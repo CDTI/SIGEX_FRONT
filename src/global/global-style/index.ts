@@ -12,4 +12,7 @@ export default createGlobalStyle`
         color: #102E8F;
         font-family: sans-serif;
     }
+    .ant-list-item-action > li{
+        font-size: 18px !important;
+    }
 `;

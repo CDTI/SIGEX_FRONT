@@ -6,6 +6,7 @@ export const Container = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #002140;
 `
 
 export const FormDiv = styled.div`
@@ -13,5 +14,22 @@ export const FormDiv = styled.div`
     color: #fff;
     border-radius: 3px;
     min-width: 350px;
-    padding: 12px;
+    padding: 22px;
+`
+
+export const LabelInput = styled.label`
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 10px;
+`
+
+export const ContainerImage = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+export const ImageLogo = styled.img`
+    max-width: 150px;
+    padding: 15px;
 `

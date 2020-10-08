@@ -5,13 +5,17 @@ import { IWorkload } from "./workload";
 export interface IPrograms {
     id: number
     name: string
-    start_period: Date
-    final_period: Date
+    start_period: string
+    final_period: string
     mode: string
-    category: ICategory
-    course_unity: ICourse_Unit
+    categoryId: number
+    course_unity: string
     type: string
     allocation: string
     type_evaluation: string
-    workload: IWorkload,
+    total_workload: number,
+    extension_workload: number,
+    weekly: number,
+    hour_clock: number,
+    form_id: number
 }

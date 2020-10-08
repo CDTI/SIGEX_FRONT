@@ -1,87 +1,38 @@
-export const extensionPrograms = [
+import { IPrograms } from "../interfaces/programs";
+
+export const extensionPrograms: IPrograms[] = [
     {
         id: 1,
-        name: 'Inverno 2020',
-        period: 1,
-        mode: 'presencial',
-        category: 'obrigatória',
-        course_unit: {
-            name: 'GESTÃO DE PROJETOS',
-            code: '12389ba'
-        },
-        offer: {
-            allocation: 'COMUM UP',
-            evaluation_type: 'NOTAS'
-        },
-        workload: {
-            hours_in_class: {
-                ch_total_course_unit: 120,
-                ch_total_extension: 60
-            },
-            clock_time: {
-                ch_total_course: 100
-            }
-        }
+        name: 'Campanha 2020',
+        start_period: '19/01/2020',
+        final_period: '19/11/2020',
+        mode: 'Presencial',
+        categoryId: 1,
+        course_unity: 'sa123',
+        type: 'presencial',
+        allocation: 'Comum UP',
+        type_evaluation: 'Nota',
+        total_workload: 60,
+        extension_workload: 60,
+        weekly: 3,
+        hour_clock: 50,
+        form_id: 1
     },
     {
         id: 2,
-        name: 'Verão 2020',
-        period: 1,
-        mode: 'semi-presencial',
-        category: 'opcional',
-        course_unit: {
-            name: 'GESTÃO DE MARKETING',
-            code: '16589ba'
-        },
-        offer: {
-            allocation: 'COMUM UP',
-            evaluation_type: 'RESULTADOS'
-        },
-        workload: {
-            hours_in_class: {
-                ch_total_course_unit: 120,
-                ch_total_extension: 60
-            },
-            clock_time: {
-                ch_total_course: 100
-            }
-        }
+        name: 'Campanha 2021',
+        start_period: '19/01/2021',
+        final_period: '19/11/2021',
+        mode: 'Presencial',
+        categoryId: 1,
+        course_unity: 'jk645',
+        type: 'presencial',
+        allocation: 'Comum UP',
+        type_evaluation: 'Nota',
+        total_workload: 60,
+        extension_workload: 60,
+        weekly: 3,
+        hour_clock: 50,
+        form_id: 0
     }
 ]
-
-
-export interface IPrograms {
-    id: number
-    name: string
-    period: number
-    mode: string
-    category: string
-    course_unit: CourseUnit
-    offer: Offer
-    workload: WorkLoad
-
-}
-
-interface CourseUnit {
-    name: string
-    code: string
-}
-
-interface Offer {
-    allocation: string
-    evaluation_type: string
-}
-
-interface WorkLoad {
-    hours_in_class: HourInClass
-    clock_time: ClockTime
-}
-
-interface HourInClass{
-    ch_total_course_unit: number
-    ch_total_extension: number
-}
-
-interface ClockTime {
-    ch_total_course: number
-}

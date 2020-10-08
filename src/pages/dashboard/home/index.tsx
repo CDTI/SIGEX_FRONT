@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { Card, Col, Row, Select } from 'antd';
 import { extensionPrograms } from '../../../mocks/mockPrograms'
 import { mockProjects, Project } from '../../../mocks/mockProjects'
+import Structure from '../../../components/layout/structure';
 
-const { Option, OptGroup } = Select;
+const { Option } = Select;
 
 const HomeDashboard: React.FC = () => {
   const [projects, setProject] = useState<Project[]>([])
@@ -15,12 +16,12 @@ const HomeDashboard: React.FC = () => {
   }
 
   return (
-    <>
+    <Structure title="dashboard">
       <div>
         <Select defaultValue="Selecione" style={{ width: 200 }} onChange={handleChange}>
           {extensionPrograms.map(e => {
             return (
-              <Option value={e.id}>{e.name}</Option>
+              <Option key={e.id} value={e.id}>{e.name}</Option>
             )
           })}
         </Select>,
@@ -35,16 +36,16 @@ const HomeDashboard: React.FC = () => {
           <Col span={8}>
             <Card title="Projetos Aprovados" bordered={false}>
               {projects.filter(e => e.status === 'approved').length}
-        </Card>
+            </Card>
           </Col>
           <Col span={8}>
             <Card title="Projetos Reprovados" bordered={false}>
-            {projects.filter(e => e.status === 'reproved').length}
-        </Card>
+              {projects.filter(e => e.status === 'reproved').length}
+            </Card>
           </Col>
         </Row>
       </div>
-    </>
+    </Structure>
   )
 }
 
