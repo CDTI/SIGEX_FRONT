@@ -1,5 +1,5 @@
-import React from 'react'
-import { Form, Button, Input } from 'antd'
+import React, { useState } from 'react'
+import { Form, Button, Input, Spin } from 'antd'
 import { Users } from '../../mocks/mockLogin'
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './style'
 import { history } from 'react-router-guard'
@@ -15,7 +15,7 @@ interface ValueLogin {
 }
 
 interface StateProps {
-  user: User
+  user: any
 }
 
 interface DispatchProps {
@@ -26,51 +26,61 @@ interface DispatchProps {
 
 type Props = StateProps & DispatchProps
 
-const LoginPage: React.FC<Props> = ({ addUser }) => {
+const LoginPage: React.FC<Props> = ({ addUser, user }) => {
+  const [loading, setLoading] = useState(false)
 
   const onFinish = (values: ValueLogin) => {
-    console.log(values.cpf)
+    setLoading(true)
     const user = Users.find(e => e.cpf === values.cpf && e.password === values.password)
 
     if (user !== undefined) {
-        addUser(user)
+      addUser(user)
+      setTimeout(() => {
+        setLoading(false)
         history.push('/dashboard')
+      }, 2000)
     } else {
+      setLoading(false)
       alert('Login ou senha incorreto')
     }
   }
 
   return (
     <Container>
-      <FormDiv>
-        <>
-          <ContainerImage>
-            <ImageLogo src="https://www.up.edu.br/blogs/wp-content/uploads/2020/03/cropped-favicon.png" />
-          </ContainerImage>
-          <Form
-            onFinish={onFinish}
-            name="basic"
-          >
-            <LabelInput>CPF</LabelInput>
-            <Form.Item name="cpf"
-              rules={[{ required: true, message: 'Campo obrigatório' }]}
+      {!loading && (
+        <FormDiv>
+          <>
+            <ContainerImage>
+              <ImageLogo src="https://www.up.edu.br/blogs/wp-content/uploads/2020/03/cropped-favicon.png" />
+            </ContainerImage>
+            <Form
+              onFinish={onFinish}
+              name="basic"
             >
-              <Input />
-            </Form.Item>
-            <LabelInput>Senha</LabelInput>
-            <Form.Item name="password"
-              rules={[{ required: true, message: 'Campo obrigatório' }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item>
-              <p style={{ textAlign: 'center' }}>
-                <Button type="primary" htmlType="submit">Login</Button>
-              </p>
-            </Form.Item>
-          </Form>
-        </>
-      </FormDiv>
+              <LabelInput>CPF</LabelInput>
+              <Form.Item name="cpf"
+                rules={[{ required: true, message: 'Campo obrigatório' }]}
+              >
+                <Input />
+              </Form.Item>
+              <LabelInput>Senha</LabelInput>
+              <Form.Item name="password"
+                rules={[{ required: true, message: 'Campo obrigatório' }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item>
+                <p style={{ textAlign: 'center' }}>
+                  <Button type="primary" htmlType="submit">Login</Button>
+                </p>
+              </Form.Item>
+            </Form>
+          </>
+        </FormDiv>
+      )}
+      {loading && (
+        <Spin size="large" />
+      )}
     </Container>
   )
 }

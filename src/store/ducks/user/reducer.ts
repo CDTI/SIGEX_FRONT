@@ -5,16 +5,18 @@ const INITIAL_STATE: UserState = {
     data: { id: 0, name: '', role: '', cpf: '', password: '' }
 }
 
+const reset_state = { id: 0, name: '', role: '', cpf: '', password: '' }
+
 const reducer: Reducer<UserState> = (state = INITIAL_STATE, action) => {
-    switch(action.type){
+    switch (action.type) {
         case UserTypes.ADD_USER:
-            return {...state, data: action.payload.data};
+            return { ...state, data: action.payload.data };
         case UserTypes.REMOVE_USER:
-            return {...state, data: state};
+            return { ...state, data: reset_state };
         case UserTypes.REQUEST_USER:
-            return {...state};
+            return { ...state };
         default:
-            return state    
+            return state
     }
 }
 
