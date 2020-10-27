@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Form, Input, Button, Select, Checkbox } from 'antd'
+import { Form, Input, Button, Select, Checkbox, Typography } from 'antd'
 import { extensionPrograms } from '../../../../../../mocks/mockPrograms'
 import { ContainerFlex } from '../../../../../../global/styles';
 import { IBasicInfo } from '..';
@@ -120,24 +120,9 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                      )
                   })}
                </Checkbox.Group>
-               {/* <Select
-                  placeholder='Escolha 1 ou + unidades'
-                  mode="multiple"
-                  allowClear
-                  style={{ width: '100%' }}>
-                  <Option value={1}>
-                     UP - Curitiba
-                  </Option>
-                  <Option value={2}>
-                     UP - Santos Andrade
-                  </Option>
-                  <Option value={3}>
-                     UP - Praça Osório
-                  </Option>
-                  <Option value={4}>
-                     UP - Londrina
-                  </Option>
-               </Select> */}
+              {selectedCalendar === null && (
+                 <Typography>Selecione uma categoria</Typography>
+              )}
             </Form.Item>
             <Form.Item
                label="Resultado"
