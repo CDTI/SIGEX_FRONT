@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Layout, Menu, Popover, Button, Typography, Spin } from 'antd';
+import { Layout, Menu, Popover, Button, Typography } from 'antd';
 import {
     TeamOutlined,
     PieChartOutlined,
@@ -11,27 +11,18 @@ import {
     DiffOutlined,
     PoweroffOutlined
 } from '@ant-design/icons';
-import { history } from 'react-router-guard'
-import { Link } from 'react-router-guard';
-import { User } from '../../store/ducks/user/types';
-import { ApplicationState } from '../../store';
-import { Dispatch, bindActionCreators } from 'redux';
-import * as UserActions from '../../store/ducks/user/actions'
-import { connect } from 'react-redux';
-import { Container } from '../login/style';
+import { Link, useHistory } from 'react-router-dom'
+import { useAuth } from '../../context/auth';
+import logo from '../../sigex.png'
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
 
-interface Props {
-    user: User
-    removeUser(): void
-}
-
-const Dashboard: React.FC<Props> = (props) => {
+const Dashboard: React.FC = (props) => {
+    const history = useHistory()
     const [collapsed, setcollapsed] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const context = useAuth()
 
     const onCollapse = (collapsed: boolean) => {
         setcollapsed(collapsed);
@@ -39,7 +30,7 @@ const Dashboard: React.FC<Props> = (props) => {
 
     const memoizedDate = useMemo(() => {
         let dt = new Date()
-        let dateFormat = `${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getDate().toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')}`
+        let dateFormat = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')}`
         return (
             <Typography style={{ color: '#fff', marginLeft: '9px' }}>
                 {dateFormat}
@@ -48,77 +39,84 @@ const Dashboard: React.FC<Props> = (props) => {
     }, []);
 
     const logout = () => {
-        setLoading(true)
-        props.removeUser()
-        setTimeout(() => {
-            setLoading(false)
-            history.push('/login')
-        }, 2000)
-
+        context.logout()
+        history.push('/')
     }
 
-    const location = window.location.href.slice(25)
+    const location = window.location.href.slice(21)
 
     return (
         <>
-            {!loading && (
-                <Layout style={{ minHeight: '100vh' }}>
-                    <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
-                        <div className="logo" >
-                            <img src="https://www.up.edu.br/blogs/wp-content/uploads/2020/03/cropped-favicon.png" style={{ width: '100%', padding: '15px' }} alt="" />
-                        </div>
-                        {props.user.role === 'admin' && (
-                            <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
-                                <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
-                                    <Link to='/dashboard'>
-                                        Home
+
+            <Layout style={{ minHeight: '100vh' }}>
+                <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
+                    <div className="logo" >
+                        <img src={logo} style={{ width: '100%', padding: '15px' }} alt="" />
+                    </div>
+                    {context.user?.role === 'admin' && (
+                        <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
+                            <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
+                                <Link to='/dashboard'>
+                                    Home
                             </Link>
+                            </Menu.Item>
+                            <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
+                                <Menu.Item icon={<UnorderedListOutlined />} key="3">
+                                    <Link to="/dashboard/programs">Listar Programas</Link>
                                 </Menu.Item>
-                                <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
-                                    <Menu.Item icon={<UnorderedListOutlined />} key="3">
-                                        <Link to="/dashboard/programs">Listar Programas</Link>
-                                    </Menu.Item>
-                                    <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
-                                        <Link to="/dashboard/program/create">Criar Programa</Link>
-                                    </Menu.Item>
-                                </SubMenu>
-                                <Menu.Item key="2" icon={<TeamOutlined />}>
+                                <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
+                                    <Link to="/dashboard/program/create">Criar Programa</Link>
+                                </Menu.Item>
+                            </SubMenu>
+                            <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
+                                <Link to="/dashboard/categories">Categorias</Link>
+                            </Menu.Item>
+                            <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                <Link to='/dashboard/projects'>
                                     Propostas
-                        </Menu.Item>
-                                <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
-                                    <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
-                                    <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
-                                </SubMenu>
-                            </Menu>
-                        )}
-                        {props.user.role === 'teacher' && (
-                            <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
-                                <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
-                                    <Link to='/dashboard'>
-                                        Home
+                                    </Link>
+                            </Menu.Item>
+                            <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
+                                <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
+                                <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
+                            </SubMenu>
+                        </Menu>
+                    )}
+                    {context.user?.role === 'teacher' && (
+                        <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
+                            <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
+                                <Link to='/dashboard'>
+                                    Home
                                 </Link>
+                            </Menu.Item>
+                            <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
+                                <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/programs">
+                                    <Link to="/dashboard/programs">Listar Programas</Link>
                                 </Menu.Item>
-                                <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
-                                    <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/programs">
-                                        <Link to="/dashboard/programs">Listar Programas</Link>
-                                    </Menu.Item>
-                                </SubMenu>
+                            </SubMenu>
+                            <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
                                 <Menu.Item key="/dashboard/project/create" icon={<TeamOutlined />}>
                                     <Link to="/dashboard/project/create">Registrar um projeto</Link>
                                 </Menu.Item>
-                                <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
-                                    <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
-                                    <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
-                                </SubMenu>
-                            </Menu>
-                        )}
-                    </Sider>
-                    <Layout className="site-layout">
-                        <Header className="site-layout-background" style={{
-                            padding: 0, display: "flex",
-                            justifyContent: 'space-between', alignItems: 'center'
-                        }} >
-                            {memoizedDate}
+                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                    <Link to="/dashboard/projects">Meus Projetos</Link>
+                                </Menu.Item>
+                            </SubMenu>
+                            <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
+                                <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
+                                <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
+                            </SubMenu>
+                        </Menu>
+                    )}
+                </Sider>
+                <Layout className="site-layout">
+                    <Header className="site-layout-background" style={{
+                        padding: 0, display: "flex",
+                        justifyContent: 'space-between', alignItems: 'center'
+                    }} >
+                        {memoizedDate}
+                        <div>
+                            <label style={{ color: '#fff', marginRight: '10px' }}>Olá, {context.user?.name}</label>
                             <Popover content={
                                 <Button onClick={logout} type="link" style={{ backgroundColor: '#b23a48', color: '#fff' }}>
                                     <PoweroffOutlined />
@@ -128,33 +126,18 @@ const Dashboard: React.FC<Props> = (props) => {
                                     <SettingOutlined />
                                 </Button>
                             </Popover>
-                        </Header>
-                        <Content style={{ margin: '0 16px' }}>
-                            {/* <Breadcrumb style={{ margin: '16px 0' }}>
-                            <Breadcrumb.Item>User</Breadcrumb.Item>
-                            <Breadcrumb.Item>Bill</Breadcrumb.Item>
-                        </Breadcrumb> */}
-                            <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-                                {props.children}
-                            </div>
-                        </Content>
-                        <Footer style={{ textAlign: 'center' }}>Dashboard ₢2020 Criado por Daniel Candido</Footer>
-                    </Layout>
+                        </div>
+                    </Header>
+                    <Content style={{ margin: '0 16px' }}>
+                        <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
+                            {props.children}
+                        </div>
+                    </Content>
+                    <Footer style={{ textAlign: 'center' }}>Dashboard ₢2020 Criado por Daniel Candido</Footer>
                 </Layout>
-            )}
-            {loading && (
-                <Container>
-                    <Spin size="large" />
-                </Container>
-            )}
+            </Layout>
         </>
     )
 }
 
-const mapStateToProps = (state: ApplicationState) => ({
-    user: state.user.data
-})
-
-const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators(Object.assign({}, UserActions), dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)
+export default Dashboard

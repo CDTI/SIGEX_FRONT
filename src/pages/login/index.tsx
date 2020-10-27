@@ -1,48 +1,25 @@
 import React, { useState } from 'react'
 import { Form, Button, Input, Spin } from 'antd'
-import { Users } from '../../mocks/mockLogin'
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './style'
-import { history } from 'react-router-guard'
-import { User } from '../../store/ducks/user/types';
-import { ApplicationState } from '../../store';
-import { Dispatch, bindActionCreators } from 'redux';
-import * as UserActions from '../../store/ducks/user/actions'
-import { connect } from 'react-redux';
+import { useAuth } from '../../context/auth'
+import logo from '../../sigex.png'
 
 interface ValueLogin {
-  cpf: string,
+  email: string,
   password: string
 }
 
-interface StateProps {
+interface Props {
   user: any
 }
 
-interface DispatchProps {
-  loadRequest(): void;
-  addUser(data: User): void;
-  requestUser(): void;
-}
-
-type Props = StateProps & DispatchProps
-
-const LoginPage: React.FC<Props> = ({ addUser, user }) => {
+const LoginPage: React.FC<Props> = () => {
+  const context = useAuth()
   const [loading, setLoading] = useState(false)
 
   const onFinish = (values: ValueLogin) => {
-    setLoading(true)
-    const user = Users.find(e => e.cpf === values.cpf && e.password === values.password)
-
-    if (user !== undefined) {
-      addUser(user)
-      setTimeout(() => {
-        setLoading(false)
-        history.push('/dashboard')
-      }, 2000)
-    } else {
-      setLoading(false)
-      alert('Login ou senha incorreto')
-    }
+    setLoading(false)
+    context.login(values)
   }
 
   return (
@@ -51,23 +28,23 @@ const LoginPage: React.FC<Props> = ({ addUser, user }) => {
         <FormDiv>
           <>
             <ContainerImage>
-              <ImageLogo src="https://www.up.edu.br/blogs/wp-content/uploads/2020/03/cropped-favicon.png" />
+              <ImageLogo src={logo} />
             </ContainerImage>
             <Form
               onFinish={onFinish}
               name="basic"
             >
-              <LabelInput>CPF</LabelInput>
-              <Form.Item name="cpf"
+              <LabelInput>Email</LabelInput>
+              <Form.Item name="email"
                 rules={[{ required: true, message: 'Campo obrigatório' }]}
               >
-                <Input />
+                <Input type='email' placeholder='Digite seu e-mail' />
               </Form.Item>
               <LabelInput>Senha</LabelInput>
               <Form.Item name="password"
                 rules={[{ required: true, message: 'Campo obrigatório' }]}
               >
-                <Input />
+                <Input.Password draggable type='password' placeholder='Digite sua senha'/>
               </Form.Item>
               <Form.Item>
                 <p style={{ textAlign: 'center' }}>
@@ -85,10 +62,4 @@ const LoginPage: React.FC<Props> = ({ addUser, user }) => {
   )
 }
 
-const mapStateToProps = (state: ApplicationState) => ({
-  user: state.user.data
-})
-
-const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators(Object.assign({}, UserActions), dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPage)
+export default LoginPage

@@ -1,6 +1,4 @@
-import { User } from "../store/ducks/user/types";
-
-export const Users: User[] = [
+export const Users = [
     {
         id: 1,
         name: 'Administrador 1',

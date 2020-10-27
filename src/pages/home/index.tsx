@@ -1,9 +1,12 @@
 import React from 'react'
-import { Link } from 'react-router-guard'
+import { Link } from 'react-router-dom'
 import { Button, Divider } from 'antd'
 import { ContainerHome, TitleHome, SubTitleHome } from './style'
+import { useAuth } from '../../context/auth'
 
 const HomePage: React.FC = () => {
+  const { user } = useAuth()
+
   return (
     <ContainerHome>
       <div>
@@ -13,11 +16,18 @@ const HomePage: React.FC = () => {
         <SubTitleHome>
           Universidade Positivo
        </SubTitleHome>
-       <Divider />
+        <Divider />
         <SubTitleHome>
-          <Button type="primary">
-            <Link to="/login">Entrar</Link>
-          </Button>
+          {(user !== null && user?.role.length) > 0 && (
+            <Button type='primary'>
+              <Link to='/dashboard'>Entrar</Link>
+            </Button>
+          )}
+          {(user === null) && (
+            <Button type="primary">
+              <Link to="/login">Entrar</Link>
+            </Button>
+          )}
         </SubTitleHome>
       </div>
     </ContainerHome>

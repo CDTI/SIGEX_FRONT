@@ -1,18 +1,20 @@
-// import { Teacher } from "./teacher";
-
 export interface IProject {
-    id: number
+    _id: string
     name: string
-    program_id: number
+    programId: string
+    categoryId: string
     unity: number[]
-    // related_teachers: Teacher[]
     partnership: IPartnership[]
-    specific_community: ISpecificCommunity
+    specificCommunity: ISpecificCommunity
     description: string
-    planning: IPlanning
+    planning: IPlanning[]
     results: string
     resources: IResource
     attachments: string[]
+    author: string
+    dateStart: Date
+    dateFinal: Date
+    status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish'
 }
 
 export interface IPartnership {
@@ -21,7 +23,6 @@ export interface IPartnership {
 }
 
 export interface IContact {
-    id: number
     name: string
     phone: string
 }
@@ -29,29 +30,29 @@ export interface IContact {
 export interface ISpecificCommunity {
     text: string
     location: string
-    people_involved: number
+    peopleInvolved: number
 }
 
 export interface IPlanning {
-    activities: string[]
-    development_site: string
-    development_mode: string
-    start_date: string
-    final_date: string
+    text: string,
+    developmentSite: string
+    developmentMode: string
+    startDate: string
+    finalDate: string
 }
 
 export interface IResource {
     transport: ITransport
-    materials: IMaterials
+    materials: IMaterials[]
 }
 
 export interface ITransport {
-    type: string
+    typeTransport: string
     description: string
     unity: string
     quantity: number
-    unitary_value: number
-    total_price: number
+    unitaryValue: number
+    totalPrice: number
 }
 
 export interface IMaterials {
@@ -59,6 +60,6 @@ export interface IMaterials {
     description: string
     unity: string
     quantity: number
-    unitary_value: number
-    total_price: number
+    unitaryValue: number
+    totalPrice: number
 }

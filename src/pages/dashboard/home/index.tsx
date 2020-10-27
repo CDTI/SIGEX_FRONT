@@ -21,7 +21,7 @@ const HomeDashboard: React.FC = () => {
         <Select defaultValue="Selecione" style={{ width: 200 }} onChange={handleChange}>
           {extensionPrograms.map(e => {
             return (
-              <Option key={e.id} value={e.id}>{e.name}</Option>
+              <Option key={e._id} value={e.name}>{e.name}</Option>
             )
           })}
         </Select>,

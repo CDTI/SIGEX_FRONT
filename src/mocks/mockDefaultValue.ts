@@ -1,51 +1,56 @@
 import { IProject, ITransport } from "../interfaces/project";
 
 export const newProject: IProject = {
-    id: 0,
+    _id: '',
     name: '',
     description: '',
     partnership: [],
-    planning: {
-        activities: [],
-        development_mode: '',
-        development_site: '',
-        final_date: '',
-        start_date: ''
-    },
-    program_id: 0,
+    planning: [{
+        text: '',
+        developmentMode: '',
+        developmentSite: '',
+        finalDate: '',
+        startDate: ''
+    }],
+    programId: '',
+    categoryId: '',
     resources: {
         transport: {
             description: '',
             quantity: 0,
-            total_price: 0,
-            type: '',
-            unitary_value: 0,
+            totalPrice: 0,
+            typeTransport: '',
+            unitaryValue: 0,
             unity: ''
         },
-        materials: {
+        materials: [{
             description: '',
             item: '',
             quantity: 0,
-            total_price: 0,
-            unitary_value: 0,
+            totalPrice: 0,
+            unitaryValue: 0,
             unity: ''
-        }
+        }],
     },
     results: '',
-    specific_community: {
+    specificCommunity: {
         location: '',
-        people_involved: 0,
+        peopleInvolved: 0,
         text: ''
     },
     unity: [],
-    attachments: []
+    attachments: [],
+    author: '',
+    dateStart: new Date(),
+    dateFinal: new Date(),
+    status: 'pending'
 }
 
 export const newTransport: ITransport = {
     description: '',
     quantity: 0,
-    total_price: 0,
-    type: '',
-    unitary_value: 0,
+    totalPrice: 0,
+    typeTransport: '',
+    unitaryValue: 0,
     unity: ''
 }

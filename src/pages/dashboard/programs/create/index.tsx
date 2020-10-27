@@ -1,150 +1,92 @@
 import React, { useState } from 'react'
-import { Form, Button, Input, Select, Result } from 'antd'
-import { Link } from 'react-router-guard'
-import { Categories } from '../../../../mocks/mockCategory'
-import { CourseUnit } from '../../../../mocks/mockCourseUnit'
+import { Form, Button, Input, Result } from 'antd'
+import { Link } from 'react-router-dom'
 import Structure from '../../../../components/layout/structure'
+import { ContainerFlex } from '../../../../global/styles'
+import { IPrograms } from '../../../../interfaces/programs'
+import { createProgram, ReturnResponsePost } from '../../../../services/program_service'
 
-const { Option } = Select
-
-const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 8 },
-};
 const tailLayout = {
     wrapperCol: { offset: 8, span: 16 },
 };
 
-const CreateProgram: React.FC = () => {
-    const [state, setstate] = useState(false)
+interface ProgramForm {
+    name: string,
+    description: string,
+}
 
-    const onFinish = (values: any) => {
-        setstate(true)
+const CreateProgram: React.FC = () => {
+    const [state, setstate] = useState<ReturnResponsePost | null>(null)
+    const onFinish = async (values: ProgramForm) => {
+        const program: IPrograms = {
+            name: values.name,
+            description: values.description,
+            isActive: true,
+            startDate: new Date(),
+            finalDate: new Date()
+        }
+        const response = await createProgram(program)
+        console.log(response)
+        setstate({ message: response.message, result: response.result, program: response.program, created: response.created })
     }
+
+    const [form] = Form.useForm()
+
+    const resetForm = () => {
+        form.resetFields()
+        setstate(null)
+    }
+
 
     return (
         <Structure title="Criar campanha">
-            {state && (
-                <Result
-                    status="success"
-                    title="Programa criado com sucesso"
-                    subTitle="O programa foi criado, agora você pode incluir um formulário para o mesmo"
-                    extra={[
-                        <Button type="primary" key="console">
-                            <Link to="/dashboard/programs">Ok</Link>
-                        </Button>,
-                    ]}
-                />
-            )}
-            {!state && (
-                <Form
-                    onFinish={onFinish}
-                    {...layout}
-                    name="basic"
-                >
-                    <Form.Item name="name"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Nome"
+            {
+                (state !== null) && (
+                    <Result
+                        status={state.result}
+                        title={state.message}
+                        subTitle={state.program?.name}
+                        extra={[
+                            <Button type="primary" key="/dashboard/programs" onClick={resetForm}>
+                                <Link to="/dashboard/programs">Ok</Link>
+                            </Button>,
+                        ]}
+                    />
+                )
+            }
+            {(state === null) && (
+                <ContainerFlex>
+                    <Form
+                        form={form}
+                        onFinish={onFinish}
+                        layout='vertical'
+                        style={{ width: '100%', maxWidth: '500px' }}
                     >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="start_period"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Inicio do período"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="final_period"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Final do período"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="mode"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Modo programa"
-                    >
-                        <Select defaultValue="" style={{ width: '100%' }}>
-                            <Option value="presencial">Presencial</Option>
-                            <Option value="semipresencial">Semipresencial</Option>
-                            <Option value="online">Online</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="category"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Categoria"
-                    >
-                        <Select style={{ width: '100%' }}>
-                            {Categories.map(category => (
-                                <Option key={category.id} value={category.id}>
-                                    {category.name}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="course_unity"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Unidade Curricular"
-                    >
-                        <Select style={{ width: '100%' }}>
-                            {CourseUnit.map(course => (
-                                <Option key={course.code} value={course.code}>
-                                    {course.name}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="type"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Tipo"
-                    >
-                        <Select defaultValue="" style={{ width: '100%' }}>
-                            <Option value="obrigatoria">Obrigatória</Option>
-                            <Option value="opcional">Opcional</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="allocation"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Alocação"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="type_evaluation"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Tipo de avaliação"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="total_workload"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Total carga-horária UC"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="extension_workload"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Total carga-horária extensão"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="weekly"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Horas semanais"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="hour_clock"
-                        rules={[{ required: true, message: 'Campo obrigatório' }]}
-                        label="Horas relógio"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item {...tailLayout}>
-                        <Button htmlType="submit" type="primary">Cadastrar</Button>
-                    </Form.Item>
-                </Form>
-            )}
-        </Structure>
+                        <Form.Item name="name"
+                            rules={[
+                                { required: true, message: 'Campo obrigatório' }
+                            ]}
+                            label="Nome"
+                        >
+                            <Input placeholder='Nome do programa' />
+                        </Form.Item>
+                        <Form.Item
+                            name='description'
+                            label='Descrição'
+                            rules={[
+                                { required: true, message: 'Campo Obrigatório' }
+                            ]}
+                        >
+                            <Input placeholder='Descrição do programa' />
+                        </Form.Item>
+                        <Form.Item {...tailLayout}>
+                            <Button htmlType="submit" type="primary">Cadastrar</Button>
+                        </Form.Item>
+                    </Form>
+                </ContainerFlex>
+            )
+            }
+        </Structure >
     )
 }
 
