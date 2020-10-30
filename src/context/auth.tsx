@@ -4,7 +4,7 @@ import api from '../services/api'
 import history from '../global/history'
 
 export interface Login {
-    email: string
+    cpf: string
     password: string
 }
 
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
     const login = async (login: Login) => {
         const response = await api.post('/login', {
-            email: login.email,
+            cpf: login.cpf,
             password: login.password
         })
 

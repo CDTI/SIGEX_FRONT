@@ -5,5 +5,6 @@ export interface UserInterface {
     password: string,
     cpf: string,
     _id: string,
-    role: string
+    role: string,
+    isActive: boolean
 }

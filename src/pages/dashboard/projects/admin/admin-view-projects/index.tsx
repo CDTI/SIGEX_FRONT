@@ -11,7 +11,7 @@ import { listPrograms } from '../../../../../services/program_service'
 import { IPrograms } from '../../../../../interfaces/programs'
 import { ReturnResponse, updateProject } from '../../../../../services/project_service'
 import { Link } from 'react-router-dom'
-import { IFeedback, IRegister } from '../../../../../interfaces/feedback'
+import { IFeedback } from '../../../../../interfaces/feedback'
 import { createFeedbackProject, listFeedbackProject } from '../../../../../services/feedback_service'
 const { Step } = Steps;
 const { Panel } = Collapse
@@ -211,6 +211,13 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                     <Typography>Descrição: {location.state.description}</Typography>
                                     <Typography>Categoria: {category?.name}</Typography>
                                     <Typography>Programa: {program?.name}</Typography>
+                                    <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários:</Typography>
+                                    <ul style={{marginLeft: '18px'}}>
+                                        {location.state.unity.map(e => (
+                                            <li>{e.name} - {e.day} - {e.turn}</li>
+                                        ))}
+                                    </ul>
+                                        <Typography>CH disponível: {location.state.totalCH}</Typography>
                                 </Panel>
                                 <Panel header='Parcerias' key='2'>
                                     <Collapse accordion>

@@ -19,3 +19,18 @@ export const currentProject = (project: IProject) => {
 export const compareDate = (a: IRegister, b: IRegister) => {
     return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
 }
+
+export const typeUser = (role: string) => {
+    let type = ''
+    
+    if (role === 'teacher')
+        type = 'Professor'
+    if (role === 'admin')
+        type = 'Administrador'
+    if (role === 'ndePresident')
+        type = 'Presidente do NDE'
+    if (role === 'integrationCord')
+        type = 'Coordenador de integração'
+
+    return type
+}

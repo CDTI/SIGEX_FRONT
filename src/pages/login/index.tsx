@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { Form, Button, Input, Spin } from 'antd'
+import InputMask from 'antd-mask-input'
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './style'
 import { useAuth } from '../../context/auth'
 import logo from '../../sigex.png'
 
 interface ValueLogin {
-  email: string,
+  cpf: string,
   password: string
 }
 
@@ -34,11 +35,11 @@ const LoginPage: React.FC<Props> = () => {
               onFinish={onFinish}
               name="basic"
             >
-              <LabelInput>Email</LabelInput>
-              <Form.Item name="email"
+              <LabelInput>CPF</LabelInput>
+              <Form.Item name="cpf"
                 rules={[{ required: true, message: 'Campo obrigatório' }]}
               >
-                <Input type='email' placeholder='Digite seu e-mail' />
+                <InputMask mask='111.111.111-11' placeholder='Digite seu CPF' />
               </Form.Item>
               <LabelInput>Senha</LabelInput>
               <Form.Item name="password"

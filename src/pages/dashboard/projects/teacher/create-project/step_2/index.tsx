@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Form, Input, Button, Space, Empty } from 'antd'
+import React from 'react'
+import { Form, Input, Button, Space } from 'antd'
 import { IPartnership, IProject } from '../../../../../../interfaces/project';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { ContainerFlex } from '../../../../../../global/styles';
@@ -15,19 +15,11 @@ export interface Props {
 }
 
 const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, next }) => {
-    const [partners, setPartners] = useState<IPartnership[]>([{ text: '', contacts: [] }])
-    const [primary, setPrimary] = useState(true)
     const [form] = Form.useForm()
 
-    const addPartner = (partner: IPartnership) => {
-        if (primary) {
-            partners.length = 0
-        }
-        partners.push(partner)
-        console.log(partners)
-        setPartners(partners)
-        setPrimary(false)
-        changePartner(partners)
+    const addPartner = (partners: any) => {
+        const changepartners = partners.partners as IPartnership[]
+        changePartner(changepartners)
         form.resetFields()
     }
 
@@ -41,50 +33,80 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, next }
                     style={{ width: '100%', maxWidth: '500px' }}
                     initialValues={project}
                 >
-                    <Form.Item
-                        name="text"
-                        label="Sobre"
-                        rules={[{ required: true, message: 'Campo Obritarório' }]}
-                        style={{ width: '100%' }}
-                    >
-                        <TextArea placeholder="Fale sobre sua parceria" />
-                    </Form.Item>
-                    <h2>Contatos</h2>
-                    <Form.List name="contacts">
-                        {(fields, { add, remove }) => {
+                    <Form.List name='partners'>
+                        {(fieldsPart, { add, remove }) => {
                             return (
-                                <div>
-                                    {fields.map(field => (
-                                        <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
-                                            <Form.Item
-                                                {...field}
-                                                label="Nome"
-                                                name={[field.name, 'name']}
-                                                fieldKey={[field.fieldKey, 'name']}
-                                                rules={[{ required: true, message: 'Campo obrigatório' }]}
-                                            >
-                                                <Input placeholder="Nome do contato" />
-                                            </Form.Item>
-                                            <Form.Item
-                                                {...field}
-                                                label="Telefone"
-                                                name={[field.name, 'phone']}
-                                                fieldKey={[field.fieldKey, 'phone']}
-                                                rules={[{ required: true, message: 'Campo obrigatório' }]}
-                                            >
-                                                <MaskedInput
-                                                    mask="(11) 11111-1111"
+                                <>
+                                    {fieldsPart.map(fieldPart => (
+                                        <>
+                                            <div>
+                                                <Form.Item
+                                                    {...fieldPart}
+                                                    name={[fieldPart.name, 'text']}
+                                                    fieldKey={[fieldPart.fieldKey, 'text']}
+                                                    label="Sobre"
+                                                    rules={[{ required: true, message: 'Campo Obritarório' }]}
+                                                    style={{ width: '100%' }}
+                                                >
+                                                    <TextArea placeholder="Fale sobre sua parceria" />
+                                                </Form.Item>
+                                                <MinusCircleOutlined
+                                                    onClick={() => {
+                                                        remove(fieldPart.name);
+                                                    }}
                                                 />
-                                            </Form.Item>
+                                            </div>
+                                            <Form.List name={[fieldPart.name, 'contacts']}>
+                                                {(fields, { add, remove }) => {
+                                                    return (
+                                                        <div>
+                                                            {fields.map(field => (
+                                                                <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
+                                                                    <Form.Item
+                                                                        {...field}
+                                                                        label="Nome"
+                                                                        name={[field.name, 'name']}
+                                                                        fieldKey={[field.fieldKey, 'name']}
+                                                                        rules={[{ required: true, message: 'Campo obrigatório' }]}
+                                                                    >
+                                                                        <Input placeholder="Nome do contato" />
+                                                                    </Form.Item>
+                                                                    <Form.Item
+                                                                        {...field}
+                                                                        label="Telefone"
+                                                                        name={[field.name, 'phone']}
+                                                                        fieldKey={[field.fieldKey, 'phone']}
+                                                                        rules={[{ required: true, message: 'Campo obrigatório' }]}
+                                                                    >
+                                                                        <MaskedInput
+                                                                            mask="(11) 11111-1111"
+                                                                        />
+                                                                    </Form.Item>
 
-                                            <MinusCircleOutlined
-                                                onClick={() => {
-                                                    remove(field.name);
+                                                                    <MinusCircleOutlined
+                                                                        onClick={() => {
+                                                                            remove(field.name);
+                                                                        }}
+                                                                    />
+                                                                </Space>
+                                                            ))}
+
+                                                            <Form.Item>
+                                                                <Button
+                                                                    type="dashed"
+                                                                    onClick={() => {
+                                                                        add();
+                                                                    }}
+                                                                    block >
+                                                                    <PlusOutlined /> Adicionar Contato
+                                                                </Button>
+                                                            </Form.Item>
+                                                        </div>
+                                                    );
                                                 }}
-                                            />
-                                        </Space>
+                                            </Form.List>
+                                        </>
                                     ))}
-
                                     <Form.Item>
                                         <Button
                                             type="dashed"
@@ -93,21 +115,22 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, next }
                                             }}
                                             block
                                         >
-                                            <PlusOutlined /> Adicionar Contato
+                                            <PlusOutlined /> Adicionar Parceria
                                         </Button>
                                     </Form.Item>
-                                </div>
-                            );
+                                </>
+                            )
                         }}
                     </Form.List>
                     <Form.Item>
-                        <Space>
-                            <Button type="primary" htmlType="submit">Inserir</Button>
+                        <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Button type="primary" onClick={previous}>Anterior</Button>
+                            <Button type="primary" htmlType='submit'>Próximo</Button>
                         </Space>
                     </Form.Item>
                 </Form >
             </ContainerFlex >
-            <ContainerFlex>
+            {/* <ContainerFlex>
                 <div style={{ width: '100%', maxWidth: '500px' }}>
                     <h1 style={{ fontSize: '18pt', color: '#333', borderBottom: '3px solid #333' }}>Lista de parceiros</h1>
                     {project.partnership.length > 0 && (
@@ -134,12 +157,9 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, next }
                             </span>
                         } />
                     )}
-                    <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button type="primary" onClick={previous}>Anterior</Button>
-                        <Button type="primary" onClick={next}>Próximo</Button>
-                    </Space>
+
                 </div>
-            </ContainerFlex>
+            </ContainerFlex> */}
         </>
     )
 }

@@ -1,9 +1,12 @@
+import { ILocal } from "../mocks/mockCalendar";
+
 export interface IProject {
     _id: string
     name: string
     programId: string
     categoryId: string
-    unity: number[]
+    unity: ILocal[]
+    totalCH: number
     partnership: IPartnership[]
     specificCommunity: ISpecificCommunity
     description: string

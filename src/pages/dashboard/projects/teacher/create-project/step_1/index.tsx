@@ -1,27 +1,36 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { Form, Input, Button, Select, Checkbox, Typography } from 'antd'
-import { extensionPrograms } from '../../../../../../mocks/mockPrograms'
+import React, { useState, useEffect } from 'react'
+import { Form, Input, Button, Select, Checkbox, Typography, InputNumber } from 'antd'
 import { ContainerFlex } from '../../../../../../global/styles';
 import { IBasicInfo } from '..';
 import { IProject } from '../../../../../../interfaces/project';
 import { ICategory } from '../../../../../../interfaces/category';
 import { listCategories } from '../../../../../../services/category_service';
 import { calendar, ICalendar } from '../../../../../../mocks/mockCalendar'
+import { ILocal } from '../../../../../../mocks/mockCalendar'
+import { IPrograms } from '../../../../../../interfaces/programs';
+import { listPrograms } from '../../../../../../services/program_service';
 
 const { Option } = Select
 const { TextArea } = Input
 
 export interface Props {
-   changeBasicInfo(values: IBasicInfo): void;
+   changeBasicInfo(values: IBasicInfo, unity: ILocal[]): void;
    project: IProject
 }
 
 const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
    const [categories, setCategories] = useState<ICategory[]>([])
    const [selectedCalendar, setCalendar] = useState<ICalendar | null>(null)
+   const [programs, setPrograms] = useState<IPrograms[] | null>(null)
+   const available: ILocal[] = []
 
    useEffect(() => {
-      listCategories().then(dataCategories => setCategories(dataCategories))
+      listCategories().then(dataCategories => {
+         setCategories(dataCategories)
+         listPrograms().then(data => {
+            setPrograms(data.programs)
+         })
+      })
    }, [])
 
    const changeCalendar = (id: string) => {
@@ -31,27 +40,17 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
    }
 
    const changeDays = (e: any) => {
-      console.log(e)
+      available.push(e.target.value)
    }
 
-   const memoCalendar = useMemo(() => {
-      return (
-         <>
-            <Checkbox.Group>
-               {selectedCalendar?.local.map((local, index) => {
-                  return (
-                     <Checkbox key={index} value={local} onChange={changeDays}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                  )
-               })}
-            </Checkbox.Group>
-         </>
-      )
-   }, [selectedCalendar])
+   const submit = (value: IBasicInfo) => {
+      changeBasicInfo(value, available)
+   }
 
    return (
       <ContainerFlex>
          <Form
-            onFinish={changeBasicInfo}
+            onFinish={submit}
             layout="vertical"
             style={{ width: '100%', maxWidth: '500px' }}
             initialValues={project}
@@ -67,16 +66,6 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                <Input placeholder="Nome do projeto" />
             </Form.Item>
             <Form.Item
-               label='Descrição'
-               name='description'
-               rules={[
-                  { required: true, message: 'Campo Obrigatório' },
-                  { max: 300, message: 'Número de caracteres excedido' }
-               ]}
-            >
-               <TextArea placeholder="Descrição do projeto" />
-            </Form.Item>
-            <Form.Item
                label="Programa"
                name="programId"
                rules={[{ required: true, message: 'Campo Obrigatório' }]}
@@ -84,11 +73,15 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                <Select
                   placeholder='Selecione um programa'
                >
-                  {extensionPrograms.map(e => (
-                     <Option key={e._id} value={e.name}>
-                        {e.name}
-                     </Option>
-                  ))}
+                  {programs?.map(e => {
+                     if (e._id !== undefined) {
+                        return (
+                           <Option key={e._id} value={e._id}>
+                              {e.name}
+                           </Option>
+                        )
+                     }
+                  })}
                </Select>
             </Form.Item>
             <Form.Item
@@ -110,8 +103,11 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                </Select>
             </Form.Item>
             <Form.Item
-               label="Unidade"
+               label="Horários disponíveis"
                name="unity"
+            // rules={[
+            //    { required: true, message: 'Campo Obrigatório' }
+            // ]}
             >
                <Checkbox.Group>
                   {selectedCalendar?.local.map((local, index) => {
@@ -120,9 +116,28 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                      )
                   })}
                </Checkbox.Group>
-              {selectedCalendar === null && (
-                 <Typography>Selecione uma categoria</Typography>
-              )}
+               {selectedCalendar === null && (
+                  <Typography>Selecione uma categoria</Typography>
+               )}
+            </Form.Item>
+            <Form.Item
+               label='Carga horária disponível'
+               name='totalCH'
+               rules={[
+                  { required: true, message: 'Campo Obrigatório' }
+               ]}
+            >
+               <InputNumber />
+            </Form.Item>
+            <Form.Item
+               label='Descrição'
+               name='description'
+               rules={[
+                  { required: true, message: 'Campo Obrigatório' },
+                  { max: 300, message: 'Número de caracteres excedido' }
+               ]}
+            >
+               <TextArea placeholder="Descrição do projeto" />
             </Form.Item>
             <Form.Item
                label="Resultado"

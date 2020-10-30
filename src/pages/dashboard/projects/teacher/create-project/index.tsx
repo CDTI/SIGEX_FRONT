@@ -14,13 +14,15 @@ import { newProject } from '../../../../../mocks/mockDefaultValue'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../../../../context/auth'
 import { createProject } from '../../../../../services/project_service'
+import { ILocal } from '../../../../../mocks/mockCalendar'
 
 const { Step } = Steps
 
 export interface IBasicInfo {
   name: string
   description: string
-  unity: number[]
+  unity: ILocal[]
+  totalCH: number
   programId: string
   results: string
   categoryId: string
@@ -36,19 +38,20 @@ const CreateProject: React.FC = () => {
     console.log(project)
   }, [project])
 
-  const changeBasicInfo = (values: IBasicInfo) => {
+  const changeBasicInfo = (values: IBasicInfo, unity: ILocal[]) => {
     console.log(values)
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, unity: values.unity, programId: values.programId, results: values.results, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf })
+      setProject({ ...project, name: values.name, description: values.description, unity: unity, programId: values.programId, results: values.results, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, unity: values.unity, programId: values.programId, results: values.results, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId })
+      setProject({ ...project, name: values.name, description: values.description, unity: unity, programId: values.programId, results: values.results, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH })
     }
     setCurrent(current + 1)
   }
 
   const changePartner = (partner: IPartnership[]) => {
     setProject({ ...project, partnership: partner })
+    next()
   }
 
   const changeSpecificCommunity = (specificCommunity: ISpecificCommunity) => {

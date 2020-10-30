@@ -60,6 +60,11 @@ const Dashboard: React.FC = (props) => {
                                     Home
                             </Link>
                             </Menu.Item>
+                            <Menu.Item icon={<UserOutlined />}>
+                                <Link to="/dashboard/users">
+                                    Usuários
+                                </Link>
+                            </Menu.Item>
                             <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
                                 <Menu.Item icon={<UnorderedListOutlined />} key="3">
                                     <Link to="/dashboard/programs">Listar Programas</Link>

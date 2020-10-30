@@ -39,6 +39,7 @@ export const newProject: IProject = {
         text: ''
     },
     unity: [],
+    totalCH: 0,
     attachments: [],
     author: '',
     dateStart: new Date(),

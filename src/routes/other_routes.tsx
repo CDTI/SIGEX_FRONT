@@ -17,6 +17,9 @@ import AdminViewProject from '../pages/dashboard/projects/admin/admin-view-proje
 // Componentes Category
 import CreateCategory from '../pages/dashboard/category'
 
+// Componentes Usuário
+import Users from '../pages/dashboard/users'
+
 // Outros Componentes
 import Home from '../pages/home'
 import NotFound from '../pages/404'
@@ -47,6 +50,7 @@ const OtherRoutes: React.FC = () => {
                         */}
                         <Route path='/dashboard/programs' component={Programs}/>
                         <Route path='/dashboard/program/create' component={CreateProgram}/>
+                        <Route path='/dashboard/users' component={Users}/>
                         
                     </Dashboard>
                     <Route component={NotFound} />
