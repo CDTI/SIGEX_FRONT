@@ -29,9 +29,10 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
          setCategories(dataCategories)
          listPrograms().then(data => {
             setPrograms(data.programs)
+            changeCalendar(project.categoryId)
          })
       })
-   }, [])
+   }, [project.categoryId])
 
    const changeCalendar = (id: string) => {
       const filterCalendar = calendar.find(e => e.categoryId === id)
@@ -45,6 +46,28 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
 
    const submit = (value: IBasicInfo) => {
       changeBasicInfo(value, available)
+   }
+
+   const compareChecked = (local: ILocal) => {
+      const filterLocal = project.unity.find(e => e.day === local.day && e.name === local.name) 
+      if (filterLocal !== undefined) {
+         const compareA = Object.keys(local)
+         const compareB = Object.keys(filterLocal)
+
+         if(compareA.length !== compareB.length ){
+            return false
+         }
+
+         const diff = compareA.some((key, index) => {
+            return compareA[index] !== compareB[index]
+         })
+
+         console.log(!diff)
+         return !diff
+
+      } else {
+         return false
+      }
    }
 
    return (
@@ -112,7 +135,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                <Checkbox.Group>
                   {selectedCalendar?.local.map((local, index) => {
                      return (
-                        <Checkbox key={index} value={local} onChange={changeDays}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                        <Checkbox key={index} value={local} onChange={changeDays} defaultChecked={compareChecked(local)}>{local.name} - {local.turn} - {local.day}</Checkbox>
                      )
                   })}
                </Checkbox.Group>
@@ -139,7 +162,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
             >
                <TextArea placeholder="Descrição do projeto" />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
                label="Resultado"
                name="results"
                rules={[
@@ -147,7 +170,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                ]}
             >
                <TextArea placeholder="Digite aqui qual será a entrega final para a comunidade?" />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item>
                <Button htmlType='submit' type="primary">Próximo</Button>
             </Form.Item>

@@ -31,3 +31,9 @@ export const updateUser = async(user: any): Promise<ResponseUser> => {
 
     return response.data
 }
+
+export const checkUser = async(user: any): Promise<boolean> => {
+    const response = await api.post('checkUser', user)
+
+    return response.data
+}

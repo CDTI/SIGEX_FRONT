@@ -6,6 +6,7 @@ import { listProjectForTeacher } from '../../../../../services/project_service'
 import { Tag, Space, Button } from 'antd'
 
 import MyTable from '../../../../../components/layout/table'
+import { Link } from 'react-router-dom'
 
 const columns = [
     {
@@ -53,7 +54,11 @@ const columns = [
         key: 'action',
         render: (text: string, record: IProject) => (
             <Space size="middle">
-                <Button>Editar {record.name}</Button>
+                <Button>
+                    <Link to={{ pathname: '/dashboard/project/create', state: record }}>
+                        Editar
+                    </Link>
+                </Button>
                 <Button>Delete</Button>
             </Space>
         ),
