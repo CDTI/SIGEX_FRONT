@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Form, Button, Input, Spin } from 'antd'
+import { Form, Button, Input, Spin, notification } from 'antd'
 import InputMask from 'antd-mask-input'
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './style'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useAuth } from '../../context/auth'
 import logo from '../../sigex.png'
 import { checkUser, createUser } from '../../services/user_service'
-import { UserInterface } from '../../interfaces/user'
 
 interface ValueLogin {
   cpf: string,
@@ -23,38 +23,50 @@ const LoginPage: React.FC<Props> = () => {
   const [newUser, setNewUser] = useState(false)
   const [loginUser, setLoginUser] = useState(false)
   const [password, setPassword] = useState('')
-  const [ form ] = Form.useForm()
+  const [form] = Form.useForm()
 
   const onFinish = (values: ValueLogin) => {
     setLoading(false)
     context.login(values)
   }
 
-  const handleCreateUser = async (userNew: any) => {
-    const cUser = {
-      cpf: userNew.cpf,
-      email: userNew.email,
-      lattes: userNew.lattes,
-      name: userNew.name,
-      password: userNew.password,
-      role: 'teacher',
-      isActive: false
-    }
-
-    setPassword(userNew.password)
-    const newUser = await createUser(cUser)
-    const login = { cpf: cpf, password: password}
-    console.log(newUser)
-    setCpf(userNew.cpf)
+  const back = () => {
+    setCpf('')
+    form.resetFields()
     setNewUser(false)
-    setLoginUser(true)
-    context.login(login)
+    setLoginUser(false)
+  }
+
+  const handleCreateUser = async (userNew: any) => {
+    try {
+      const cUser = {
+        cpf: userNew.cpf,
+        email: userNew.email,
+        lattes: userNew.lattes,
+        name: userNew.name,
+        password: userNew.password,
+        role: 'teacher',
+        isActive: false
+      }
+
+      setPassword(userNew.password)
+      const newUser = await createUser(cUser)
+      const login = { cpf: cpf, password: password }
+      console.log(newUser)
+      setCpf(userNew.cpf)
+      setNewUser(false)
+      setLoginUser(true)
+      notification.success({ message: 'Usuário cadastrado com sucesso' })
+      context.login(login)
+    }catch(e){
+      notification.error({ message: 'Erro ao cadastrar usuário' })
+    }
   }
 
   const handleCheckUser = async (value: any) => {
     const check = await checkUser(value)
     setCpf(value.cpf)
-    const cpf = { cpf: value.cpf}
+    const cpf = { cpf: value.cpf }
     form.setFieldsValue(cpf)
     if (check) {
       setLoginUser(true)
@@ -91,86 +103,92 @@ const LoginPage: React.FC<Props> = () => {
               </Form>
             )}
             {loginUser && (
-              <Form
-                onFinish={onFinish}
-                name="basic"
-                form={form}
-              >
-                <LabelInput>CPF</LabelInput>
-                <Form.Item name="cpf"
-                  rules={[{ required: true, message: 'Campo obrigatório' }]}
+              <>
+                <Button style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }} type='link' onClick={back}><ArrowLeftOutlined />Voltar</Button>
+                <Form
+                  onFinish={onFinish}
+                  name="basic"
+                  form={form}
                 >
-                  <Input placeholder='Digite seu CPF' disabled/>
-                </Form.Item>
-                <LabelInput>Senha</LabelInput>
-                <Form.Item name="password"
-                  rules={[{ required: true, message: 'Campo obrigatório' }]}
-                >
-                  <Input.Password draggable type='password' placeholder='Digite sua senha' />
-                </Form.Item>
-                <Form.Item>
-                  <p style={{ textAlign: 'center' }}>
-                    <Button type="primary" htmlType="submit">Login</Button>
-                  </p>
-                </Form.Item>
-              </Form>
+                  <LabelInput>CPF</LabelInput>
+                  <Form.Item name="cpf"
+                    rules={[{ required: true, message: 'Campo obrigatório' }]}
+                  >
+                    <Input placeholder='Digite seu CPF' disabled />
+                  </Form.Item>
+                  <LabelInput>Senha</LabelInput>
+                  <Form.Item name="password"
+                    rules={[{ required: true, message: 'Campo obrigatório' }]}
+                  >
+                    <Input.Password draggable type='password' placeholder='Digite sua senha' />
+                  </Form.Item>
+                  <Form.Item>
+                    <p style={{ textAlign: 'center' }}>
+                      <Button type="primary" htmlType="submit">Login</Button>
+                    </p>
+                  </Form.Item>
+                </Form>
+              </>
             )}
             {newUser && (
-              <Form
-                form={form}
-                layout='vertical'
-                onFinish={handleCreateUser}
-                style={{ maxWidth: '520px', width: '100%' }}
-              >
-                <LabelInput>CPF</LabelInput>
-                <Form.Item
-                  name='cpf'
-                  rules={[
-                    { required: true, message: 'Campo Obrigatório' }
-                  ]}
+              <>
+                <Button style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }} type='link' onClick={back}><ArrowLeftOutlined />Voltar</Button>
+                <Form
+                  form={form}
+                  layout='vertical'
+                  onFinish={handleCreateUser}
+                  style={{ maxWidth: '520px', width: '100%' }}
                 >
-                  <InputMask mask='111.111.111-11' disabled/>
-                </Form.Item>
-                <LabelInput>Name</LabelInput>
-                <Form.Item
-                  name='name'
-                  rules={[
-                    { required: true, message: 'Campo Obrigatório' }
-                  ]}
-                >
-                  <Input placeholder='Digite o Nome' />
-                </Form.Item>
-                <LabelInput>E-Mail</LabelInput>
-                <Form.Item
-                  name='email'
-                  rules={[
-                    { required: true, message: 'Campo Obrigatório' }
-                  ]}
-                >
-                  <Input placeholder='Digite o E-Mail' />
-                </Form.Item>
-                <LabelInput>Cod. Lattes</LabelInput>
-                <Form.Item
-                  name='lattes'
-                  rules={[
-                    { required: true, message: 'Campo Obrigatório' }
-                  ]}
-                >
-                  <Input addonBefore='https://cnpq.lattes/' placeholder='Digite o código lattes' />
-                </Form.Item>
-                <LabelInput>Senha</LabelInput>
-                <Form.Item
-                  name='password'
-                  rules={[
-                    { required: true, message: 'Campo Obrigatório' }
-                  ]}
-                >
-                  <Input.Password draggable type='password' placeholder='Digite a Senha' />
-                </Form.Item>
-                <Form.Item>
-                  <Button type='primary' htmlType='submit'>Cadastrar</Button>
-                </Form.Item>
-              </Form>
+                  <LabelInput>CPF</LabelInput>
+                  <Form.Item
+                    name='cpf'
+                    rules={[
+                      { required: true, message: 'Campo Obrigatório' }
+                    ]}
+                  >
+                    <InputMask mask='111.111.111-11' disabled />
+                  </Form.Item>
+                  <LabelInput>Name</LabelInput>
+                  <Form.Item
+                    name='name'
+                    rules={[
+                      { required: true, message: 'Campo Obrigatório' }
+                    ]}
+                  >
+                    <Input placeholder='Digite o Nome' />
+                  </Form.Item>
+                  <LabelInput>E-Mail</LabelInput>
+                  <Form.Item
+                    name='email'
+                    rules={[
+                      { required: true, message: 'Campo Obrigatório' }
+                    ]}
+                  >
+                    <Input placeholder='Digite o E-Mail' />
+                  </Form.Item>
+                  <LabelInput>Cod. Lattes</LabelInput>
+                  <Form.Item
+                    name='lattes'
+                    rules={[
+                      { required: true, message: 'Campo Obrigatório' }
+                    ]}
+                  >
+                    <Input addonBefore='https://cnpq.lattes/' placeholder='Digite o código lattes' />
+                  </Form.Item>
+                  <LabelInput>Senha</LabelInput>
+                  <Form.Item
+                    name='password'
+                    rules={[
+                      { required: true, message: 'Campo Obrigatório' }
+                    ]}
+                  >
+                    <Input.Password draggable type='password' placeholder='Digite a Senha' />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type='primary' htmlType='submit'>Cadastrar</Button>
+                  </Form.Item>
+                </Form>
+              </>
             )}
           </>
         </FormDiv>

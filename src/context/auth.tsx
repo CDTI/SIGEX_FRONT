@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { notification } from 'antd'
 import { UserInterface } from '../interfaces/user'
 import api from '../services/api'
 import history from '../global/history'
+import { AxiosError } from 'axios'
 
 export interface Login {
     cpf: string
@@ -48,18 +50,35 @@ export const AuthProvider: React.FC = ({ children }) => {
     }
 
     const login = async (login: Login) => {
-        const response = await api.post('/login', {
-            cpf: login.cpf,
-            password: login.password
-        })
+        try {
+            let status: 'success' | 'error' = 'success'
+            const response = await api.post('/login', {
+                cpf: login.cpf,
+                password: login.password
+            })
+            console.log(response)
+            status = response.data.status
+            if (response.data.token !== null && response.data.status === 'success') {
+                notification[status]({ message: response.data.message })
+                setUser(response.data.user)
+                api.defaults.headers.Authorization = `Bearer ${response.data.token}`
 
-        setUser(response.data.user)
-        api.defaults.headers.Authorization = `Bearer ${response.data.token}`
+                localStorage.setItem('@pp:user', JSON.stringify(response.data.user))
+                localStorage.setItem('@pp:token', response.data.token)
 
-        localStorage.setItem('@pp:user', JSON.stringify(response.data.user))
-        localStorage.setItem('@pp:token', response.data.token)
 
-        history.push('/dashboard')
+                history.push('/dashboard')
+            } else if (response.data.token === null && response.data.status === 'error') {
+                notification[status]({ message: response.data.message })
+            }
+        } catch (err) {
+            if (err && err.reponse) {
+                const axiosError = err as AxiosError;
+                console.log(axiosError);
+                return axiosError.response?.data;
+            }
+            throw err;
+        }
     }
 
     return (
