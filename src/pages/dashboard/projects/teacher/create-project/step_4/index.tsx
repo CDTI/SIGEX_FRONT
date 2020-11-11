@@ -1,6 +1,6 @@
 import React from 'react'
-import { ContainerFlex, Title } from '../../../../../../global/styles'
-import { Form, Input, Button, Space } from 'antd'
+import { ContainerFlex } from '../../../../../../global/styles'
+import { Form, Input, Button, Space, Divider } from 'antd'
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'
 import { IProject } from '../../../../../../interfaces/project'
 import { MaskedInput } from 'antd-mask-input'
@@ -13,6 +13,9 @@ interface Props {
 }
 
 const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeStep }) => {
+    const totalSteps = project.planning.length
+
+
     return (
         <ContainerFlex>
             <div
@@ -24,30 +27,43 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                     <div style={{ maxWidth: '520px', width: '100%' }}>
                         {project.planning.map((p, index) => (
                             <div>
-                                <Button onClick={() => removeStep(index)}>Remover</Button>
+                                <h2>Etapa {index + 1}</h2>
+                                <Button
+                                    type='link'
+                                    style={{ margin: '8px 0', padding: '0' }}
+                                    onClick={() => {
+                                        removeStep(index)
+                                    }}>
+                                    <MinusCircleOutlined
+                                        className="dynamic-delete-button"
+
+                                    />
+                                        Excluir
+                                    </Button>
                                 <Form.Item label='Etapa'>
-                                    <Input value={p.text} disabled/>
+                                    <Input value={p.text} disabled />
                                 </Form.Item>
                                 <Form.Item
                                     label='Área de desenvolvimento'
                                 >
-                                    <Input value={p.developmentSite} disabled/>
+                                    <Input value={p.developmentSite} disabled />
                                 </Form.Item>
                                 <Form.Item
                                     label='Modo desenvolvimento'
                                 >
-                                    <Input value={p.developmentMode} disabled/>
+                                    <Input value={p.developmentMode} disabled />
                                 </Form.Item>
                                 <Form.Item
                                     label='Data de inicío'
                                 >
-                                    <Input value={p.startDate} disabled/>
+                                    <Input value={p.startDate} disabled />
                                 </Form.Item>
                                 <Form.Item
                                     label='Data de término'
                                 >
-                                    <Input value={p.finalDate} disabled/>
+                                    <Input value={p.finalDate} disabled />
                                 </Form.Item>
+                                <Divider style={{ backgroundColor: '#333' }} />
                             </div>
                         ))}
                     </div>
@@ -63,7 +79,19 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                     <div>
                                         {fields.map((field, index) => (
                                             <>
-                                                <Title>Etapa {index + 1}</Title>
+                                                <h2>Etapa {totalSteps + index + 1}</h2>
+                                                {(fields.length > 1 || project.planning.length > 0) ? (
+                                                    <Button
+                                                        type='link'
+                                                        style={{ margin: '8px 0', padding: '0' }}
+                                                        onClick={() => {
+                                                            remove(field.name);
+                                                        }}>
+                                                        <MinusCircleOutlined />
+                                                        Excluir
+                                                    </Button>
+
+                                                ) : null}
                                                 <Form.Item
                                                     required={false}
                                                     key={field.key}
@@ -124,21 +152,11 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                                             mask="11/11/1111"
                                                         />
                                                     </Form.Item>
-                                                    {fields.length > 1 ? (
-                                                        <>
-                                                            <MinusCircleOutlined
-                                                                className="dynamic-delete-button"
-                                                                style={{ margin: '0 8px' }}
-                                                                onClick={() => {
-                                                                    remove(field.name);
-                                                                }}
-                                                            />
-                                                Excluir
-                                            </>
-                                                    ) : null}
                                                 </Form.Item>
+                                                <Divider style={{ backgroundColor: '#333' }} />
                                             </>
                                         ))}
+
                                         <Form.Item>
                                             <Button
                                                 type="dashed"

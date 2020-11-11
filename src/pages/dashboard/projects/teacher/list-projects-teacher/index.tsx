@@ -3,7 +3,7 @@ import Structure from '../../../../../components/layout/structure'
 import { ContainerFlex } from '../../../../../global/styles'
 import { IProject } from '../../../../../interfaces/project'
 import { listProjectForTeacher } from '../../../../../services/project_service'
-import { Tag, Space, Button } from 'antd'
+import { Tag, Space, Button, Spin } from 'antd'
 
 import MyTable from '../../../../../components/layout/table'
 import { Link } from 'react-router-dom'
@@ -54,12 +54,16 @@ const columns = [
         key: 'action',
         render: (text: string, record: IProject) => (
             <Space size="middle">
-                <Button>
-                    <Link to={{ pathname: '/dashboard/project/create', state: record }}>
-                        Editar
-                    </Link>
-                </Button>
-                <Button>Delete</Button>
+                {(record.status === 'pending' || record.status === 'adjust') && (
+                    <>
+                        <Button>
+                            <Link to={{ pathname: '/dashboard/project/create', state: record }}>
+                                Editar
+                        </Link>
+                        </Button>
+                        <Button>Delete</Button>
+                    </>
+                )}
             </Space>
         ),
     },
@@ -67,18 +71,21 @@ const columns = [
 
 const Projects: React.FC = () => {
     const [projects, setProjects] = useState<IProject[]>([])
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
+        setLoading(true)
         listProjectForTeacher().then(data => {
             console.log(data)
             setProjects(data)
+            setTimeout(() => {setLoading(false)}, 2000)
         })
     }, [])
 
     return (
         <Structure title="Meus Projetos">
             <ContainerFlex>
-                <MyTable data={projects} columns={columns} />
+                {loading ? <Spin /> : <MyTable data={projects} columns={columns} /> }
             </ContainerFlex>
         </Structure>
     )

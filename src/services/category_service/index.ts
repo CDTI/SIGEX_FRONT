@@ -5,6 +5,8 @@ interface ReturnRequest{
     message: string
     deleted?: boolean
     created?: boolean
+    edited?: boolean
+    status: 'error' | 'success'
 }
 
 export const createCategory = async (category: ICategory): Promise<ReturnRequest> => {
@@ -25,6 +27,12 @@ export const listCategories = async(): Promise<ICategory[]> => {
 
 export const deleteCategory = async(id: string): Promise<ReturnRequest> => {
     const response = await api.delete(`/category/${id}`)
+
+    return response.data as ReturnRequest
+}
+
+export const updateCategory = async(category: any): Promise<ReturnRequest> => {
+    const response = await api.put('/category', category)
 
     return response.data as ReturnRequest
 }

@@ -44,7 +44,6 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const { user } = useAuth()
 
   useEffect(() => {
-    console.log(editProject)
     if (primary && editProject === undefined) {
       const loadProject = localStorage.getItem('registerProject')
       if (loadProject !== null) {
@@ -52,26 +51,25 @@ const CreateProject: React.FC<Props> = ({ location }) => {
       } else {
         setPrimary(false)
       }
-    } else if(editProject !== undefined) {
+    } else if (editProject !== undefined) {
       setTitle('Editar projeto')
       setProject(editProject)
       setEdited(true)
       setPrimary(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primary])
 
   useEffect(() => {
-    if (!primary) {
+    if (!primary && title === 'Criar projeto') {
       setPrimary(false)
       localStorage.setItem('registerProject', JSON.stringify(project))
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project])
 
   const changeLoadProject = (option: string) => {
     const loadProject = localStorage.getItem('registerProject')
-    console.log(loadProject)
     setPrimary(false)
     if (loadProject !== null && option === 'yes') {
       const loaded = JSON.parse(loadProject) as IProject
@@ -92,14 +90,6 @@ const CreateProject: React.FC<Props> = ({ location }) => {
       setProject({ ...project, name: values.name, description: values.description, unity: unity, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH })
     }
     setCurrent(current + 1)
-  }
-
-  const changePartner = (partner: IPartnership[] | undefined) => {
-    if (partner !== undefined) {
-      const partners = project.partnership.concat(partner)
-      setProject({ ...project, partnership: partners })
-    }
-    next()
   }
 
   const changeSpecificCommunity = (specificCommunity: ISpecificCommunity) => {
@@ -131,6 +121,37 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   //   setFinish(true)
   // }
 
+  const removeStep = (index: number) => {
+    project.planning.splice(index, 1)
+
+    setProject({ ...project, planning: project.planning })
+  }
+
+  const removeMaterials = (index: number) => {
+    project.resources.materials.splice(index, 1)
+    setProject({ ...project, resources: project.resources })
+  }
+
+  /**
+   * 
+   * @param event 
+   * @param index 
+   * @description Funcções relacionadas a parceria
+   */
+
+  const changePartner = (partner: IPartnership[] | undefined) => {
+    if (partner !== undefined) {
+      const partners = project.partnership.concat(partner)
+      setProject({ ...project, partnership: partners })
+    }
+    next()
+  }
+
+  const changeEditPartner = (event: any, index: number) => {
+    project.partnership[index].text = event.target.value
+    setProject({ ...project, partnership: project.partnership })
+  }
+
   const removePartner = (index: number) => {
     console.log(index)
     project.partnership.splice(index, 1)
@@ -149,16 +170,12 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
   }
 
-  const removeStep = (index: number) => {
-    project.planning.splice(index, 1)
-
-    setProject({ ...project, planning: project.planning })
+  const addContact = (index: number) => {
+    const newContact = { name: '', phone: '' }
+    project.partnership[index].contacts.push(newContact)
+    setProject({ ...project, partnership: project.partnership })
   }
 
-  const removeMaterials = (index: number) => {
-    project.resources.materials.splice(index, 1)
-    setProject({...project, resources: project.resources})
-  }
 
   const previous = () => {
     setCurrent(current - 1)
@@ -172,23 +189,46 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const steps = [
     {
       title: 'Informações Básicas',
-      content: <BasicInfo changeBasicInfo={changeBasicInfo} project={project} />
+      content: <BasicInfo
+        changeBasicInfo={changeBasicInfo}
+        project={project}
+      />
     },
     {
       title: 'Parcerias',
-      content: <Partner changePartner={changePartner} previous={previous} removeContact={removeContact} removePartner={removePartner} next={next} project={project} />
+      content: <Partner
+        changePartner={changePartner}
+        previous={previous}
+        changeEditPartner={changeEditPartner}
+        removeContact={removeContact}
+        removePartner={removePartner}
+        project={project}
+        addContact={addContact}
+      />
     },
     {
       title: 'Comunidade',
-      content: <SpecificCommunity previous={previous} changeCommunitySpecific={changeSpecificCommunity} project={project} />
+      content: <SpecificCommunity
+        previous={previous}
+        changeCommunitySpecific={changeSpecificCommunity}
+        project={project}
+      />
     },
     {
       title: 'Planejamento',
-      content: <Planning previous={previous} removeStep={removeStep} changePlanning={changePlanning} project={project} />
+      content: <Planning
+        previous={previous}
+        removeStep={removeStep}
+        changePlanning={changePlanning}
+        project={project} />
     },
     {
       title: 'Recursos',
-      content: <Resource removeMaterials={removeMaterials} edited={edited} previous={previous} changeResources={changeResource} project={project} />
+      content: <Resource
+        removeMaterials={removeMaterials}
+        edited={edited} previous={previous}
+        changeResources={changeResource}
+        project={project} />
     },
     // {
     //   title: 'Anexos',

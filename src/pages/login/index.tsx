@@ -46,7 +46,7 @@ const LoginPage: React.FC<Props> = () => {
         name: userNew.name,
         password: userNew.password,
         role: 'teacher',
-        isActive: false
+        isActive: true
       }
 
       setPassword(userNew.password)
@@ -169,9 +169,6 @@ const LoginPage: React.FC<Props> = () => {
                   <LabelInput>Cod. Lattes</LabelInput>
                   <Form.Item
                     name='lattes'
-                    rules={[
-                      { required: true, message: 'Campo Obrigatório' }
-                    ]}
                   >
                     <Input addonBefore='https://cnpq.lattes/' placeholder='Digite o código lattes' />
                   </Form.Item>

@@ -1,4 +1,5 @@
 export interface ILocal {
+    _id?: string,
     name: string,
     turn: string,
     day: string

@@ -1,9 +1,7 @@
-import { ICategory } from "../interfaces/category";
-
-export const Categories: ICategory[] = [
+export const Categories = [
     {
         _id: '1',
-        name: 'Pesquisa e Sociedade'
+        name: 'Pesquisa e Sociedade',
     },
     {
         _id: '2',

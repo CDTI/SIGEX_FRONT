@@ -49,21 +49,21 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
    }
 
    const compareChecked = (local: ILocal) => {
+      
       const filterLocal = project.unity.find(e => e.day === local.day && e.name === local.name) 
       if (filterLocal !== undefined) {
+         delete filterLocal._id
          const compareA = Object.keys(local)
          const compareB = Object.keys(filterLocal)
 
-         if(compareA.length !== compareB.length ){
+         if (compareA.length !== compareB.length) {
             return false
+         } else {
+
+            const diff = compareA.some((key, index) => compareA[index] === compareB[index])
+            console.log(diff)
+            return diff
          }
-
-         const diff = compareA.some((key, index) => {
-            return compareA[index] !== compareB[index]
-         })
-
-         console.log(!diff)
-         return !diff
 
       } else {
          return false

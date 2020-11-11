@@ -124,7 +124,7 @@ const Dashboard: React.FC = (props) => {
                             <label style={{ color: '#fff', marginRight: '10px' }}>Olá, {context.user?.name}</label>
                             <Popover content={
                                 <Button onClick={logout} type="link" style={{ backgroundColor: '#b23a48', color: '#fff' }}>
-                                    <PoweroffOutlined />
+                                    <PoweroffOutlined />SAIR
                                 </Button>
                             } trigger="focus">
                                 <Button>
@@ -138,7 +138,9 @@ const Dashboard: React.FC = (props) => {
                             {props.children}
                         </div>
                     </Content>
-                    <Footer style={{ textAlign: 'center' }}>Dashboard ₢2020 Criado por Daniel Candido</Footer>
+                    <Footer style={{ textAlign: 'center' }}>
+                        <Typography>Sigex ₢2020</Typography>
+                    </Footer>
                 </Layout>
             </Layout>
         </>
