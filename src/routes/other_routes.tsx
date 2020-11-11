@@ -13,6 +13,7 @@ import CreateProgram from '../pages/dashboard/programs/create'
 import CreateProject from '../pages/dashboard/projects/teacher/create-project'
 import Projects from '../pages/dashboard/projects'
 import AdminViewProject from '../pages/dashboard/projects/admin/admin-view-projects'
+import SelectProjects from '../pages/dashboard/projects/admin/select-projects'
 
 // Componentes Category
 import CreateCategory from '../pages/dashboard/category'
@@ -41,6 +42,7 @@ const OtherRoutes: React.FC = () => {
                         <Route path='/dashboard/projects' component={Projects}/>
                         <Route path='/dashboard/project/create' component={CreateProject} />
                         <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
+                        <Route path='/dashboard/selectProjects' component={SelectProjects}/>
                         {/* 
                             Rotas de categorias
                         */}

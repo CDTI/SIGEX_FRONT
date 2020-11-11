@@ -76,11 +76,18 @@ const Dashboard: React.FC = (props) => {
                             <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
                                 <Link to="/dashboard/categories">Categorias</Link>
                             </Menu.Item>
-                            <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                <Link to='/dashboard/projects'>
-                                    Propostas
+                            <SubMenu title='Propostas'>
+                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                    <Link to='/dashboard/projects'>
+                                        Todas as propostas
                                     </Link>
-                            </Menu.Item>
+                                </Menu.Item>
+                                <Menu.Item key="/dashboard/selectProjects" icon={<TeamOutlined />}>
+                                    <Link to='/dashboard/selectProjects'>
+                                        Selecionar projetos
+                                    </Link>
+                                </Menu.Item>
+                            </SubMenu>
                             <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
                                 <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
                                 <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>

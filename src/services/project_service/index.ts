@@ -7,6 +7,11 @@ export interface ReturnResponse {
     result: 'error' | 'success',
 }
 
+export interface GetResponse {
+    message: string,
+    projects: IProject[]
+}
+
 export const listAllProject = async (): Promise<IProject[]> => {
     const response = await api.get('/project')
 
@@ -27,6 +32,12 @@ export const createProject = async (project: IProject): Promise<IProject> => {
 
 export const updateProject = async (project: IProject): Promise<ReturnResponse> => {
     const response = await api.put('/project', project)
+
+    return response.data
+}
+
+export const listApprovedProjects = async(): Promise<GetResponse> => {
+    const response =  await api.get('/listApprovedProject')
 
     return response.data
 }

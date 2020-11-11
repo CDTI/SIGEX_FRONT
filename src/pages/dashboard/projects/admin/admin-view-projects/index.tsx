@@ -211,13 +211,19 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                     <Typography>Descrição: {location.state.description}</Typography>
                                     <Typography>Categoria: {category?.name}</Typography>
                                     <Typography>Programa: {program?.name}</Typography>
-                                    <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários:</Typography>
-                                    <ul style={{marginLeft: '18px'}}>
-                                        {location.state.unity.map(e => (
+                                    <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários primeiro semestre:</Typography>
+                                    <ul style={{ marginLeft: '18px' }}>
+                                        {location.state.firstSemester.map(e => (
                                             <li>{e.name} - {e.day} - {e.turn}</li>
                                         ))}
                                     </ul>
-                                        <Typography>CH disponível: {location.state.totalCH}</Typography>
+                                    <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários segundo semestre:</Typography>
+                                    <ul style={{ marginLeft: '18px' }}>
+                                        {location.state.secondSemester.map(e => (
+                                            <li>{e.name} - {e.day} - {e.turn}</li>
+                                        ))}
+                                    </ul>
+                                    <Typography>CH disponível: {location.state.totalCH}</Typography>
                                 </Panel>
                                 <Panel header='Parcerias' key='2'>
                                     <Collapse accordion>

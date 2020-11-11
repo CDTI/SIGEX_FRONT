@@ -13,7 +13,7 @@ import { IPartnership, IProject, ISpecificCommunity } from '../../../../../inter
 import { newProject } from '../../../../../mocks/mockDefaultValue'
 import { Link, RouteProps } from 'react-router-dom'
 import { useAuth } from '../../../../../context/auth'
-import { createProject } from '../../../../../services/project_service'
+import { createProject, updateProject } from '../../../../../services/project_service'
 import { ILocal } from '../../../../../mocks/mockCalendar'
 import Modal from 'antd/lib/modal/Modal'
 
@@ -22,7 +22,8 @@ const { Step } = Steps
 export interface IBasicInfo {
   name: string
   description: string
-  unity: ILocal[]
+  firstSemester: ILocal[]
+  secondSemester: ILocal[]
   totalCH: number
   programId: string
   categoryId: string
@@ -82,12 +83,12 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
   }
 
-  const changeBasicInfo = (values: IBasicInfo, unity: ILocal[]) => {
+  const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, unity: unity, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, unity: unity, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH })
     }
     setCurrent(current + 1)
   }
@@ -98,18 +99,28 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   }
 
   const changePlanning = (planning: any) => {
+    console.log(planning)
     project.planning.concat(planning.planning)
     setProject(project)
     setCurrent(current + 1)
   }
 
   const changeResource = async (resource: any) => {
-    project.resources.transport = resource.transport[0]
-    project.resources.materials = resource.materials
+    console.log(resource)
+    if (resource.transport !== undefined) {
+      project.resources.transport = resource.transport[0]
+    }
+
+    if (resource.materials !== undefined) {
+      project.resources.materials.concat(resource.materials)
+    }
     setProject(project)
-    setCurrent(current + 1)
-    const projectData = await createProject(project)
-    console.log(projectData)
+    // setCurrent(current + 1)
+    if (!edited) {
+      await createProject(project)
+    }else {
+      await updateProject(project)
+    }
     setFinish(true)
   }
 
@@ -141,6 +152,10 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   const changePartner = (partner: IPartnership[] | undefined) => {
     if (partner !== undefined) {
+      partner.map(e => {
+        if (e.contacts === undefined)
+          e.contacts = []
+      })
       const partners = project.partnership.concat(partner)
       setProject({ ...project, partnership: partners })
     }
@@ -175,7 +190,6 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     project.partnership[index].contacts.push(newContact)
     setProject({ ...project, partnership: project.partnership })
   }
-
 
   const previous = () => {
     setCurrent(current - 1)

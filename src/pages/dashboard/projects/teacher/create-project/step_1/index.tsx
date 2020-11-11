@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Form, Input, Button, Select, Checkbox, Typography, InputNumber } from 'antd'
+import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space } from 'antd'
 import { ContainerFlex } from '../../../../../../global/styles';
 import { IBasicInfo } from '..';
 import { IProject } from '../../../../../../interfaces/project';
@@ -14,7 +14,7 @@ const { Option } = Select
 const { TextArea } = Input
 
 export interface Props {
-   changeBasicInfo(values: IBasicInfo, unity: ILocal[]): void;
+   changeBasicInfo(values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]): void;
    project: IProject
 }
 
@@ -22,7 +22,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
    const [categories, setCategories] = useState<ICategory[]>([])
    const [selectedCalendar, setCalendar] = useState<ICalendar | null>(null)
    const [programs, setPrograms] = useState<IPrograms[] | null>(null)
-   const available: ILocal[] = []
+   const firstSemester: ILocal[] = []
+   const secondSemester: ILocal[] = []
 
    useEffect(() => {
       listCategories().then(dataCategories => {
@@ -40,17 +41,21 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
          setCalendar(filterCalendar)
    }
 
-   const changeDays = (e: any) => {
-      available.push(e.target.value)
+   const changeDaysFirst = (e: any) => {
+      firstSemester.push(e.target.value)
+   }
+
+   const changeDaysSecond = (e: any) => {
+      secondSemester.push(e.target.value)
    }
 
    const submit = (value: IBasicInfo) => {
-      changeBasicInfo(value, available)
+      changeBasicInfo(value, firstSemester, secondSemester)
    }
 
    const compareChecked = (local: ILocal) => {
-      
-      const filterLocal = project.unity.find(e => e.day === local.day && e.name === local.name) 
+
+      const filterLocal = project.firstSemester.find(e => e.day === local.day && e.name === local.name)
       if (filterLocal !== undefined) {
          delete filterLocal._id
          const compareA = Object.keys(local)
@@ -75,7 +80,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
          <Form
             onFinish={submit}
             layout="vertical"
-            style={{ width: '100%', maxWidth: '500px' }}
+            style={{ width: '100%', maxWidth: '700px' }}
             initialValues={project}
          >
             <Form.Item
@@ -125,26 +130,40 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                   ))}
                </Select>
             </Form.Item>
+            <Space>
+               <Form.Item
+                  label="Horários disponíveis 1° Semestre"
+                  name="firstSemester"
+               >
+                  <Checkbox.Group>
+                     {selectedCalendar?.local.map((local, index) => {
+                        return (
+                           <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={true}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                        )
+                     })}
+                  </Checkbox.Group>
+                  {selectedCalendar === null && (
+                     <Typography>Selecione uma categoria</Typography>
+                  )}
+               </Form.Item>
+               <Form.Item
+                  label="Horários disponíveis 2° Semestre"
+                  name="secondSemester"
+               >
+                  <Checkbox.Group>
+                     {selectedCalendar?.local.map((local, index) => {
+                        return (
+                           <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={true}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                        )
+                     })}
+                  </Checkbox.Group>
+                  {selectedCalendar === null && (
+                     <Typography>Selecione uma categoria</Typography>
+                  )}
+               </Form.Item>
+            </Space>
             <Form.Item
-               label="Horários disponíveis"
-               name="unity"
-            // rules={[
-            //    { required: true, message: 'Campo Obrigatório' }
-            // ]}
-            >
-               <Checkbox.Group>
-                  {selectedCalendar?.local.map((local, index) => {
-                     return (
-                        <Checkbox key={index} value={local} onChange={changeDays} defaultChecked={compareChecked(local)}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                     )
-                  })}
-               </Checkbox.Group>
-               {selectedCalendar === null && (
-                  <Typography>Selecione uma categoria</Typography>
-               )}
-            </Form.Item>
-            <Form.Item
-               label='Carga horária disponível'
+               label='Carga horária disponível para a extensão institucional'
                name='totalCH'
                rules={[
                   { required: true, message: 'Campo Obrigatório' }

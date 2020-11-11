@@ -55,34 +55,38 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, remove
                                 >
                                     <Input.TextArea defaultValue={e.text} onChange={event => changeEditPartner(event, index)} />
                                 </Form.Item>
-                                {e.contacts.map((contact, indexC) => (
-                                    <div key={indexC}>
-                                        <Button onClick={() => removeContact(index, indexC)}
-                                            type='link'
-                                            style={{ margin: '8px 0', padding: '0' }}
-                                        ><UserAddOutlined />Remover Contato</Button>
-                                        <Space style={{ display: 'flex', marginBottom: 8 }} align="start">
-                                            <Form.Item
-                                                label='Nome'
-                                                name={[indexC, 'name']}
-                                                rules={[
-                                                    { required: true, message: 'Campo Obrigatório' }
-                                                ]}
-                                            >
-                                                <Input defaultValue={contact.name} />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label='Telefone'
-                                                name={[indexC, 'phone']}
-                                                rules={[
-                                                    { required: true, message: 'Campo Obrigatório' }
-                                                ]}
-                                            >
-                                                <MaskedInput mask='(11) 11111-1111' defaultValue={contact.phone} />
-                                            </Form.Item>
-                                        </Space>
-                                    </div>
-                                ))}
+                                {e.contacts.length > 0 && (
+                                    <>
+                                        {e.contacts.map((contact, indexC) => (
+                                            <div key={indexC}>
+                                                <Button onClick={() => removeContact(index, indexC)}
+                                                    type='link'
+                                                    style={{ margin: '8px 0', padding: '0' }}
+                                                ><UserAddOutlined />Remover Contato</Button>
+                                                <Space style={{ display: 'flex', marginBottom: 8 }} align="start">
+                                                    <Form.Item
+                                                        label='Nome'
+                                                        name={[indexC, 'name']}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' }
+                                                        ]}
+                                                    >
+                                                        <Input defaultValue={contact.name} />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        label='Telefone'
+                                                        name={[indexC, 'phone']}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' }
+                                                        ]}
+                                                    >
+                                                        <MaskedInput mask='(11) 11111-1111' defaultValue={contact.phone} />
+                                                    </Form.Item>
+                                                </Space>
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
                                 <Button
                                     style={{ backgroundColor: '#439A86', color: '#fff' }}
                                     onClick={() => addContact(index)}
@@ -107,7 +111,7 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, remove
                                         {fieldsPart.map((fieldPart, indexPart) => (
                                             <>
                                                 <div>
-                                                    <Space style={{width: '100%'}}>
+                                                    <Space style={{ width: '100%' }}>
                                                         <h2 style={{ margin: '8px 0', padding: '0' }}>Parceria {totalPartner + indexPart + 1}</h2>
                                                         <Button
                                                             type='link'

@@ -14,7 +14,7 @@ interface Props {
 
 const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeStep }) => {
     const totalSteps = project.planning.length
-
+    console.log(totalSteps)
 
     return (
         <ContainerFlex>
@@ -44,12 +44,14 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                     <Input value={p.text} disabled />
                                 </Form.Item>
                                 <Form.Item
-                                    label='Área de desenvolvimento'
+                                    label='Onde será desenvolvida'
                                 >
                                     <Input value={p.developmentSite} disabled />
                                 </Form.Item>
                                 <Form.Item
-                                    label='Modo desenvolvimento'
+                                    label='Como será desenvolvida (indicar recursos de
+                                        infraestrutura necessários, tais como laboratório de
+                                        informática, laboratório específico, etc.)'
                                 >
                                     <Input value={p.developmentMode} disabled />
                                 </Form.Item>
@@ -121,7 +123,9 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                                     <Form.Item
                                                         {...field}
                                                         name={[field.name, 'developmentMode']}
-                                                        label="Modo de desenvolvimento"
+                                                        label="Como será desenvolvida (indicar recursos de
+                                                            infraestrutura necessários, tais como laboratório de
+                                                            informática, laboratório específico, etc.)"
                                                         rules={[
                                                             { required: true, message: 'Campo Obrigatório' }
                                                         ]}

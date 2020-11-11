@@ -5,7 +5,8 @@ export interface IProject {
     name: string
     programId: string
     categoryId: string
-    unity: ILocal[]
+    firstSemester: ILocal[]
+    secondSemester: ILocal[]
     totalCH: number
     partnership: IPartnership[]
     specificCommunity: ISpecificCommunity

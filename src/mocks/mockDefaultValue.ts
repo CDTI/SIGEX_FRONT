@@ -38,7 +38,8 @@ export const newProject: IProject = {
         peopleInvolved: 0,
         text: ''
     },
-    unity: [],
+    firstSemester: [],
+    secondSemester: [],
     totalCH: 0,
     attachments: [],
     author: '',

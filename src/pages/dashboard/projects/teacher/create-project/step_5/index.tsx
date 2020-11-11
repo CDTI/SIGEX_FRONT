@@ -139,6 +139,7 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                     ))}
 
                                     <Form.Item>
+                                        <>
                                         <Button
                                             type="dashed"
                                             onClick={() => {
@@ -148,6 +149,12 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                         >
                                             <PlusOutlined /> Adicionar Materiais
                                     </Button>
+                                    (quando o projeto exigir materiais específicos.
+Por exemplo: material descartável para atendimento de
+saúde, impressão de banner, material para impressora
+3D) 
+
+                                    </>
                                     </Form.Item>
                                 </div>
                             );
@@ -228,15 +235,18 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
 
                                     {(fields.length < 1 && project.resources.transport.typeTransport.length === 0) && (
                                         <Form.Item>
-                                            <Button
-                                                type="dashed"
-                                                onClick={() => {
-                                                    add();
-                                                }}
-                                                block
-                                            >
-                                                <PlusOutlined /> Adicionar Transporte
-                                    </Button>
+                                            <>
+                                                <Button
+                                                    type="dashed"
+                                                    onClick={() => {
+                                                        add();
+                                                    }}
+                                                    block
+                                                >
+                                                    <PlusOutlined /> Adicionar Transporte ()
+                                                </Button>
+                                                (quando a comunidade estiver fora da região metropolitana de Curitiba)
+                                            </>
                                         </Form.Item>
                                     )}
                                     {
