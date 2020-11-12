@@ -8,11 +8,14 @@ interface Props {
     changeResources(transport: any, resources: IMaterials[]): void
     previous(): void
     removeMaterials(index: number): void
+    removeTransport(): void
     project: IProject
     edited: boolean
 }
 
-const Resources: React.FC<Props> = ({ changeResources, previous, project, edited, removeMaterials }) => {
+const Resources: React.FC<Props> = ({ changeResources, previous, project, edited, removeMaterials, removeTransport }) => {
+    console.log(project.resources.transport)
+
     const formatReal = (value: any) => {
         var tmp = value + '';
         tmp = tmp.replace(/([0-9]{2})$/g, ",$1");
@@ -56,12 +59,12 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                 <Form.Item
                                     label='Item'
                                 >
-                                    <Input value={material.item} />
+                                    <Input value={material.item} disabled/>
                                 </Form.Item>
                                 <Form.Item
                                     label='Descrição'
                                 >
-                                    <Input value={material.description} />
+                                    <Input value={material.description} disabled/>
                                 </Form.Item>
                                 <Form.Item
                                     label='Quantidade'
@@ -70,7 +73,7 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                         defaultValue={material.quantity}
                                         formatter={value => `${value}`.replace(/\D+/g, '')}
                                         min={1} step={1}
-                                        placeholder="Quantidade" />
+                                        placeholder="Quantidade" disabled/>
                                 </Form.Item>
                                 <Form.Item
                                     label='Preço unitário'
@@ -78,7 +81,7 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                     <InputNumber
                                         defaultValue={material.unitaryValue}
                                         formatter={value => formatReal(value)}
-                                        placeholder="Preço Unitário" />
+                                        placeholder="Preço Unitário" disabled/>
                                 </Form.Item>
                             </Space>
                         </div>
@@ -250,7 +253,7 @@ saúde, impressão de banner, material para impressora
                                             </Space>
                                         ))}
 
-                                        {((fields.length < 1 && project.resources.transport?.typeTransport.length === 0) || (fields.length < 1 && project.resources.transport === null)) && (
+                                        {((fields.length < 1 && project.resources.transport === undefined) || (fields.length < 1 && project.resources.transport === null)) && (
                                             <Form.Item>
                                                 <>
                                                     <Button
@@ -267,17 +270,25 @@ saúde, impressão de banner, material para impressora
                                             </Form.Item>
                                         )}
                                         {
-                                            (project.resources.transport !== null && project.resources.transport.typeTransport.length) > 0 && (
+                                            (project.resources.transport !== null && project.resources.transport !== undefined) && (
                                                 <Space style={{ display: 'flex', marginBottom: 8 }}>
+                                                    <Button
+                                                        type='link'
+                                                        style={{margin: '8px 0', padding: '0'}}
+                                                        onClick={removeTransport}
+                                                    >
+                                                        <MinusCircleOutlined />
+                                                        Remover transporte
+                                                    </Button>
                                                     <Form.Item
                                                         label='Tipo de transporte'
                                                     >
-                                                        <Input defaultValue={project.resources.transport?.typeTransport} />
+                                                        <Input defaultValue={project.resources.transport?.typeTransport} disabled/>
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Descrição'
                                                     >
-                                                        <Input defaultValue={project.resources.transport?.description} />
+                                                        <Input defaultValue={project.resources.transport?.description} disabled/>
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Quantidade'
@@ -285,7 +296,7 @@ saúde, impressão de banner, material para impressora
                                                         <InputNumber
                                                             defaultValue={project.resources.transport?.quantity}
                                                             formatter={value => `${value}`.replace(/\D+/g, '')}
-                                                            placeholder="Preço Unitário" />
+                                                            placeholder="Preço Unitário" disabled/>
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Preço unitário'
@@ -294,7 +305,7 @@ saúde, impressão de banner, material para impressora
                                                             defaultValue={project.resources.transport?.unitaryValue}
                                                             formatter={value => formatReal(value)}
                                                             min={1} step={1}
-                                                            placeholder="Quantidade" />
+                                                            placeholder="Quantidade" disabled/>
                                                     </Form.Item>
                                                 </Space>
                                             )

@@ -114,6 +114,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
     setProject({...project, resources: project.resources})
     // setCurrent(current + 1)
+    console.log(project._id)
+    console.log(project)
+
     if (!edited) {
       await createProject(project)
     } else {
@@ -139,6 +142,11 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   //   console.log(projectData)
   //   setFinish(true)
   // }
+
+  const removeTransport = () => {
+    project.resources.transport = null
+    setProject({ ...project, resources: project.resources })
+  }
 
   const removeStep = (index: number) => {
     project.planning.splice(index, 1)
@@ -267,6 +275,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         removeMaterials={removeMaterials}
         edited={edited} previous={previous}
         changeResources={changeResource}
+        removeTransport={removeTransport}
         project={project} />
     },
     // {

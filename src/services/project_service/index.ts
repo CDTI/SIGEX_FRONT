@@ -41,3 +41,9 @@ export const listApprovedProjects = async(): Promise<GetResponse> => {
 
     return response.data
 }
+
+export const deleteProject = async(projectId: string): Promise<ReturnResponse> => {
+    const response = await api.delete(`/project/${projectId}`)
+
+    return response.data
+}
