@@ -2,19 +2,30 @@ import React from 'react'
 import { ContainerFlex } from '../../../../../../global/styles'
 import { Form, Input, Button, Space, Divider } from 'antd'
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'
-import { IProject } from '../../../../../../interfaces/project'
+import { IPlanning, IProject } from '../../../../../../interfaces/project'
 import { MaskedInput } from 'antd-mask-input'
 
 interface Props {
-    changePlanning(planning: any): void
+    changePlanning(plannings: IPlanning[]): void
     removeStep(index: number): void
+    next(): void
     previous(): void
     project: IProject
+    changeStep(index: number, name: 'developmentSite' | 'developmentMode' | 'startDate' | 'finalDate' | 'text',
+        value: string): void
 }
 
-const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeStep }) => {
+const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeStep, next, changeStep }) => {
     const totalSteps = project.planning.length
-    console.log(totalSteps)
+
+    const handlePlanning = async (event: any) => {
+        if (event.planning !== undefined) {
+            console.log(event.planning)
+            changePlanning(event.planning)
+        } else {
+            changePlanning([])
+        }
+    }
 
     return (
         <ContainerFlex>
@@ -28,43 +39,66 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                         {project.planning.map((p, index) => (
                             <div>
                                 <h2>Etapa {index + 1}</h2>
-                                <Button
-                                    type='link'
-                                    style={{ margin: '8px 0', padding: '0' }}
-                                    onClick={() => {
-                                        removeStep(index)
-                                    }}>
-                                    <MinusCircleOutlined
-                                        className="dynamic-delete-button"
-
-                                    />
-                                        Excluir
+                                {index !== 0 && (
+                                    <Button
+                                        type='link'
+                                        style={{ margin: '8px 0', padding: '0' }}
+                                        onClick={() => {
+                                            removeStep(index);
+                                        }}>
+                                        <MinusCircleOutlined />
+                                                        Excluir
                                     </Button>
-                                <Form.Item label='Etapa'>
-                                    <Input value={p.text} disabled />
-                                </Form.Item>
-                                <Form.Item
-                                    label='Onde será desenvolvida'
-                                >
-                                    <Input value={p.developmentSite} disabled />
-                                </Form.Item>
-                                <Form.Item
-                                    label='Como será desenvolvida (indicar recursos de
+                                )}
+                                <Form layout='vertical'>
+                                    <Form.Item
+                                        label='Etapa'
+                                        name={[index, 'text']}
+                                        rules={[
+                                            { required: true, message: 'Campo Obrigatório' }
+                                        ]}
+                                    >
+                                        <Input defaultValue={p.text} onChange={event => changeStep(index, 'text', event.target.value)} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Onde será desenvolvida'
+                                        rules={[
+                                            { required: true, message: 'Campo Obrigatório' },
+                                        ]}
+                                        name={[index, 'developmentSite']}
+                                    >
+                                        <Input defaultValue={p.developmentSite} onChange={event => changeStep(index, 'developmentSite', event.target.value)} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Como será desenvolvida (indicar recursos de
                                         infraestrutura necessários, tais como laboratório de
                                         informática, laboratório específico, etc.)'
-                                >
-                                    <Input value={p.developmentMode} disabled />
-                                </Form.Item>
-                                <Form.Item
-                                    label='Data de inicío'
-                                >
-                                    <Input value={p.startDate} disabled />
-                                </Form.Item>
-                                <Form.Item
-                                    label='Data de término'
-                                >
-                                    <Input value={p.finalDate} disabled />
-                                </Form.Item>
+                                        rules={[
+                                            { required: true, message: 'Campo Obrigatório' }
+                                        ]}
+                                        name={[index, 'developmentMode']}
+                                    >
+                                        <Input defaultValue={p.developmentMode} onChange={event => changeStep(index, 'developmentMode', event.target.value)} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Data de inicío'
+                                        rules={[
+                                            { required: true, message: 'Campo Obrigatório' }
+                                        ]}
+                                        name={[index, 'startDate']}
+                                    >
+                                        <MaskedInput mask='11/11/1111' defaultValue={p.startDate} onChange={event => changeStep(index, 'startDate', event.target.value)} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Data de término'
+                                        rules={[
+                                            { required: true, message: 'Campo Obrigatório' }
+                                        ]}
+                                        name={[index, 'finalDate']}
+                                    >
+                                        <MaskedInput mask='11/11/1111' defaultValue={p.finalDate} onChange={event => changeStep(index, 'finalDate', event.target.value)} />
+                                    </Form.Item>
+                                </Form>
                                 <Divider style={{ backgroundColor: '#333' }} />
                             </div>
                         ))}
@@ -73,7 +107,7 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                         layout='vertical'
                         style={{ maxWidth: '520px', width: '100%' }}
                         initialValues={project.planning}
-                        onFinish={changePlanning}
+                        onFinish={handlePlanning}
                     >
                         <Form.List name='planning'>
                             {(fields, { add, remove }) => {
@@ -105,7 +139,7 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                                         fieldKey={[field.fieldKey, 'text']}
                                                         rules={[
                                                             { required: true, message: 'Campo obrigatório' },
-                                                            { max: 50, message: 'Número de caracteres ultrapassado' }
+                                                            { max: 200, message: 'Número de caracteres ultrapassado' }
                                                         ]}
                                                     >
                                                         <Input placeholder="Descreva a etapa" />

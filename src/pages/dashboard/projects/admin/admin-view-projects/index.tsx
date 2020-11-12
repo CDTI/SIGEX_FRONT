@@ -114,9 +114,10 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
         const resource = location.state.resources
         let value = 0;
 
-        value += resource.transport.quantity * resource.transport.unitaryValue
+        if (resource.transport !== null)
+            value += resource.transport.quantity * resource.transport.unitaryValue
 
-        resource.materials.map(e => value += e.quantity * e.unitaryValue)
+        resource.materials?.map((e: IMaterials) => value += e.quantity * e.unitaryValue)
         return value
     }
 
@@ -227,7 +228,7 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                 </Panel>
                                 <Panel header='Parcerias' key='2'>
                                     <Collapse accordion>
-                                        {location.state.partnership.map((partner, index) => (
+                                        {location.state.partnership?.map((partner, index) => (
                                             <Panel header={'Parceria ' + (index + 1)} key={index}>
                                                 <Typography>Sobre: {partner.text}</Typography>
                                                 {partner.contacts.map((contact, contactInd) => (
@@ -261,7 +262,9 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                 </Panel>
                                 <Panel header='Recursos' key='5'>
                                     <h2>Materiais</h2>
-                                    <MyTable columns={columnsMaterials} pagination={false} data={location.state.resources.materials} />
+                                    {location.state.resources.materials !== undefined && (
+                                        <MyTable columns={columnsMaterials} pagination={false} data={location.state.resources.materials} />
+                                    )}
                                     <Divider />
                                     <h2>Transportes</h2>
                                     <MyTable columns={columnsTransport} pagination={false} data={[location.state.resources.transport]}></MyTable>

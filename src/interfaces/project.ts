@@ -8,7 +8,7 @@ export interface IProject {
     firstSemester: ILocal[]
     secondSemester: ILocal[]
     totalCH: number
-    partnership: IPartnership[]
+    partnership: IPartnership[] | undefined
     specificCommunity: ISpecificCommunity
     description: string
     planning: IPlanning[]
@@ -46,8 +46,8 @@ export interface IPlanning {
 }
 
 export interface IResource {
-    transport: ITransport
-    materials: IMaterials[]
+    transport: ITransport | null
+    materials: IMaterials[] | undefined
 }
 
 export interface ITransport {

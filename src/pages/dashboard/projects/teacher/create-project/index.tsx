@@ -9,13 +9,14 @@ import SpecificCommunity from './step_3'
 import Planning from './step_4'
 import Resource from './step_5'
 // import Attachment from './step_6'
-import { IPartnership, IProject, ISpecificCommunity } from '../../../../../interfaces/project'
+import { IMaterials, IPartnership, IPlanning, IProject, ISpecificCommunity } from '../../../../../interfaces/project'
 import { newProject } from '../../../../../mocks/mockDefaultValue'
 import { Link, RouteProps } from 'react-router-dom'
 import { useAuth } from '../../../../../context/auth'
 import { createProject, updateProject } from '../../../../../services/project_service'
 import { ILocal } from '../../../../../mocks/mockCalendar'
 import Modal from 'antd/lib/modal/Modal'
+import { AnyAaaaRecord } from 'dns'
 
 const { Step } = Steps
 
@@ -98,32 +99,39 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     setCurrent(current + 1)
   }
 
-  const changePlanning = (planning: any) => {
-    console.log(planning)
-    project.planning.concat(planning.planning)
-    setProject(project)
+  const changePlanning = (plannings: IPlanning[]) => {
+    setProject({ ...project, planning: project.planning.concat(plannings) })
     setCurrent(current + 1)
   }
 
-  const changeResource = async (resource: any) => {
-    console.log(resource)
-    if (resource.transport !== undefined) {
-      project.resources.transport = resource.transport[0]
+  const changeResource = async (transport: any, materials: IMaterials[]) => {
+    if (transport !== undefined) {
+      project.resources.transport = transport
     }
 
-    if (resource.materials !== undefined) {
-      project.resources.materials.concat(resource.materials)
+    if (materials !== undefined) {
+      project.resources.materials = materials
     }
-    setProject(project)
+    setProject({...project, resources: project.resources})
     // setCurrent(current + 1)
     if (!edited) {
       await createProject(project)
-    }else {
+    } else {
       await updateProject(project)
     }
     setFinish(true)
   }
 
+
+  const removeLocal = (index: number, name: 'firstSemester' | 'secondSemester') => {
+    const remove = project[name].splice(index, 1)
+    console.log(remove)
+    if(name === 'firstSemester')
+    setProject({...project, firstSemester: project.firstSemester })
+
+    if(name === 'secondSemester')
+    setProject({...project, secondSemester: project.secondSemester })
+  }
   // const changeAttachment = async (attachment: any) => {
   //   setProject({ ...project, attachments: attachment })
   //   console.log(project)
@@ -139,7 +147,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   }
 
   const removeMaterials = (index: number) => {
-    project.resources.materials.splice(index, 1)
+    project.resources.materials?.splice(index, 1)
     setProject({ ...project, resources: project.resources })
   }
 
@@ -156,30 +164,31 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         if (e.contacts === undefined)
           e.contacts = []
       })
-      const partners = project.partnership.concat(partner)
+      const partners = project.partnership?.concat(partner)
       setProject({ ...project, partnership: partners })
     }
     next()
   }
 
   const changeEditPartner = (event: any, index: number) => {
-    project.partnership[index].text = event.target.value
+    if (project.partnership !== undefined)
+      project.partnership[index].text = event.target.value
     setProject({ ...project, partnership: project.partnership })
   }
 
   const removePartner = (index: number) => {
-    console.log(index)
-    project.partnership.splice(index, 1)
+    if (project.partnership !== undefined)
+      project.partnership.splice(index, 1)
     setProject({ ...project, partnership: project.partnership })
   }
 
   const removeContact = (indexPartner: number, indexContact: number) => {
-    const partner = project.partnership.find((p, index) => index === indexPartner)
-    project.partnership.splice(indexPartner, 1)
+    const partner = project.partnership?.find((p, index) => index === indexPartner)
+    project.partnership?.splice(indexPartner, 1)
     if (partner !== undefined) {
       partner.contacts.splice(indexContact, 1)
 
-      project.partnership.push(partner)
+      project.partnership?.push(partner)
 
       setProject({ ...project, partnership: project.partnership })
     }
@@ -187,8 +196,21 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   const addContact = (index: number) => {
     const newContact = { name: '', phone: '' }
-    project.partnership[index].contacts.push(newContact)
+    if (project.partnership !== undefined)
+      project.partnership[index].contacts.push(newContact)
     setProject({ ...project, partnership: project.partnership })
+  }
+
+  /**
+   * @description Funções relaciondas as etapas
+   */
+
+  const changeStep = (
+    index: number,
+    name: 'developmentSite' | 'developmentMode' | 'startDate' | 'finalDate' | 'text',
+    value: string
+  ) => {
+    project.planning[index][name] = value
   }
 
   const previous = () => {
@@ -206,6 +228,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
       content: <BasicInfo
         changeBasicInfo={changeBasicInfo}
         project={project}
+        removeLocal={removeLocal}
       />
     },
     {
@@ -231,8 +254,10 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     {
       title: 'Planejamento',
       content: <Planning
+        changeStep={changeStep}
         previous={previous}
         removeStep={removeStep}
+        next={next}
         changePlanning={changePlanning}
         project={project} />
     },

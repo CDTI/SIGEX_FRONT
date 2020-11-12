@@ -19,7 +19,7 @@ export interface Props {
 
 const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, removeContact, removePartner, changeEditPartner, addContact }) => {
     const [form] = Form.useForm()
-    const totalPartner = project.partnership.length
+    const totalPartner = project.partnership?.length || 0
 
     const addPartner = (partners: any) => {
         const changepartners = partners.partners as IPartnership[]
@@ -33,7 +33,7 @@ const PartnerShip: React.FC<Props> = ({ changePartner, previous, project, remove
                 <div
                     style={{ width: '100%', maxWidth: '500px' }}
                 >
-                    {project.partnership.map((e, index) => (
+                    {project.partnership?.map((e, index) => (
                         <>
                             <Form key={index}
                                 layout='vertical'

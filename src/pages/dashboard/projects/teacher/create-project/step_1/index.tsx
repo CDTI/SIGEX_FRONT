@@ -5,59 +5,55 @@ import { IBasicInfo } from '..';
 import { IProject } from '../../../../../../interfaces/project';
 import { ICategory } from '../../../../../../interfaces/category';
 import { listCategories } from '../../../../../../services/category_service';
-import { calendar, ICalendar } from '../../../../../../mocks/mockCalendar'
+import { calendar } from '../../../../../../mocks/mockCalendar'
 import { ILocal } from '../../../../../../mocks/mockCalendar'
 import { IPrograms } from '../../../../../../interfaces/programs';
 import { listPrograms } from '../../../../../../services/program_service';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 const { Option } = Select
 const { TextArea } = Input
 
 export interface Props {
    changeBasicInfo(values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]): void;
+   removeLocal(index: number, name: 'firstSemester' | 'secondSemester'): void
    project: IProject
 }
 
-const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
+export interface ICal {
+   _id?: string
+   name: string,
+   turn: string,
+   day: string,
+   checked?: boolean
+}
+
+const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) => {
    const [categories, setCategories] = useState<ICategory[]>([])
-   const [selectedCalendar, setCalendar] = useState<ICalendar | null>(null)
+   const [firstCalendar, setFirstCalendar] = useState<ICal[]>([])
+   const [secondCalendar, setSecondCalendar] = useState<ICal[]>([])
+   const [categoryId, setCategoryId] = useState('')
    const [programs, setPrograms] = useState<IPrograms[] | null>(null)
-   const firstSemester: ILocal[] = []
-   const secondSemester: ILocal[] = []
+   let firstSemester: ICal[] = []
+   const secondSemester: ICal[] = []
 
    useEffect(() => {
       listCategories().then(dataCategories => {
          setCategories(dataCategories)
          listPrograms().then(data => {
             setPrograms(data.programs)
+            setCategoryId(project.categoryId)
             changeCalendar(project.categoryId)
          })
       })
-   }, [project.categoryId])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [])
 
-   const changeCalendar = (id: string) => {
-      const filterCalendar = calendar.find(e => e.categoryId === id)
-      if (filterCalendar !== undefined)
-         setCalendar(filterCalendar)
-   }
-
-   const changeDaysFirst = (e: any) => {
-      firstSemester.push(e.target.value)
-   }
-
-   const changeDaysSecond = (e: any) => {
-      secondSemester.push(e.target.value)
-   }
-
-   const submit = (value: IBasicInfo) => {
-      changeBasicInfo(value, firstSemester, secondSemester)
-   }
-
-   const compareChecked = (local: ILocal) => {
-
-      const filterLocal = project.firstSemester.find(e => e.day === local.day && e.name === local.name)
+   const compareChecked = async (local: ILocal, nameArray: 'firstSemester' | 'secondSemester') => {
+      const filterLocal = project[nameArray].find(e => e.day === local.day && e.name === local.name) as ICal | undefined
       if (filterLocal !== undefined) {
          delete filterLocal._id
+         delete filterLocal.checked
          const compareA = Object.keys(local)
          const compareB = Object.keys(filterLocal)
 
@@ -75,6 +71,97 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
       }
    }
 
+
+   const changeCalendar = async (id: string) => {
+      setCategoryId(id)
+      firstCalendar.splice(1, firstCalendar.length)
+      secondCalendar.splice(1, secondCalendar.length)
+      const filterCalendar = calendar.find(e => e.categoryId === id)
+      if (filterCalendar !== undefined) {
+         const first: ICal[] = []
+         const second: ICal[] = []
+         for await (let e of filterCalendar.local) {
+            const cal = { day: e.day, turn: e.turn, name: e.name, checked: await compareChecked(e, 'firstSemester') }
+            const cal2 = { day: e.day, turn: e.turn, name: e.name, checked: await compareChecked(e, 'secondSemester') }
+            first.push(cal)
+            second.push(cal2)
+         }
+
+         setFirstCalendar(first)
+         setSecondCalendar(second)
+      }
+   }
+
+   const submit = async (value: IBasicInfo) => {
+      const filterFirst = firstCalendar.filter(e => e.checked === true)
+      console.log(firstCalendar)
+      if (filterFirst !== undefined) {
+         for await (let e of filterFirst) {
+            const verify = await compareChecked(e, 'firstSemester')
+            if (!verify)
+               firstSemester.push(e)
+         }
+      }
+
+      const filterSecond = secondCalendar.filter(e => e.checked === true)
+      if (filterSecond !== undefined) {
+         for await (let e of filterSecond) {
+            const verify = await compareChecked(e, 'secondSemester')
+            if (!verify)
+               secondSemester.push(e)
+         }
+      }
+      changeBasicInfo(value, firstSemester, secondSemester)
+   }
+
+   const changeDaysFirst = async (e: CheckboxChangeEvent) => {
+      if (e.target.checked) {
+         const verify = await compareChecked(e.target.value, 'firstSemester')
+         if (!verify)
+            if(firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
+            firstSemester.push(e.target.value)
+      } else {
+         const exist = firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+         if (exist !== -1) {
+            firstSemester.splice(exist, 1)
+         } else {
+            const exist2 = project.firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+            if (exist2 !== -1) {
+               removeLocal(exist2, 'firstSemester')
+               const indexCalendar = firstCalendar.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+               if (indexCalendar !== -1) {
+                  firstCalendar[indexCalendar].checked = false
+                  setFirstCalendar(firstCalendar)
+               }
+            }
+         }
+      }
+   }
+
+   const changeDaysSecond = async(e: CheckboxChangeEvent) => {
+      if (e.target.checked) {
+         const verify = await compareChecked(e.target.value, 'secondSemester')
+         if (!verify)
+            if(secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
+            secondSemester.push(e.target.value)
+      } else {
+         const exist = secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+         if (exist !== -1) {
+            secondSemester.splice(exist, 1)
+         } else {
+            const exist2 = project.secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+            if (exist2 !== -1) {
+               removeLocal(exist2, 'secondSemester')
+               const indexCalendar = secondCalendar.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
+               if (indexCalendar !== -1) {
+                  secondCalendar[indexCalendar].checked = false
+                  setSecondCalendar(secondCalendar)
+               }
+            }
+         }
+      }
+   }
+
    return (
       <ContainerFlex>
          <Form
@@ -88,7 +175,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                name='name'
                rules={[
                   { required: true, message: 'Campo Obrigatório' },
-                  { max: 40, message: 'Número de caracteres excedido' }
+                  { max: 200, message: 'Número de caracteres excedido' }
                ]}
             >
                <Input placeholder="Nome do projeto" />
@@ -130,19 +217,16 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                   ))}
                </Select>
             </Form.Item>
-            <Space>
+            <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                <Form.Item
                   label="Horários disponíveis 1° Semestre"
                   name="firstSemester"
                >
-                  <Checkbox.Group>
-                     {selectedCalendar?.local.map((local, index) => {
-                        return (
-                           <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={true}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                        )
-                     })}
-                  </Checkbox.Group>
-                  {selectedCalendar === null && (
+                  {firstCalendar.map((local, index) => (
+                     <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                  )
+                  )}
+                  {firstCalendar === null && (
                      <Typography>Selecione uma categoria</Typography>
                   )}
                </Form.Item>
@@ -150,14 +234,11 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                   label="Horários disponíveis 2° Semestre"
                   name="secondSemester"
                >
-                  <Checkbox.Group>
-                     {selectedCalendar?.local.map((local, index) => {
-                        return (
-                           <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={true}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                        )
-                     })}
-                  </Checkbox.Group>
-                  {selectedCalendar === null && (
+                  {secondCalendar.map((local, index) => (
+                     <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                  )
+                  )}
+                  {secondCalendar === null && (
                      <Typography>Selecione uma categoria</Typography>
                   )}
                </Form.Item>
@@ -176,7 +257,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project }) => {
                name='description'
                rules={[
                   { required: true, message: 'Campo Obrigatório' },
-                  { max: 300, message: 'Número de caracteres excedido' }
+                  { max: 1000, message: 'Número de caracteres excedido' }
                ]}
             >
                <TextArea placeholder="Descrição do projeto" />

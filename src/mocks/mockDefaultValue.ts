@@ -15,22 +15,8 @@ export const newProject: IProject = {
     programId: '',
     categoryId: '',
     resources: {
-        transport: {
-            description: '',
-            quantity: 0,
-            totalPrice: 0,
-            typeTransport: '',
-            unitaryValue: 0,
-            unity: ''
-        },
-        materials: [{
-            description: '',
-            item: '',
-            quantity: 0,
-            totalPrice: 0,
-            unitaryValue: 0,
-            unity: ''
-        }],
+        transport: null,
+        materials: [],
     },
     results: '',
     specificCommunity: {
