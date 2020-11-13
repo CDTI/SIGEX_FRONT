@@ -15,4 +15,5 @@ export default createGlobalStyle`
     .ant-list-item-action > li{
         font-size: 18px !important;
     }
+
 `;

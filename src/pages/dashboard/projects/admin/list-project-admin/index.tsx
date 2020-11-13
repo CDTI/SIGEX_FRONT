@@ -3,11 +3,15 @@ import Structure from '../../../../../components/layout/structure'
 import { ContainerFlex } from '../../../../../global/styles'
 import { IProject } from '../../../../../interfaces/project'
 import { listAllProject } from '../../../../../services/project_service'
-import { Tag, Space, Button } from 'antd'
+import { Tag, Space, Button, Select } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
 
 import MyTable from '../../../../../components/layout/table'
 import { Link } from 'react-router-dom'
+import { IPrograms } from '../../../../../interfaces/programs'
+import { listPrograms } from '../../../../../services/program_service'
+
+const { Option } = Select
 
 const columns = [
     {
@@ -56,9 +60,9 @@ const columns = [
         render: (text: string, record: IProject) => (
             <Space size="middle">
                 <Button>
-                    <Link to={{ pathname:'/dashboard/project/admin-view', state: record }} >
+                    <Link to={{ pathname: '/dashboard/project/admin-view', state: record }} >
                         <EyeOutlined />
-                        Revisar 
+                        Revisar
                     </Link>
                 </Button>
             </Space>
@@ -68,18 +72,42 @@ const columns = [
 
 const Projects: React.FC = () => {
     const [projects, setProjects] = useState<IProject[]>([])
+    const [filteredProject, setFilteredProjects] = useState<IProject[]>([])
+    const [programs, setPrograms] = useState<IPrograms[]>([])
 
     useEffect(() => {
         listAllProject().then(data => {
-            console.log(data)
             setProjects(data)
+            setFilteredProjects(data)
+            listPrograms().then(listPrograms => {
+                setPrograms(listPrograms.programs)
+            })
         })
     }, [])
 
+    const handleChange = (event: string) => {
+        if (event !== 'null') {
+            const filter = projects.filter(e => e.programId === event)
+            setFilteredProjects(filter)
+        } else {
+            setFilteredProjects(projects)
+        }
+    }
+
     return (
         <Structure title="todas as propostas">
+            <Select defaultValue="null" style={{ width: 200, margin: '8px 0' }} onChange={handleChange}>
+                <Option value='null'>Sem filtro</Option>
+                {programs.map(e => {
+                    if (e._id !== undefined) {
+                        return (
+                            <Option key={e._id} value={e._id}>{e.name}</Option>
+                        )
+                    }
+                })}
+            </Select>
             <ContainerFlex>
-                <MyTable data={projects} columns={columns} />
+                <MyTable data={filteredProject} columns={columns} />
             </ContainerFlex>
         </Structure>
     )

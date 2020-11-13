@@ -20,9 +20,24 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
         var tmp = value + '';
         tmp = tmp.replace(/([0-9]{2})$/g, ",$1");
         if (tmp.length > 6)
-            tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$)/g, ".$1,$2");
-
+            tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
         return tmp;
+    }
+
+    const formatInteger = (value: any) => {
+        let format = value.toString().replace(/\D/g, '')
+        if (format === '0') {
+            format = '1'
+        }
+        return format
+    }
+
+    const editMaterial = (index: number, ev: any,
+        nameEvent: any) => {
+        if (project.resources.materials !== undefined) {
+            const material = project.resources.materials[index] as any
+            material[nameEvent] = ev.target.value
+        }
     }
 
     const handle = async (value: any) => {
@@ -48,47 +63,68 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
     return (
         <ContainerFlex>
             <div>
-                <div>
+                <>
                     {project.resources.materials?.map((material, index) => (
-                        <div>
-                            <Button onClick={() => removeMaterials(index)} type='link' style={{ margin: '8px 0', padding: '0' }}>
-                                <MinusCircleOutlined />
-                                Remover
+                        <ContainerFlex>
+                            <Form
+                                style={{ maxWidth: '720px' }}
+                                layout='vertical'
+                            >
+                                <Button onClick={() => removeMaterials(index)} type='link' style={{ margin: '8px 0', padding: '0' }}>
+                                    <MinusCircleOutlined />
+                                    Remover
                                 </Button>
-                            <Space style={{ display: 'flex', marginBottom: 8 }} align="start">
-                                <Form.Item
-                                    label='Item'
-                                >
-                                    <Input value={material.item} disabled/>
-                                </Form.Item>
-                                <Form.Item
-                                    label='Descrição'
-                                >
-                                    <Input value={material.description} disabled/>
-                                </Form.Item>
-                                <Form.Item
-                                    label='Quantidade'
-                                >
-                                    <InputNumber
-                                        defaultValue={material.quantity}
-                                        formatter={value => `${value}`.replace(/\D+/g, '')}
-                                        min={1} step={1}
-                                        placeholder="Quantidade" disabled/>
-                                </Form.Item>
-                                <Form.Item
-                                    label='Preço unitário'
-                                >
-                                    <InputNumber
-                                        defaultValue={material.unitaryValue}
-                                        formatter={value => formatReal(value)}
-                                        placeholder="Preço Unitário" disabled/>
-                                </Form.Item>
-                            </Space>
-                        </div>
+                                <Space style={{ display: 'flex', marginBottom: 8 }} align="start">
+                                    <Form.Item
+                                        label='Item'
+                                    >
+                                        <Input defaultValue={material.item} onChange={event => editMaterial(index, event, 'item')} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Descrição'
+                                    >
+                                        <Input defaultValue={material.description} onChange={event => editMaterial(index, event, 'description')} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Quantidade'
+                                    >
+                                        <InputNumber
+                                            defaultValue={material.quantity}
+                                            formatter={value => `${value}`.replace(/\D+/g, '')}
+                                            min={0} step={1}
+                                            placeholder="Quantidade" onChange={event => {
+                                                if (event !== undefined) {
+                                                    const value = event.toString()
+                                                    const ev = { target: { value: value } }
+                                                    editMaterial(index, ev, 'quantity')
+                                                }
+                                            }} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label='Preço unitário'
+                                    >
+                                        <InputNumber
+                                            defaultValue={material.unitaryValue}
+                                            min={0}
+                                            formatter={value => formatReal(value)}
+                                            placeholder="Preço Unitário"
+                                            onChange={event => {
+                                                if (event !== undefined) {
+                                                    const value = event.toString()
+                                                    const ev = { target: { value: value } }
+                                                    editMaterial(index, ev, 'unitaryValue')
+                                                }
+                                            }}
+                                        />
+                                    </Form.Item>
+                                </Space>
+                            </Form>
+                        </ContainerFlex>
                     ))}
-                </div>
+                </>
                 <ContainerFlex>
                     <Form
+                        style={{ maxWidth: '720px' }}
                         layout="vertical"
                         onFinish={handle}
                     // initialValues={project.resources}
@@ -136,12 +172,13 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                                         label="Quantidade"
                                                         name={[field.name, 'quantity']}
                                                         fieldKey={[field.fieldKey, 'quantity']}
-                                                        rules={[{ required: true, message: 'Campo Obrigatório' }]}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' }
+                                                        ]}
                                                     >
                                                         <InputNumber
-                                                            defaultValue={0}
-                                                            formatter={value => `${value}`.replace(/\D+/g, '')}
-                                                            min={1} step={1}
+                                                            formatter={value => formatInteger(value)}
+                                                            step={1}
                                                             placeholder="Quantidade" />
                                                     </Form.Item>
                                                     <Form.Item
@@ -149,10 +186,11 @@ const Resources: React.FC<Props> = ({ changeResources, previous, project, edited
                                                         label="Preço Unitário"
                                                         name={[field.name, 'unitaryValue']}
                                                         fieldKey={[field.fieldKey, 'unitaryValue']}
-                                                        rules={[{ required: true, message: 'Campo Obrigatório' }]}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' }
+                                                        ]}
                                                     >
                                                         <InputNumber
-                                                            defaultValue={0}
                                                             formatter={value => formatReal(value)}
                                                             placeholder="Preço Unitário" />
                                                     </Form.Item>
@@ -188,26 +226,35 @@ saúde, impressão de banner, material para impressora
                                 return (
                                     <div>
                                         {fields.map(field => (
-                                            <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
-                                                <Form.Item
-                                                    {...field}
-                                                    label="Tipo de transporte"
-                                                    name={[field.name, 'typeTransport']}
-                                                    fieldKey={[field.fieldKey, 'typeTransport']}
-                                                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
+                                            <>
+                                                <Button
+                                                    onClick={() => remove(field.name)}
+                                                    style={{ margin: '8px 0', padding: '0' }}
+                                                    type='link'
                                                 >
-                                                    <Input placeholder="Ex: Carro, Moto..." />
-                                                </Form.Item>
-                                                <Form.Item
-                                                    {...field}
-                                                    label="Descrição"
-                                                    name={[field.name, 'description']}
-                                                    fieldKey={[field.fieldKey, 'description']}
-                                                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
-                                                >
-                                                    <Input placeholder="Descrição" />
-                                                </Form.Item>
-                                                {/* <Form.Item
+                                                    <MinusCircleOutlined />
+                                                    Remover Transporte
+                                                </Button>
+                                                <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
+                                                    <Form.Item
+                                                        {...field}
+                                                        label="Tipo de transporte"
+                                                        name={[field.name, 'typeTransport']}
+                                                        fieldKey={[field.fieldKey, 'typeTransport']}
+                                                        rules={[{ required: true, message: 'Campo Obrigatório' }]}
+                                                    >
+                                                        <Input placeholder="Ex: Carro, Moto..." />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        {...field}
+                                                        label="Descrição"
+                                                        name={[field.name, 'description']}
+                                                        fieldKey={[field.fieldKey, 'description']}
+                                                        rules={[{ required: true, message: 'Campo Obrigatório' }]}
+                                                    >
+                                                        <Input placeholder="Descrição" />
+                                                    </Form.Item>
+                                                    {/* <Form.Item
                                                 {...field}
                                                 label="Unidade"
                                                 name={[field.name, 'unity']}
@@ -216,41 +263,37 @@ saúde, impressão de banner, material para impressora
                                             >
                                                 <Input placeholder="Unidade" />
                                             </Form.Item> */}
-                                                <Form.Item
-                                                    {...field}
-                                                    label="Quantidade"
-                                                    name={[field.name, 'quantity']}
-                                                    fieldKey={[field.fieldKey, 'quantity']}
-                                                    rules={[
-                                                        { required: true, message: 'Campo Obrigatório' },
-                                                    ]}
-                                                >
-                                                    <InputNumber
-                                                        defaultValue={0}
-                                                        formatter={value => `${value}`.replace(/\D+/g, '')}
-                                                        min={1} step={1}
-                                                        placeholder="Quantidade" />
-                                                </Form.Item>
-                                                <Form.Item
-                                                    {...field}
-                                                    label="Preço Unitário"
-                                                    name={[field.name, 'unitaryValue']}
-                                                    fieldKey={[field.fieldKey, 'unitaryValue']}
-                                                    rules={[
-                                                        { required: true, message: 'Campo Obrigatório' },
-                                                    ]}
-                                                >
-                                                    <InputNumber
-                                                        defaultValue={0}
-                                                        formatter={value => formatReal(value)}
-                                                        placeholder="Preço Unitário" />
-                                                </Form.Item>
-                                                <MinusCircleOutlined
-                                                    onClick={() => {
-                                                        remove(field.name);
-                                                    }}
-                                                />
-                                            </Space>
+                                                    <Form.Item
+                                                        {...field}
+                                                        label="Quantidade"
+                                                        name={[field.name, 'quantity']}
+                                                        fieldKey={[field.fieldKey, 'quantity']}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' },
+                                                        ]}
+                                                    >
+                                                        <InputNumber
+                                                            formatter={value => formatInteger(value)}
+                                                            step={1}
+                                                            style={{ appearance: "textfield" }}
+                                                            placeholder="Quantidade" />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        {...field}
+                                                        label="Preço Unitário"
+                                                        name={[field.name, 'unitaryValue']}
+                                                        fieldKey={[field.fieldKey, 'unitaryValue']}
+                                                        rules={[
+                                                            { required: true, message: 'Campo Obrigatório' }
+                                                        ]}
+                                                    >
+                                                        <InputNumber
+                                                            defaultValue={0}
+                                                            formatter={value => formatReal(value)}
+                                                            placeholder="Preço Unitário" />
+                                                    </Form.Item>
+                                                </Space>
+                                            </>
                                         ))}
 
                                         {((fields.length < 1 && project.resources.transport === undefined) || (fields.length < 1 && project.resources.transport === null)) && (
@@ -274,7 +317,7 @@ saúde, impressão de banner, material para impressora
                                                 <Space style={{ display: 'flex', marginBottom: 8 }}>
                                                     <Button
                                                         type='link'
-                                                        style={{margin: '8px 0', padding: '0'}}
+                                                        style={{ margin: '8px 0', padding: '0' }}
                                                         onClick={removeTransport}
                                                     >
                                                         <MinusCircleOutlined />
@@ -283,12 +326,12 @@ saúde, impressão de banner, material para impressora
                                                     <Form.Item
                                                         label='Tipo de transporte'
                                                     >
-                                                        <Input defaultValue={project.resources.transport?.typeTransport} disabled/>
+                                                        <Input defaultValue={project.resources.transport?.typeTransport} disabled />
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Descrição'
                                                     >
-                                                        <Input defaultValue={project.resources.transport?.description} disabled/>
+                                                        <Input defaultValue={project.resources.transport?.description} disabled />
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Quantidade'
@@ -296,16 +339,16 @@ saúde, impressão de banner, material para impressora
                                                         <InputNumber
                                                             defaultValue={project.resources.transport?.quantity}
                                                             formatter={value => `${value}`.replace(/\D+/g, '')}
-                                                            placeholder="Preço Unitário" disabled/>
+                                                            placeholder="Preço Unitário" disabled />
                                                     </Form.Item>
                                                     <Form.Item
                                                         label='Preço unitário'
                                                     >
-                                                         <InputNumber
+                                                        <InputNumber
                                                             defaultValue={project.resources.transport?.unitaryValue}
                                                             formatter={value => formatReal(value)}
                                                             min={1} step={1}
-                                                            placeholder="Quantidade" disabled/>
+                                                            placeholder="Quantidade" disabled />
                                                     </Form.Item>
                                                 </Space>
                                             )

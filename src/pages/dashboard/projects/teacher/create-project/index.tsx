@@ -16,7 +16,6 @@ import { useAuth } from '../../../../../context/auth'
 import { createProject, updateProject } from '../../../../../services/project_service'
 import { ILocal } from '../../../../../mocks/mockCalendar'
 import Modal from 'antd/lib/modal/Modal'
-import { AnyAaaaRecord } from 'dns'
 
 const { Step } = Steps
 

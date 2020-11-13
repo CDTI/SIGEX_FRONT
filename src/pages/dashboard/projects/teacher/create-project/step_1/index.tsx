@@ -257,7 +257,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
                name='description'
                rules={[
                   { required: true, message: 'Campo Obrigatório' },
-                  { max: 1000, message: 'Número de caracteres excedido' }
+                  { max: 3000, message: 'Número de caracteres excedido' }
                ]}
             >
                <TextArea placeholder="Descrição do projeto" />
