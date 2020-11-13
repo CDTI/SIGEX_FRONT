@@ -88,7 +88,7 @@ const Projects: React.FC = () => {
             setProjects(data)
             setTimeout(() => { setLoading(false) }, 2000)
         })
-    }, [])
+    }, [initialState])
 
     return (
         <Structure title="Meus Projetos">

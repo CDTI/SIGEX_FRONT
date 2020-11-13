@@ -65,7 +65,8 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   useEffect(() => {
     if (!primary && title === 'Criar projeto') {
       setPrimary(false)
-      localStorage.setItem('registerProject', JSON.stringify(project))
+      if (!edited)
+        localStorage.setItem('registerProject', JSON.stringify(project))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project])
@@ -112,15 +113,17 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     if (materials !== undefined) {
       project.resources.materials = materials
     }
-    setProject({...project, resources: project.resources})
+    setProject({ ...project, resources: project.resources })
     // setCurrent(current + 1)
     console.log(project._id)
     console.log(project)
 
     if (!edited) {
       await createProject(project)
+      localStorage.removeItem('registerProject')
     } else {
       await updateProject(project)
+      localStorage.removeItem('registerProject')
     }
     setFinish(true)
   }
@@ -129,11 +132,11 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const removeLocal = (index: number, name: 'firstSemester' | 'secondSemester') => {
     const remove = project[name].splice(index, 1)
     console.log(remove)
-    if(name === 'firstSemester')
-    setProject({...project, firstSemester: project.firstSemester })
+    if (name === 'firstSemester')
+      setProject({ ...project, firstSemester: project.firstSemester })
 
-    if(name === 'secondSemester')
-    setProject({...project, secondSemester: project.secondSemester })
+    if (name === 'secondSemester')
+      setProject({ ...project, secondSemester: project.secondSemester })
   }
   // const changeAttachment = async (attachment: any) => {
   //   setProject({ ...project, attachments: attachment })
