@@ -3,15 +3,42 @@ import Structure from '../../../../../components/layout/structure'
 import { ContainerFlex } from '../../../../../global/styles'
 import { IProject } from '../../../../../interfaces/project'
 import { deleteProject, listProjectForTeacher } from '../../../../../services/project_service'
-import { Tag, Space, Button, Spin, notification } from 'antd'
+import { Tag, Space, Button, Spin, notification, Select } from 'antd'
 
 import MyTable from '../../../../../components/layout/table'
 import { Link } from 'react-router-dom'
+import { IPrograms } from '../../../../../interfaces/programs'
+import { listPrograms } from '../../../../../services/program_service'
+
+const { Option } = Select
 
 const Projects: React.FC = () => {
     const [projects, setProjects] = useState<IProject[]>([])
+    const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
+    const [programs, setPrograms] = useState<IPrograms[]>([])
     const [loading, setLoading] = useState(false)
     const [initialState, setInitialState] = useState(0)
+
+    useEffect(() => {
+        setLoading(true)
+        listProjectForTeacher().then(data => {
+            setProjects(data)
+            setFilteredProjects(data)
+            listPrograms().then(list => {
+                setPrograms(list.programs)
+                setTimeout(() => { setLoading(false) }, 2000)
+            })
+        })
+    }, [initialState])
+
+    const handleChange = (event: string) => {
+        if (event !== 'null') {
+            const filter = projects.filter(e => e.programId === event)
+            setFilteredProjects(filter)
+        } else {
+            setFilteredProjects(projects)
+        }
+    }
 
     const columns = [
         {
@@ -31,7 +58,7 @@ const Projects: React.FC = () => {
             render: (status: string) => {
                 let typeStatus = { color: '', text: '' }
 
-                if (status === 'pending' || status === 'pending') {
+                if (status === 'pending' || status === 'approved') {
                     typeStatus.color = '#f9a03f'
                     typeStatus.text = 'Pendente'
                 } else if (status === 'adjust') {
@@ -81,19 +108,20 @@ const Projects: React.FC = () => {
         },
     ];
 
-    useEffect(() => {
-        setLoading(true)
-        listProjectForTeacher().then(data => {
-            console.log(data)
-            setProjects(data)
-            setTimeout(() => { setLoading(false) }, 2000)
-        })
-    }, [initialState])
-
     return (
         <Structure title="Meus Projetos">
+            <Select defaultValue="null" style={{ width: 200, margin: '8px 0' }} onChange={handleChange}>
+                <Option value='null'>Sem filtro</Option>
+                {programs.map(e => {
+                    if (e._id !== undefined) {
+                        return (
+                            <Option key={e._id} value={e._id}>{e.name}</Option>
+                        )
+                    }
+                })}
+            </Select>
             <ContainerFlex>
-                {loading ? <Spin /> : <MyTable data={projects} columns={columns} />}
+                {loading ? <Spin /> : <MyTable data={filteredProjects} columns={columns} />}
             </ContainerFlex>
         </Structure>
     )

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Structure from '../../../../../components/layout/structure'
 import { ContainerFlex } from '../../../../../global/styles'
 import { IProject } from '../../../../../interfaces/project'
-import { listAllProject } from '../../../../../services/project_service'
+import { downloadCSV, listAllProject } from '../../../../../services/project_service'
 import { Tag, Space, Button, Select } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
 
@@ -10,6 +10,7 @@ import MyTable from '../../../../../components/layout/table'
 import { Link } from 'react-router-dom'
 import { IPrograms } from '../../../../../interfaces/programs'
 import { listPrograms } from '../../../../../services/program_service'
+import { base_url } from '../../../../../services/api'
 
 const { Option } = Select
 
@@ -74,6 +75,7 @@ const Projects: React.FC = () => {
     const [projects, setProjects] = useState<IProject[]>([])
     const [filteredProject, setFilteredProjects] = useState<IProject[]>([])
     const [programs, setPrograms] = useState<IPrograms[]>([])
+    const [event, setEvent] = useState('')
 
     useEffect(() => {
         listAllProject().then(data => {
@@ -86,12 +88,18 @@ const Projects: React.FC = () => {
     }, [])
 
     const handleChange = (event: string) => {
+        setEvent(event)
         if (event !== 'null') {
             const filter = projects.filter(e => e.programId === event)
             setFilteredProjects(filter)
         } else {
             setFilteredProjects(projects)
         }
+    }
+
+    const download = async () => {
+        const teste = await downloadCSV(event)
+        console.log(teste)
     }
 
     return (
@@ -109,6 +117,12 @@ const Projects: React.FC = () => {
             <ContainerFlex>
                 <MyTable data={filteredProject} columns={columns} />
             </ContainerFlex>
+            {event !== 'null' && (
+                <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/').concat(event)}>Baixar projetos</Button>
+            )}
+            {event === 'null' && (
+                <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/')}>Baixar projetos</Button>
+            )}
         </Structure>
     )
 }

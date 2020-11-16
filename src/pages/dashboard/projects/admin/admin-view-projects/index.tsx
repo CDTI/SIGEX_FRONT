@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline } from 'antd'
 import Structure from '../../../../../components/layout/structure'
 import { ContainerFlex } from '../../../../../global/styles'
-import { IMaterials, IProject } from '../../../../../interfaces/project'
+import { IMaterials, IProject, ITransport } from '../../../../../interfaces/project'
 import { compareDate, currentProject } from '../../../../../util'
 import MyTable from '../../../../../components/layout/table'
 import { listCategories } from '../../../../../services/category_service'
@@ -13,6 +13,7 @@ import { ReturnResponse, updateProject } from '../../../../../services/project_s
 import { Link } from 'react-router-dom'
 import { IFeedback } from '../../../../../interfaces/feedback'
 import { createFeedbackProject, listFeedbackProject } from '../../../../../services/feedback_service'
+
 const { Step } = Steps;
 const { Panel } = Collapse
 const { TextArea } = Input
@@ -23,66 +24,6 @@ interface Props {
     }
 }
 
-const columnsMaterials = [
-    {
-        title: 'Nome',
-        dataIndex: 'item',
-        key: 'item'
-    },
-    {
-        title: 'Descrição',
-        dataIndex: 'description',
-        key: 'description'
-    },
-    {
-        title: 'Quantidade',
-        dataIndex: 'quantity',
-        key: 'quantity'
-    },
-    {
-        title: 'Valor Unitário',
-        dataIndex: 'unitaryValue',
-        key: 'unitaryValue'
-    },
-    {
-        title: 'Total',
-        key: 'total',
-        render: (text: string, material: IMaterials) => (
-            <Typography>{material.quantity * material.unitaryValue}</Typography>
-        )
-    }
-]
-
-const columnsTransport = [
-    {
-        title: 'Tipo',
-        dataIndex: 'typeTransport',
-        key: 'typeTransport'
-    },
-    {
-        title: 'Descrição',
-        dataIndex: 'description',
-        key: 'description'
-    },
-    {
-        title: 'Quantidade',
-        dataIndex: 'quantity',
-        key: 'quantity'
-    },
-    {
-        title: 'Valor Unitário',
-        dataIndex: 'unitaryValue',
-        key: 'unitaryValue'
-    },
-    {
-        title: 'Total',
-        key: 'total',
-        render: (text: string, material: IMaterials) => (
-            <Typography>{material.quantity * material.unitaryValue}</Typography>
-        )
-    }
-]
-
 const AdminViewProject: React.FC<Props> = ({ location }) => {
     const [edited, setEdited] = useState<ReturnResponse | null>(null)
     const [feedback, setFeedback] = useState<IFeedback | null>(null)
@@ -91,6 +32,16 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
     const [status, setStatus] = useState(false)
     const [visible, setVisible] = useState(false)
     const [form] = Form.useForm()
+    const [total, setTotal] = useState('')
+
+    const formatReal = (value: any) => {
+        console.log(value)
+        var tmp = value + '';
+        tmp = tmp.replace(/([0-9]{2})$/g, ",$1");
+        if (tmp.length > 6)
+            tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
+        return tmp;
+    }
 
     useEffect(() => {
         listCategories().then(data => {
@@ -104,24 +55,30 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                 listFeedbackProject(location.state._id).then(data => {
                     console.log(data)
                     setFeedback(data.feedback)
+                    const resource = location.state.resources
+                    let value = 0;
+
+                    if (resource.transport !== null && resource.transport !== undefined)
+                        value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()))
+
+                    resource.materials?.map((e: IMaterials) => value += e.quantity * parseInt(formatReal(e.unitaryValue.toString())))
+                    setTotal(formatReal(value))
                 })
             })
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const totalSpending = (): number => {
+    const totalSpending = () => {
         const resource = location.state.resources
         let value = 0;
 
-        if (resource.transport !== null)
-            value += resource.transport.quantity * resource.transport.unitaryValue
+        if (resource.transport !== null && resource.transport !== undefined)
+            value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()))
 
-        resource.materials?.map((e: IMaterials) => value += e.quantity * e.unitaryValue)
-        return value
+        resource.materials?.map((e: IMaterials) => value += e.quantity * parseInt(formatReal(e.unitaryValue.toString())))
+        setTotal(formatReal(value))
     }
-
-    const totalproject = totalSpending()
 
     const changeStatus = async (status: 'approved' | 'reproved' | 'adjust') => {
         location.state.status = status
@@ -182,6 +139,76 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
     }, [form, location.state._id, visible])
 
 
+    const columnsMaterials = [
+        {
+            title: 'Nome',
+            dataIndex: 'item',
+            key: 'item'
+        },
+        {
+            title: 'Descrição',
+            dataIndex: 'description',
+            key: 'description'
+        },
+        {
+            title: 'Quantidade',
+            dataIndex: 'quantity',
+            key: 'quantity'
+        },
+        {
+            title: 'Valor Unitário',
+            dataIndex: 'unitaryValue',
+            key: 'unitaryValue',
+            render: (text: string, transport: ITransport) => (
+                <Typography>{formatReal(transport.unitaryValue)}</Typography>
+            )
+        },
+        {
+            title: 'Total',
+            key: 'total',
+            render: (text: string, material: IMaterials) => (
+                <Typography>{material.quantity * parseInt(formatReal(material.unitaryValue))}</Typography>
+            )
+        }
+    ]
+
+    const columnsTransport = [
+        {
+            title: 'Tipo',
+            dataIndex: 'typeTransport',
+            key: 'typeTransport'
+        },
+        {
+            title: 'Descrição',
+            dataIndex: 'description',
+            key: 'description'
+        },
+        {
+            title: 'Quantidade',
+            dataIndex: 'quantity',
+            key: 'quantity'
+        },
+        {
+            title: 'Valor Unitário',
+            dataIndex: 'unitaryValue',
+            key: 'unitaryValue',
+            render: (text: string, transport: ITransport) => (
+                <Typography>{formatReal(transport.unitaryValue)}</Typography>
+            )
+        },
+        {
+            title: 'Total',
+            key: 'total',
+            render: (text: string, transport: ITransport) => {
+                if (transport !== undefined && transport !== null) {
+                    return (
+                        <Typography>{transport.quantity * parseInt(formatReal(transport.unitaryValue.toString()))}</Typography>
+                    )
+                }
+            }
+        }
+    ]
+
     return (
         <>
             {!status && (
@@ -192,8 +219,8 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                 {location.state.status === 'reproved' && (
                                     <Step title="Reprovado" description="Projeto foi reprovado" />
                                 )}
-                                {location.state.status === 'pending' && (
-                                    <Step title="Em análise" description="Projeto aguardando aprovação." />
+                                {(location.state.status === 'pending' || location.state.status === 'approved') && (
+                                    <Step title="Em análise" description="Projeto em ánalise." />
                                 )}
                                 {location.state.status === 'adjust' && (
                                     <Step title="Correção" description="Projeto aguardando correção" />
@@ -267,10 +294,12 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                     )}
                                     <Divider />
                                     <h2>Transportes</h2>
-                                    <MyTable columns={columnsTransport} pagination={false} data={[location.state.resources.transport]}></MyTable>
+                                    {(location.state.resources.transport !== null && location.state.resources.transport !== undefined) && (
+                                        <MyTable columns={columnsTransport} pagination={false} data={[location.state.resources.transport]}></MyTable>
+                                    )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <Typography style={{ marginLeft: '10px', fontWeight: 'bold', fontSize: '16pt', color: '#b80c09' }}>Valor total do projeto</Typography>
-                                        <Typography style={{ marginRight: '50px', fontWeight: 'bold', fontSize: '16pt', color: '#b80c09' }}>{totalproject}</Typography>
+                                        <Typography style={{ marginRight: '50px', fontWeight: 'bold', fontSize: '16pt', color: '#b80c09' }}>{total}</Typography>
                                     </div>
                                 </Panel>
                             </Collapse>

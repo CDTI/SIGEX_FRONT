@@ -47,3 +47,16 @@ export const deleteProject = async(projectId: string): Promise<ReturnResponse> =
 
     return response.data
 }
+
+export const downloadCSV = async(programId: string): Promise<any> => {
+    if(programId !== 'null'){
+        const response = await api.get('/downloadCsv/'.concat(programId), { responseType: 'blob' })
+        console.log(response.headers)
+        window.open(response.data)
+        return response.data
+    } else {
+        const response = await api.get('/downloadCsv/')
+        window.open(response.data)
+        return response.data
+    }
+}

@@ -4,11 +4,11 @@ import { IProject } from "../interfaces/project";
 export const currentProject = (project: IProject) => {
     let current = -1
 
-    if (project.status === 'pending' || project.status === 'adjust' || project.status === 'reproved')
+    if (project.status === 'pending' || project.status === 'adjust' || project.status === 'reproved' || project.status === 'approved')
         current = 0
-    if (project.status === 'approved')
-        current = 1
     if (project.status === 'selected')
+        current = 1
+    if (project.status === 'finish')
         current = 2
     if (project.status === 'finish')
         current = 3

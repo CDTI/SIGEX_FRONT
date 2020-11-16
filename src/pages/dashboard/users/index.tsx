@@ -57,14 +57,6 @@ const Users: React.FC = () => {
             key: 'cpf'
         },
         {
-            title: 'Cod. Lattes',
-            dataIndex: 'lattes',
-            key: 'lattes',
-            render: (text: any, record: UserInterface) => (
-                <Button target='_blank' href={`http://lattes.cnpq.br/${record.lattes}`} type='link'>{record.lattes}</Button>
-            )
-        },
-        {
             title: 'E-Mail',
             key: 'email',
             render: (text: any, record: UserInterface) => (

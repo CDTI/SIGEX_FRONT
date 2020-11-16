@@ -155,7 +155,7 @@ const LoginPage: React.FC<Props> = () => {
                       { required: true, message: 'Campo Obrigatório' }
                     ]}
                   >
-                    <Input placeholder='Digite o Nome' />
+                    <Input placeholder='Digite o seu Nome' />
                   </Form.Item>
                   <LabelInput>E-Mail</LabelInput>
                   <Form.Item

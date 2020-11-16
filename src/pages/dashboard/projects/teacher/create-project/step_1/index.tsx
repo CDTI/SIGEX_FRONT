@@ -171,7 +171,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
             initialValues={project}
          >
             <Form.Item
-               label='Nome'
+               label='Nome do projeto'
                name='name'
                rules={[
                   { required: true, message: 'Campo Obrigatório' },

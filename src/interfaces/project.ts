@@ -18,7 +18,7 @@ export interface IProject {
     author: string
     dateStart: Date
     dateFinal: Date
-    status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish'
+    status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish' | 'notSelected'
 }
 
 export interface IPartnership {
