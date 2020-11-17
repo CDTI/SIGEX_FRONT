@@ -104,25 +104,33 @@ const Projects: React.FC = () => {
 
     return (
         <Structure title="todas as propostas">
-            <Select defaultValue="null" style={{ width: 200, margin: '8px 0' }} onChange={handleChange}>
-                <Option value='null'>Sem filtro</Option>
-                {programs.map(e => {
-                    if (e._id !== undefined) {
-                        return (
-                            <Option key={e._id} value={e._id}>{e.name}</Option>
-                        )
-                    }
-                })}
-            </Select>
+            <Space>
+                <Select defaultValue="null" style={{ width: 200, margin: '8px 0' }} onChange={handleChange}>
+                    <Option value='null'>Sem filtro</Option>
+                    {programs.map(e => {
+                        if (e._id !== undefined) {
+                            return (
+                                <Option key={e._id} value={e._id}>{e.name}</Option>
+                            )
+                        }
+                    })}
+                </Select>
+                {event !== 'null' && (
+                    <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/').concat(event)}>Baixar projetos</Button>
+                )}
+                {event === 'null' && (
+                    <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/')}>Baixar projetos</Button>
+                )}
+                {event !== 'null' && (
+                    <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCSVHours/').concat(event)}>Baixar horários</Button>
+                )}
+                {event === 'null' && (
+                    <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCSVHours/')}>Baixar horários</Button>
+                )}
+            </Space>
             <ContainerFlex>
                 <MyTable data={filteredProject} columns={columns} />
             </ContainerFlex>
-            {event !== 'null' && (
-                <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/').concat(event)}>Baixar projetos</Button>
-            )}
-            {event === 'null' && (
-                <Button type='link' target='_blank' href={base_url?.concat('extensao/downloadCsv/')}>Baixar projetos</Button>
-            )}
         </Structure>
     )
 }
