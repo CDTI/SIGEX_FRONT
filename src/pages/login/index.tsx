@@ -45,7 +45,7 @@ const LoginPage: React.FC<Props> = () => {
         lattes: userNew.lattes,
         name: userNew.name,
         password: userNew.password,
-        role: 'teacher',
+        role: ['teacher'],
         isActive: true
       }
 

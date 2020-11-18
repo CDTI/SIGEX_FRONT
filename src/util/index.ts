@@ -20,17 +20,17 @@ export const compareDate = (a: IRegister, b: IRegister) => {
     return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
 }
 
-export const typeUser = (role: string) => {
-    let type = ''
+export const typeUser = async (role: string[]) => {
+    let type = []
     
-    if (role === 'teacher')
-        type = 'Professor'
-    if (role === 'admin')
-        type = 'Administrador'
-    if (role === 'ndePresident')
-        type = 'Presidente do NDE'
-    if (role === 'integrationCord')
-        type = 'Coordenador de integração'
+    if (role.includes('teacher'))
+        type.push('Professor')
+    if (role.includes('admin'))
+        type.push('Administrador')
+    if (role.includes('ndePresident'))
+        type.push('Presidente do NDE')
+    if (role.includes('integrationCord'))
+        type.push('Coordenador de integração')
 
     return type
 }

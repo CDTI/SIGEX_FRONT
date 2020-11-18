@@ -92,39 +92,6 @@ const Users: React.FC = () => {
             sortDirections: ['descend'],
         },
         {
-            title: 'Tipo',
-            dataIndex: 'role',
-            render: (text: any, record: UserInterface) => {
-                const roleName = typeUser(record.role)
-                return (
-                    <Typography>{roleName}</Typography>
-                )
-            },
-            filters: [
-                {
-                    text: 'Professor',
-                    value: 'teacher',
-                },
-                {
-                    text: 'Administrador',
-                    value: 'admin',
-                },
-                {
-                    text: 'Presidente do NDE',
-                    value: 'ndePresident',
-                },
-                {
-                    text: 'Coordenador de integração',
-                    value: 'integrationCoord',
-                }
-            ],
-            // specify the condition of filtering result
-            // here is that finding the name started with `value`
-            onFilter: (value: any, record: UserInterface) => record.role.indexOf(value) === 0,
-            // sorter: (a, b) => a.name.length - b.name.length,
-            sortDirections: ['descend'],
-        },
-        {
             title: 'Ação',
             key: 'action',
             render: (text: string, record: UserInterface) => (

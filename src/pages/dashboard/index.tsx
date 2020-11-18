@@ -53,73 +53,62 @@ const Dashboard: React.FC = (props) => {
                     <div className="logo" >
                         <img src={logo} style={{ width: '100%', padding: '15px' }} alt="" />
                     </div>
-                    {context.user?.role === 'admin' && (
-                        <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
-                            <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
-                                <Link to='/dashboard'>
-                                    Home
+                    <Menu theme="dark" defaultSelectedKeys={[location]}>
+                        <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
+                            <Link to='/dashboard'>
+                                Home
                             </Link>
+                        </Menu.Item>
+                        <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
+                            <Menu.Item icon={<UnorderedListOutlined />} key="3">
+                                <Link to="/dashboard/programs">Listar Programas</Link>
                             </Menu.Item>
-                            <Menu.Item icon={<UserOutlined />}>
-                                <Link to="/dashboard/users">
-                                    Usuários
+                            {context.user?.role.includes('admin')}
+                            <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
+                                <Link to="/dashboard/program/create">Criar Programa</Link>
+                            </Menu.Item>
+                        </SubMenu>
+                        {context.user?.role.includes('admin') && (
+                            <>
+                                <Menu.Item icon={<UserOutlined />}>
+                                    <Link to="/dashboard/users">
+                                        Usuários
                                 </Link>
-                            </Menu.Item>
-                            <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
-                                <Menu.Item icon={<UnorderedListOutlined />} key="3">
-                                    <Link to="/dashboard/programs">Listar Programas</Link>
                                 </Menu.Item>
-                                <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
-                                    <Link to="/dashboard/program/create">Criar Programa</Link>
+                                <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
+                                    <Link to="/dashboard/categories">Categorias</Link>
                                 </Menu.Item>
-                            </SubMenu>
-                            <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
-                                <Link to="/dashboard/categories">Categorias</Link>
-                            </Menu.Item>
-                            <SubMenu title='Propostas'>
-                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                    <Link to='/dashboard/projects'>
-                                        Todas as propostas
+                                <SubMenu title='Propostas'>
+                                    <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                        <Link to='/dashboard/projects'>
+                                            Todas as propostas
                                     </Link>
-                                </Menu.Item>
-                                <Menu.Item key="/dashboard/selectProjects" icon={<TeamOutlined />}>
-                                    <Link to='/dashboard/selectProjects'>
-                                        Selecionar projetos
+                                    </Menu.Item>
+                                    <Menu.Item key="/dashboard/selectProjects" icon={<TeamOutlined />}>
+                                        <Link to='/dashboard/selectProjects'>
+                                            Selecionar projetos
                                     </Link>
-                                </Menu.Item>
-                            </SubMenu>
-                            <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
-                                <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
-                                <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
-                            </SubMenu>
-                        </Menu>
-                    )}
-                    {context.user?.role === 'teacher' && (
-                        <Menu theme="dark" defaultSelectedKeys={[location]} mode="inline">
-                            <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
-                                <Link to='/dashboard'>
-                                    Home
-                                </Link>
-                            </Menu.Item>
-                            <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
-                                <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/programs">
-                                    <Link to="/dashboard/programs">Listar Programas</Link>
-                                </Menu.Item>
-                            </SubMenu>
-                            <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
-                                <Menu.Item key="/dashboard/project/create" icon={<TeamOutlined />}>
-                                    <Link to="/dashboard/project/create">Registrar um projeto</Link>
-                                </Menu.Item>
-                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                    <Link to="/dashboard/projects">Meus Projetos</Link>
-                                </Menu.Item>
-                            </SubMenu>
-                            <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes">
-                                <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
-                                <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
-                            </SubMenu>
-                        </Menu>
-                    )}
+                                    </Menu.Item>
+                                </SubMenu>
+                            </>
+                        )}
+                        {context.user?.role.includes('teacher') && (
+                            <>
+                                <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
+                                    <Menu.Item key="/dashboard/project/create" icon={<TeamOutlined />}>
+                                        <Link to="/dashboard/project/create">Registrar um projeto</Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                        <Link to="/dashboard/projects">Meus Projetos</Link>
+                                    </Menu.Item>
+                                </SubMenu>
+                            </>
+                        )}
+                        <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes" disabled>
+                            <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
+                            <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
+                        </SubMenu>
+                    </Menu>
                 </Sider>
                 <Layout className="site-layout">
                     <Header className="site-layout-background" style={{

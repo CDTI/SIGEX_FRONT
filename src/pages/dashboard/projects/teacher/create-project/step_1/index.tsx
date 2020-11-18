@@ -33,6 +33,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
    const [firstCalendar, setFirstCalendar] = useState<ICal[]>([])
    const [secondCalendar, setSecondCalendar] = useState<ICal[]>([])
    const [categoryId, setCategoryId] = useState('')
+   const [category, setCategory] = useState<ICategory | null>(null)
    const [programs, setPrograms] = useState<IPrograms[] | null>(null)
    let firstSemester: ICal[] = []
    const secondSemester: ICal[] = []
@@ -74,6 +75,9 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
 
    const changeCalendar = async (id: string) => {
       setCategoryId(id)
+      const cat = categories.find(e => e._id === id)
+      if(cat !== undefined)
+         setCategory(cat)
       firstCalendar.splice(1, firstCalendar.length)
       secondCalendar.splice(1, secondCalendar.length)
       const filterCalendar = calendar.find(e => e.categoryId === id)

@@ -36,7 +36,6 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) => {
             notification.open({ message: newUser.message })
 
         } else {
-            console.log(userSubmit)
             const userUpdate = await updateUser(userSubmit)
 
             notification.open({ message: userUpdate.message })
@@ -113,7 +112,9 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) => {
                         { required: true, message: 'Campo Obrigatório' }
                     ]}
                 >
-                    <Select placeholder='Seleciona o tipo de usuário'>
+                    <Select placeholder='Seleciona o tipo de usuário'
+                    mode="multiple"
+                    allowClear>
                         <Option value='teacher'>Professor</Option>
                         <Option value='admin'>Administrador</Option>
                         <Option value='ndePresident'>Presidente NDE</Option>

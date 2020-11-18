@@ -17,8 +17,8 @@ const HomeDashboard: React.FC = () => {
     listPrograms().then(data => {
       setPrograms(data.programs)
       listAllProject().then(allProjects => {
-        console.log(allProjects)
         setProject(allProjects)
+        setFilteredProject(allProjects)
       })
     })
   }, [])

@@ -9,10 +9,10 @@ const Projects: React.FC = () => {
   const { user } = useAuth()
   return (
     <>
-      {user?.role === 'teacher' && (
+      {user?.role.includes('teacher') && (
         <ListProjectsTeacher />
       )}
-      {user?.role === 'admin' && (
+      {user?.role.includes('admin') && (
         <ListProjectsAdmin />
       )}
     </>

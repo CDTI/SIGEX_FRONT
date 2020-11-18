@@ -19,36 +19,20 @@ const Programs: React.FC = () => {
 
     return (
         <Structure title="Lista de Programas">
-            {user?.role === 'admin' && (
-                <List
-                    itemLayout="horizontal"
-                    dataSource={programs}
-                    renderItem={item => (
-                        <List.Item
-                        >
+            <List
+                itemLayout="horizontal"
+                dataSource={programs}
+                renderItem={item => (
+                    <List.Item
+                    >
 
-                            <List.Item.Meta
-                                title={<Button type="link">{item.name}</Button>}
-                                description={item.description}
-                            />
-                        </List.Item>
-                    )}
-                />
-            )}
-            {user?.role === 'teacher' && (
-                <List
-                    itemLayout="horizontal"
-                    dataSource={programs}
-                    renderItem={item => (
-                        <List.Item>
-                            <List.Item.Meta
-                                title={<Button type="link"><Link to={{ pathname: '/dashboard/program/details', state: item }}>{item.name}</Link></Button>}
-                                description={item.description}
-                            />
-                        </List.Item>
-                    )}
-                />
-            )}
+                        <List.Item.Meta
+                            title={<Button type="link">{item.name}</Button>}
+                            description={item.description}
+                        />
+                    </List.Item>
+                )}
+            />
         </Structure>
     )
 }
