@@ -19,12 +19,10 @@ const { Panel } = Collapse
 const { TextArea } = Input
 
 interface Props {
-    location: {
-        state: IProject
-    }
+    project: IProject
 }
 
-const AdminViewProject: React.FC<Props> = ({ location }) => {
+const AdminViewProject: React.FC<Props> = ({ project }) => {
     const [edited, setEdited] = useState<ReturnResponse | null>(null)
     const [feedback, setFeedback] = useState<IFeedback | null>(null)
     const [category, setCategory] = useState<ICategory | null>(null)
@@ -45,17 +43,17 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
 
     useEffect(() => {
         listCategories().then(data => {
-            const categorySelected = data.find(cat => cat._id === location.state.categoryId)
+            const categorySelected = data.find(cat => cat._id === project.categoryId)
             if (categorySelected !== undefined)
                 setCategory(categorySelected)
             listPrograms().then(programsData => {
-                const programSelected = programsData.programs.find(e => e._id === location.state.programId)
+                const programSelected = programsData.programs.find(e => e._id === project.programId)
                 if (programSelected !== undefined)
                     setProgram(programSelected)
-                listFeedbackProject(location.state._id).then(data => {
+                listFeedbackProject(project._id).then(data => {
                     console.log(data)
                     setFeedback(data.feedback)
-                    const resource = location.state.resources
+                    const resource = project.resources
                     let value = 0;
 
                     if (resource.transport !== null && resource.transport !== undefined)
@@ -70,7 +68,7 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
     }, [])
 
     const totalSpending = () => {
-        const resource = location.state.resources
+        const resource = project.resources
         let value = 0;
 
         if (resource.transport !== null && resource.transport !== undefined)
@@ -81,9 +79,9 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
     }
 
     const changeStatus = async (status: 'approved' | 'reproved' | 'adjust') => {
-        location.state.status = status
+        project.status = status
 
-        const update = await updateProject(location.state)
+        const update = await updateProject(project)
         console.log(update)
         setStatus(true)
         setEdited({ message: update.message, result: update.result, project: update.project })
@@ -97,7 +95,7 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
         const submitFeedback = async (values: { text: string }) => {
             console.log(values)
             setVisible(false)
-            const registerFeed = await createFeedbackProject(location.state._id, values)
+            const registerFeed = await createFeedbackProject(project._id, values)
             console.log(registerFeed)
         }
 
@@ -136,7 +134,7 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                 </Form>
             </Modal>
         )
-    }, [form, location.state._id, visible])
+    }, [form, project._id, visible])
 
 
     const columnsMaterials = [
@@ -212,20 +210,20 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
     return (
         <>
             {!status && (
-                <Structure title={location.state.name}>
+                <Structure title={project.name}>
                     <ContainerFlex>
                         <div>
-                            <Steps direction="horizontal" current={currentProject(location.state)}>
-                                {location.state.status === 'reproved' && (
+                            <Steps direction="horizontal" current={currentProject(project)}>
+                                {project.status === 'reproved' && (
                                     <Step title="Reprovado" description="Projeto foi reprovado" />
                                 )}
-                                {(location.state.status === 'pending' || location.state.status === 'approved') && (
+                                {(project.status === 'pending' || project.status === 'approved') && (
                                     <Step title="Em análise" description="Projeto em ánalise." />
                                 )}
-                                {location.state.status === 'adjust' && (
+                                {project.status === 'adjust' && (
                                     <Step title="Correção" description="Projeto aguardando correção" />
                                 )}
-                                {location.state.status !== 'reproved' && (
+                                {project.status !== 'reproved' && (
                                     <>
                                         <Step title="Aprovado" description="Projeto aprovado." />
                                         <Step title="Em andamento" description="Projeto em andamento." />
@@ -235,27 +233,27 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                             </Steps>
                             <Collapse accordion style={{ marginTop: '30px' }}>
                                 <Panel header='Informações básicas' key='1'>
-                                    <Typography>Nome: {location.state.name}</Typography>
-                                    <Typography>Descrição: {location.state.description}</Typography>
+                                    <Typography>Nome: {project.name}</Typography>
+                                    <Typography>Descrição: {project.description}</Typography>
                                     <Typography>Categoria: {category?.name}</Typography>
                                     <Typography>Programa: {program?.name}</Typography>
                                     <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários primeiro semestre:</Typography>
                                     <ul style={{ marginLeft: '18px' }}>
-                                        {location.state.firstSemester.map(e => (
+                                        {project.firstSemester.map(e => (
                                             <li>{e.name} - {e.day} - {e.turn}</li>
                                         ))}
                                     </ul>
                                     <Typography style={{ fontWeight: 'bold', marginTop: '9px' }}>Disponibilidades de horários segundo semestre:</Typography>
                                     <ul style={{ marginLeft: '18px' }}>
-                                        {location.state.secondSemester.map(e => (
+                                        {project.secondSemester.map(e => (
                                             <li>{e.name} - {e.day} - {e.turn}</li>
                                         ))}
                                     </ul>
-                                    <Typography>CH disponível: {location.state.totalCH}</Typography>
+                                    <Typography>CH disponível: {project.totalCH}</Typography>
                                 </Panel>
                                 <Panel header='Parcerias' key='2'>
                                     <Collapse accordion>
-                                        {location.state.partnership?.map((partner, index) => (
+                                        {project.partnership?.map((partner, index) => (
                                             <Panel header={'Parceria ' + (index + 1)} key={index}>
                                                 <Typography>Sobre: {partner.text}</Typography>
                                                 {partner.contacts.map((contact, contactInd) => (
@@ -270,13 +268,13 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                     <Typography></Typography>
                                 </Panel>
                                 <Panel header='Comunidade' key='3'>
-                                    <Typography>Sobre: {location.state.specificCommunity.text}</Typography>
-                                    <Typography>Localização: {location.state.specificCommunity.location}</Typography>
-                                    <Typography>Pessoas envolvidas: {location.state.specificCommunity.peopleInvolved}</Typography>
+                                    <Typography>Sobre: {project.specificCommunity.text}</Typography>
+                                    <Typography>Localização: {project.specificCommunity.location}</Typography>
+                                    <Typography>Pessoas envolvidas: {project.specificCommunity.peopleInvolved}</Typography>
                                 </Panel>
                                 <Panel header='Planejamento' key='4'>
                                     <Collapse>
-                                        {location.state.planning.map((planning, planningIdx) => (
+                                        {project.planning.map((planning, planningIdx) => (
                                             <Panel header={'Etapas ' + (planningIdx + 1)} key={planningIdx}>
                                                 <Typography>Sobre: {planning.text}</Typography>
                                                 <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
@@ -289,13 +287,13 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                 </Panel>
                                 <Panel header='Recursos' key='5'>
                                     <h2>Materiais</h2>
-                                    {location.state.resources.materials !== undefined && (
-                                        <MyTable columns={columnsMaterials} pagination={false} data={location.state.resources.materials} />
+                                    {project.resources.materials !== undefined && (
+                                        <MyTable columns={columnsMaterials} pagination={false} data={project.resources.materials} />
                                     )}
                                     <Divider />
                                     <h2>Transportes</h2>
-                                    {(location.state.resources.transport !== null && location.state.resources.transport !== undefined) && (
-                                        <MyTable columns={columnsTransport} pagination={false} data={[location.state.resources.transport]}></MyTable>
+                                    {(project.resources.transport !== null && project.resources.transport !== undefined) && (
+                                        <MyTable columns={columnsTransport} pagination={false} data={[project.resources.transport]}></MyTable>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <Typography style={{ marginLeft: '10px', fontWeight: 'bold', fontSize: '16pt', color: '#b80c09' }}>Valor total do projeto</Typography>
@@ -304,7 +302,7 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                                 </Panel>
                             </Collapse>
                             <Space style={{ marginTop: '25px' }}>
-                                {(location.state.status === 'pending') && (
+                                {(project.status === 'pending') && (
                                     <>
                                         <Button style={{ backgroundColor: '#a31621', color: '#fff' }} onClick={() => changeStatus('reproved')}>Reprovar</Button>
                                         <Button style={{ backgroundColor: '#dbbb04', color: '#fff' }} onClick={openModal}>Solicitar ajuste</Button>
@@ -332,13 +330,6 @@ const AdminViewProject: React.FC<Props> = ({ location }) => {
                         status={edited?.result}
                         title={edited?.message}
                         subTitle={'Projeto editado: ' + edited?.project.name}
-                        extra={[
-                            <Button type="primary" key="/dashboard/projects">
-                                <Link to='/dashboard/projects'>
-                                    Voltar
-                                </Link>
-                            </Button>
-                        ]}
                     />
                 </ContainerFlex>
             )}
