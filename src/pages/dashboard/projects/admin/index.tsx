@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import Structure from '../../../../../components/layout/structure'
-import { ContainerFlex } from '../../../../../global/styles'
-import { IProject } from '../../../../../interfaces/project'
-import { downloadCSV, listAllProject } from '../../../../../services/project_service'
+import Structure from '../../../../components/layout/structure'
+import { ContainerFlex } from '../../../../global/styles'
+import { IProject } from '../../../../interfaces/project'
+import { downloadCSV, listAllProject } from '../../../../services/project_service'
 import { Tag, Space, Button, Select } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
 
-import MyTable from '../../../../../components/layout/table'
+import MyTable from '../../../../components/layout/table'
 import { Link } from 'react-router-dom'
-import { IPrograms } from '../../../../../interfaces/programs'
-import { listPrograms } from '../../../../../services/program_service'
-import { base_url } from '../../../../../services/api'
+import { IPrograms } from '../../../../interfaces/programs'
+import { listPrograms } from '../../../../services/program_service'
+import { base_url } from '../../../../services/api'
 
 const { Option } = Select
 

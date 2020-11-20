@@ -5,6 +5,7 @@ export const newProject: IProject = {
     name: '',
     description: '',
     partnership: [],
+    typeProject: 'common',
     planning: [{
         text: '',
         developmentMode: '',

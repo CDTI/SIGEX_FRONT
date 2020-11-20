@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space } from 'antd'
+import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space, Radio } from 'antd'
 import { ContainerFlex } from '../../../../../../global/styles';
 import { IBasicInfo } from '..';
 import { IProject } from '../../../../../../interfaces/project';
@@ -10,6 +10,7 @@ import { ILocal } from '../../../../../../mocks/mockCalendar'
 import { IPrograms } from '../../../../../../interfaces/programs';
 import { listPrograms } from '../../../../../../services/program_service';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { useAuth } from '../../../../../../context/auth';
 
 const { Option } = Select
 const { TextArea } = Input
@@ -17,6 +18,8 @@ const { TextArea } = Input
 export interface Props {
    changeBasicInfo(values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]): void;
    removeLocal(index: number, name: 'firstSemester' | 'secondSemester'): void
+   specific: boolean,
+   commom: boolean
    project: IProject
 }
 
@@ -28,15 +31,17 @@ export interface ICal {
    checked?: boolean
 }
 
-const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) => {
+const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, specific, commom }) => {
    const [categories, setCategories] = useState<ICategory[]>([])
    const [firstCalendar, setFirstCalendar] = useState<ICal[]>([])
    const [secondCalendar, setSecondCalendar] = useState<ICal[]>([])
    const [categoryId, setCategoryId] = useState('')
    const [category, setCategory] = useState<ICategory | null>(null)
    const [programs, setPrograms] = useState<IPrograms[] | null>(null)
+   const [typeProject, setTypeProject] = useState<'extraCurricular' | 'curricularComponent' | 'common'>('common')
    let firstSemester: ICal[] = []
    const secondSemester: ICal[] = []
+   const { user } = useAuth()
 
    useEffect(() => {
       listCategories().then(dataCategories => {
@@ -76,7 +81,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
    const changeCalendar = async (id: string) => {
       setCategoryId(id)
       const cat = categories.find(e => e._id === id)
-      if(cat !== undefined)
+      if (cat !== undefined)
          setCategory(cat)
       firstCalendar.splice(1, firstCalendar.length)
       secondCalendar.splice(1, secondCalendar.length)
@@ -97,6 +102,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
    }
 
    const submit = async (value: IBasicInfo) => {
+      value.typeProject = typeProject
       const filterFirst = firstCalendar.filter(e => e.checked === true)
       console.log(firstCalendar)
       if (filterFirst !== undefined) {
@@ -122,8 +128,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
       if (e.target.checked) {
          const verify = await compareChecked(e.target.value, 'firstSemester')
          if (!verify)
-            if(firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
-            firstSemester.push(e.target.value)
+            if (firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
+               firstSemester.push(e.target.value)
       } else {
          const exist = firstSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
          if (exist !== -1) {
@@ -142,12 +148,12 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
       }
    }
 
-   const changeDaysSecond = async(e: CheckboxChangeEvent) => {
+   const changeDaysSecond = async (e: CheckboxChangeEvent) => {
       if (e.target.checked) {
          const verify = await compareChecked(e.target.value, 'secondSemester')
          if (!verify)
-            if(secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
-            secondSemester.push(e.target.value)
+            if (secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn) === -1)
+               secondSemester.push(e.target.value)
       } else {
          const exist = secondSemester.findIndex(local => local.day === e.target.value.day && local.name === e.target.value.name && local.turn === e.target.value.turn)
          if (exist !== -1) {
@@ -164,6 +170,12 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
             }
          }
       }
+   }
+
+   const changeTypeProject = (e: any) => {
+      const value = e.target.value as 'extraCurricular' | 'curricularComponent'
+
+      setTypeProject(value)
    }
 
    return (
@@ -214,48 +226,70 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal }) =
                   placeholder='Selecione uma categoria'
                   onChange={changeCalendar}
                >
-                  {categories.map(e => (
-                     <Option key={e._id} value={e._id}>
-                        {e.name}
-                     </Option>
-                  ))}
+                  {categories.map(e => {
+                     if (e.name !== 'Extensão específica do curso' && commom) {
+                        return (
+                           <Option key={e._id} value={e._id}>
+                              {e.name}
+                           </Option>
+                        )
+                     } else {
+                        if (user?.role.includes('ndePresident') && specific) {
+                           return (
+                              <Option key={e._id} value={e._id}>
+                                 {e.name}
+                              </Option>
+                           )
+                        }
+                     }
+                  })}
                </Select>
             </Form.Item>
-            <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-               <Form.Item
-                  label="Horários disponíveis 1° Semestre"
-                  name="firstSemester"
-               >
-                  {firstCalendar.map((local, index) => (
-                     <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                  )
-                  )}
-                  {firstCalendar === null && (
-                     <Typography>Selecione uma categoria</Typography>
-                  )}
-               </Form.Item>
-               <Form.Item
-                  label="Horários disponíveis 2° Semestre"
-                  name="secondSemester"
-               >
-                  {secondCalendar.map((local, index) => (
-                     <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
-                  )
-                  )}
-                  {secondCalendar === null && (
-                     <Typography>Selecione uma categoria</Typography>
-                  )}
-               </Form.Item>
-            </Space>
-            <Form.Item
-               label='Carga horária disponível para a extensão institucional'
-               name='totalCH'
-               rules={[
-                  { required: true, message: 'Campo Obrigatório' }
-               ]}
-            >
-               <InputNumber />
-            </Form.Item>
+            {(category?.name !== 'Extensão específica do curso' && category !== null) && (
+               <>
+                  <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                     <Form.Item
+                        label="Horários disponíveis 1° Semestre"
+                        name="firstSemester"
+                     >
+                        {firstCalendar.map((local, index) => (
+                           <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                        )
+                        )}
+                        {firstCalendar === null && (
+                           <Typography>Selecione uma categoria</Typography>
+                        )}
+                     </Form.Item>
+                     <Form.Item
+                        label="Horários disponíveis 2° Semestre"
+                        name="secondSemester"
+                     >
+                        {secondCalendar.map((local, index) => (
+                           <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>{local.name} - {local.turn} - {local.day}</Checkbox>
+                        )
+                        )}
+                        {secondCalendar === null && (
+                           <Typography>Selecione uma categoria</Typography>
+                        )}
+                     </Form.Item>
+                  </Space>
+                  <Form.Item
+                     label='Carga horária disponível para a extensão institucional'
+                     name='totalCH'
+                     rules={[
+                        { required: true, message: 'Campo Obrigatório' }
+                     ]}
+                  >
+                     <InputNumber />
+                  </Form.Item>
+               </>
+            )}
+            {category?.name === 'Extensão específica do curso' && (
+               <Radio.Group onChange={changeTypeProject}>
+                  <Radio value='curricularComponent'>Componente Curricular</Radio>
+                  <Radio value='extraCurricular'>Extra Curricular</Radio>
+               </Radio.Group>
+            )}
             <Form.Item
                label='Descrição'
                name='description'

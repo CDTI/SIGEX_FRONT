@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Structure from '../../../../../components/layout/structure'
-import { ContainerFlex } from '../../../../../global/styles'
-import { IProject } from '../../../../../interfaces/project'
-import { deleteProject, listProjectForTeacher } from '../../../../../services/project_service'
+import Structure from '../../../../components/layout/structure'
+import { ContainerFlex } from '../../../../global/styles'
+import { IProject } from '../../../../interfaces/project'
+import { deleteProject, listProjectForTeacher } from '../../../../services/project_service'
 import { Tag, Space, Button, Spin, notification, Select } from 'antd'
 
-import MyTable from '../../../../../components/layout/table'
+import MyTable from '../../../../components/layout/table'
 import { Link } from 'react-router-dom'
-import { IPrograms } from '../../../../../interfaces/programs'
-import { listPrograms } from '../../../../../services/program_service'
+import { IPrograms } from '../../../../interfaces/programs'
+import { listPrograms } from '../../../../services/program_service'
 
 const { Option } = Select
 

@@ -9,7 +9,9 @@ import {
     HomeOutlined,
     SettingOutlined,
     DiffOutlined,
-    PoweroffOutlined
+    PoweroffOutlined,
+    FileAddOutlined,
+    FieldTimeOutlined
 } from '@ant-design/icons';
 import { Link, useHistory } from 'react-router-dom'
 import { useAuth } from '../../context/auth';
@@ -63,10 +65,11 @@ const Dashboard: React.FC = (props) => {
                             <Menu.Item icon={<UnorderedListOutlined />} key="3">
                                 <Link to="/dashboard/programs">Listar Programas</Link>
                             </Menu.Item>
-                            {context.user?.role.includes('admin')}
-                            <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
-                                <Link to="/dashboard/program/create">Criar Programa</Link>
-                            </Menu.Item>
+                            {context.user?.role.includes('admin') && (
+                                <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
+                                    <Link to="/dashboard/program/create">Criar Programa</Link>
+                                </Menu.Item>
+                            )}
                         </SubMenu>
                         {context.user?.role.includes('admin') && (
                             <>
@@ -78,7 +81,10 @@ const Dashboard: React.FC = (props) => {
                                 <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
                                     <Link to="/dashboard/categories">Categorias</Link>
                                 </Menu.Item>
-                                <SubMenu title='Propostas'>
+                                <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
+                                    <Link to='/dashboard/periods'>Períodos de Envio</Link>
+                                </Menu.Item>
+                                <SubMenu title='Propostas' icon={<FileTextOutlined />}>
                                     <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
                                         <Link to='/dashboard/projects'>
                                             Todas as propostas
@@ -92,14 +98,14 @@ const Dashboard: React.FC = (props) => {
                                 </SubMenu>
                             </>
                         )}
-                        {context.user?.role.includes('teacher') && (
+                        {(context.user?.role.includes('teacher') || context.user?.role.includes('ndePresident')) && (
                             <>
                                 <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
-                                    <Menu.Item key="/dashboard/project/create" icon={<TeamOutlined />}>
+                                    <Menu.Item key="/dashboard/project/create" icon={<FileAddOutlined />}>
                                         <Link to="/dashboard/project/create">Registrar um projeto</Link>
                                     </Menu.Item>
-                                    <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                        <Link to="/dashboard/projects">Meus Projetos</Link>
+                                    <Menu.Item key="/dashboard/myProjects" icon={<TeamOutlined />}>
+                                        <Link to="/dashboard/myProjects">Meus Projetos</Link>
                                     </Menu.Item>
                                 </SubMenu>
                             </>

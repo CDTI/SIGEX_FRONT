@@ -16,6 +16,7 @@ import { useAuth } from '../../../../../context/auth'
 import { createProject, updateProject } from '../../../../../services/project_service'
 import { ILocal } from '../../../../../mocks/mockCalendar'
 import Modal from 'antd/lib/modal/Modal'
+import { getAllPeriods } from '../../../../../services/registrationPeriod_service'
 
 const { Step } = Steps
 
@@ -27,13 +28,16 @@ export interface IBasicInfo {
   totalCH: number
   programId: string
   categoryId: string
+  typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
 }
 
 interface Props {
+  // Quando for editar um projeto o projeto a ser editado vem no location do RoutePros
   location?: RouteProps['location']
 }
 
 const CreateProject: React.FC<Props> = ({ location }) => {
+  // Verifica se existe um projeto no location.state
   const editProject = location?.state as IProject | undefined
   const [current, setCurrent] = useState(0)
   const [project, setProject] = useState<IProject>(newProject)
@@ -42,22 +46,39 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const [primary, setPrimary] = useState(true)
   const [title, setTitle] = useState('Criar projeto')
   const [edited, setEdited] = useState(false)
+  const [commom, setCommom] = useState(true)
+  const [specific, setSpecific] = useState(true)
   const { user } = useAuth()
 
   useEffect(() => {
-    if (primary && editProject === undefined) {
-      const loadProject = localStorage.getItem('registerProject')
-      if (loadProject !== null) {
-        setVisible(true)
-      } else {
-        setPrimary(false)
+    // Verifica se os periodos estão ativos
+    getAllPeriods().then(periods => {
+      console.log(periods)
+      for (let period of periods) {
+        if (period.typePeriod === 'common') {
+          setCommom(period.isActive)
+        } else if (period.typePeriod === 'specific') {
+          setSpecific(period.isActive)
+        }
       }
-    } else if (editProject !== undefined) {
-      setTitle('Editar projeto')
-      setProject(editProject)
-      setEdited(true)
-      setPrimary(false)
-    }
+
+      if (user !== null) {
+        if (primary && editProject === undefined) {
+          const loadProject = localStorage.getItem('registerProject')
+          if (loadProject !== null) {
+            setVisible(true)
+          } else {
+            setPrimary(false)
+          }
+        } else if (editProject !== undefined) {
+          setTitle('Editar projeto')
+          setProject(editProject)
+          setEdited(true)
+          setPrimary(false)
+        }
+      }
+
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primary])
 
@@ -84,12 +105,13 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
   }
 
+  // Recebe as informções da 1° Etapa do cadastro e mando para o estado "project"
   const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject })
     }
     setCurrent(current + 1)
   }
@@ -137,25 +159,21 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     if (name === 'secondSemester')
       setProject({ ...project, secondSemester: project.secondSemester })
   }
-  // const changeAttachment = async (attachment: any) => {
-  //   setProject({ ...project, attachments: attachment })
-  //   console.log(project)
-  //   const projectData = await createProject(project)
-  //   console.log(projectData)
-  //   setFinish(true)
-  // }
 
+  // Função para remover o transporte do projeto
   const removeTransport = () => {
     project.resources.transport = null
     setProject({ ...project, resources: project.resources })
   }
 
+  // Função para remover 1 etapa do planejamento
   const removeStep = (index: number) => {
     project.planning.splice(index, 1)
 
     setProject({ ...project, planning: project.planning })
   }
 
+  // Função para remover 1 material dos recursos
   const removeMaterials = (index: number) => {
     project.resources.materials?.splice(index, 1)
     setProject({ ...project, resources: project.resources })
@@ -168,6 +186,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
    * @description Funcções relacionadas a parceria
    */
 
+  // Adicionar um array de parceiros se ele for diferente de undefinde
   const changePartner = (partner: IPartnership[] | undefined) => {
     if (partner !== undefined) {
       partner.map(e => {
@@ -180,18 +199,21 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     next()
   }
 
+  // Edita um parceiro
   const changeEditPartner = (event: any, index: number) => {
     if (project.partnership !== undefined)
       project.partnership[index].text = event.target.value
     setProject({ ...project, partnership: project.partnership })
   }
 
+  // Remove um parceiro
   const removePartner = (index: number) => {
     if (project.partnership !== undefined)
       project.partnership.splice(index, 1)
     setProject({ ...project, partnership: project.partnership })
   }
 
+  // Remove um cotato dos parceiros
   const removeContact = (indexPartner: number, indexContact: number) => {
     const partner = project.partnership?.find((p, index) => index === indexPartner)
     project.partnership?.splice(indexPartner, 1)
@@ -204,6 +226,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
   }
 
+  // Adiciona um contato ao parceiro
   const addContact = (index: number) => {
     const newContact = { name: '', phone: '' }
     if (project.partnership !== undefined)
@@ -215,6 +238,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
    * @description Funções relaciondas as etapas
    */
 
+  // Edita um campo da etapa[index] do planejamento
+  // O Campo a ser editado é enviado como parametro "name" para a função
+  // O valor a ser adicionado é enviado como parametro "value" para a função 
   const changeStep = (
     index: number,
     name: 'developmentSite' | 'developmentMode' | 'startDate' | 'finalDate' | 'text',
@@ -223,19 +249,23 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     project.planning[index][name] = value
   }
 
+  // Chama a etapa anterior
   const previous = () => {
     setCurrent(current - 1)
   }
 
+  // Chama a próxima etapa
   const next = () => {
     setCurrent(current + 1)
   }
 
-  // Steps
+  // Aqui estão os componentes de todas as etapas
   const steps = [
     {
       title: 'Informações Básicas',
       content: <BasicInfo
+        specific={specific}
+        commom={commom}
         changeBasicInfo={changeBasicInfo}
         project={project}
         removeLocal={removeLocal}
@@ -288,36 +318,50 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   return (
     <>
-      <Modal
-        visible={visible}
-        title='Existe um cadastro em andamento, deseja carregar?'
-        footer={[]}
-      >
-        <Space>
-          <Button type='primary' style={{ backgroundColor: '#a31621' }} onClick={() => changeLoadProject('no')}>Não</Button>
-          <Button type='primary' style={{ backgroundColor: '#439A86' }} onClick={() => changeLoadProject('yes')}>Sim</Button>
-        </Space>
-      </Modal>
-      {(!finish && !primary) && (
-        <Structure title={title}>
-          <Steps current={current}>
-            {steps.map(item => (
-              <Step key={item.title} title={item.title} />
-            ))}
-          </Steps>
-          <div className="steps-content">{steps[current].content}</div>
-        </Structure>
+      {(commom || specific) && (
+        <>
+          <Modal
+            visible={visible}
+            title='Existe um cadastro em andamento, deseja carregar?'
+            footer={[]}
+          >
+            <Space>
+              <Button type='primary' style={{ backgroundColor: '#a31621' }} onClick={() => changeLoadProject('no')}>Não</Button>
+              <Button type='primary' style={{ backgroundColor: '#439A86' }} onClick={() => changeLoadProject('yes')}>Sim</Button>
+            </Space>
+          </Modal>
+          {(!finish && !primary) && (
+            <Structure title={title}>
+              <Steps current={current}>
+                {steps.map(item => (
+                  <Step key={item.title} title={item.title} />
+                ))}
+              </Steps>
+              <div className="steps-content">{steps[current].content}</div>
+            </Structure>
+          )}
+          {finish && (
+            <Result
+              status="success"
+              title="Seu projeto foi registrado com sucesso"
+              subTitle="Você pode acompanha os seus projetos no menu 'Meus Projetos'."
+              extra={[
+                <Button type="primary" key="console">
+                  <Link to="/dashboard">Voltar</Link>
+                </Button>,
+              ]}
+            />
+          )}
+        </>
       )}
-      {finish && (
+      {(!commom && !specific) && (
         <Result
-          status="success"
-          title="Seu projeto foi registrado com sucesso"
-          subTitle="Você pode acompanha os seus projetos no menu 'Meus Projetos'."
-          extra={[
-            <Button type="primary" key="console">
-              <Link to="/dashboard">Voltar</Link>
-            </Button>,
-          ]}
+          status="403"
+          title="403"
+          subTitle="Desculpe, parece que o periodo de cadastro não esta ativo!"
+          extra={<Button type="primary">
+            <Link to='/dashboard' key='/dashboard'>Voltar</Link>
+          </Button>}
         />
       )}
     </>
