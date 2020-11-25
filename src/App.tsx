@@ -8,6 +8,7 @@ import { AuthProvider } from './context/auth'
 function App() {
   return (
     <div className="App">
+      <span> Teste </span>
       <GlobalStyled />
       <AuthProvider>
         <Routes />
