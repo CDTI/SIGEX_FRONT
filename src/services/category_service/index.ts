@@ -25,8 +25,14 @@ export const listCategories = async(): Promise<ICategory[]> => {
     return response.data.categories
 }
 
-export const deleteCategory = async(id: string): Promise<ReturnRequest> => {
-    const response = await api.delete(`/category/${id}`)
+export const listCategoriesDashboard = async(): Promise<ICategory[]> => {
+    const response = await api.get('/categoryDashboard')
+
+    return response.data.categories
+}
+
+export const changeStatusCategory = async(id: string): Promise<ReturnRequest> => {
+    const response = await api.put(`/changeStatusCategory/${id}`)
 
     return response.data as ReturnRequest
 }
