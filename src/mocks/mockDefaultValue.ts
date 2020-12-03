@@ -15,6 +15,7 @@ export const newProject: IProject = {
     }],
     programId: '',
     categoryId: '',
+    periodRegistrarionId: '',
     resources: {
         transport: null,
         materials: [],

@@ -20,7 +20,6 @@ import logo from '../../sigex.png'
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
-
 const Dashboard: React.FC = (props) => {
     const history = useHistory()
     const [collapsed, setcollapsed] = useState(false)
@@ -82,7 +81,7 @@ const Dashboard: React.FC = (props) => {
                                     <Link to="/dashboard/categories">Categorias</Link>
                                 </Menu.Item>
                                 <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
-                                    <Link to='/dashboard/periods'>Períodos de Envio</Link>
+                                    <Link to='/dashboard/periods'>Editais</Link>
                                 </Menu.Item>
                                 <SubMenu title='Propostas' icon={<FileTextOutlined />}>
                                     <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>

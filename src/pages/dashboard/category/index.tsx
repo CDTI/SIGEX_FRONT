@@ -1,15 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  List,
-  Typography,
-  notification,
-  Popconfirm,
-  Modal,
-  Space,
-} from "antd";
+import { Form, Input, Button, List, Typography, notification, Modal, Space, Switch } from "antd";
 import { ICategory } from "../../../interfaces/category";
 import {
   createCategory,
@@ -18,11 +8,7 @@ import {
   listCategoriesDashboard,
 } from "../../../services/category_service";
 import Structure from "../../../components/layout/structure";
-import {
-  EditOutlined,
-  EyeOutlined,
-  EyeInvisibleOutlined,
-} from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 
 interface State {
   visible: boolean;
@@ -86,12 +72,7 @@ const CreateCategory: React.FC = () => {
 
   const modal = useMemo(
     () => (
-      <Modal
-        visible={state.visible}
-        onCancel={onCancel}
-        title="Editar categoria"
-        footer={[]}
-      >
+      <Modal visible={state.visible} onCancel={onCancel} title="Editar categoria" footer={[]}>
         <Form onFinish={submitEdit} form={formModal}>
           <Form.Item name="_id">
             <Input style={{ display: "none" }} />
@@ -119,17 +100,8 @@ const CreateCategory: React.FC = () => {
   return (
     <Structure title="Categoria">
       {modal}
-      <Form
-        form={form}
-        onFinish={submitCategory}
-        layout="vertical"
-        style={{ maxWidth: "500px", width: "100%" }}
-      >
-        <Form.Item
-          name="name"
-          label="Nome da categoria"
-          rules={[{ required: true, message: "Campo Obrigatório" }]}
-        >
+      <Form form={form} onFinish={submitCategory} layout="vertical" style={{ maxWidth: "500px", width: "100%" }}>
+        <Form.Item name="name" label="Nome da categoria" rules={[{ required: true, message: "Campo Obrigatório" }]}>
           <Input placeholder="Insira o nome da categoria" />
         </Form.Item>
         <Form.Item>
@@ -145,47 +117,11 @@ const CreateCategory: React.FC = () => {
         renderItem={(item) => (
           <List.Item
             actions={[
-              <Button
-                style={{ color: "#333" }}
-                onClick={() => changeEdit(item)}
-              >
+              <Switch onChange={(event) => changeStatus(item._id)} defaultChecked={!item.isDeleted} />,
+              <Button style={{ color: "#333" }} onClick={() => changeEdit(item)}>
                 Editar
                 <EditOutlined />
               </Button>,
-              <>
-                {item.isDeleted && (
-                  <Popconfirm
-                    title="Deseja ativar esta categoria?"
-                    onConfirm={() => changeStatus(item._id)}
-                    onCancel={() => {
-                      notification.info({ message: "Ação cancelada" });
-                    }}
-                    okText="Sim"
-                    cancelText="Não"
-                  >
-                    <Button style={{ color: "#5bc0de", width: "120px" }}>
-                      Ativar
-                      <EyeOutlined />
-                    </Button>
-                  </Popconfirm>
-                )}
-                {!item.isDeleted && (
-                  <Popconfirm
-                    title="Deseja desativar esta categoria?"
-                    onConfirm={() => changeStatus(item._id)}
-                    onCancel={() => {
-                      notification.info({ message: "Ação cancelada" });
-                    }}
-                    okText="Sim"
-                    cancelText="Não"
-                  >
-                    <Button style={{ color: "#bb2124", width: "120px" }}>
-                      Desativar
-                      <EyeInvisibleOutlined />
-                    </Button>
-                  </Popconfirm>
-                )}
-              </>,
             ]}
           >
             <Typography>{item.name}</Typography>

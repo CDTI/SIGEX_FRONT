@@ -16,7 +16,7 @@ import { useAuth } from '../../../../../context/auth'
 import { createProject, updateProject } from '../../../../../services/project_service'
 import { ILocal } from '../../../../../mocks/mockCalendar'
 import Modal from 'antd/lib/modal/Modal'
-import { getAllPeriods } from '../../../../../services/registrationPeriod_service'
+import { getAllPeriodsActive } from '../../../../../services/registrationPeriod_service'
 
 const { Step } = Steps
 
@@ -28,6 +28,7 @@ export interface IBasicInfo {
   totalCH: number
   programId: string
   categoryId: string
+  periodRegistrarionId: string
   typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
 }
 
@@ -46,13 +47,13 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const [primary, setPrimary] = useState(true)
   const [title, setTitle] = useState('Criar projeto')
   const [edited, setEdited] = useState(false)
-  const [commom, setCommom] = useState(true)
-  const [specific, setSpecific] = useState(true)
+  const [commom, setCommom] = useState(false)
+  const [specific, setSpecific] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
     // Verifica se os periodos estão ativos
-    getAllPeriods().then(periods => {
+    getAllPeriodsActive().then(periods => {
       console.log(periods)
       for (let period of periods) {
         if (period.typePeriod === 'common') {
@@ -109,9 +110,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrarionId })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrarionId })
     }
     setCurrent(current + 1)
   }
@@ -186,7 +187,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
    * @description Funcções relacionadas a parceria
    */
 
-  // Adicionar um array de parceiros se ele for diferente de undefinde
+  // Adicionar um array de parceiros se ele for diferente de undefined
   const changePartner = (partner: IPartnership[] | undefined) => {
     if (partner !== undefined) {
       partner.map(e => {
@@ -199,21 +200,21 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     next()
   }
 
-  // Edita um parceiro
+  // Editar um parceiro
   const changeEditPartner = (event: any, index: number) => {
     if (project.partnership !== undefined)
       project.partnership[index].text = event.target.value
     setProject({ ...project, partnership: project.partnership })
   }
 
-  // Remove um parceiro
+  // Remover um parceiro
   const removePartner = (index: number) => {
     if (project.partnership !== undefined)
       project.partnership.splice(index, 1)
     setProject({ ...project, partnership: project.partnership })
   }
 
-  // Remove um cotato dos parceiros
+  // Remover um contato dos parceiros
   const removeContact = (indexPartner: number, indexContact: number) => {
     const partner = project.partnership?.find((p, index) => index === indexPartner)
     project.partnership?.splice(indexPartner, 1)
@@ -226,7 +227,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     }
   }
 
-  // Adiciona um contato ao parceiro
+  // Adicionar um contato ao parceiro
   const addContact = (index: number) => {
     const newContact = { name: '', phone: '' }
     if (project.partnership !== undefined)
@@ -344,7 +345,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
             <Result
               status="success"
               title="Seu projeto foi registrado com sucesso"
-              subTitle="Você pode acompanha os seus projetos no menu 'Meus Projetos'."
+              subTitle="Você pode acompanhar os seus projetos no menu 'Meus Projetos'."
               extra={[
                 <Button type="primary" key="console">
                   <Link to="/dashboard">Voltar</Link>

@@ -5,6 +5,7 @@ export interface IProject {
     name: string
     programId: string
     categoryId: string
+    periodRegistrarionId: string
     typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
     firstSemester: ILocal[]
     secondSemester: ILocal[]
