@@ -28,7 +28,7 @@ export interface IBasicInfo {
   totalCH: number
   programId: string
   categoryId: string
-  periodRegistrarionId: string
+  periodRegistrationId: string
   typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
 }
 
@@ -84,6 +84,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   }, [primary])
 
   useEffect(() => {
+    console.log(project)
     if (!primary && title === 'Criar projeto') {
       setPrimary(false)
       if (!edited)
@@ -110,9 +111,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrarionId })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrarionId })
+      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
     }
     setCurrent(current + 1)
   }

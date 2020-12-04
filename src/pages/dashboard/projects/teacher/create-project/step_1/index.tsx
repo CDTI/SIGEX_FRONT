@@ -221,7 +221,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       <Form onFinish={submit} layout="vertical" style={{ width: "100%", maxWidth: "700px" }} initialValues={project}>
         <Form.Item
           label="Edital"
-          name="registrationPeriodId"
+          name="periodRegistrationId"
           rules={[{ required: true, message: "Campo Obrigatório" }]}
         >
           <Select placeholder="Selecione um edital">
