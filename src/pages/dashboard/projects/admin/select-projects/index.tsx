@@ -18,7 +18,7 @@ const columns = [
     {
         title: 'Data de início',
         dataIndex: 'dateStart',
-        key: 'dateStart',
+        key: 'dateStart'
     },
     {
         title: 'Status',
