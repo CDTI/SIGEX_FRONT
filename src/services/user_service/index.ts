@@ -37,3 +37,9 @@ export const checkUser = async(user: any): Promise<boolean> => {
 
     return response.data
 }
+
+export const resetPassword = async(user: any): Promise<ResponseUser> => {
+    const response = await api.put(`resetPassword/${user.cpf}`)
+
+    return response.data
+}
