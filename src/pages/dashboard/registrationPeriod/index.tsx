@@ -7,15 +7,21 @@ import {
   changeStatusRegistrationPeriod,
   updatePeriod,
 } from "../../../services/registrationPeriod_service";
-import { Button, Form, Input, List, Modal, notification, Space, Switch, Typography } from "antd";
+import { Button, Form, Input, List, Modal, notification, Select, Space, Switch, Typography } from "antd";
 import { EditOutlined } from "@ant-design/icons";
+import { ICategory } from "../../../interfaces/category";
+import { listCategoriesDashboard } from "../../../services/category_service";
+
+const { Option } = Select;
 
 interface State {
   visible: boolean;
   period: IRegistrationPeriod | undefined;
+  category?: ICategory | undefined;
 }
 
 const RegistrationPeriod: React.FC = () => {
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [periods, setPeriods] = useState<IRegistrationPeriod[]>([]);
   const [form] = Form.useForm();
   const [initialState, setInitialState] = useState(0);
@@ -23,11 +29,15 @@ const RegistrationPeriod: React.FC = () => {
   const [state, setState] = useState<State>({
     visible: false,
     period: undefined,
+    category: undefined
   });
 
   useEffect(() => {
-    getAllPeriods().then((allPeriods) => {
+    getAllPeriods().then((allPeriods) => {  
       setPeriods(allPeriods);
+    });
+    listCategoriesDashboard().then((loadCategories) => {
+      setCategories(loadCategories);
     });
   }, [initialState]);
 
@@ -61,6 +71,7 @@ const RegistrationPeriod: React.FC = () => {
     notification[periodEdit.status]({ message: periodEdit.message });
     setState({ visible: false, period: undefined });
     setInitialState(initialState + 1);
+    console.log(item);
   };
 
   const onCancel = () => {
@@ -71,12 +82,33 @@ const RegistrationPeriod: React.FC = () => {
   const modal = useMemo(
     () => (
       <Modal visible={state.visible} onCancel={onCancel} title="Editar categoria" footer={[]}>
-        <Form onFinish={submitEdit} form={formModal}>
+        <Form onFinish={submitEdit} form={formModal} layout="vertical">
           <Form.Item name="_id">
             <Input style={{ display: "none" }} />
           </Form.Item>
           <Form.Item name="name" label="Nome">
             <Input />
+          </Form.Item>
+          <Form.Item name="roles" label="Usuários que podem acessar o edital" rules={[{ required: true, message: "Campo Obrigatório" }]}>            
+            <Select placeholder="Selecione o tipo de usuário" mode="multiple" allowClear>
+              <Option value="teacher">Professor</Option>
+              <Option value="admin">Administrador</Option>
+              <Option value="ndePresident">Presidente NDE</Option>
+              <Option value="integrationCoord">Coordenador de integração</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="categories" label="Categorias do Edital" rules={[{ required: true, message: "Campo Obrigatório" }]}>            
+            <Select placeholder="Selecione a categoria" mode="multiple" allowClear>
+              {categories?.map((e) => {
+                if (e._id !== undefined) {
+                  return (
+                    <Option key={e._id} value={e._id}>
+                      {e.name}
+                    </Option>
+                  );
+                }
+              })}
+            </Select>
           </Form.Item>
           <Form.Item>
             <Space>
@@ -115,7 +147,7 @@ const RegistrationPeriod: React.FC = () => {
         renderItem={(item) => (
           <List.Item
             actions={[
-              <Switch onChange={(event) => changeStatus(item._id)} defaultChecked={item.isActive} />,
+              <Switch onChange={() => changeStatus(item._id)} defaultChecked={item.isActive} />,
               <Button style={{ color: "#333" }} onClick={() => changeEdit(item)}>
                 Editar
                 <EditOutlined />

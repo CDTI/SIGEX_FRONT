@@ -4,7 +4,7 @@ import { ContainerFlex } from "../../../../../../global/styles";
 import { IBasicInfo } from "..";
 import { IProject } from "../../../../../../interfaces/project";
 import { ICategory } from "../../../../../../interfaces/category";
-import { listCategories } from "../../../../../../services/category_service";
+import { listCategories, listCategoriesByPeriod } from "../../../../../../services/category_service";
 import { calendar } from "../../../../../../mocks/mockCalendar";
 import { ILocal } from "../../../../../../mocks/mockCalendar";
 import { IPrograms } from "../../../../../../interfaces/programs";
@@ -45,20 +45,17 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   let firstSemester: ICal[] = [];
   const secondSemester: ICal[] = [];
   const { user } = useAuth();
+  const [form] = Form.useForm()
 
   useEffect(() => {
-    getAllPeriodsActive().then((dataPeriods) => {
+    getAllPeriodsActive(user?._id).then((dataPeriods) => {
       setPeriods(dataPeriods);
-      listCategories().then((dataCategories) => {
-        setCategories(dataCategories);
         listPrograms().then((data) => {
           setPrograms(data.programs);
           setCategoryId(project.categoryId);
           changeCalendar(project.categoryId);
         });
-      });
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const compareChecked = async (local: ILocal, nameArray: "firstSemester" | "secondSemester") => {
@@ -216,6 +213,13 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     setTypeProject(value);
   };
 
+  const changePeriod = async (id: any) => {
+    listCategoriesByPeriod(id).then((categories) => {
+      setCategories(categories);
+      form.resetFields();
+    });
+  };
+
   return (
     <ContainerFlex>
       <Form onFinish={submit} layout="vertical" style={{ width: "100%", maxWidth: "700px" }} initialValues={project}>
@@ -224,7 +228,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
           name="periodRegistrationId"
           rules={[{ required: true, message: "Campo Obrigatório" }]}
         >
-          <Select placeholder="Selecione um edital">
+          <Select onChange={(id) => changePeriod(id)} placeholder="Selecione um edital">
             {periods?.map((e) => {
               if (e._id !== undefined) {
                 return (
@@ -262,21 +266,21 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         <Form.Item label="Categoria" name="categoryId" rules={[{ required: true, message: "Campo Obrigatório" }]}>
           <Select placeholder="Selecione uma categoria" onChange={changeCalendar}>
             {categories.map((e) => {
-              if (e.name !== "Extensão específica do curso" && commom) {
+              // if (e.name !== "Extensão específica do curso" && commom) {
                 return (
                   <Option key={e._id} value={e._id}>
                     {e.name}
                   </Option>
                 );
-              } else {
-                if (user?.role.includes("ndePresident") && specific) {
-                  return (
-                    <Option key={e._id} value={e._id}>
-                      {e.name}
-                    </Option>
-                  );
-                }
-              }
+              // } else {
+              //   if (user?.role.includes("ndePresident") && specific) {
+                  // return (
+                  //   <Option key={e._id} value={e._id}>
+                  //     {e.name}
+                  //   </Option>
+                  // );
+                // }
+              // }
             })}
           </Select>
         </Form.Item>

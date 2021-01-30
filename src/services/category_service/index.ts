@@ -25,6 +25,12 @@ export const listCategories = async (): Promise<ICategory[]> => {
   return response.data.categories;
 };
 
+export const listCategoriesByPeriod = async (id: string): Promise<ICategory[]> => {
+  const response = await api.get(`/categoryByPeriod/${id}`);
+
+  return response.data.categories;
+};
+
 export const listCategoriesDashboard = async (): Promise<ICategory[]> => {
   const response = await api.get("/categoryDashboard");
 

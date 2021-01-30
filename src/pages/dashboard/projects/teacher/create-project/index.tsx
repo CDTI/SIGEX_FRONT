@@ -53,8 +53,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   useEffect(() => {
     // Verifica se os periodos estão ativos
-    getAllPeriodsActive().then(periods => {
-      console.log(periods)
+    getAllPeriodsActive(user?._id).then(periods => {
       for (let period of periods) {
         if (period.typePeriod === 'common') {
           setCommom(period.isActive)

@@ -15,8 +15,8 @@ export const getAllPeriods = async (): Promise<IRegistrationPeriod[]> => {
   return response.data;
 };
 
-export const getAllPeriodsActive = async (): Promise<IRegistrationPeriod[]> => {
-  const response = await api.get("registrationPeriodActive");
+export const getAllPeriodsActive = async (id?: string): Promise<IRegistrationPeriod[]> => {
+  const response = await api.get(`registrationPeriodActive/${id}`);
 
   return response.data;
 };
