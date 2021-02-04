@@ -9,7 +9,7 @@ import SpecificCommunity from './step_3'
 import Planning from './step_4'
 import Resource from './step_5'
 // import Attachment from './step_6'
-import { IMaterials, IPartnership, IPlanning, IProject, ISpecificCommunity } from '../../../../../interfaces/project'
+import { IDiscipline, IMaterials, IPartnership, IPlanning, IProject, ISpecificCommunity, ITeacher } from '../../../../../interfaces/project'
 import { newProject } from '../../../../../mocks/mockDefaultValue'
 import { Link, RouteProps } from 'react-router-dom'
 import { useAuth } from '../../../../../context/auth'
@@ -30,6 +30,8 @@ export interface IBasicInfo {
   categoryId: string
   periodRegistrationId: string
   typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
+  disciplines : IDiscipline[]
+  teachers : ITeacher[]
 }
 
 interface Props {
@@ -97,7 +99,6 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     setPrimary(false)
     if (loadProject !== null && option === 'yes') {
       const loaded = JSON.parse(loadProject) as IProject
-      console.log(loaded)
       setProject(loaded)
       setVisible(false)
     } else if (option === 'no') {
@@ -110,9 +111,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
     const date = new Date()
     if (user !== null) {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
+      setProject({ ...project, teachers: values.teachers, disciplines: values.disciplines, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, author: user.cpf, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
     } else {
-      setProject({ ...project, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
+      setProject({ ...project, teachers: values.teachers, disciplines: values.disciplines, name: values.name, description: values.description, firstSemester: firstSemester, secondSemester: secondSemester, programId: values.programId, dateStart: date, dateFinal: date, status: 'pending', categoryId: values.categoryId, totalCH: values.totalCH, typeProject: values.typeProject, periodRegistrarionId: values.periodRegistrationId })
     }
     setCurrent(current + 1)
   }
@@ -138,7 +139,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     setProject({ ...project, resources: project.resources })
     // setCurrent(current + 1)
     console.log(project._id)
-    console.log(project)
+    // console.log(project)
 
     if (!edited) {
       await createProject(project)
@@ -229,9 +230,8 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   // Adicionar um contato ao parceiro
   const addContact = (index: number) => {
-    const newContact = { name: '', phone: '' }
     if (project.partnership !== undefined)
-      project.partnership[index].contacts.push(newContact)
+      project.partnership[index].contacts.push({ name: '', phone: '' })
     setProject({ ...project, partnership: project.partnership })
   }
 

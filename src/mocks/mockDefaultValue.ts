@@ -33,7 +33,9 @@ export const newProject: IProject = {
     author: '',
     dateStart: new Date(),
     dateFinal: new Date(),
-    status: 'pending'
+    status: 'pending',
+    disciplines : [],
+    teachers: []
 }
 
 export const newTransport: ITransport = {

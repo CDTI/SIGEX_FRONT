@@ -21,11 +21,25 @@ export interface IProject {
     dateStart: Date
     dateFinal: Date
     status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish' | 'notSelected'
+    disciplines: IDiscipline[]
+    teachers : ITeacher[]
 }
 
 export interface IPartnership {
     text: string
     contacts: IContact[]
+}
+
+export interface ITeacher {
+    name: string
+    registration: string
+    cpf: string
+    email: string
+    phone: string
+    totalCH: number | undefined
+}
+export interface IDiscipline {
+    name: string
 }
 
 export interface IContact {

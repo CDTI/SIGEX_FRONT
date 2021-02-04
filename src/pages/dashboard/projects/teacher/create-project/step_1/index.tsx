@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space, Radio } from "antd";
+import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space, Radio, Divider } from "antd";
 import { ContainerFlex } from "../../../../../../global/styles";
 import { IBasicInfo } from "..";
 import { IProject } from "../../../../../../interfaces/project";
 import { ICategory } from "../../../../../../interfaces/category";
-import { listCategories, listCategoriesByPeriod } from "../../../../../../services/category_service";
+import { listCategoriesByPeriod } from "../../../../../../services/category_service";
 import { calendar } from "../../../../../../mocks/mockCalendar";
 import { ILocal } from "../../../../../../mocks/mockCalendar";
 import { IPrograms } from "../../../../../../interfaces/programs";
@@ -13,6 +13,8 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useAuth } from "../../../../../../context/auth";
 import { IRegistrationPeriod } from "../../../../../../interfaces/registrationPeriod";
 import { getAllPeriodsActive } from "../../../../../../services/registrationPeriod_service";
+import DynamicDisciplinesFieldStep1 from "./dynamicDisciplinesFieldStep1";
+import DynamicTechersFieldStep1 from "./dynamicTechersFieldStep1";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -45,16 +47,16 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   let firstSemester: ICal[] = [];
   const secondSemester: ICal[] = [];
   const { user } = useAuth();
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
 
   useEffect(() => {
     getAllPeriodsActive(user?._id).then((dataPeriods) => {
       setPeriods(dataPeriods);
-        listPrograms().then((data) => {
-          setPrograms(data.programs);
-          setCategoryId(project.categoryId);
-          changeCalendar(project.categoryId);
-        });
+      listPrograms().then((data) => {
+        setPrograms(data.programs);
+        setCategoryId(project.categoryId);
+        changeCalendar(project.categoryId);
+      });
     });
   }, []);
 
@@ -72,7 +74,6 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         return false;
       } else {
         const diff = compareA.some((key, index) => compareA[index] === compareB[index]);
-        console.log(diff);
         return diff;
       }
     } else {
@@ -84,6 +85,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     setCategoryId(id);
     const cat = categories.find((e) => e._id === id);
     if (cat !== undefined) setCategory(cat);
+    if (cat?.name !== "Extensão específica do curso") setTypeProject("common");
     firstCalendar.splice(1, firstCalendar.length);
     secondCalendar.splice(1, secondCalendar.length);
     const filterCalendar = calendar.find((e) => e.categoryId === id);
@@ -105,7 +107,6 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const submit = async (value: IBasicInfo) => {
     value.typeProject = typeProject;
     const filterFirst = firstCalendar.filter((e) => e.checked === true);
-    console.log(firstCalendar);
     if (filterFirst !== undefined) {
       for await (let e of filterFirst) {
         const verify = await compareChecked(e, "firstSemester");
@@ -209,20 +210,27 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
 
   const changeTypeProject = (e: any) => {
     const value = e.target.value as "extraCurricular" | "curricularComponent";
-
     setTypeProject(value);
   };
 
   const changePeriod = async (id: any) => {
+    setFirstCalendar([]);
+    setSecondCalendar([]);
+    setTypeProject("common");
     listCategoriesByPeriod(id).then((categories) => {
       setCategories(categories);
-      form.resetFields();
     });
   };
 
   return (
     <ContainerFlex>
-      <Form onFinish={submit} layout="vertical" style={{ width: "100%", maxWidth: "700px" }} initialValues={project}>
+      <Form
+        form={form}
+        onFinish={submit}
+        layout="vertical"
+        style={{ width: "100%", maxWidth: "700px" }}
+        initialValues={project}
+      >
         <Form.Item
           label="Edital"
           name="periodRegistrationId"
@@ -263,62 +271,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
             })}
           </Select>
         </Form.Item>
-        <Form.Item label="Categoria" name="categoryId" rules={[{ required: true, message: "Campo Obrigatório" }]}>
-          <Select placeholder="Selecione uma categoria" onChange={changeCalendar}>
-            {categories.map((e) => {
-              // if (e.name !== "Extensão específica do curso" && commom) {
-                return (
-                  <Option key={e._id} value={e._id}>
-                    {e.name}
-                  </Option>
-                );
-              // } else {
-              //   if (user?.role.includes("ndePresident") && specific) {
-                  // return (
-                  //   <Option key={e._id} value={e._id}>
-                  //     {e.name}
-                  //   </Option>
-                  // );
-                // }
-              // }
-            })}
-          </Select>
-        </Form.Item>
-        {category?.name !== "Extensão específica do curso" && category !== null && (
-          <>
-            <Space style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Form.Item label="Horários disponíveis 1° Semestre" name="firstSemester">
-                {firstCalendar.map((local, index) => (
-                  <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>
-                    {local.name} - {local.turn} - {local.day}
-                  </Checkbox>
-                ))}
-                {firstCalendar === null && <Typography>Selecione uma categoria</Typography>}
-              </Form.Item>
-              <Form.Item label="Horários disponíveis 2° Semestre" name="secondSemester">
-                {secondCalendar.map((local, index) => (
-                  <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>
-                    {local.name} - {local.turn} - {local.day}
-                  </Checkbox>
-                ))}
-                {secondCalendar === null && <Typography>Selecione uma categoria</Typography>}
-              </Form.Item>
-            </Space>
-            <Form.Item
-              label="Carga horária disponível para a extensão institucional"
-              name="totalCH"
-              rules={[{ required: true, message: "Campo Obrigatório" }]}
-            >
-              <InputNumber />
-            </Form.Item>
-          </>
-        )}
-        {category?.name === "Extensão específica do curso" && (
-          <Radio.Group onChange={changeTypeProject}>
-            <Radio value="curricularComponent">Componente Curricular</Radio>
-            <Radio value="extraCurricular">Extra Curricular</Radio>
-          </Radio.Group>
-        )}
+
         <Form.Item
           label="Descrição"
           name="description"
@@ -329,15 +282,79 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         >
           <TextArea placeholder="Descrição do projeto" />
         </Form.Item>
-        {/* <Form.Item
-               label="Resultado"
-               name="results"
-               rules={[
-                  { required: true, message: 'Campo Obrigatório' }
-               ]}
+        <Form.Item label="Categoria" name="categoryId" rules={[{ required: true, message: "Campo Obrigatório" }]}>
+          <Select placeholder="Selecione uma categoria" onChange={changeCalendar}>
+            {categories.map((e) => {
+              return (
+                <Option key={e._id} value={e._id}>
+                  {e.name}
+                </Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+        {category?.name !== "Extensão específica do curso" && category !== null && (
+          <>
+            <Space style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              {firstCalendar.length > 0 && (
+                <Form.Item label="Horários disponíveis 1° Semestre" name="firstSemester">
+                  {firstCalendar.map((local, index) => (
+                    <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>
+                      {local.name} - {local.turn} - {local.day}
+                    </Checkbox>
+                  ))}
+                  {firstCalendar === null && <Typography>Selecione uma categoria</Typography>}
+                </Form.Item>
+              )}
+              {secondCalendar.length > 0 && (
+                <Form.Item label="Horários disponíveis 2° Semestre" name="secondSemester">
+                  {secondCalendar.map((local, index) => (
+                    <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>
+                      {local.name} - {local.turn} - {local.day}
+                    </Checkbox>
+                  ))}
+                  {secondCalendar === null && <Typography>Selecione uma categoria</Typography>}
+                </Form.Item>
+              )}
+            </Space>
+            {secondCalendar.length > 0 && (
+              <Form.Item
+                label="Carga horária disponível para a extensão institucional"
+                name="totalCH"
+                rules={[{ required: true, message: "Campo Obrigatório" }]}
+              >
+                <InputNumber />
+              </Form.Item>
+            )}
+          </>
+        )}
+        {category?.name === "Extensão específica do curso" && (
+          <>
+            <Divider style={{ backgroundColor: "#333" }} />
+            <Form.Item
+              label="Tipo de Projeto"
+              name="typeProject"
+              rules={[{ required: true, message: "Campo Obrigatório" }]}
             >
-               <TextArea placeholder="Digite aqui qual será a entrega final para a comunidade?" />
-            </Form.Item> */}
+              <Radio.Group onChange={changeTypeProject}>
+                <Radio value="curricularComponent">Componente Curricular</Radio>
+                <Radio value="extraCurricular">Extra Curricular</Radio>
+              </Radio.Group>
+            </Form.Item>
+          </>
+        )}
+        {typeProject === "curricularComponent" && (
+          <>
+            <DynamicDisciplinesFieldStep1 />
+            <DynamicTechersFieldStep1 typeProject={typeProject} />
+            <Divider style={{ backgroundColor: "#333" }} />
+          </>
+        )}
+        {typeProject === "extraCurricular" && (
+          <>
+            <DynamicTechersFieldStep1 typeProject={typeProject} />
+          </>
+        )}
         <Form.Item>
           <Button htmlType="submit" type="primary">
             Próximo
