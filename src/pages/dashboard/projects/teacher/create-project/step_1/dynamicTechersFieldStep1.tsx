@@ -33,7 +33,7 @@ const DynamicTechersFieldStep1: React.FC<Props> = ({ typeProject }) => {
                     {...field}
                     name={[field.name, "name"]}
                     label="Nome"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Campo Obrigatório"  }]}
                     fieldKey={[field.fieldKey, "name"]}
                   >
                     <Input placeholder="Professor" />
@@ -42,7 +42,7 @@ const DynamicTechersFieldStep1: React.FC<Props> = ({ typeProject }) => {
                     {...field}
                     name={[field.name, "registration"]}
                     label="Matrícula"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Campo Obrigatório"  }]}
                     fieldKey={[field.fieldKey, "registration"]}
                   >
                     <Input placeholder="Matrícula" />
@@ -51,7 +51,7 @@ const DynamicTechersFieldStep1: React.FC<Props> = ({ typeProject }) => {
                     {...field}
                     name={[field.name, "cpf"]}
                     label="CPF"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Campo Obrigatório"  }]}
                     fieldKey={[field.fieldKey, "cpf"]}
                   >
                     <InputMask placeholder="CPF" mask="111.111.111-11" />
@@ -63,7 +63,7 @@ const DynamicTechersFieldStep1: React.FC<Props> = ({ typeProject }) => {
                     {...field}
                     name={[field.name, "email"]}
                     label="E-mail"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Campo Obrigatório"  }]}
                     fieldKey={[field.fieldKey, "email"]}
                   >
                     <Input placeholder="E-mail" />
@@ -72,17 +72,17 @@ const DynamicTechersFieldStep1: React.FC<Props> = ({ typeProject }) => {
                     {...field}
                     name={[field.name, "phone"]}
                     label="Telefone"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "Campo Obrigatório"  }]}
                     fieldKey={[field.fieldKey, "phone"]}
                   >
-                    <InputMask placeholder="CPF" mask="(11) 1111-1111" />
+                    <InputMask placeholder="Telefone" mask="(11) 1111-1111" />
                   </Form.Item>
                   {typeProject === "extraCurricular" && (
                     <Form.Item
                       {...field}
                       name={[field.name, "totalCH"]}
                       label="Carga horária fora de sala"
-                      rules={[{ required: true }]}
+                      rules={[{ required: true, message: "Campo Obrigatório"  }]}
                       fieldKey={[field.fieldKey, "totalCH"]}
                     >
                       <Input placeholder="Carga horária" />

@@ -6,13 +6,7 @@ export const newProject: IProject = {
     description: '',
     partnership: [],
     typeProject: 'common',
-    planning: [{
-        text: '',
-        developmentMode: '',
-        developmentSite: '',
-        finalDate: '',
-        startDate: ''
-    }],
+    planning: [],
     programId: '',
     categoryId: '',
     periodRegistrarionId: '',

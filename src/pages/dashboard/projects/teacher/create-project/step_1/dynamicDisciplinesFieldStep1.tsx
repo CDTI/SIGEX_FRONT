@@ -26,7 +26,7 @@ function DynamicDisciplinesFieldStep1() {
                   {...field}
                   name={[field.name, "name"]}
                   label="Nome da disciplina"
-                  rules={[{ required: true }]}
+                  rules={[{ required: true , message: "Campo Obrigatório" }]}
                   fieldKey={[field.fieldKey, 'name']}
                 >
                   <Input placeholder="Disciplina" />

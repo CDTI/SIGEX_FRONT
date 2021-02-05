@@ -274,7 +274,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
                                 </Panel>
                                 <Panel header='Planejamento' key='4'>
                                     <Collapse>
-                                        {project.planning.map((planning, planningIdx) => (
+                                        {project.planning?.map((planning, planningIdx) => (
                                             <Panel header={'Etapas ' + (planningIdx + 1)} key={planningIdx}>
                                                 <Typography>Sobre: {planning.text}</Typography>
                                                 <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>

@@ -104,7 +104,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     } else if (option === 'no') {
       localStorage.removeItem('registerProject')
       setVisible(false)
-    }
+    } 
   }
 
   // Recebe as informções da 1° Etapa do cadastro e mando para o estado "project"
@@ -143,11 +143,13 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
     if (!edited) {
       await createProject(project)
-      localStorage.removeItem('registerProject')
     } else {
       await updateProject(project)
-      localStorage.removeItem('registerProject')
     }
+    project.resources.materials = undefined;
+    project.resources.transport = null;
+    project.planning = [];
+    localStorage.removeItem('registerProject')
     setFinish(true)
   }
 
