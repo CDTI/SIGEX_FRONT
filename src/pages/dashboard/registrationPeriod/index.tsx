@@ -10,7 +10,7 @@ import {
 import { Button, Form, Input, List, Modal, notification, Select, Space, Switch, Typography } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import { ICategory } from "../../../interfaces/category";
-import { listCategoriesDashboard } from "../../../services/category_service";
+import { listCategoriesByPeriod, listCategoriesDashboard } from "../../../services/category_service";
 
 const { Option } = Select;
 
@@ -29,11 +29,11 @@ const RegistrationPeriod: React.FC = () => {
   const [state, setState] = useState<State>({
     visible: false,
     period: undefined,
-    category: undefined
+    category: undefined,
   });
 
   useEffect(() => {
-    getAllPeriods().then((allPeriods) => {  
+    getAllPeriods().then((allPeriods) => {
       setPeriods(allPeriods);
     });
     listCategoriesDashboard().then((loadCategories) => {
@@ -60,9 +60,11 @@ const RegistrationPeriod: React.FC = () => {
   };
 
   const changeEdit = (period: IRegistrationPeriod) => {
-    formModal.setFieldsValue(period);
-    setState({ visible: true, period: period });
-    console.log(state.period);
+    listCategoriesByPeriod(period._id).then((categories) => {
+      setCategories(categories);
+      formModal.setFieldsValue(period);
+      setState({ visible: true, period: period });
+    });
   };
 
   const submitEdit = async (item: any) => {
@@ -89,7 +91,11 @@ const RegistrationPeriod: React.FC = () => {
           <Form.Item name="name" label="Nome">
             <Input />
           </Form.Item>
-          <Form.Item name="roles" label="Usuários que podem acessar o edital" rules={[{ required: true, message: "Campo Obrigatório" }]}>            
+          <Form.Item
+            name="roles"
+            label="Usuários que podem acessar o edital"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
             <Select placeholder="Selecione o tipo de usuário" mode="multiple" allowClear>
               <Option value="teacher">Professor</Option>
               <Option value="admin">Administrador</Option>
@@ -97,7 +103,11 @@ const RegistrationPeriod: React.FC = () => {
               <Option value="integrationCoord">Coordenador de integração</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="categories" label="Categorias do Edital" rules={[{ required: true, message: "Campo Obrigatório" }]}>            
+          <Form.Item
+            name="categories"
+            label="Categorias do Edital"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
             <Select placeholder="Selecione a categoria" mode="multiple" allowClear>
               {categories?.map((e) => {
                 if (e._id !== undefined) {

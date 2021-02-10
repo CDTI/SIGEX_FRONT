@@ -8,19 +8,21 @@ import { EyeOutlined } from "@ant-design/icons";
 import AdminViewProject from "../admin/admin-view-projects";
 
 import MyTable from "../../../../components/layout/table";
-import { Link } from "react-router-dom";
 import { IPrograms } from "../../../../interfaces/programs";
 import { listPrograms } from "../../../../services/program_service";
 import { base_url } from "../../../../services/api";
 import { newProject } from "../../../../mocks/mockDefaultValue";
 import { IRegistrationPeriod } from "../../../../interfaces/registrationPeriod";
 import { getAllPeriods } from "../../../../services/registrationPeriod_service";
+import { ICategory } from "../../../../interfaces/category";
+import { listCategoriesDashboard } from "../../../../services/category_service";
 
 const { Option } = Select;
 
 interface IModal {
   project: IProject;
   visible: boolean;
+  category: ICategory | undefined;
 }
 interface State {
   period?: string;
@@ -30,17 +32,23 @@ interface State {
 const Projects: React.FC = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [filteredProject, setFilteredProjects] = useState<IProject[]>([]);
+  const [category, setCategory] = useState<ICategory>();
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [periods, setPeriods] = useState<IRegistrationPeriod[]>([]);
   const [program, setProgram] = useState("");
   const [period, setPeriod] = useState("");
-  const [modal, setModal] = useState<IModal>({ visible: false, project: newProject });
+  const [modal, setModal] = useState<IModal>({ visible: false, project: newProject, category: undefined });
   const [state, setState] = useState<State>({
     period: "null",
     program: "null",
   });
+  const [initialState, setInitialState] = useState(0);
 
   useEffect(() => {
+    listCategoriesDashboard().then((data) => {
+      setCategories(data);
+    });
     listAllProject().then((data) => {
       setProjects(data);
       setFilteredProjects(data);
@@ -81,11 +89,13 @@ const Projects: React.FC = () => {
   };
 
   const openModal = (project: IProject) => {
-    setModal({ visible: true, project: project });
+    setInitialState(initialState + 1);
+    setCategory(categories.find((c) => c._id === project.categoryId));
+    setModal({ visible: true, project: project, category: category });
   };
 
   const closeModal = () => {
-    setModal({ visible: false, project: newProject });
+    setModal({ visible: false, project: newProject, category: undefined });
   };
 
   const columns = [
@@ -196,7 +206,7 @@ const Projects: React.FC = () => {
       </ContainerFlex>
       <Modal visible={modal.visible} onCancel={closeModal} footer={[]} width="90%" style={{ minHeight: "90%" }}>
         <>
-          <AdminViewProject project={modal.project} />
+          <AdminViewProject project={modal.project} key={initialState}/>
           <Space style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
             <p></p>
             <Button onClick={closeModal} type="primary">
