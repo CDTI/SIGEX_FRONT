@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Select, Checkbox, Typography, InputNumber, Space, Radio, Divider } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  Checkbox,
+  Typography,
+  InputNumber,
+  Space,
+  Radio,
+  Divider,
+  notification,
+} from "antd";
 import { ContainerFlex } from "../../../../../../global/styles";
 import { IBasicInfo } from "..";
 import { IProject } from "../../../../../../interfaces/project";
@@ -56,6 +68,10 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         setPrograms(data.programs);
         setCategoryId(project.categoryId);
         changeCalendar(project.categoryId);
+        project.teachers.splice(0,project.teachers.length);
+        project.disciplines.splice(0,project.disciplines.length);
+        project.teachers.push({cpf:"",email:"",name:"",phone:"",registration:"",totalCH:0});
+        project.disciplines.push({name:""});
       });
     });
   }, []);
@@ -121,7 +137,11 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         if (!verify) secondSemester.push(e);
       }
     }
-    changeBasicInfo(value, firstSemester, secondSemester);
+    if (category?.name === "Extensão específica do curso" && typeProject === "common") {
+      notification.open({ message: "Por favor, selecione a opção Componente Curricular ou Extra-Curricular!" });
+    } else {
+      changeBasicInfo(value, firstSemester, secondSemester);
+    }
   };
 
   const changeDaysFirst = async (e: CheckboxChangeEvent) => {
@@ -209,8 +229,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   };
 
   const changeTypeProject = (e: any) => {
-    const value = e.target.value as "extraCurricular" | "curricularComponent";
-    setTypeProject(value);
+    // const value = e.target.value as "extraCurricular" | "curricularComponent";
+    setTypeProject(e.target.value);
   };
 
   const changePeriod = async (id: any) => {

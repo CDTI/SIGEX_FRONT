@@ -44,12 +44,14 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
   };
 
   const defineTypeProject = () => {
-    if (project.typeProject === "common") {
-      setTypeProject("Comum");
+    if(project.typeProject === "common" && project.categoryId === "5fb8402399032945bc5c1fe2"){
+      setTypeProject("Extracurricular");
+    }else if (project.typeProject === "common") {
+      setTypeProject("Institucional");
     } else if (project.typeProject === "extraCurricular") {
-      setTypeProject("Extra Curricular");
-    } else {
-      setTypeProject("Componente Curricular");
+      setTypeProject("Extracurricular");
+    } else if (project.typeProject === "curricularComponent") {
+      setTypeProject("Componente Curricular"); 
     }
   }
 
