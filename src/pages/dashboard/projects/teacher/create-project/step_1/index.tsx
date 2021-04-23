@@ -16,7 +16,11 @@ import { ContainerFlex } from "../../../../../../global/styles";
 import { IBasicInfo } from "..";
 import { IProject } from "../../../../../../interfaces/project";
 import { ICategory } from "../../../../../../interfaces/category";
-import { listCategoriesByPeriod } from "../../../../../../services/category_service";
+import {
+  getCategoryById,
+  listCategoriesByPeriod,
+  listCategoriesDashboard,
+} from "../../../../../../services/category_service";
 import { calendar } from "../../../../../../mocks/mockCalendar";
 import { ILocal } from "../../../../../../mocks/mockCalendar";
 import { IPrograms } from "../../../../../../interfaces/programs";
@@ -53,8 +57,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
   const [categoryId, setCategoryId] = useState("");
   const [category, setCategory] = useState<ICategory | null>(null);
-  const [programs, setPrograms] = useState<IPrograms[] | null>(null);
-  const [periods, setPeriods] = useState<IRegistrationPeriod[] | null>(null);
+  const [programs, setPrograms] = useState<IPrograms[]>([]);
+  const [periods, setPeriods] = useState<IRegistrationPeriod[]>([]);
   const [typeProject, setTypeProject] = useState<"extraCurricular" | "curricularComponent" | "common">("common");
   let firstSemester: ICal[] = [];
   const secondSemester: ICal[] = [];
@@ -62,16 +66,18 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getAllPeriodsActive(user?._id).then((dataPeriods) => {
-      setPeriods(dataPeriods);
+    getAllPeriodsActive(user?._id).then((periods) => {
       listPrograms().then((data) => {
-        setPrograms(data.programs);
-        setCategoryId(project.categoryId);
-        changeCalendar(project.categoryId);
-        project.teachers.splice(0,project.teachers.length);
-        project.disciplines.splice(0,project.disciplines.length);
-        project.teachers.push({cpf:"",email:"",name:"",phone:"",registration:"",totalCH:0});
-        project.disciplines.push({name:""});
+        listCategoriesDashboard().then((categories) => {
+          getCategoryById(project.categoryId).then((category) => {
+            setPeriods(periods);
+            setPrograms(data.programs);
+            setCategory(category);
+            setCategories(categories);
+            setCategoryId(project.categoryId);
+            setTypeProject(project.typeProject);
+          });
+        });
       });
     });
   }, []);
@@ -256,7 +262,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
           name="periodRegistrationId"
           rules={[{ required: true, message: "Campo Obrigatório" }]}
         >
-          <Select onChange={(id) => changePeriod(id)} placeholder="Selecione um edital">
+          <Select onChange={changePeriod} placeholder="Selecione um edital">
             {periods?.map((e) => {
               if (e._id !== undefined) {
                 return (

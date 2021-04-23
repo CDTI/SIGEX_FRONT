@@ -35,9 +35,9 @@ const RegistrationPeriod: React.FC = () => {
   useEffect(() => {
     getAllPeriods().then((allPeriods) => {
       setPeriods(allPeriods);
-    });
-    listCategoriesDashboard().then((loadCategories) => {
-      setCategories(loadCategories);
+      listCategoriesDashboard().then((loadCategories) => {
+        setCategories(loadCategories);
+      });
     });
   }, [initialState]);
 
@@ -83,7 +83,7 @@ const RegistrationPeriod: React.FC = () => {
 
   const modal = useMemo(
     () => (
-      <Modal visible={state.visible} onCancel={onCancel} title="Editar categoria" footer={[]}>
+      <Modal visible={state.visible} onCancel={onCancel} title="Editar edital" footer={[]}>
         <Form onFinish={submitEdit} form={formModal} layout="vertical">
           <Form.Item name="_id">
             <Input style={{ display: "none" }} />
@@ -106,7 +106,6 @@ const RegistrationPeriod: React.FC = () => {
           <Form.Item
             name="categories"
             label="Categorias do Edital"
-            rules={[{ required: true, message: "Campo Obrigatório" }]}
           >
             <Select placeholder="Selecione a categoria" mode="multiple" allowClear>
               {categories?.map((e) => {

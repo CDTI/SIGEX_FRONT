@@ -65,13 +65,13 @@ const Projects: React.FC = () => {
 
   const handleChange = () => {
     if (state.program != "null" && state.period != "null") {
-      const filter = projects.filter((e) => e.programId === state.program && e.periodRegistrarionId === state.period);
+      const filter = projects.filter((e) => e.programId === state.program && e.periodRegistrationId === state.period);
       setFilteredProjects(filter);
     } else if (state.program != "null") {
       const filter = projects.filter((e) => e.programId === state.program);
       setFilteredProjects(filter);
     } else if (state.period != "null") {
-      const filter = projects.filter((e) => e.periodRegistrarionId === state.period);
+      const filter = projects.filter((e) => e.periodRegistrationId === state.period);
       setFilteredProjects(filter);
     } else {
       setFilteredProjects(projects);
