@@ -147,12 +147,12 @@ const Planning: React.FC<Props> = ({ changePlanning, previous, project, removeSt
                                                     <Form.Item
                                                         {...field}
                                                         name={[field.name, 'developmentSite']}
-                                                        label="Área de desenvolvimento"
+                                                        label="Local"
                                                         rules={[
                                                             { required: true, message: 'Campo Obrigatório' }
                                                         ]}
                                                     >
-                                                        <Input placeholder="Onde será desenvolvida?" />
+                                                        <Input placeholder="Indicar o local onde essa etapa será desenvolvida" />
                                                     </Form.Item>
                                                     <Form.Item
                                                         {...field}

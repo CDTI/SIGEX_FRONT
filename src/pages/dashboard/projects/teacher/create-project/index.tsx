@@ -40,6 +40,7 @@ export interface IBasicInfo {
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   disciplines: IDiscipline[];
   teachers: ITeacher[];
+  maxClasses: number;
 }
 
 interface Props {
@@ -118,6 +119,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     if (user !== null) {
       setProject({
         ...project,
+        maxClasses: values.maxClasses,
         teachers: values.teachers,
         disciplines: values.disciplines,
         name: values.name,
@@ -137,6 +139,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     } else {
       setProject({
         ...project,
+        maxClasses: values.maxClasses,
         teachers: values.teachers,
         disciplines: values.disciplines,
         name: values.name,

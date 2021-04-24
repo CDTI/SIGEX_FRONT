@@ -23,6 +23,7 @@ export interface IProject {
     status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish' | 'notSelected'
     disciplines: IDiscipline[]
     teachers : ITeacher[]
+    maxClasses: number
 }
 
 export interface IPartnership {

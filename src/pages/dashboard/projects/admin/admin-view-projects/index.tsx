@@ -274,6 +274,9 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
                       <Typography>
                         <b>CH disponível:</b> {project.totalCH}
                       </Typography>
+                      <Typography>
+                        <b>Máximo de turmas:</b> {project.maxClasses}
+                      </Typography>
                     </>
                   )}
                   {project.categoryId === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (

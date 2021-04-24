@@ -127,6 +127,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   };
 
   const submit = async (value: IBasicInfo) => {
+    console.log(value);
     value.typeProject = typeProject;
     const filterFirst = firstCalendar.filter((e) => e.checked === true);
     if (filterFirst !== undefined) {
@@ -322,7 +323,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         {category?.name !== "Extensão específica do curso" && category !== null && (
           <>
             <Space style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              {firstCalendar.length > 0 && (
+              {/* {firstCalendar.length > 0 && (
                 <Form.Item label="Horários disponíveis 1° Semestre" name="firstSemester">
                   {firstCalendar.map((local, index) => (
                     <Checkbox key={index} value={local} onChange={changeDaysFirst} defaultChecked={local.checked}>
@@ -331,11 +332,18 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
                   ))}
                   {firstCalendar === null && <Typography>Selecione uma categoria</Typography>}
                 </Form.Item>
-              )}
+              )} */}
               {secondCalendar.length > 0 && (
-                <Form.Item label="Horários disponíveis 2° Semestre" name="secondSemester">
+                // <Form.Item label="Horários disponíveis 2° Semestre" name="secondSemester">
+                <Form.Item label="Horários disponíveis" name="secondSemester">
                   {secondCalendar.map((local, index) => (
-                    <Checkbox key={index} value={local} onChange={changeDaysSecond} defaultChecked={local.checked}>
+                    <Checkbox
+                      style={{ display: "block" }}
+                      key={index}
+                      value={local}
+                      onChange={changeDaysSecond}
+                      defaultChecked={local.checked}
+                    >
                       {local.name} - {local.turn} - {local.day}
                     </Checkbox>
                   ))}
@@ -344,13 +352,22 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
               )}
             </Space>
             {secondCalendar.length > 0 && (
-              <Form.Item
-                label="Carga horária disponível para a extensão institucional"
-                name="totalCH"
-                rules={[{ required: true, message: "Campo Obrigatório" }]}
-              >
-                <InputNumber />
-              </Form.Item>
+              <>
+                <Form.Item
+                  label="Carga horária máxima que o professor pode assumir na extensão institucional"
+                  name="totalCH"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
+                >
+                  <InputNumber />
+                </Form.Item>
+                <Form.Item
+                  label="Número máximo de turmas para este projeto"
+                  name="maxClasses"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
+                >
+                  <InputNumber min={1} max={5} defaultValue={1} />
+                </Form.Item>
+              </>
             )}
           </>
         )}

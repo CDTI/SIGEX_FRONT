@@ -53,16 +53,6 @@ export const calendar: ICalendar[] = [
                 name: 'Campus Londrina',
                 turn: 'Noite',
                 day: '4ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Manhã',
-                day: '3ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Noite',
-                day: '5ª Feira'
             }
         ]
     },
@@ -108,16 +98,6 @@ export const calendar: ICalendar[] = [
                 name: 'Campus Londrina',
                 turn: 'Noite',
                 day: '6ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Manhã',
-                day: '4ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Noite',
-                day: '4ª Feira'
             }
         ]
     },
@@ -162,16 +142,6 @@ export const calendar: ICalendar[] = [
                 name: 'Campus Londrina',
                 turn: 'Noite',
                 day: '2ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Manhã',
-                day: '5ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Noite',
-                day: '3° Feira'
             }
         ]
     },
@@ -217,16 +187,6 @@ export const calendar: ICalendar[] = [
                 name: 'Campus Londrina',
                 turn: 'Noite',
                 day: '3ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Manhã',
-                day: '6ª Feira'
-            },
-            {
-                name: 'Campus Ponta Grossa',
-                turn: 'Noite',
-                day: '2ª Feira'
             }
         ]
     }
