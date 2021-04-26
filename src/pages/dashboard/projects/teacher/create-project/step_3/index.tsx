@@ -36,7 +36,7 @@ const SpecificCommunity: React.FC<Props> = ({ changeCommunitySpecific, project, 
                         { required: true, message: 'Campo Obrigatório' }
                     ]}
                 >
-                    <Input placeholder="Localização do projeto" />
+                    <Input />
                 </Form.Item>
                 <Form.Item
                     label="N° de pessoas envolvidas"
