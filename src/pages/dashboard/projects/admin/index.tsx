@@ -3,7 +3,7 @@ import Structure from "../../../../components/layout/structure";
 import { ContainerFlex } from "../../../../global/styles";
 import { IProject } from "../../../../interfaces/project";
 import { downloadCSV, listAllProject } from "../../../../services/project_service";
-import { Tag, Space, Button, Select, Modal } from "antd";
+import { Tag, Space, Button, Select, Modal, Input } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import AdminViewProject from "../admin/admin-view-projects";
 
@@ -98,6 +98,16 @@ const Projects: React.FC = () => {
     setModal({ visible: false, project: newProject, category: undefined });
   };
 
+  const handleInput = (e: any) => {
+    const texto: string = e.target.value;
+    if(texto.length >= 3){
+      const filter = projects.filter((e) => e.name.toLocaleLowerCase().includes(texto.toLocaleLowerCase()));
+      setFilteredProjects(filter);
+    }else{
+      setFilteredProjects(projects);
+    }
+  }
+
   const columns = [
     {
       title: "Nome",
@@ -180,6 +190,7 @@ const Projects: React.FC = () => {
             }
           })}
         </Select>
+        <Input placeholder="Nome do projeto" onChange={handleInput} />
         {program !== "null" && (
           <Button type="link" target="_blank" href={base_url?.concat("extensao/downloadCsv/").concat(program)}>
             Baixar projetos
@@ -206,7 +217,7 @@ const Projects: React.FC = () => {
       </ContainerFlex>
       <Modal visible={modal.visible} onCancel={closeModal} footer={[]} width="90%" style={{ minHeight: "90%" }}>
         <>
-          <AdminViewProject project={modal.project} key={initialState}/>
+          <AdminViewProject project={modal.project} key={initialState} />
           <Space style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
             <p></p>
             <Button onClick={closeModal} type="primary">
