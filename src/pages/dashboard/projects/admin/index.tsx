@@ -72,6 +72,7 @@ const Projects: React.FC = () => {
       setFilteredProjects(filter);
     } else if (state.period != "null") {
       const filter = projects.filter((e) => e.periodRegistrationId === state.period);
+      console.log();
       setFilteredProjects(filter);
     } else {
       setFilteredProjects(projects);
@@ -100,13 +101,13 @@ const Projects: React.FC = () => {
 
   const handleInput = (e: any) => {
     const texto: string = e.target.value;
-    if(texto.length >= 3){
+    if (texto.length >= 3) {
       const filter = projects.filter((e) => e.name.toLocaleLowerCase().includes(texto.toLocaleLowerCase()));
       setFilteredProjects(filter);
-    }else{
+    } else {
       setFilteredProjects(projects);
     }
-  }
+  };
 
   const columns = [
     {
@@ -118,6 +119,10 @@ const Projects: React.FC = () => {
       title: "Data de início",
       dataIndex: "dateStart",
       key: "dateStart",
+      render: (dateStart: string) => {
+        let date = new Date(dateStart).toLocaleString("pt-BR");
+        return <>{date}</>;
+      },
     },
     {
       title: "Status",
