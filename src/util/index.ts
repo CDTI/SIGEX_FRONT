@@ -1,3 +1,4 @@
+import { useLocation } from "react-router";
 import { IRegister } from "../interfaces/feedback";
 import { IProject } from "../interfaces/project";
 
@@ -34,3 +35,5 @@ export const typeUser = async (role: string[]) => {
 
     return type
 }
+
+export const useUrlQuery = () => new URLSearchParams(useLocation().search);

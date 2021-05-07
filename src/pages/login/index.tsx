@@ -5,7 +5,7 @@ import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './sty
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useAuth } from '../../context/auth'
 import logo from '../../sigex.png'
-import { checkUser, createUser } from '../../services/user_service'
+import { checkUser, createUser, requestPasswordChange } from '../../services/user_service'
 
 interface ValueLogin {
   cpf: string,
@@ -23,6 +23,7 @@ const LoginPage: React.FC<Props> = () => {
   const [newUser, setNewUser] = useState(false)
   const [loginUser, setLoginUser] = useState(false)
   const [password, setPassword] = useState('')
+  const [forgotPassword, setForgotPassword] = useState(false)
   const [form] = Form.useForm()
 
   const onFinish = (values: ValueLogin) => {
@@ -75,6 +76,33 @@ const LoginPage: React.FC<Props> = () => {
     }
   }
 
+  const handleForgotPassword = () =>
+  {
+    form.resetFields();
+    setNewUser(false);
+    setLoginUser(false);
+    setForgotPassword(true);
+  }
+
+  const handlePasswordChangeRequest = async (value: any) =>
+  {
+    try
+    {
+      await requestPasswordChange({ ...value, cpf });
+
+      form.resetFields();
+      setForgotPassword(false);
+
+      form.setFieldsValue(cpf);
+
+      notification.success({ message: "E-mail de confirmação enviado com sucesso!" });
+    }
+    catch (err)
+    {
+      notification.error({ message: err.response.data });
+    }
+  }
+
   return (
     <Container>
       {!loading && (
@@ -83,7 +111,8 @@ const LoginPage: React.FC<Props> = () => {
             <ContainerImage>
               <ImageLogo src={logo} />
             </ContainerImage>
-            {(!newUser && !loginUser) && (
+
+            {(!newUser && !loginUser && !forgotPassword) && (
               <Form
                 form={form}
                 onFinish={handleCheckUser}
@@ -97,14 +126,23 @@ const LoginPage: React.FC<Props> = () => {
                 >
                   <InputMask mask='111.111.111-11' />
                 </Form.Item>
+
                 <Form.Item>
                   <Button htmlType='submit' type='primary'>Avançar</Button>
                 </Form.Item>
               </Form>
             )}
+
             {loginUser && (
               <>
-                <Button style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }} type='link' onClick={back}><ArrowLeftOutlined />Voltar</Button>
+                <Button
+                  type='link'
+                  style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }}
+                  onClick={back}
+                >
+                  <ArrowLeftOutlined />Voltar
+                </Button>
+
                 <Form
                   onFinish={onFinish}
                   name="basic"
@@ -116,12 +154,22 @@ const LoginPage: React.FC<Props> = () => {
                   >
                     <Input placeholder='Digite seu CPF' disabled />
                   </Form.Item>
+
                   <LabelInput>Senha</LabelInput>
                   <Form.Item name="password"
                     rules={[{ required: true, message: 'Campo obrigatório' }]}
                   >
                     <Input.Password draggable type='password' placeholder='Digite sua senha' />
                   </Form.Item>
+
+                  <Form.Item>
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                      <Button type="link" htmlType="button" onClick={handleForgotPassword}>
+                        Esqueceu sua senha?
+                      </Button>
+                    </div>
+                  </Form.Item>
+
                   <Form.Item>
                     <p style={{ textAlign: 'center' }}>
                       <Button type="primary" htmlType="submit">Login</Button>
@@ -130,9 +178,17 @@ const LoginPage: React.FC<Props> = () => {
                 </Form>
               </>
             )}
+
             {newUser && (
               <>
-                <Button style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }} type='link' onClick={back}><ArrowLeftOutlined />Voltar</Button>
+                <Button
+                  type='link'
+                  style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }}
+                  onClick={back}
+                >
+                  <ArrowLeftOutlined />Voltar
+                </Button>
+
                 <Form
                   form={form}
                   layout='vertical'
@@ -142,62 +198,77 @@ const LoginPage: React.FC<Props> = () => {
                   <LabelInput>CPF</LabelInput>
                   <Form.Item
                     name='cpf'
-                    rules={[
-                      { required: true, message: 'Campo Obrigatório' }
-                    ]}
+                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
                   >
                     <InputMask mask='111.111.111-11' disabled />
                   </Form.Item>
+
                   <LabelInput>Name</LabelInput>
                   <Form.Item
                     name='name'
-                    rules={[
-                      { required: true, message: 'Campo Obrigatório' }
-                    ]}
+                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
                   >
                     <Input placeholder='Digite o seu Nome' />
                   </Form.Item>
+
                   <LabelInput>E-Mail</LabelInput>
                   <Form.Item
                     name='email'
-                    rules={[
-                      { required: true, message: 'Campo Obrigatório' }
-                    ]}
+                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
                   >
                     <Input placeholder='Digite o E-Mail' />
                   </Form.Item>
+
                   <LabelInput>Cod. Lattes</LabelInput>
-                  <Form.Item
-                    name='lattes'
-                  >
+                  <Form.Item name='lattes'>
                     <Input addonBefore='https://cnpq.lattes/' placeholder='Digite o código lattes' />
                   </Form.Item>
+
                   <LabelInput>Senha</LabelInput>
                   <Form.Item
                     name='password'
-                    rules={[
-                      { required: true, message: 'Campo Obrigatório' }
-                    ]}
+                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
                   >
                     <Input.Password draggable type='password' placeholder='Digite a Senha' />
                   </Form.Item>
+                  
                   <Form.Item>
                     <Button type='primary' htmlType='submit'>Cadastrar</Button>
                   </Form.Item>
                 </Form>
               </>
             )}
+            
+            {forgotPassword && (
+              <>
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handlePasswordChangeRequest}
+                  style={{ maxWidth: "520px", width: "100%" }}
+                >
+                  <LabelInput>Para alterar sua senha, confirme o e-mail cadastrado com seu CPF</LabelInput>
+                  <Form.Item
+                    name="email"
+                    rules={[{ required: true, message: "Campo obrigatório" }]}
+                  >
+                    <Input placeholder="Digite o e-mail"></Input>
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">Enviar</Button>
+                  </Form.Item>
+                </Form>
+              </>
+            )}
           </>
         </FormDiv>
-      )
-      }
-      {
-        loading && (
-          <Spin size="large" />
-        )
-      }
-    </Container >
-  )
+      )}
+
+      {loading && (
+        <Spin size="large" />
+      )}
+    </Container >)
 }
 
 export default LoginPage

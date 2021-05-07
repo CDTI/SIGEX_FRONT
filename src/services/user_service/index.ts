@@ -44,6 +44,20 @@ export const resetPassword = async (user: any): Promise<ResponseUser> => {
   return response.data;
 };
 
+export const requestPasswordChange = async (value: any): Promise<boolean> =>
+{
+  const response = await api.post("requestPasswordChange", value);
+
+  return response.data;
+};
+
+export const changePassword = async (value: any): Promise<boolean> =>
+{
+  const response = await api.put("changePassword", value);
+
+  return response.data;
+};
+
 export const getUserName = async (cpf: string): Promise<ResponseUser> => {
   const response = await api.get(`userName/${cpf}`);
   return response.data;
