@@ -75,6 +75,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
             setCategory(category);
             setCategories(categories);
             setCategoryId(project.categoryId);
+            changeCalendar(project.categoryId);
             setTypeProject(project.typeProject);
           });
         });
@@ -108,8 +109,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     const cat = categories.find((e) => e._id === id);
     if (cat !== undefined) setCategory(cat);
     if (cat?.name !== "Extensão específica do curso") setTypeProject("common");
-    firstCalendar.splice(1, firstCalendar.length);
-    secondCalendar.splice(1, secondCalendar.length);
+    firstCalendar.splice(0, firstCalendar.length);
+    secondCalendar.splice(0, secondCalendar.length);
     const filterCalendar = calendar.find((e) => e.categoryId === id);
     if (filterCalendar !== undefined) {
       const first: ICal[] = [];
@@ -244,9 +245,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     setFirstCalendar([]);
     setSecondCalendar([]);
     setTypeProject("common");
-    listCategoriesByPeriod(id).then((categories) => {
-      setCategories(categories);
-    });
+    setCategories(await listCategoriesByPeriod(id));
   };
 
   return (
