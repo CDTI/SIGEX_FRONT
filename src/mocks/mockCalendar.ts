@@ -28,6 +28,11 @@ export const calendar: ICalendar[] = [
                 name: 'Unidade Praça Osório',
                 turn: 'Noite',
                 day: '5ª Feira'
+            },
+            {
+                name: 'Unidade Santos Andrade',
+                turn: 'Manhã',
+                day: '4ª Feira'
             }
         ]
     },

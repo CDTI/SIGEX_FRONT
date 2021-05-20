@@ -162,13 +162,15 @@ const LoginPage: React.FC<Props> = () => {
                     <Input.Password draggable type='password' placeholder='Digite sua senha' />
                   </Form.Item>
 
-                  <Form.Item>
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                      <Button type="link" htmlType="button" onClick={handleForgotPassword}>
-                        Esqueceu sua senha?
-                      </Button>
-                    </div>
-                  </Form.Item>
+                  {/*
+                    <Form.Item>
+                      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Button type="link" htmlType="button" onClick={handleForgotPassword}>
+                          Esqueceu sua senha?
+                        </Button>
+                      </div>
+                    </Form.Item>
+                  */}
 
                   <Form.Item>
                     <p style={{ textAlign: 'center' }}>
