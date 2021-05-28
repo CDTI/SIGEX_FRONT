@@ -1,14 +1,14 @@
-import { ILocal } from "../mocks/mockCalendar";
+import { ISchedule } from "./notice";
 
 export interface IProject {
     _id: string
     name: string
     programId: string
     categoryId: string
-    periodRegistrationId: string
+    noticeId: string
     typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
-    firstSemester: ILocal[]
-    secondSemester: ILocal[]
+    firstSemester: ISchedule[]
+    secondSemester: ISchedule[]
     totalCH: number
     partnership: IPartnership[] | undefined
     specificCommunity: ISpecificCommunity

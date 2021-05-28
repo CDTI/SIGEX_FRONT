@@ -257,7 +257,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
                       <ul style={{ marginLeft: "18px" }}>
                         {project.firstSemester.map((e) => (
                           <li>
-                            {e.name} - {e.day} - {e.turn}
+                            {e.location} - {`${e.day}ª feira`} - {e.period}
                           </li>
                         ))}
                       </ul>
@@ -267,7 +267,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
                       <ul style={{ marginLeft: "18px" }}>
                         {project.secondSemester.map((e) => (
                           <li>
-                            {e.name} - {e.day} - {e.turn}
+                            {e.location} - {`${e.day}º feira`} - {e.period}
                           </li>
                         ))}
                       </ul>
