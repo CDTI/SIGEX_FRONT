@@ -22,21 +22,21 @@ import { newProject } from "../../../../../mocks/mockDefaultValue";
 import { Link, RouteProps } from "react-router-dom";
 import { useAuth } from "../../../../../context/auth";
 import { createProject, updateProject } from "../../../../../services/project_service";
-import { ILocal } from "../../../../../mocks/mockCalendar";
 import Modal from "antd/lib/modal/Modal";
 import { getActiveNoticesForUser } from "../../../../../services/notice_service";
+import { ISchedule } from "../../../../../interfaces/notice";
 
 const { Step } = Steps;
 
 export interface IBasicInfo {
   name: string;
   description: string;
-  firstSemester: ILocal[];
-  secondSemester: ILocal[];
+  firstSemester: ISchedule[];
+  secondSemester: ISchedule[];
   totalCH: number;
   programId: string;
   categoryId: string;
-  periodRegistrationId: string;
+  noticeId: string;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   disciplines: IDiscipline[];
   teachers: ITeacher[];
@@ -114,7 +114,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   };
 
   // Recebe as informções da 1° Etapa do cadastro e mando para o estado "project"
-  const changeBasicInfo = (values: IBasicInfo, firstSemester: ILocal[], secondSemester: ILocal[]) => {
+  const changeBasicInfo = (values: IBasicInfo, firstSemester: ISchedule[], secondSemester: ISchedule[]) => {
     const date = new Date();
     if (user !== null) {
       setProject({
@@ -134,7 +134,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         author: user.cpf,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
-        periodRegistrationId: values.periodRegistrationId,
+        noticeId: values.noticeId,
       });
     } else {
       setProject({
@@ -153,7 +153,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         categoryId: values.categoryId,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
-        periodRegistrationId: values.periodRegistrationId,
+        noticeId: values.noticeId,
       });
     }
     setCurrent(current + 1);
