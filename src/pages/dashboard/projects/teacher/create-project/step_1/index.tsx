@@ -17,9 +17,9 @@ import { IBasicInfo } from "..";
 import { IProject } from "../../../../../../interfaces/project";
 import { ICategory } from "../../../../../../interfaces/category";
 import {
-  getCategoryById,
-  listCategoriesByPeriod,
-  listCategoriesDashboard,
+  getCategory,
+  getCategoriesByNotice,
+  getActiveCategories,
 } from "../../../../../../services/category_service";
 import { calendar } from "../../../../../../mocks/mockCalendar";
 import { ILocal } from "../../../../../../mocks/mockCalendar";
@@ -27,8 +27,8 @@ import { IPrograms } from "../../../../../../interfaces/programs";
 import { listPrograms } from "../../../../../../services/program_service";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useAuth } from "../../../../../../context/auth";
-import { IRegistrationPeriod } from "../../../../../../interfaces/registrationPeriod";
-import { getAllPeriodsActive } from "../../../../../../services/registrationPeriod_service";
+import { INotice } from "../../../../../../interfaces/notice";
+import { getActiveNoticesForUser } from "../../../../../../services/notice_service";
 import DynamicDisciplinesFieldStep1 from "./dynamicDisciplinesFieldStep1";
 import DynamicTechersFieldStep1 from "./dynamicTechersFieldStep1";
 
@@ -58,7 +58,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const [categoryId, setCategoryId] = useState("");
   const [category, setCategory] = useState<ICategory | null>(null);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
-  const [periods, setPeriods] = useState<IRegistrationPeriod[]>([]);
+  const [periods, setPeriods] = useState<INotice[]>([]);
   const [typeProject, setTypeProject] = useState<"extraCurricular" | "curricularComponent" | "common">("common");
   let firstSemester: ICal[] = [];
   const secondSemester: ICal[] = [];
@@ -66,11 +66,11 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getAllPeriodsActive(user?._id).then((periods) => {
+    getActiveNoticesForUser(user?._id).then((notices) => {
       listPrograms().then((data) => {
-        listCategoriesDashboard().then((categories) => {
-          getCategoryById(project.categoryId).then((category) => {
-            setPeriods(periods);
+        getActiveCategories().then((categories) => {
+          getCategory(project.categoryId).then((category) => {
+            setPeriods(notices);
             setPrograms(data.programs);
             setCategory(category);
             setCategories(categories);
@@ -245,7 +245,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     setFirstCalendar([]);
     setSecondCalendar([]);
     setTypeProject("common");
-    setCategories(await listCategoriesByPeriod(id));
+    setCategories(await getCategoriesByNotice(id));
   };
 
   return (

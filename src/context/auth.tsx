@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { notification } from 'antd'
-import { UserInterface } from '../interfaces/user'
+import IUser from '../interfaces/user'
 import api from '../services/api'
 import history from '../global/history'
 import { AxiosError } from 'axios'
@@ -12,7 +12,7 @@ export interface Login {
 
 interface AuthContextData {
     signed: boolean
-    user: UserInterface | null
+    user: IUser | null
     login(login: Login): Promise<void>
     logout(): void
 }
@@ -29,7 +29,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     //     _id: '',
     //     role: '',
     // }
-    const [user, setUser] = useState<UserInterface | null>(null)
+    const [user, setUser] = useState<IUser | null>(null)
 
     useEffect(() => {
         const storageUser = localStorage.getItem('@pp:user')

@@ -1,5 +1,6 @@
-export interface ICategory {
-    _id: string
-    name: string
-    isDeleted: boolean
-}
+export interface ICategory
+{
+  _id: string;
+  name: string;
+  isActive: boolean;
+};

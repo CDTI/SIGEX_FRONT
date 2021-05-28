@@ -24,7 +24,7 @@ import { useAuth } from "../../../../../context/auth";
 import { createProject, updateProject } from "../../../../../services/project_service";
 import { ILocal } from "../../../../../mocks/mockCalendar";
 import Modal from "antd/lib/modal/Modal";
-import { getAllPeriodsActive } from "../../../../../services/registrationPeriod_service";
+import { getActiveNoticesForUser } from "../../../../../services/notice_service";
 
 const { Step } = Steps;
 
@@ -64,12 +64,12 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   useEffect(() => {
     // Verifica se os periodos estão ativos
-    getAllPeriodsActive(user?._id).then((periods) => {
-      for (let period of periods) {
-        if (period.typePeriod === "common") {
-          setCommom(period.isActive);
-        } else if (period.typePeriod === "specific") {
-          setSpecific(period.isActive);
+    getActiveNoticesForUser(user?._id).then((notices) => {
+      for (let notice of notices) {
+        if (notice.type === "common") {
+          setCommom(notice.isActive);
+        } else if (notice.type === "specific") {
+          setSpecific(notice.isActive);
         }
       }
 

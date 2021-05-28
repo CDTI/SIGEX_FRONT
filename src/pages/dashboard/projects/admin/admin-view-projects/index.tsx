@@ -5,14 +5,14 @@ import { ContainerFlex } from "../../../../../global/styles";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
 import { compareDate, currentProject } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
-import { listCategoriesDashboard } from "../../../../../services/category_service";
+import { getActiveCategories } from "../../../../../services/category_service";
 import { ICategory } from "../../../../../interfaces/category";
 import { listPrograms } from "../../../../../services/program_service";
 import { IPrograms } from "../../../../../interfaces/programs";
 import { ReturnResponse, updateProject } from "../../../../../services/project_service";
 import { IFeedback } from "../../../../../interfaces/feedback";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
-import { UserInterface } from "../../../../../interfaces/user";
+import IUser from "../../../../../interfaces/user";
 import { getUserName } from "../../../../../services/user_service";
 
 const { Step } = Steps;
@@ -28,7 +28,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory | null>(null);
   const [program, setProgram] = useState<IPrograms | null>(null);
-  const [user, setUser] = useState<UserInterface | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [status, setStatus] = useState(false);
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
@@ -51,12 +51,12 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
     } else if (project.typeProject === "extraCurricular") {
       setTypeProject("Extracurricular");
     } else if (project.typeProject === "curricularComponent") {
-      setTypeProject("Componente Curricular"); 
+      setTypeProject("Componente Curricular");
     }
   }
 
   useEffect(() => {
-    listCategoriesDashboard().then((data) => {
+    getActiveCategories().then((data) => {
       console.log(data);
       const categorySelected = data.find((cat) => cat._id === project.categoryId);
       if (categorySelected !== undefined) setCategory(categorySelected);

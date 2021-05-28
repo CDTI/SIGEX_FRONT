@@ -12,10 +12,10 @@ import { IPrograms } from "../../../../interfaces/programs";
 import { listPrograms } from "../../../../services/program_service";
 import { base_url } from "../../../../services/api";
 import { newProject } from "../../../../mocks/mockDefaultValue";
-import { IRegistrationPeriod } from "../../../../interfaces/registrationPeriod";
-import { getAllPeriods } from "../../../../services/registrationPeriod_service";
+import { INotice } from "../../../../interfaces/notice";
+import { getAllNotices } from "../../../../services/notice_service";
 import { ICategory } from "../../../../interfaces/category";
-import { listCategoriesDashboard } from "../../../../services/category_service";
+import { getActiveCategories } from "../../../../services/category_service";
 
 const { Option } = Select;
 
@@ -35,7 +35,7 @@ const Projects: React.FC = () => {
   const [category, setCategory] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
-  const [periods, setPeriods] = useState<IRegistrationPeriod[]>([]);
+  const [periods, setPeriods] = useState<INotice[]>([]);
   const [program, setProgram] = useState("");
   const [period, setPeriod] = useState("");
   const [modal, setModal] = useState<IModal>({ visible: false, project: newProject, category: undefined });
@@ -46,16 +46,16 @@ const Projects: React.FC = () => {
   const [initialState, setInitialState] = useState(0);
 
   useEffect(() => {
-    listCategoriesDashboard().then((data) => {
+    getActiveCategories().then((data) => {
       setCategories(data);
     });
     listAllProject().then((data) => {
       setProjects(data);
       setFilteredProjects(data);
       listPrograms().then((listPrograms) => {
-        getAllPeriods().then((listPeriods) => {
+        getAllNotices().then((listNotices) => {
           setPrograms(listPrograms.programs);
-          setPeriods(listPeriods);
+          setPeriods(listNotices);
           setProgram("null");
           setPeriod("null");
         });
