@@ -16,6 +16,7 @@ import {
 import { Link, useHistory } from 'react-router-dom'
 import { useAuth } from '../../context/auth';
 import logo from '../../sigex.png'
+import { IRole } from '../../interfaces/role';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -28,6 +29,16 @@ const Dashboard: React.FC = (props) => {
     const onCollapse = (collapsed: boolean) => {
         setcollapsed(collapsed);
     };
+
+    const isIRole = (v: string | IRole): v is IRole =>
+    {
+      if ((v as IRole).description)
+        return true;
+
+      return false;
+    };
+
+    let userRoles = context.user?.roles?.map((r: string | IRole) => (isIRole(r)) ? r.description : r) ?? [];
 
     const memoizedDate = useMemo(() => {
         let dt = new Date()
@@ -64,13 +75,13 @@ const Dashboard: React.FC = (props) => {
                             <Menu.Item icon={<UnorderedListOutlined />} key="3">
                                 <Link to="/dashboard/programs">Listar Programas</Link>
                             </Menu.Item>
-                            {context.user?.role.includes('admin') && (
+                            {userRoles.includes("Administrador") && (
                                 <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
                                     <Link to="/dashboard/program/create">Criar Programa</Link>
                                 </Menu.Item>
                             )}
                         </SubMenu>
-                        {context.user?.role.includes('admin') && (
+                        {userRoles.includes('Administrador') && (
                             <>
                                 <Menu.Item icon={<UserOutlined />}>
                                     <Link to="/dashboard/users">
@@ -81,7 +92,7 @@ const Dashboard: React.FC = (props) => {
                                     <Link to="/dashboard/categories">Categorias</Link>
                                 </Menu.Item>
                                 <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
-                                    <Link to='/dashboard/periods'>Editais</Link>
+                                    <Link to='/dashboard/notices'>Editais</Link>
                                 </Menu.Item>
                                 <SubMenu title='Propostas' icon={<FileTextOutlined />}>
                                     <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
@@ -97,7 +108,7 @@ const Dashboard: React.FC = (props) => {
                                 </SubMenu>
                             </>
                         )}
-                        {(context.user?.role.includes('teacher') || context.user?.role.includes('ndePresident')) && (
+                        {(userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
                             <>
                                 <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
                                     <Menu.Item key="/dashboard/project/create" icon={<FileAddOutlined />}>

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Input, Modal, Space, Typography } from 'antd'
 import Structure from '../../../components/layout/structure'
 import { ContainerFlex } from '../../../global/styles'
-import { UserInterface } from '../../../interfaces/user'
+import IUser from '../../../interfaces/user'
 import { getUsers } from '../../../services/user_service'
 import CreateUser from '../../../components/forms/create-user'
 import MyTable from '../../../components/layout/table'
@@ -12,13 +12,13 @@ import { EditOutlined, UserOutlined } from '@ant-design/icons'
 interface State {
     title: string
     visible: boolean,
-    user: undefined | UserInterface
+    user: undefined | IUser
 }
 
 const Users: React.FC = () => {
-    const [users, setUsers] = useState<UserInterface[] | null>(null)
-    const [filteredUser, setFilteredUser] = useState<UserInterface[]>([])
-    // const [user, setUser] = useState<UserInterface | undefined>(undefined)
+    const [users, setUsers] = useState<IUser[] | null>(null)
+    const [filteredUser, setFilteredUser] = useState<IUser[]>([])
+    // const [user, setUser] = useState<IUser | undefined>(undefined)
     const [initialValue, setInitialValue] = useState(0)
     const [state, setState] = useState<State>({ visible: false, user: undefined, title: '' })
 
@@ -29,7 +29,7 @@ const Users: React.FC = () => {
         })
     }, [initialValue])
 
-    const openModal = (userSelected: UserInterface | undefined, title: string) => {
+    const openModal = (userSelected: IUser | undefined, title: string) => {
         setState({ visible: true, user: userSelected, title: title })
     }
 
@@ -59,14 +59,14 @@ const Users: React.FC = () => {
         {
             title: 'E-Mail',
             key: 'email',
-            render: (text: any, record: UserInterface) => (
+            render: (text: any, record: IUser) => (
                 <Button href={`mailto:${record.email}`} type='link'>{record.email}</Button>
             )
         },
         {
             title: 'Ativo',
             key: 'isActive',
-            render: (text: any, record: UserInterface) => {
+            render: (text: any, record: IUser) => {
                 return (
                     <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
                         {record.isActive && (<div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: 'green' }} />)}
@@ -87,14 +87,14 @@ const Users: React.FC = () => {
             ],
             // specify the condition of filtering result
             // here is that finding the name started with `value`
-            onFilter: (value: any, record: UserInterface) => record.isActive === value,
+            onFilter: (value: any, record: IUser) => record.isActive === value,
             // sorter: (a, b) => a.name.length - b.name.length,
             sortDirections: ['descend'],
         },
         {
             title: 'Ação',
             key: 'action',
-            render: (text: string, record: UserInterface) => (
+            render: (text: string, record: IUser) => (
                 <Space>
                     <Button icon={<EditOutlined />} onClick={() => openModal(record, 'Editar Usuário')}>Editar</Button>
                 </Space>

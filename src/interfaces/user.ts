@@ -1,10 +1,15 @@
-export interface UserInterface {
-    email: string,
-    name: string,
-    lattes: string,
-    password: string,
-    cpf: string,
-    _id: string,
-    role: string[],
-    isActive: boolean
-}
+import { IRole } from "./role";
+
+export default interface IUser
+{
+  _id: string,
+  cpf: string,
+  name: string,
+  lattes: string;
+  email: string;
+  password: string;
+  roles: (string | IRole)[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};

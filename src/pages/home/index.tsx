@@ -18,7 +18,7 @@ const HomePage: React.FC = () => {
        </SubTitleHome>
         <Divider />
         <SubTitleHome>
-          {(user !== null && user?.role.length) > 0 && (
+          {(user !== null && user?.roles.length) > 0 && (
             <Button type='primary'>
               <Link to='/dashboard'>Entrar</Link>
             </Button>

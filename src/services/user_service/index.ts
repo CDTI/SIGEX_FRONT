@@ -1,15 +1,15 @@
-import { UserInterface } from "../../interfaces/user";
+import IUser from "../../interfaces/user";
 import api from "../api";
 
 interface ResponseUsers {
   status: "error" | "success";
-  user: UserInterface[];
+  user: IUser[];
   message: string;
 }
 
 interface ResponseUser {
   status: "error" | "success";
-  user: UserInterface;
+  user: IUser;
   message: string;
   created: boolean;
 }

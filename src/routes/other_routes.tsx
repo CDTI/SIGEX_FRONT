@@ -27,10 +27,22 @@ import Home from '../pages/home'
 import NotFound from '../pages/404'
 import { useAuth } from '../context/auth'
 
-import RegistrationPeriods from '../pages/dashboard/registrationPeriod'
+import RegistrationPeriods from '../pages/dashboard/notice'
+import CreateNoticeController from '../pages/dashboard/notice/create'
+import { IRole } from '../interfaces/role'
 
 const OtherRoutes: React.FC = () => {
     const { user } = useAuth()
+
+    const isIRole = (v: string | IRole): v is IRole =>
+    {
+      if ((v as IRole)._id)
+        return true;
+
+      return false;
+    };
+
+    let userRoles = user?.roles?.map((r: any) => (isIRole(r)) ? r.description : r) ?? [];
 
     return (
         <>
@@ -38,28 +50,38 @@ const OtherRoutes: React.FC = () => {
                 <Switch>
                     <Route path='/' exact={true} component={Home} />
                     <Dashboard>
-                        {/* 
+                        {/*
                             Rota base
                         */}
                         <Route path='/dashboard' exact={true} component={DashboardHome} />
-                        {/* 
+                        {/*
                             @description
                             Rotas acessadas apenas por professore e ou predidentes do NDE
                         */}
-                        {(user?.role.includes('teacher') || user?.role.includes('ndePresident')) && (
+                        {(userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
                             <>
                                 <Route path='/dashboard/project/create' component={CreateProject} />
                                 <Route path='/dashboard/myProjects' component={ProjectsTeacher} />
                             </>
                         )}
-                        {/* 
+                        {/*
                             @description
                             Rotas acessadas apenas por administradores
-                            
+
                         */}
-                        {user?.role.includes('admin') && (
+                        {userRoles.includes('Administrador') && (
                             <>
-                                <Route path='/dashboard/periods' component={RegistrationPeriods} />
+                                <Route exact={true} path='/dashboard/notices' component={RegistrationPeriods} />
+                                <Route
+                                    exact={true}
+                                    path={'/dashboard/notices/create'}
+                                    component={CreateNoticeController} />
+
+                                <Route
+                                    exact={true}
+                                    path={'/dashboard/notices/edit/:id'}
+                                    component={CreateNoticeController} />
+
                                 <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
                                 <Route path='/dashboard/selectProjects' component={SelectProjects} />
                                 <Route path='/dashboard/program/create' component={CreateProgram} />
@@ -69,7 +91,7 @@ const OtherRoutes: React.FC = () => {
                             </>
                         )}
 
-                        {/* 
+                        {/*
                             Rotas de programas
                         */}
                         <Route path='/dashboard/programs' component={Programs} />

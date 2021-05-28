@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Select, Space, notification, Switch } from "antd";
 import InputMask from "antd-mask-input";
 import { createUser, updateUser, resetPassword } from "../../../services/user_service";
-import { UserInterface } from "../../../interfaces/user";
+import IUser from "../../../interfaces/user";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
@@ -11,7 +11,7 @@ interface Props {
   title: string;
   closeModal(): void;
   loadUser(): void;
-  user?: UserInterface;
+  user?: IUser;
 }
 
 const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) => {
@@ -42,7 +42,7 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) => {
     closeModal();
   };
 
-  const reset = async (userSubmit: UserInterface) => { 
+  const reset = async (userSubmit: IUser) => {
     if (user !== undefined) {
       const userUpdated = await resetPassword(user);
 

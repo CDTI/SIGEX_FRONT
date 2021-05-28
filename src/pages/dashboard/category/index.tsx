@@ -3,9 +3,9 @@ import { Form, Input, Button, List, Typography, notification, Modal, Space, Swit
 import { ICategory } from "../../../interfaces/category";
 import {
   createCategory,
-  changeStatusCategory,
+  changeCategoryStatus,
   updateCategory,
-  listCategoriesDashboard,
+  getAllCategories,
 } from "../../../services/category_service";
 import Structure from "../../../components/layout/structure";
 import { EditOutlined } from "@ant-design/icons";
@@ -26,13 +26,13 @@ const CreateCategory: React.FC = () => {
   });
 
   useEffect(() => {
-    listCategoriesDashboard().then((loadCategories) => {
+    getAllCategories().then((loadCategories) => {
       setCategories(loadCategories);
     });
   }, [initialState]);
 
   const submitCategory = async (category: ICategory) => {
-    category.isDeleted = false;
+    category.isActive = false;
     const newCategory = await createCategory(category);
     notification.open({
       message: newCategory.message,
@@ -42,7 +42,7 @@ const CreateCategory: React.FC = () => {
   };
 
   const changeStatus = async (id: string) => {
-    const category = await changeStatusCategory(id);
+    const category = await changeCategoryStatus(id);
 
     notification.open({
       message: category.message,
@@ -58,7 +58,7 @@ const CreateCategory: React.FC = () => {
   };
 
   const submitEdit = async (item: any) => {
-    const categoryEdit = await updateCategory(item);
+    const categoryEdit = await updateCategory(item._id, item);
     formModal.resetFields();
     notification[categoryEdit.status]({ message: categoryEdit.message });
     setState({ visible: false, category: undefined });
@@ -117,7 +117,7 @@ const CreateCategory: React.FC = () => {
         renderItem={(item) => (
           <List.Item
             actions={[
-              <Switch onChange={(event) => changeStatus(item._id)} defaultChecked={!item.isDeleted} />,
+              <Switch onChange={(event) => changeStatus(item._id)} defaultChecked={item.isActive} />,
               <Button style={{ color: "#333" }} onClick={() => changeEdit(item)}>
                 Editar
                 <EditOutlined />
