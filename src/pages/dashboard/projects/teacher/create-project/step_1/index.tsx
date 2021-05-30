@@ -53,10 +53,29 @@ export interface ICal
 
 const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, specific, commom }) =>
 {
+  const compareChecked = (s: ISchedule, nameArray: "firstSemester" | "secondSemester") =>
+  {
+    const filterLocal = project[nameArray].find((e) => e.day === s.day && e.location === s.location && e.period === s.period) as
+      | ICal
+      | undefined;
+
+    if (filterLocal === undefined)
+      return false;
+
+    delete filterLocal.checked;
+    const compareA = Object.keys(s);
+    const compareB = Object.keys(filterLocal);
+
+    if (compareA.length !== compareB.length)
+      return false;
+
+    return compareA.some((key, index) => compareA[index] === compareB[index]);
+  };
+
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
   const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(project.categoryId);
   const [category, setCategory] = useState<ICategory | null>(null);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [notices, setNotices] = useState<INotice[]>([]);
@@ -74,35 +93,19 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       setPrograms(response.programs);
       setNotices(await getActiveNoticesForUser(user?._id));
       setCategories(await getActiveCategories());
-      if (project.categoryId)
-        setCategory(await getCategory(project.categoryId));
+      if (categoryId)
+        setCategory(await getCategory(categoryId));
 
-      setCategoryId(project.categoryId);
-      changeCalendar(project.categoryId);
       setTypeProject(project.typeProject);
+      setSecondCalendar(project.secondSemester.map((s: ISchedule) =>
+      ({
+        ...s,
+        checked: compareChecked(s, "secondSemester")
+      })));
     })();
   }, []);
 
-  const compareChecked = async (s: ISchedule, nameArray: "firstSemester" | "secondSemester") =>
-  {
-    const filterLocal = project[nameArray].find((e) => e.day === s.day && s.location === s.location && e.period === s.period) as
-      | ICal
-      | undefined;
-
-    if (filterLocal === undefined)
-      return false;
-
-    delete filterLocal.checked;
-    const compareA = Object.keys(s);
-    const compareB = Object.keys(filterLocal);
-
-    if (compareA.length !== compareB.length)
-      return false;
-
-    return compareA.some((key, index) => compareA[index] === compareB[index]);
-  };
-
-  const changeCalendar = async (id: string) =>
+  const changeCalendar = (id: string) =>
   {
     setCategoryId(id);
 
@@ -127,8 +130,8 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       {
         const calendar = { day: e.day, period: e.period, location: e.location };
 
-        first.push({ ...calendar, checked: await compareChecked(calendar, "firstSemester") });
-        second.push({ ...calendar, checked: await compareChecked(calendar, "secondSemester") });
+        first.push({ ...calendar, checked: compareChecked(calendar, "firstSemester") });
+        second.push({ ...calendar, checked: compareChecked(calendar, "secondSemester") });
       }
 
       setFirstCalendar(first);
@@ -143,13 +146,13 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     const filterFirst = firstCalendar.filter((e) => e.checked);
     if (filterFirst !== undefined)
       for (let e of filterFirst)
-        if (!await compareChecked(e, "firstSemester"))
+        if (!compareChecked(e, "firstSemester"))
           firstSemester.push(e);
 
     const filterSecond = secondCalendar.filter((e) => e.checked);
     if (filterSecond !== undefined)
       for (let e of filterSecond)
-        if (!await compareChecked(e, "secondSemester"))
+        if (!compareChecked(e, "secondSemester"))
           secondSemester.push(e);
 
     if (category?.name === "Extensão específica do curso" && typeProject === "common")
@@ -162,7 +165,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   {
     if (e.target.checked)
     {
-      if (!await compareChecked(e.target.value, "firstSemester"))
+      if (!compareChecked(e.target.value, "firstSemester"))
         if (firstSemester.findIndex((local) =>
             local.day === e.target.value.day &&
             local.location === e.target.value.location &&
@@ -209,7 +212,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   {
     if (e.target.checked)
     {
-      if (!await compareChecked(e.target.value, "secondSemester"))
+      if (!compareChecked(e.target.value, "secondSemester"))
         if (secondSemester.findIndex((local) =>
             local.day === e.target.value.day &&
             local.location === e.target.value.location &&
