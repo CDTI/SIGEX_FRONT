@@ -94,7 +94,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       setNotices(await getActiveNoticesForUser(user?._id));
       setCategories(await getActiveCategories());
       if (categoryId)
-        setCategory(await getCategory(categoryId));
+        setCategory(categories.find((c) => c._id === categoryId) as ICategory);
 
       setTypeProject(project.typeProject);
       setSecondCalendar(project.secondSemester.map((s: ISchedule) =>
@@ -327,7 +327,9 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
         </Form.Item>
 
         <Form.Item label="Categoria" name="categoryId" rules={[{ required: true, message: "Campo Obrigatório" }]}>
-          <Select placeholder="Selecione uma categoria" onChange={changeCalendar}>
+          <Select
+            placeholder="Selecione uma categoria"
+            onChange={changeCalendar}>
             {categories.map((e) => (<Option key={e._id} value={e._id}>{e.name}</Option>))}
           </Select>
         </Form.Item>
