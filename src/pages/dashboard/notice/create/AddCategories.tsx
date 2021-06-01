@@ -181,7 +181,7 @@ const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                       </>))}
 
                       <Form.Item>
-                        <Button type="dashed" block onClick={add}>
+                        <Button type="dashed" block onClick={() => add()}>
                           <PlusOutlined /> Adicionar agenda
                         </Button>
                       </Form.Item>
