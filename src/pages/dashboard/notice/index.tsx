@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import
 {
+  Button,
   List,
   notification,
   Switch,
@@ -56,7 +57,9 @@ const Notices: React.FC = () =>
             [
               <Switch onChange={() => changeStatus(item._id ?? "")} defaultChecked={item.isActive} />,
               <Link to={`/dashboard/notices/edit/${item._id}`}>
-                Editar <EditOutlined />
+                <Button style={{ color: "#333" }}>
+                  Editar <EditOutlined />
+                </Button>
               </Link>,
             ]}
           >
