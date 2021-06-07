@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Select, Space, notification, Switch } from "antd";
 import InputMask from "antd-mask-input";
-import { createUser, updateUser, resetPassword } from "../../../services/user_service";
+import { createUser, updateUser, requestPasswordChange } from "../../../services/user_service";
 import IUser from "../../../interfaces/user";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { IRole } from "../../../interfaces/role";
@@ -47,11 +47,7 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
   const reset = async (userSubmit: IUser) =>
   {
     if (user !== undefined)
-    {
-      const response = await resetPassword(user);
-
-      notification.open({ message: response.message });
-    }
+      notification.open({ message: await requestPasswordChange(user.cpf) });
 
     form.resetFields();
     loadUser();
