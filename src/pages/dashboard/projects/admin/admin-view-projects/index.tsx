@@ -12,7 +12,6 @@ import { IPrograms } from "../../../../../interfaces/programs";
 import { ReturnResponse, updateProject } from "../../../../../services/project_service";
 import { IFeedback } from "../../../../../interfaces/feedback";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
-import IUser from "../../../../../interfaces/user";
 import { getUserName } from "../../../../../services/user_service";
 
 const { Step } = Steps;
@@ -28,7 +27,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory | null>(null);
   const [program, setProgram] = useState<IPrograms | null>(null);
-  const [user, setUser] = useState<IUser | null>(null);
+  const [userName, setUserName] = useState("");
   const [status, setStatus] = useState(false);
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
@@ -77,7 +76,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
           );
           setTotal(formatReal(value));
           getUserName(project.author).then((data) =>{
-            setUser(data.user);
+            setUserName(data);
           });
           defineTypeProject();
         });
@@ -232,7 +231,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
               <Collapse accordion style={{ marginTop: "30px" }}>
                 <Panel header="Informações básicas" key="1">
                   <Typography>
-                    <b>Usuário:</b> {user?.name}
+                    <b>Usuário:</b> {userName}
                   </Typography>
                   <Typography>
                     <b>Nome:</b> {project.name}
