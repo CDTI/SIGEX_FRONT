@@ -58,8 +58,10 @@ export const changePassword = async (value: any): Promise<boolean> =>
   return response.data;
 };
 
-export const getUserName = async (cpf: string): Promise<ResponseUser> => {
-  const response = await api.get(`userName/${cpf}`);
+export const getUserName = async (cpf: string): Promise<string> =>
+{
+  const response = await api.get(`user/name/${cpf}`);
+
   return response.data;
 };
 
