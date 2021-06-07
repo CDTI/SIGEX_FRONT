@@ -144,7 +144,9 @@ const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                           >
                             <Select>
                               <Option value="Campus Ecoville">Campus Ecoville</Option>
-                              <Option value="Unidade Sants Andrade">Unidade Santo Andrade</Option>
+                              <Option value="Unidade Santos Andrade">Unidade Santos Andrade</Option>
+                              <Option value="Unidade Praça Osório">Unidade Praça Osório</Option>
+                              <Option value="Faculdade Positivo Londrina">Faculdade Positivo Londrina</Option>
                             </Select>
                           </Form.Item>
 
