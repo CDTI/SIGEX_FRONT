@@ -5,7 +5,9 @@ import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './sty
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useAuth } from '../../context/auth'
 import logo from '../../sigex.png'
-import { checkUser, createUser, requestPasswordChange } from '../../services/user_service'
+import { checkUser, createUser, hasPasswordChangeToken } from '../../services/user_service'
+import { useHistory } from "react-router-dom";
+import crypto from "crypto";
 
 interface ValueLogin {
   cpf: string,
@@ -17,6 +19,7 @@ interface Props {
 }
 
 const LoginPage: React.FC<Props> = () => {
+  const history = useHistory();
   const context = useAuth()
   const [loading, setLoading] = useState(false)
   const [cpf, setCpf] = useState('')
@@ -88,18 +91,26 @@ const LoginPage: React.FC<Props> = () => {
   {
     try
     {
-      await requestPasswordChange({ ...value, cpf });
+      const id = await hasPasswordChangeToken(cpf);
 
-      form.resetFields();
-      setForgotPassword(false);
+      const key = crypto.createHash("sha256").update("S1g3x@UP").digest();
+      const iv = crypto.createHash("sha256").update(new Date().toISOString().split("T")[0]).digest();
+      const cipher = crypto.createCipheriv("aes-256-gcm", key, iv).setEncoding("hex");
 
-      form.setFieldsValue(cpf);
+      const token = JSON.stringify({ id, cpf, name: value.name.toUpperCase(), email: value.email.toLowerCase() });
+      const encryptedToken = iv.toString("hex") + cipher.update(token).toString("hex");
 
-      notification.success({ message: "E-mail de confirmação enviado com sucesso!" });
+      history.push(`/changePassword?userId=${id}&token=${encryptedToken}`);
     }
     catch (err)
     {
       notification.error({ message: err.response.data });
+
+      form.resetFields();
+      form.setFieldsValue({ cpf });
+
+      setForgotPassword(false);
+      setLoginUser(true);
     }
   }
 
@@ -231,14 +242,14 @@ const LoginPage: React.FC<Props> = () => {
                   >
                     <Input.Password draggable type='password' placeholder='Digite a Senha' />
                   </Form.Item>
-                  
+
                   <Form.Item>
                     <Button type='primary' htmlType='submit'>Cadastrar</Button>
                   </Form.Item>
                 </Form>
               </>
             )}
-            
+
             {forgotPassword && (
               <>
                 <Form
@@ -247,7 +258,19 @@ const LoginPage: React.FC<Props> = () => {
                   onFinish={handlePasswordChangeRequest}
                   style={{ maxWidth: "520px", width: "100%" }}
                 >
-                  <LabelInput>Para alterar sua senha, confirme o e-mail cadastrado com seu CPF</LabelInput>
+                  <Form.Item>
+                  <LabelInput>Forneça alguns dados para completar a redefinição da sua senha.</LabelInput>
+                  </Form.Item>
+
+                  <LabelInput>Nome</LabelInput>
+                  <Form.Item
+                    name="name"
+                    rules={[{ required: true, message: "Campo obrigatório" }]}
+                  >
+                    <Input placeholder="Digite seu nome"></Input>
+                  </Form.Item>
+
+                  <LabelInput>E-mail</LabelInput>
                   <Form.Item
                     name="email"
                     rules={[{ required: true, message: "Campo obrigatório" }]}
