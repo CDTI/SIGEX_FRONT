@@ -8,6 +8,8 @@ import logo from '../../sigex.png'
 import { checkUser, createUser, hasPasswordChangeToken } from '../../services/user_service'
 import { useHistory } from "react-router-dom";
 import crypto from "crypto";
+import { getRoles } from '../../services/role_service'
+import { IRole } from '../../interfaces/role'
 
 interface ValueLogin {
   cpf: string,
@@ -43,19 +45,21 @@ const LoginPage: React.FC<Props> = () => {
 
   const handleCreateUser = async (userNew: any) => {
     try {
-      const cUser = {
+      const roles = await getRoles();
+      const cUser =
+      {
         cpf: userNew.cpf,
         email: userNew.email,
         lattes: userNew.lattes,
         name: userNew.name,
         password: userNew.password,
-        role: ['teacher'],
+        roles: roles.filter((r: IRole) => r.description === "Professor").map((r:IRole) => r._id),
         isActive: true
       }
 
       setPassword(userNew.password)
       const newUser = await createUser(cUser)
-      const login = { cpf: cpf, password: password }
+      const login = { cpf, password }
       console.log(newUser)
       setCpf(userNew.cpf)
       setNewUser(false)
@@ -173,7 +177,7 @@ const LoginPage: React.FC<Props> = () => {
                     <Input.Password draggable type='password' placeholder='Digite sua senha' />
                   </Form.Item>
 
-                  {/*
+                  {
                     <Form.Item>
                       <div style={{ display: "flex", justifyContent: "flex-end" }}>
                         <Button type="link" htmlType="button" onClick={handleForgotPassword}>
@@ -181,7 +185,7 @@ const LoginPage: React.FC<Props> = () => {
                         </Button>
                       </div>
                     </Form.Item>
-                  */}
+                  }
 
                   <Form.Item>
                     <p style={{ textAlign: 'center' }}>
@@ -261,7 +265,7 @@ const LoginPage: React.FC<Props> = () => {
                   style={{ maxWidth: "520px", width: "100%" }}
                 >
                   <Form.Item>
-                  <LabelInput>Forneça alguns dados para completar a redefinição da sua senha.</LabelInput>
+                    <LabelInput>Forneça alguns dados para completar a redefinição da sua senha.</LabelInput>
                   </Form.Item>
 
                   <LabelInput>Nome</LabelInput>
