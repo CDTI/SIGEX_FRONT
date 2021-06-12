@@ -131,7 +131,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         dateFinal: date,
         status: "pending",
         categoryId: values.categoryId,
-        author: user.cpf,
+        author: user._id,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
         noticeId: values.noticeId,

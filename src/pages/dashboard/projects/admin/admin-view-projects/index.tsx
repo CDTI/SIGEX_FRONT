@@ -12,17 +12,19 @@ import { IPrograms } from "../../../../../interfaces/programs";
 import { ReturnResponse, updateProject } from "../../../../../services/project_service";
 import { IFeedback } from "../../../../../interfaces/feedback";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
-import { getUserName } from "../../../../../services/user_service";
+import IUser from "../../../../../interfaces/user";
 
 const { Step } = Steps;
 const { Panel } = Collapse;
 const { TextArea } = Input;
 
-interface Props {
+interface Props
+{
   project: IProject;
 }
 
-const AdminViewProject: React.FC<Props> = ({ project }) => {
+const AdminViewProject: React.FC<Props> = ({ project }) =>
+{
   const [edited, setEdited] = useState<ReturnResponse | null>(null);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory | null>(null);
@@ -34,35 +36,46 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
   const [total, setTotal] = useState("");
   const [typeProject, setTypeProject] = useState("");
 
-  const formatReal = (value: any) => {
+  const formatReal = (value: any) =>
+  {
     console.log(value);
     var tmp = value + "";
     tmp = tmp.replace(/([0-9]{2})$/g, ",$1");
-    if (tmp.length > 6) tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
+    if (tmp.length > 6)
+      tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
+
     return tmp;
   };
 
-  const defineTypeProject = () => {
-    if(project.typeProject === "common" && project.categoryId === "5fb8402399032945bc5c1fe2"){
+  const defineTypeProject = () =>
+  {
+    if (project.typeProject === "common" && project.categoryId === "5fb8402399032945bc5c1fe2")
       setTypeProject("Extracurricular");
-    }else if (project.typeProject === "common") {
+    else if (project.typeProject === "common")
       setTypeProject("Institucional");
-    } else if (project.typeProject === "extraCurricular") {
+    else if (project.typeProject === "extraCurricular")
       setTypeProject("Extracurricular");
-    } else if (project.typeProject === "curricularComponent") {
+    else if (project.typeProject === "curricularComponent")
       setTypeProject("Componente Curricular");
-    }
-  }
+  };
 
-  useEffect(() => {
-    getActiveCategories().then((data) => {
+  useEffect(() =>
+  {
+    getActiveCategories().then((data) =>
+    {
       console.log(data);
       const categorySelected = data.find((cat) => cat._id === project.categoryId);
-      if (categorySelected !== undefined) setCategory(categorySelected);
-      listPrograms().then((programsData) => {
+      if (categorySelected !== undefined)
+        setCategory(categorySelected);
+
+      listPrograms().then((programsData) =>
+      {
         const programSelected = programsData.programs.find((e) => e._id === project.programId);
-        if (programSelected !== undefined) setProgram(programSelected);
-        listFeedbackProject(project._id).then((data) => {
+        if (programSelected !== undefined)
+          setProgram(programSelected);
+
+        listFeedbackProject(project._id).then((data) =>
+        {
           console.log(data);
           setFeedback(data.feedback);
           const resource = project.resources;
@@ -71,32 +84,35 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
           if (resource.transport !== null && resource.transport !== undefined)
             value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
 
-          resource.materials?.map(
-            (e: IMaterials) => (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString())))
-          );
+          resource.materials?.map((e: IMaterials) =>
+            (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
+
           setTotal(formatReal(value));
-          getUserName(project.author).then((data) =>{
-            setUserName(data);
-          });
+          setUserName((project.author as IUser)?.name);
           defineTypeProject();
         });
       });
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalSpending = () => {
+  const totalSpending = () =>
+  {
     const resource = project.resources;
     let value = 0;
 
     if (resource.transport !== null && resource.transport !== undefined)
       value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
 
-    resource.materials?.map((e: IMaterials) => (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
+    resource.materials?.map((e: IMaterials) =>
+      (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
+
     setTotal(formatReal(value));
   };
 
-  const changeStatus = async (status: "approved" | "reproved" | "adjust") => {
+  const changeStatus = async (status: "approved" | "reproved" | "adjust") =>
+  {
     project.status = status;
 
     const update = await updateProject(project);
@@ -105,21 +121,19 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
     setEdited({ message: update.message, result: update.result, project: update.project });
   };
 
-  const openModal = () => {
-    setVisible(true);
-  };
+  const openModal = () => setVisible(true);
 
-  const modalFeedback = useMemo(() => {
-    const submitFeedback = async (values: { text: string }) => {
+  const modalFeedback = useMemo(() =>
+  {
+    const submitFeedback = async (values: { text: string }) =>
+    {
       console.log(values);
       setVisible(false);
       const registerFeed = await createFeedbackProject(project._id, values);
       console.log(registerFeed);
     };
 
-    const closeModal = () => {
-      setVisible(false);
-    };
+    const closeModal = () => setVisible(false);
 
     return (
       <Modal title="Enviar feedback" visible={visible} onCancel={closeModal} footer={[]}>
@@ -127,19 +141,20 @@ const AdminViewProject: React.FC<Props> = ({ project }) => {
           <Form.Item label="Feedback" name="text" rules={[{ required: true, message: "Campo Obrigatório " }]}>
             <TextArea />
           </Form.Item>
+
           <Form.Item>
             <Space>
               <Button onClick={closeModal} type="primary" style={{ backgroundColor: "#a31621", color: "#fff" }}>
                 Cancelar
               </Button>
+
               <Button htmlType="submit" type="primary" style={{ backgroundColor: "#439A86", color: "#fff" }}>
                 Enviar
               </Button>
             </Space>
           </Form.Item>
         </Form>
-      </Modal>
-    );
+      </Modal>);
   }, [form, project._id, visible]);
 
   const columnsMaterials = [

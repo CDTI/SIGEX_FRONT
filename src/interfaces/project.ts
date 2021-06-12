@@ -1,4 +1,5 @@
 import { ISchedule } from "./notice";
+import IUser from "./user";
 
 export interface IProject {
     _id: string
@@ -17,7 +18,7 @@ export interface IProject {
     results: string
     resources: IResource
     attachments: string[]
-    author: string
+    author: IUser | string;
     dateStart: Date
     dateFinal: Date
     status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish' | 'notSelected'
