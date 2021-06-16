@@ -8,7 +8,7 @@ export const newProject: IProject = {
   typeProject: "common",
   planning: [],
   programId: "",
-  categoryId: "",
+  category: "",
   noticeId: "",
   resources: {
     transport: null,

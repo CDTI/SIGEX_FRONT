@@ -5,7 +5,6 @@ import { ContainerFlex } from "../../../../../global/styles";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
 import { compareDate, currentProject } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
-import { getActiveCategories } from "../../../../../services/category_service";
 import { ICategory } from "../../../../../interfaces/category";
 import { listPrograms } from "../../../../../services/program_service";
 import { IPrograms } from "../../../../../interfaces/programs";
@@ -27,7 +26,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 {
   const [edited, setEdited] = useState<ReturnResponse | null>(null);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
-  const [category, setCategory] = useState<ICategory | null>(null);
+  const [category, setCategory] = useState<ICategory>(project.category as ICategory);
   const [program, setProgram] = useState<IPrograms | null>(null);
   const [userName, setUserName] = useState("");
   const [status, setStatus] = useState(false);
@@ -38,9 +37,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 
   const formatReal = (value: any) =>
   {
-    console.log(value);
-    var tmp = value + "";
-    tmp = tmp.replace(/([0-9]{2})$/g, ",$1");
+    let tmp = `${value} `.replace(/([0-9]{2})$/g, ",$1");
     if (tmp.length > 6)
       tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
 
@@ -49,48 +46,46 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 
   const defineTypeProject = () =>
   {
-    if (project.typeProject === "common" && project.categoryId === "5fb8402399032945bc5c1fe2")
-      setTypeProject("Extracurricular");
-    else if (project.typeProject === "common")
-      setTypeProject("Institucional");
+    if (project.typeProject === "common")
+    {
+      setTypeProject(project.category === "5fb8402399032945bc5c1fe2"
+        ? "Extracurricular"
+        : "Institucional");
+    }
     else if (project.typeProject === "extraCurricular")
+    {
       setTypeProject("Extracurricular");
+    }
     else if (project.typeProject === "curricularComponent")
+    {
       setTypeProject("Componente Curricular");
+    }
   };
 
   useEffect(() =>
   {
-    getActiveCategories().then((data) =>
+    listPrograms().then((programsData) =>
     {
-      console.log(data);
-      const categorySelected = data.find((cat) => cat._id === project.categoryId);
-      if (categorySelected !== undefined)
-        setCategory(categorySelected);
+      const programSelected = programsData.programs.find((e) => e._id === project.programId);
+      if (programSelected !== undefined)
+        setProgram(programSelected);
 
-      listPrograms().then((programsData) =>
+      listFeedbackProject(project._id).then((data) =>
       {
-        const programSelected = programsData.programs.find((e) => e._id === project.programId);
-        if (programSelected !== undefined)
-          setProgram(programSelected);
+        console.log(data);
+        setFeedback(data.feedback);
+        const resource = project.resources;
+        let value = 0;
 
-        listFeedbackProject(project._id).then((data) =>
-        {
-          console.log(data);
-          setFeedback(data.feedback);
-          const resource = project.resources;
-          let value = 0;
+        if (resource.transport !== null && resource.transport !== undefined)
+          value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
 
-          if (resource.transport !== null && resource.transport !== undefined)
-            value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
+        resource.materials?.map((e: IMaterials) =>
+          (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
 
-          resource.materials?.map((e: IMaterials) =>
-            (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
-
-          setTotal(formatReal(value));
-          setUserName((project.author as IUser)?.name);
-          defineTypeProject();
-        });
+        setTotal(formatReal(value));
+        setUserName((project.author as IUser)?.name);
+        defineTypeProject();
       });
     });
 
@@ -230,11 +225,15 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
           <ContainerFlex>
             <div>
               <Steps direction="horizontal" current={currentProject(project)}>
-                {project.status === "reproved" && <Step title="Reprovado" description="Projeto foi reprovado" />}
+                {project.status === "reproved" && (
+                  <Step title="Reprovado" description="Projeto foi reprovado" />)}
+
                 {(project.status === "pending" || project.status === "approved") && (
-                  <Step title="Em análise" description="Projeto em ánalise." />
-                )}
-                {project.status === "adjust" && <Step title="Correção" description="Projeto aguardando correção" />}
+                  <Step title="Em análise" description="Projeto em ánalise." />)}
+
+                {project.status === "adjust" && (
+                  <Step title="Correção" description="Projeto aguardando correção" />)}
+
                 {project.status !== "reproved" && (
                   <>
                     <Step title="Aprovado" description="Projeto aprovado." />
@@ -243,111 +242,129 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                   </>
                 )}
               </Steps>
+
               <Collapse accordion style={{ marginTop: "30px" }}>
                 <Panel header="Informações básicas" key="1">
                   <Typography>
                     <b>Usuário:</b> {userName}
                   </Typography>
+
                   <Typography>
                     <b>Nome:</b> {project.name}
                   </Typography>
+
                   <Typography>
                     <b>Descrição:</b> {project.description}
                   </Typography>
+
                   <Typography>
-                    <b>Categoria:</b> {category?.name}
+                    <b>Categoria:</b> {category.name}
                   </Typography>
+
                   <Typography>
                     <b>Programa:</b> {program?.name}
                   </Typography>
+
                   <Typography key={project.typeProject}>
                     <b>Tipo:</b> {typeProject}
                   </Typography>
-                  {project.categoryId !== "5fb8402399032945bc5c1fe2" && (
+
+                  {project.category !== "5fb8402399032945bc5c1fe2" && (
                     <>
                       <Typography>
                         <b>Disponibilidades de horários primeiro semestre:</b>
                       </Typography>
+
                       <ul style={{ marginLeft: "18px" }}>
                         {project.firstSemester.map((e) => (
                           <li>
-                            {e.location} - {`${e.day}ª feira`} - {e.period}
-                          </li>
-                        ))}
+                            {e.period} - {`${e.day}ª feira`} - {e.location}
+                          </li>))}
                       </ul>
+
                       <Typography>
                         <b>Disponibilidades de horários segundo semestre:</b>
                       </Typography>
+
                       <ul style={{ marginLeft: "18px" }}>
                         {project.secondSemester.map((e) => (
                           <li>
-                            {e.location} - {`${e.day}º feira`} - {e.period}
-                          </li>
-                        ))}
+                            {e.period} - {`${e.day}ª feira`} - {e.location}
+                          </li>))}
                       </ul>
+
                       <Typography>
                         <b>CH disponível:</b> {project.totalCH}
                       </Typography>
+
                       <Typography>
                         <b>Máximo de turmas:</b> {project.maxClasses}
                       </Typography>
-                    </>
-                  )}
-                  {project.categoryId === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
+                    </>)}
+
+                  {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
                     <>
                       <Typography>
                         {" "}
-                        <b> Professores </b>{" "}
+                        <b> Professores </b>
+                        {" "}
                       </Typography>
+
                       {project.teachers.map((t) => (
                         <li>
                           {t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}
-                        </li>
-                      ))}
+                        </li>))}
+
                       <Typography>
                         {" "}
-                        <b> Disciplinas </b>{" "}
+                        <b> Disciplinas </b>
+                        {" "}
                       </Typography>
+
                       {project.disciplines.map((d) => (
-                        <li>{d.name}</li>
-                      ))}
-                    </>
-                  )}
-                  {project.categoryId === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
+                        <li>{d.name}</li>))}
+                    </>)}
+
+                  {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
                     <>
                       <Typography>
                         {" "}
-                        <b> Professores </b>{" "}
+                        <b> Professores </b>
+                        {" "}
                       </Typography>
+
                       {project.teachers.map((t) => (
                         <li>
                           {t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}
-                        </li>
-                      ))}
-                    </>
-                  )}
+                        </li>))}
+                    </>)}
                 </Panel>
+
                 <Panel header="Parcerias" key="2">
                   <Collapse accordion>
                     {project.partnership?.map((partner, index) => (
                       <Panel header={"Parceria " + (index + 1)} key={index}>
-                        <Typography>Sobre: {partner.text}</Typography>
+                        <Typography>
+                          Sobre: {partner.text}
+                        </Typography>
+
                         {partner.contacts.map((contact, contactInd) => (
                           <div key={contactInd}>
                             <Typography>{contact.name}</Typography>
                             <Typography>{contact.phone}</Typography>
-                          </div>
-                        ))}
-                      </Panel>
-                    ))}
+                          </div>))}
+                      </Panel>))}
                   </Collapse>
+
                   <Typography></Typography>
                 </Panel>
+
                 <Panel header="Comunidade" key="3">
                   <Typography>Sobre: {project.specificCommunity.text}</Typography>
                   <Typography>Localização: {project.specificCommunity.location}</Typography>
                   <Typography>Pessoas envolvidas: {project.specificCommunity.peopleInvolved}</Typography>
                 </Panel>
+
                 <Panel header="Planejamento" key="4">
                   <Collapse>
                     {project.planning?.map((planning, planningIdx) => (
@@ -357,34 +374,37 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                         <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
                         <Typography>Inicio: {planning.startDate}</Typography>
                         <Typography>Final: {planning.finalDate}</Typography>
-                      </Panel>
-                    ))}
+                      </Panel>))}
                   </Collapse>
                 </Panel>
+
                 <Panel header="Recursos" key="5">
                   <h2>Materiais</h2>
                   {project.resources.materials !== undefined && (
-                    <MyTable columns={columnsMaterials} pagination={false} data={project.resources.materials} />
-                  )}
+                    <MyTable columns={columnsMaterials} pagination={false} data={project.resources.materials} />)}
+
                   <Divider />
+
                   <h2>Transportes</h2>
                   {project.resources.transport !== null && project.resources.transport !== undefined && (
                     <MyTable
                       columns={columnsTransport}
                       pagination={false}
                       data={[project.resources.transport]}
-                    ></MyTable>
-                  )}
+                    ></MyTable>)}
+
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <Typography style={{ marginLeft: "10px", fontWeight: "bold", fontSize: "16pt", color: "#b80c09" }}>
                       Valor total do projeto
                     </Typography>
+
                     <Typography style={{ marginRight: "50px", fontWeight: "bold", fontSize: "16pt", color: "#b80c09" }}>
                       {total}
                     </Typography>
                   </div>
                 </Panel>
               </Collapse>
+
               <Space style={{ marginTop: "25px" }}>
                 {project.status === "pending" && (
                   <>
@@ -394,31 +414,30 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                     >
                       Reprovar
                     </Button>
+
                     <Button style={{ backgroundColor: "#dbbb04", color: "#fff" }} onClick={openModal}>
                       Solicitar ajuste
                     </Button>
+
                     <Button
                       style={{ backgroundColor: "#439A86", color: "#fff" }}
                       onClick={() => changeStatus("approved")}
                     >
                       Aprovar
                     </Button>
-                  </>
-                )}
+                  </>)}
               </Space>
+
               <Timeline style={{ marginTop: "25px" }}>
-                {feedback?.registers.sort(compareDate).map((e) => {
-                  return (
-                    <Timeline.Item>
-                      {e.text} - {e.date} - {e.typeFeedback}
-                    </Timeline.Item>
-                  );
-                })}
+                {feedback?.registers.sort(compareDate).map((e) => (
+                  <Timeline.Item>
+                    {e.text} - {e.date} - {e.typeFeedback}
+                  </Timeline.Item>))}
               </Timeline>
             </div>
           </ContainerFlex>
-        </Structure>
-      )}
+        </Structure>)}
+
       {status && (
         <ContainerFlex>
           <Result
@@ -426,8 +445,8 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
             title={edited?.message}
             subTitle={"Projeto editado: " + edited?.project.name}
           />
-        </ContainerFlex>
-      )}
+        </ContainerFlex>)}
+
       {modalFeedback}
     </>
   );

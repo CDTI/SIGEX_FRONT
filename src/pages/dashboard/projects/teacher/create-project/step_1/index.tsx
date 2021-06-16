@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
+import
+{
   Form,
   Input,
   Button,
@@ -12,24 +13,26 @@ import {
   Divider,
   notification,
 } from "antd";
-import { ContainerFlex } from "../../../../../../global/styles";
-import { IBasicInfo } from "..";
-import { IProject } from "../../../../../../interfaces/project";
-import { ICategory } from "../../../../../../interfaces/category";
-import {
-  getCategory,
-  getCategoriesByNotice,
-  getActiveCategories,
-} from "../../../../../../services/category_service";
-import { ISchedule } from "../../../../../../interfaces/notice";
-import { IPrograms } from "../../../../../../interfaces/programs";
-import { listPrograms } from "../../../../../../services/program_service";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { useAuth } from "../../../../../../context/auth";
-import { INotice } from "../../../../../../interfaces/notice";
-import { getActiveNoticesForUser } from "../../../../../../services/notice_service";
+
+import { IBasicInfo } from "..";
 import DynamicDisciplinesFieldStep1 from "./dynamicDisciplinesFieldStep1";
 import DynamicTechersFieldStep1 from "./dynamicTechersFieldStep1";
+
+import { ContainerFlex } from "../../../../../../global/styles";
+import { useAuth } from "../../../../../../context/auth";
+import { IPrograms } from "../../../../../../interfaces/programs";
+import { ICategory } from "../../../../../../interfaces/category";
+import { INotice, ISchedule } from "../../../../../../interfaces/notice";
+import { IProject } from "../../../../../../interfaces/project";
+import { listPrograms } from "../../../../../../services/program_service";
+import
+{
+  getCategoriesByNotice,
+  getActiveCategories
+} from "../../../../../../services/category_service";
+import { getActiveNoticesForUser } from "../../../../../../services/notice_service";
+
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -75,7 +78,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
   const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
-  const [categoryId, setCategoryId] = useState(project.categoryId);
+  const [categoryId, setCategoryId] = useState(project.category);
   const [category, setCategory] = useState<ICategory | null>(null);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [notices, setNotices] = useState<INotice[]>([]);
@@ -326,10 +329,11 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
           <TextArea placeholder="Descrição do projeto" />
         </Form.Item>
 
-        <Form.Item label="Categoria" name="categoryId" rules={[{ required: true, message: "Campo Obrigatório" }]}>
+        <Form.Item label="Categoria" name="category" rules={[{ required: true, message: "Campo Obrigatório" }]}>
           <Select
             placeholder="Selecione uma categoria"
-            onChange={changeCalendar}>
+            onChange={changeCalendar}
+          >
             {categories.map((e) => (<Option key={e._id} value={e._id}>{e.name}</Option>))}
           </Select>
         </Form.Item>

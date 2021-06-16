@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Structure from "../../../../components/layout/structure";
 import { ContainerFlex } from "../../../../global/styles";
 import { IProject } from "../../../../interfaces/project";
-import { downloadCSV, listAllProject } from "../../../../services/project_service";
+import { listAllProject } from "../../../../services/project_service";
 import { Tag, Space, Button, Select, Modal, Input } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import AdminViewProject from "../admin/admin-view-projects";
@@ -15,7 +15,7 @@ import { newProject } from "../../../../mocks/mockDefaultValue";
 import { INotice } from "../../../../interfaces/notice";
 import { getAllNotices } from "../../../../services/notice_service";
 import { ICategory } from "../../../../interfaces/category";
-import { getActiveCategories } from "../../../../services/category_service";
+import { getAllCategories } from "../../../../services/category_service";
 import IUser from "../../../../interfaces/user";
 
 const { Option } = Select;
@@ -29,8 +29,9 @@ interface IModal
 
 interface State
 {
-  period?: string;
-  program?: string;
+  notice?: string
+  program?: string
+  category?: string
 }
 
 const Projects: React.FC = () =>
@@ -42,7 +43,7 @@ const Projects: React.FC = () =>
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [periods, setPeriods] = useState<INotice[]>([]);
   const [program, setProgram] = useState("");
-  const [period, setPeriod] = useState("");
+  const [notice, setNotice] = useState("");
   const [modal, setModal] = useState<IModal>(
   {
     visible: false,
@@ -50,17 +51,12 @@ const Projects: React.FC = () =>
     category: undefined
   });
 
-  const [state, setState] = useState<State>(
-  {
-    period: "null",
-    program: "null",
-  });
-
+  const [state, setState] = useState<State>({});
   const [initialState, setInitialState] = useState(0);
 
   useEffect(() =>
   {
-    getActiveCategories().then((data) => setCategories(data));
+    getAllCategories().then((data) => setCategories(data));
     listAllProject().then((data) =>
     {
       setProjects(data);
@@ -71,51 +67,51 @@ const Projects: React.FC = () =>
           setPrograms(listPrograms.programs);
           setPeriods(listNotices);
           setProgram("null");
-          setPeriod("null");
+          setNotice("null");
         }));
     });
   }, [state]);
 
   const handleChange = () =>
   {
-    if (state.program != "null" && state.period != "null")
+    setFilteredProjects(projects.filter((p: IProject) =>
     {
-      const filter = projects.filter((e) => e.programId === state.program && e.noticeId === state.period);
-      setFilteredProjects(filter);
-    }
-    else if (state.program != "null")
-    {
-      const filter = projects.filter((e) => e.programId === state.program);
-      setFilteredProjects(filter);
-    }
-    else if (state.period != "null")
-    {
-      const filter = projects.filter((e) => e.noticeId === state.period);
-      console.log();
-      setFilteredProjects(filter);
-    }
-    else
-    {
-      setFilteredProjects(projects);
-    }
+      let shouldKeep = true;
+      if (state.program !== undefined)
+        shouldKeep = shouldKeep && p.programId === state.program;
+
+      if (state.category !== undefined)
+      shouldKeep = shouldKeep && (p.category as ICategory)._id === state.category;
+
+      if (state.notice !== undefined)
+      shouldKeep = shouldKeep && p.noticeId === state.notice;
+
+      return shouldKeep;
+    }));
   };
 
-  const handleProgram = (program: string) =>
+  const handleFilterByProgram = (program: string) =>
   {
-    state.program = program;
+    state.program = program !== "0" ? program : undefined;
     handleChange();
   };
 
-  const handlePeriod = (period: string) =>
+  const handleFilterByNotice = (notice: string) =>
   {
-    state.period = period;
+    state.program = notice !== "0" ? notice : undefined;
     handleChange();
   };
+
+  const handleFilterByCategory = (category: string) =>
+  {
+    state.category = category !== "0" ? category : undefined;
+    handleChange();
+  }
 
   const openModal = (project: IProject) =>
   {
     setInitialState(initialState + 1);
-    setCategory(categories.find((c) => c._id === project.categoryId));
+    setCategory(project.category as ICategory);
     setModal({ visible: true, project: project, category: category });
   };
 
@@ -224,18 +220,27 @@ const Projects: React.FC = () =>
   return (
     <Structure title="todas as propostas">
       <Space>
-        <Select defaultValue="null" style={{ width: 200, margin: "8px 0" }} onChange={handlePeriod}>
-          <Option value="null">Selecione um Edital</Option>
-          {periods.map((e) =>
+        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByCategory}>
+          <Option value="0">Selecione uma Categoria</Option>
+          {categories.map((e) =>
           {
             if (e._id !== undefined)
               return (<Option key={e._id} value={e._id}>{e.name}</Option>);
           })}
         </Select>
 
-        <Select defaultValue="null" style={{ width: 200, margin: "8px 0" }} onChange={handleProgram}>
-          <Option value="null">Selecione um Programa</Option>
+        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByProgram}>
+          <Option value="0">Selecione um Programa</Option>
           {programs.map((e) =>
+          {
+            if (e._id !== undefined)
+              return (<Option key={e._id} value={e._id}>{e.name}</Option>);
+          })}
+        </Select>
+
+        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByNotice}>
+          <Option value="0">Selecione um Edital</Option>
+          {periods.map((e) =>
           {
             if (e._id !== undefined)
               return (<Option key={e._id} value={e._id}>{e.name}</Option>);

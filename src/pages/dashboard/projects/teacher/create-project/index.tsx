@@ -35,7 +35,7 @@ export interface IBasicInfo {
   secondSemester: ISchedule[];
   totalCH: number;
   programId: string;
-  categoryId: string;
+  category: string;
   noticeId: string;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   disciplines: IDiscipline[];
@@ -62,7 +62,8 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const [specific, setSpecific] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     // Verifica se os periodos estão ativos
     getActiveNoticesForUser(user?._id).then((notices) => {
       for (let notice of notices) {
@@ -130,7 +131,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         dateStart: date,
         dateFinal: date,
         status: "pending",
-        categoryId: values.categoryId,
+        category: values.category,
         author: user._id,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
@@ -150,7 +151,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         dateStart: date,
         dateFinal: date,
         status: "pending",
-        categoryId: values.categoryId,
+        category: values.category,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
         noticeId: values.noticeId,
