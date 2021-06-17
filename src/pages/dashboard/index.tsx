@@ -59,73 +59,94 @@ const Dashboard: React.FC = (props) => {
 
     return (
         <>
-
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
                     <div className="logo" >
                         <img src={logo} style={{ width: '100%', padding: '15px' }} alt="" />
                     </div>
+
                     <Menu theme="dark" defaultSelectedKeys={[location]}>
                         <Menu.Item key="/dashboard" icon={<HomeOutlined />}>
                             <Link to='/dashboard'>
                                 Home
                             </Link>
                         </Menu.Item>
+
                         <SubMenu key="/dashboard/programs" icon={<FileTextOutlined />} title="Programas">
                             <Menu.Item icon={<UnorderedListOutlined />} key="3">
                                 <Link to="/dashboard/programs">Listar Programas</Link>
                             </Menu.Item>
+
                             {userRoles.includes("Administrador") && (
                                 <Menu.Item key="/dashboard/program/create" icon={<DiffOutlined />}>
                                     <Link to="/dashboard/program/create">Criar Programa</Link>
                                 </Menu.Item>
                             )}
                         </SubMenu>
+
                         {userRoles.includes('Administrador') && (
                             <>
                                 <Menu.Item icon={<UserOutlined />}>
                                     <Link to="/dashboard/users">
                                         Usuários
-                                </Link>
+                                    </Link>
                                 </Menu.Item>
+
                                 <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
                                     <Link to="/dashboard/categories">Categorias</Link>
                                 </Menu.Item>
+
                                 <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
                                     <Link to='/dashboard/notices'>Editais</Link>
                                 </Menu.Item>
+
                                 <SubMenu title='Propostas' icon={<FileTextOutlined />}>
                                     <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
                                         <Link to='/dashboard/projects'>
                                             Todas as propostas
-                                    </Link>
+                                        </Link>
                                     </Menu.Item>
+
                                     <Menu.Item key="/dashboard/selectProjects" icon={<TeamOutlined />}>
                                         <Link to='/dashboard/selectProjects'>
                                             Selecionar projetos
-                                    </Link>
+                                        </Link>
                                     </Menu.Item>
                                 </SubMenu>
                             </>
                         )}
+
                         {(userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
                             <>
                                 <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
                                     <Menu.Item key="/dashboard/project/create" icon={<FileAddOutlined />}>
                                         <Link to="/dashboard/project/create">Registrar um projeto</Link>
                                     </Menu.Item>
+
                                     <Menu.Item key="/dashboard/myProjects" icon={<TeamOutlined />}>
                                         <Link to="/dashboard/myProjects">Meus Projetos</Link>
                                     </Menu.Item>
                                 </SubMenu>
                             </>
                         )}
+
+                        {userRoles.includes("Comitê de extensão") && (
+                          <>
+                              <SubMenu title='Propostas' icon={<FileTextOutlined />}>
+                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                                  <Link to='/dashboard/projects'>Todas as propostas</Link>
+                                </Menu.Item>
+                              </SubMenu>
+                          </>
+                        )}
+
                         <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes" disabled>
                             <Menu.Item icon={<UnorderedListOutlined />} key="3">Listar Curriculos</Menu.Item>
                             <Menu.Item key="4" icon={<PieChartOutlined />}>Relatórios</Menu.Item>
                         </SubMenu>
                     </Menu>
                 </Sider>
+
                 <Layout className="site-layout">
                     <Header className="site-layout-background" style={{
                         padding: 0, display: "flex",

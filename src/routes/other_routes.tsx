@@ -50,52 +50,52 @@ const OtherRoutes: React.FC = () => {
                 <Switch>
                     <Route path='/' exact={true} component={Home} />
                     <Dashboard>
-                        {/*
-                            Rota base
-                        */}
-                        <Route path='/dashboard' exact={true} component={DashboardHome} />
-                        {/*
-                            @description
-                            Rotas acessadas apenas por professore e ou predidentes do NDE
-                        */}
-                        {(userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
-                            <>
-                                <Route path='/dashboard/project/create' component={CreateProject} />
-                                <Route path='/dashboard/myProjects' component={ProjectsTeacher} />
-                            </>
-                        )}
-                        {/*
-                            @description
-                            Rotas acessadas apenas por administradores
+                        {/* Rota base */
+                            <Route path='/dashboard' exact={true} component={DashboardHome} />
+                        }
 
-                        */}
-                        {userRoles.includes('Administrador') && (
-                            <>
-                                <Route exact={true} path='/dashboard/notices' component={RegistrationPeriods} />
-                                <Route
-                                    exact={true}
-                                    path={'/dashboard/notices/create'}
-                                    component={CreateNoticeController} />
-
-                                <Route
-                                    exact={true}
-                                    path={'/dashboard/notices/edit/:id'}
-                                    component={CreateNoticeController} />
-
-                                <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
-                                <Route path='/dashboard/selectProjects' component={SelectProjects} />
-                                <Route path='/dashboard/program/create' component={CreateProgram} />
-                                <Route path='/dashboard/categories' component={CreateCategory} />
-                                <Route path='/dashboard/projects' component={ProjectsAdmin}/>
-                                <Route path='/dashboard/users' component={Users} />
-                            </>
+                        {/* Rotas acessadas apenas por professore e ou predidentes do NDE */
+                            (userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
+                                <>
+                                    <Route path='/dashboard/project/create' component={CreateProject} />
+                                    <Route path='/dashboard/myProjects' component={ProjectsTeacher} />
+                                </>
                         )}
 
-                        {/*
-                            Rotas de programas
-                        */}
-                        <Route path='/dashboard/programs' component={Programs} />
+                        {/* Rotas acessadas apenas por administradores */
+                            userRoles.includes('Administrador') && (
+                                <>
+                                    <Route exact={true} path='/dashboard/notices' component={RegistrationPeriods} />
+                                    <Route
+                                        exact={true}
+                                        path={'/dashboard/notices/create'}
+                                        component={CreateNoticeController} />
+
+                                    <Route
+                                        exact={true}
+                                        path={'/dashboard/notices/edit/:id'}
+                                        component={CreateNoticeController} />
+
+                                    <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
+                                    <Route path='/dashboard/selectProjects' component={SelectProjects} />
+                                    <Route path='/dashboard/program/create' component={CreateProgram} />
+                                    <Route path='/dashboard/categories' component={CreateCategory} />
+                                    <Route path='/dashboard/users' component={Users} />
+                                </>
+                        )}
+
+                        {/* Rotas acessadas pelo comitê de extensão */
+                            (userRoles.includes("Administrador") || userRoles.includes("Comitê de extensão")) && (
+                              <>
+                                  <Route path='/dashboard/projects' component={ProjectsAdmin}/>
+                              </>
+                        )}
+
+                        {/* Rotas de programas */
+                            <Route path='/dashboard/programs' component={Programs} />
+                        }
                     </Dashboard>
+
                     <Route component={NotFound} />
                 </Switch>
             </BrowserRouter>
