@@ -9,7 +9,7 @@ export const newProject: IProject = {
   planning: [],
   programId: "",
   category: "",
-  noticeId: "",
+  notice: "",
   resources: {
     transport: null,
     materials: [],

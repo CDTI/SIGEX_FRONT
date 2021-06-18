@@ -24,7 +24,7 @@ import { useAuth } from "../../../../../context/auth";
 import { createProject, updateProject } from "../../../../../services/project_service";
 import Modal from "antd/lib/modal/Modal";
 import { getActiveNoticesForUser } from "../../../../../services/notice_service";
-import { ISchedule } from "../../../../../interfaces/notice";
+import { INotice, ISchedule } from "../../../../../interfaces/notice";
 
 const { Step } = Steps;
 
@@ -36,7 +36,7 @@ export interface IBasicInfo {
   totalCH: number;
   programId: string;
   category: string;
-  noticeId: string;
+  notice: string;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   disciplines: IDiscipline[];
   teachers: ITeacher[];
@@ -84,7 +84,12 @@ const CreateProject: React.FC<Props> = ({ location }) => {
           }
         } else if (editProject !== undefined) {
           setTitle("Editar projeto");
-          setProject(location?.state as IProject);
+
+          const savedState = location?.state as IProject;
+          if (savedState !== undefined)
+            savedState.notice = (savedState.notice as INotice)._id as string;
+
+          setProject(savedState);
           setEdited(true);
           setPrimary(false);
         }
@@ -135,7 +140,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         author: user._id,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
-        noticeId: values.noticeId,
+        notice: values.notice,
       });
     } else {
       setProject({
@@ -154,7 +159,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         category: values.category,
         totalCH: values.totalCH,
         typeProject: values.typeProject,
-        noticeId: values.noticeId,
+        notice: values.notice,
       });
     }
     setCurrent(current + 1);

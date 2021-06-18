@@ -84,7 +84,7 @@ const Projects: React.FC = () =>
       shouldKeep = shouldKeep && (p.category as ICategory)._id === state.category;
 
       if (state.notice !== undefined)
-      shouldKeep = shouldKeep && p.noticeId === state.notice;
+      shouldKeep = shouldKeep && (p.notice as INotice)._id === state.notice;
 
       return shouldKeep;
     }));
@@ -98,7 +98,7 @@ const Projects: React.FC = () =>
 
   const handleFilterByNotice = (notice: string) =>
   {
-    state.program = notice !== "0" ? notice : undefined;
+    state.notice = notice !== "0" ? notice : undefined;
     handleChange();
   };
 

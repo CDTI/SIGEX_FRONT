@@ -1,5 +1,5 @@
 import { ICategory } from "./category";
-import { ISchedule } from "./notice";
+import { INotice, ISchedule } from "./notice";
 import IUser from "./user";
 
 export interface IProject {
@@ -7,7 +7,7 @@ export interface IProject {
     name: string
     programId: string
     category: ICategory | string
-    noticeId: string
+    notice: INotice | string
     typeProject: 'common' | 'extraCurricular' | 'curricularComponent'
     firstSemester: ISchedule[]
     secondSemester: ISchedule[]

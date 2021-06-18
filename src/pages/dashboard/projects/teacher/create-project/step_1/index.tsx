@@ -75,13 +75,13 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     return compareA.some((key, index) => compareA[index] === compareB[index]);
   };
 
+  const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
-  const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
   const [categoryId, setCategoryId] = useState(project.category);
   const [category, setCategory] = useState<ICategory | null>(null);
-  const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [notices, setNotices] = useState<INotice[]>([]);
+  const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
+  const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
   const [typeProject, setTypeProject] = useState<"extraCurricular" | "curricularComponent" | "common">("common");
   let firstSemester: ICal[] = [];
   const secondSemester: ICal[] = [];
@@ -122,7 +122,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     firstCalendar.splice(0, firstCalendar.length);
     secondCalendar.splice(0, secondCalendar.length);
     const filterCalendar = notices
-      .find((n: INotice) => n._id === form.getFieldValue("noticeId"))?.timetables
+      .find((n: INotice) => n._id === form.getFieldValue("notice"))?.timetables
       .find((e) => e.category === id);
 
     if (filterCalendar !== undefined)
@@ -283,7 +283,7 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       >
         <Form.Item
           label="Edital"
-          name="noticeId"
+          name="notice"
           rules={[{ required: true, message: "Campo Obrigatório" }]}
         >
           <Select onChange={changeNotice} placeholder="Selecione um edital">

@@ -9,6 +9,7 @@ import MyTable from "../../../../components/layout/table";
 import { Link } from "react-router-dom";
 import { IPrograms } from "../../../../interfaces/programs";
 import { listPrograms } from "../../../../services/program_service";
+import { INotice } from "../../../../interfaces/notice";
 
 const { Option } = Select;
 
@@ -88,7 +89,7 @@ const Projects: React.FC = () => {
       key: "action",
       render: (text: string, record: IProject) => (
         <Space size="middle">
-          {(record.status === "pending" || record.status === "adjust") && (
+          {(record.notice as INotice).isActive && (record.status === "pending" || record.status === "adjust") && (
             <>
               <Button>
                 <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
@@ -102,7 +103,7 @@ const Projects: React.FC = () => {
                     setInitialState(initialState + 1);
                   }}
                 >
-                  Delete
+                  Deletar
                 </Button>
               )}
             </>
