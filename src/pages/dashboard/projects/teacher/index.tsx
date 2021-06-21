@@ -94,9 +94,11 @@ const Projects: React.FC = () => {
               <Button>
                 <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
               </Button>
+
               {(record.status === "adjust" || record.status === "pending") && (
                 <Button
-                  onClick={async () => {
+                  onClick={async () =>
+                  {
                     const deleted = await deleteProject(record._id);
 
                     notification[deleted.result]({ message: deleted.message });
@@ -117,17 +119,18 @@ const Projects: React.FC = () => {
     <Structure title="Meus Projetos">
       <Select defaultValue="null" style={{ width: 200, margin: "8px 0" }} onChange={handleChange}>
         <Option value="null">Sem filtro</Option>
-        {programs.map((e) => {
-          if (e._id !== undefined) {
-            return (
-              <Option key={e._id} value={e._id}>
-                {e.name}
-              </Option>
-            );
-          }
+        {programs.map((e) =>
+        {
+          if (e._id !== undefined)
+            return (<Option key={e._id} value={e._id}>{e.name}</Option>);
         })}
       </Select>
-      <ContainerFlex>{loading ? <Spin /> : <MyTable data={filteredProjects} columns={columns} />}</ContainerFlex>
+
+      <ContainerFlex>
+        {loading
+          ? <Spin />
+          : <MyTable data={filteredProjects} columns={columns} />}
+      </ContainerFlex>
     </Structure>
   );
 };

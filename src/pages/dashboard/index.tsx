@@ -130,7 +130,7 @@ const Dashboard: React.FC = (props) => {
                             </>
                         )}
 
-                        {userRoles.includes("Comitê de extensão") && (
+                        {(userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador")) && (
                           <>
                               <SubMenu title='Propostas' icon={<FileTextOutlined />}>
                                 <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
