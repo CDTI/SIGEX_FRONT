@@ -3,8 +3,8 @@ import Structure from "../../../../components/layout/structure";
 import { ContainerFlex } from "../../../../global/styles";
 import { IProject } from "../../../../interfaces/project";
 import { listAllProject } from "../../../../services/project_service";
-import { Tag, Space, Button, Select, Modal, Input } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { Tag, Space, Button, Select, Modal, Input, Row, Col } from "antd";
+import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
 import AdminViewProject from "../admin/admin-view-projects";
 
 import MyTable from "../../../../components/layout/table";
@@ -42,8 +42,6 @@ const Projects: React.FC = () =>
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [periods, setPeriods] = useState<INotice[]>([]);
-  const [program, setProgram] = useState("");
-  const [notice, setNotice] = useState("");
   const [modal, setModal] = useState<IModal>(
   {
     visible: false,
@@ -66,8 +64,6 @@ const Projects: React.FC = () =>
         {
           setPrograms(listPrograms.programs);
           setPeriods(listNotices);
-          setProgram("null");
-          setNotice("null");
         }));
     });
   }, [state]);
@@ -219,58 +215,74 @@ const Projects: React.FC = () =>
 
   return (
     <Structure title="todas as propostas">
-      <Space>
-        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByCategory}>
-          <Option value="0">Selecione uma Categoria</Option>
-          {categories.map((e) =>
-          {
-            if (e._id !== undefined)
-              return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-          })}
-        </Select>
+      <Row gutter={[8, 8]}>
+        <Col xs={24} md={12} xxl={4}>
+          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByCategory}>
+            <Option value="0">Selecione uma Categoria</Option>
+            {categories.map((e) =>
+            {
+              if (e._id !== undefined)
+                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
+            })}
+          </Select>
+        </Col>
 
-        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByProgram}>
-          <Option value="0">Selecione um Programa</Option>
-          {programs.map((e) =>
-          {
-            if (e._id !== undefined)
-              return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-          })}
-        </Select>
+        <Col xs={24} md={12} xxl={6}>
+          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByProgram}>
+            <Option value="0">Selecione um Programa</Option>
+            {programs.map((e) =>
+            {
+              if (e._id !== undefined)
+                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
+            })}
+          </Select>
+        </Col>
 
-        <Select defaultValue="0" style={{ width: 200, margin: "8px 0" }} onChange={handleFilterByNotice}>
-          <Option value="0">Selecione um Edital</Option>
-          {periods.map((e) =>
-          {
-            if (e._id !== undefined)
-              return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-          })}
-        </Select>
+        <Col xs={24} md={12} xxl={6}>
+          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByNotice}>
+            <Option value="0">Selecione um Edital</Option>
+            {periods.map((e) =>
+            {
+              if (e._id !== undefined)
+                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
+            })}
+          </Select>
+        </Col>
 
-        <Input placeholder="Nome do projeto" onChange={handleFilterByName} />
+        <Col xs={24} md={12} xxl={4}>
+          <Input placeholder="Nome do autor" style={{ width: "100%" }} onChange={handleFilterByAuthor} />
+        </Col>
 
-        <Input placeholder="Nome do autor" onChange={handleFilterByAuthor} />
+        <Col xs={24} xxl={4}>
+          <Input placeholder="Nome do projeto" style={{ width: "100%" }} onChange={handleFilterByName} />
+        </Col>
+      </Row>
 
-        {program !== "null" && (
-          <Button type="link" target="_blank" href={base_url?.concat("extensao/downloadCsv/").concat(program)}>
-            Baixar projetos
-          </Button>)}
+      <Row gutter={8} justify={"end"}>
+        <Col xs={12} md={6} xxl={4}>
+          <Button
+            block
+            type="default"
+            shape="round"
+            icon={<DownloadOutlined />}
+            href={base_url?.concat("extensao/downloadCsv/").concat(state.program !== undefined ? state.program : "")}
+          >
+            Projetos
+          </Button>
+        </Col>
 
-        {program === "null" && (
-          <Button type="link" target="_blank" href={base_url?.concat("extensao/downloadCsv/")}>
-            Baixar projetos
-          </Button>)}
-
-        {program !== "null" && (
-          <Button type="link" target="_blank" href={base_url?.concat("extensao/downloadCSVHours/").concat(program)}>
-            Baixar horários
-          </Button>)}
-
-        {program === "null" && (
-          <Button type="link" target="_blank" href={base_url?.concat("extensao/downloadCSVHours/")}>
-            Baixar horários
-          </Button>)}
-      </Space>
+        <Col xs={12} md={6} xxl={4}>
+          <Button
+            block
+            type="default"
+            shape="round"
+            icon={<DownloadOutlined />}
+            href={base_url?.concat("extensao/downloadCSVHours/").concat(state.program !== undefined ? state.program : "")}
+          >
+            Horários
+          </Button>
+        </Col>
+      </Row>
 
       <ContainerFlex>
         <MyTable data={filteredProject} columns={columns} />
