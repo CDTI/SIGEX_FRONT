@@ -22,7 +22,7 @@ export interface IProject {
     author: IUser | string;
     dateStart: Date
     dateFinal: Date
-    status: 'pending' | 'approved' | 'selected' | 'adjust' | 'reproved' | 'finish' | 'notSelected'
+    status: 'pending' | 'reproved' | 'notSelected' | 'selected' |  'finished'
     disciplines: IDiscipline[]
     teachers : ITeacher[]
     maxClasses: number

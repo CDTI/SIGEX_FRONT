@@ -59,29 +59,23 @@ const Projects: React.FC = () => {
       key: "status",
       dataIndex: "status",
       render: (status: string) => {
-        let typeStatus = { color: "", text: "" };
+        switch (status)
+        {
+          case "pending":
+            return (<Tag color="#f9a03f" key="Pendente">Pendente</Tag>);
 
-        if (status === "pending" || status === "approved") {
-          typeStatus.color = "#f9a03f";
-          typeStatus.text = "Pendente";
-        } else if (status === "adjust") {
-          typeStatus.color = "#e1bc29";
-          typeStatus.text = "Correção";
-        } else if (status === "reproved") {
-          typeStatus.color = "#f71735";
-          typeStatus.text = "Reprovado";
-        } else if (status === "selected") {
-          typeStatus.color = "#40f99b";
-          typeStatus.text = "Selecionado";
-        } else if (status === "finish") {
-          typeStatus.color = "#000000";
-          typeStatus.text = "Finalizado";
+          case "reproved":
+            return (<Tag color="#f71735" key="Reprovado">Reprovado</Tag>);
+
+          case "notSelected":
+            return (<Tag color="#40f99b" key="Aprovado">Aprovado</Tag>);
+
+          case "selected":
+            return (<Tag color="#ffffff" key="EmAndamento" style={{ color:"#000000" }}>Em andamento</Tag>);
+
+          case "finished":
+            return (<Tag color="#000000" key="Finalizado">Finalizado</Tag>);
         }
-        return (
-          <Tag color={typeStatus.color} key={typeStatus.text}>
-            {typeStatus.text}
-          </Tag>
-        );
       },
     },
     {
@@ -89,25 +83,23 @@ const Projects: React.FC = () => {
       key: "action",
       render: (text: string, record: IProject) => (
         <Space size="middle">
-          {(record.notice as INotice).isActive && (record.status === "pending" || record.status === "adjust") && (
+          {(record.notice as INotice).isActive && (record.status === "pending" || record.status === "reproved") && (
             <>
               <Button>
                 <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
               </Button>
 
-              {(record.status === "adjust" || record.status === "pending") && (
-                <Button
-                  onClick={async () =>
-                  {
-                    const deleted = await deleteProject(record._id);
+              <Button
+                onClick={async () =>
+                {
+                  const deleted = await deleteProject(record._id);
 
-                    notification[deleted.result]({ message: deleted.message });
-                    setInitialState(initialState + 1);
-                  }}
-                >
-                  Deletar
-                </Button>
-              )}
+                  notification[deleted.result]({ message: deleted.message });
+                  setInitialState(initialState + 1);
+                }}
+              >
+                Deletar
+              </Button>
             </>
           )}
         </Space>

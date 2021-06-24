@@ -24,30 +24,25 @@ const columns = [
         title: 'Status',
         key: 'status',
         dataIndex: 'status',
-        render: (status: string) => {
-            let typeStatus = { color: '', text: '' }
+        render: (status: string) =>
+        {
+          switch (status)
+          {
+            case "pending":
+              return (<Tag color="#f9a03f" key="Pendente">Pendente</Tag>);
 
-            if (status === 'pending') {
-                typeStatus.color = '#f9a03f'
-                typeStatus.text = 'Pendente'
-            } else if (status === 'adjust') {
-                typeStatus.color = '#e1bc29'
-                typeStatus.text = 'Correção'
-            } else if (status === 'reproved') {
-                typeStatus.color = '#f71735'
-                typeStatus.text = 'Reprovado'
-            } else if (status === 'approved') {
-                typeStatus.color = '#40f99b'
-                typeStatus.text = 'Aprovado'
-            } else if (status === 'finish') {
-                typeStatus.color = '#000000'
-                typeStatus.text = 'Finalizado'
-            }
-            return (
-                <Tag color={typeStatus.color} key={typeStatus.text}>
-                    {typeStatus.text}
-                </Tag>
-            )
+            case "reproved":
+              return (<Tag color="#f71735" key="Reprovado">Reprovado</Tag>);
+
+            case "notSelected":
+              return (<Tag color="#40f99b" key="Aprovado">Aprovado</Tag>);
+
+            case "selected":
+              return (<Tag color="#ffffff" key="EmAndamento">Em andamento</Tag>);
+
+            case "finished":
+              return (<Tag color="#000000" key="Finalizado">Finalizado</Tag>);
+          }
         },
     }
 ];

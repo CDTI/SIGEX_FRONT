@@ -85,59 +85,43 @@ const Dashboard: React.FC = (props) => {
                         </SubMenu>
 
                         {userRoles.includes('Administrador') && (
-                            <>
-                                <Menu.Item icon={<UserOutlined />}>
-                                    <Link to="/dashboard/users">
-                                        Usuários
-                                    </Link>
-                                </Menu.Item>
+                          <>
+                            <Menu.Item icon={<UserOutlined />}>
+                              <Link to="/dashboard/users">Usuários</Link>
+                            </Menu.Item>
 
-                                <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
-                                    <Link to="/dashboard/categories">Categorias</Link>
-                                </Menu.Item>
+                            <Menu.Item icon={<UnorderedListOutlined />} key="/dashboard/categories">
+                              <Link to="/dashboard/categories">Categorias</Link>
+                            </Menu.Item>
 
-                                <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
-                                    <Link to='/dashboard/notices'>Editais</Link>
-                                </Menu.Item>
+                            <Menu.Item icon={<FieldTimeOutlined />} key='/dashboard/periods'>
+                              <Link to='/dashboard/notices'>Editais</Link>
+                            </Menu.Item>
 
-                                <SubMenu title='Propostas' icon={<FileTextOutlined />}>
-                                    <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                        <Link to='/dashboard/projects'>
-                                            Todas as propostas
-                                        </Link>
-                                    </Menu.Item>
-
-                                    <Menu.Item key="/dashboard/selectProjects" icon={<TeamOutlined />}>
-                                        <Link to='/dashboard/selectProjects'>
-                                            Selecionar projetos
-                                        </Link>
-                                    </Menu.Item>
-                                </SubMenu>
-                            </>
+                            <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                              <Link to='/dashboard/projects'>Projetos</Link>
+                            </Menu.Item>
+                          </>
                         )}
 
                         {(userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
-                            <>
-                                <SubMenu key='/dashboard/projects' icon={<FileTextOutlined />} title="Projetos">
-                                    <Menu.Item key="/dashboard/project/create" icon={<FileAddOutlined />}>
-                                        <Link to="/dashboard/project/create">Registrar um projeto</Link>
-                                    </Menu.Item>
+                          <>
+                            <SubMenu key='myProjects' icon={<FileTextOutlined />} title="Meus projetos">
+                              <Menu.Item key="/dashboard/project/create" icon={<FileAddOutlined />}>
+                                <Link to="/dashboard/project/create">Registrar novo projeto</Link>
+                              </Menu.Item>
 
-                                    <Menu.Item key="/dashboard/myProjects" icon={<TeamOutlined />}>
-                                        <Link to="/dashboard/myProjects">Meus Projetos</Link>
-                                    </Menu.Item>
-                                </SubMenu>
-                            </>
+                              <Menu.Item key="/dashboard/myProjects" icon={<TeamOutlined />}>
+                                <Link to="/dashboard/myProjects">Projetos registrados</Link>
+                              </Menu.Item>
+                            </SubMenu>
+                          </>
                         )}
 
                         {(userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador")) && (
-                          <>
-                              <SubMenu title='Propostas' icon={<FileTextOutlined />}>
-                                <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
-                                  <Link to='/dashboard/projects'>Todas as propostas</Link>
-                                </Menu.Item>
-                              </SubMenu>
-                          </>
+                          <Menu.Item key="/dashboard/projects" icon={<TeamOutlined />}>
+                            <Link to='/dashboard/projects'>Projetos</Link>
+                          </Menu.Item>
                         )}
 
                         <SubMenu key="sub1" icon={<UserOutlined />} title="Lattes" disabled>

@@ -3,7 +3,7 @@ import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, For
 import Structure from "../../../../../components/layout/structure";
 import { ContainerFlex } from "../../../../../global/styles";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
-import { compareDate, currentProject } from "../../../../../util";
+import { compareDate } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
 import { ICategory } from "../../../../../interfaces/category";
 import { listPrograms } from "../../../../../services/program_service";
@@ -22,9 +22,38 @@ interface Props
   project: IProject;
 }
 
+interface ResultProps
+{
+  message: string;
+  isError: boolean;
+  name?: string;
+}
+
+const currentProject = (project: IProject) =>
+{
+  switch (project.status)
+  {
+    case "pending":
+    case "reproved":
+      return 0;
+
+    case "notSelected":
+      return 1;
+
+    case "selected":
+      return 2;
+
+    case "finished":
+      return 3;
+
+    default:
+      return -1;
+  }
+}
+
 const AdminViewProject: React.FC<Props> = ({ project }) =>
 {
-  const [edited, setEdited] = useState<ReturnResponse | null>(null);
+  const [edited, setEdited] = useState<ResultProps | null>(null);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory>(project.category as ICategory);
   const [program, setProgram] = useState<IPrograms | null>(null);
@@ -72,7 +101,6 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 
       listFeedbackProject(project._id).then((data) =>
       {
-        console.log(data);
         setFeedback(data.feedback);
         const resource = project.resources;
         let value = 0;
@@ -92,28 +120,13 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalSpending = () =>
-  {
-    const resource = project.resources;
-    let value = 0;
-
-    if (resource.transport !== null && resource.transport !== undefined)
-      value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
-
-    resource.materials?.map((e: IMaterials) =>
-      (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
-
-    setTotal(formatReal(value));
-  };
-
-  const changeStatus = async (status: "approved" | "reproved" | "adjust") =>
+  const changeStatus = async (status: "notSelected" | "selected") =>
   {
     project.status = status;
 
     const update = await updateProject(project);
-    console.log(update);
     setStatus(true);
-    setEdited({ message: update.message, result: update.result, project: update.project });
+    setEdited({ message: update.message, isError: update.result === "error", name: update.project.name });
   };
 
   const openModal = () => setVisible(true);
@@ -122,28 +135,36 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
   {
     const submitFeedback = async (values: { text: string }) =>
     {
-      console.log(values);
       setVisible(false);
-      const registerFeed = await createFeedbackProject(project._id, values);
-      console.log(registerFeed);
+      const response = await createFeedbackProject(project._id, values);
+
+      setStatus(true);
+      setEdited({ message: response.message, isError: response.status === "error" });
     };
 
     const closeModal = () => setVisible(false);
 
     return (
-      <Modal title="Enviar feedback" visible={visible} onCancel={closeModal} footer={[]}>
+      <Modal title="Justificativa" visible={visible} onCancel={closeModal} footer={[]}>
         <Form form={form} style={{ maxWidth: "500px", width: "100%" }} layout="vertical" onFinish={submitFeedback}>
-          <Form.Item label="Feedback" name="text" rules={[{ required: true, message: "Campo Obrigatório " }]}>
+          <Form.Item
+            name="text"
+            rules={
+            [
+              { required: true, message: "Campo Obrigatório" },
+              { max: 3000, message: "Número máximo de caracteres extrapolado" }
+            ]}
+          >
             <TextArea />
           </Form.Item>
 
           <Form.Item>
             <Space>
-              <Button onClick={closeModal} type="primary" style={{ backgroundColor: "#a31621", color: "#fff" }}>
+              <Button onClick={closeModal} type="default">
                 Cancelar
               </Button>
 
-              <Button htmlType="submit" type="primary" style={{ backgroundColor: "#439A86", color: "#fff" }}>
+              <Button htmlType="submit" type="primary">
                 Enviar
               </Button>
             </Space>
@@ -225,22 +246,18 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
           <ContainerFlex>
             <div>
               <Steps direction="horizontal" current={currentProject(project)}>
-                {project.status === "reproved" && (
-                  <Step title="Reprovado" description="Projeto foi reprovado" />)}
+                {project.status === "reproved"
+                  ? (<Step title="Reprovado" description="Projeto foi reprovado" />)
+                  : (<Step title="Em análise" description="Projeto em ánalise." />)}
 
-                {(project.status === "pending" || project.status === "approved") && (
-                  <Step title="Em análise" description="Projeto em ánalise." />)}
+                {/*
+                  project.status === "adjust" && (
+                    <Step title="Correção" description="Projeto aguardando correção" />)
+                */}
 
-                {project.status === "adjust" && (
-                  <Step title="Correção" description="Projeto aguardando correção" />)}
-
-                {project.status !== "reproved" && (
-                  <>
-                    <Step title="Aprovado" description="Projeto aprovado." />
-                    <Step title="Em andamento" description="Projeto em andamento." />
-                    <Step title="Finalizado" description="Projeto finalizado." />
-                  </>
-                )}
+                <Step title="Aprovado" description="Projeto aprovado." />
+                <Step title="Em andamento" description="Projeto em andamento." />
+                <Step title="Finalizado" description="Projeto finalizado." />
               </Steps>
 
               <Collapse accordion style={{ marginTop: "30px" }}>
@@ -406,24 +423,24 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
               </Collapse>
 
               <Space style={{ marginTop: "25px" }}>
-                {project.status === "pending" && (
+                {project.status !== "selected" && project.status !== "finished" && (
                   <>
                     <Button
-                      style={{ backgroundColor: "#a31621", color: "#fff" }}
-                      onClick={() => changeStatus("reproved")}
+                      style={{ backgroundColor: "#acc5cf", color: "#fff" }}
+                      onClick={openModal}
                     >
-                      Reprovar
+                      Não aprovado
                     </Button>
 
-                    <Button style={{ backgroundColor: "#dbbb04", color: "#fff" }} onClick={openModal}>
-                      Solicitar ajuste
+                    <Button style={{ backgroundColor: "#b3afc8", color: "#fff" }} onClick={() => changeStatus("notSelected")}>
+                      Aprovado e não selecionado
                     </Button>
 
                     <Button
-                      style={{ backgroundColor: "#439A86", color: "#fff" }}
-                      onClick={() => changeStatus("approved")}
+                      style={{ backgroundColor: "#8dc898", color: "#fff" }}
+                      onClick={() => changeStatus("selected")}
                     >
-                      Aprovar
+                      Selecionado
                     </Button>
                   </>)}
               </Space>
@@ -440,11 +457,9 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 
       {status && (
         <ContainerFlex>
-          <Result
-            status={edited?.result}
-            title={edited?.message}
-            subTitle={"Projeto editado: " + edited?.project.name}
-          />
+          {edited !== null && (edited.name !== undefined
+            ? <Result status={edited.isError ? "error" : "success"} title={edited.message} subTitle={"Projeto editado: " + edited.name} />
+            : <Result status={edited.isError ? "error" : "success"} title={edited.message} />)}
         </ContainerFlex>)}
 
       {modalFeedback}

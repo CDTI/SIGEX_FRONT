@@ -50,21 +50,25 @@ const HomeDashboard: React.FC = () => {
               {filteredProjects.length}
             </Card>
           </Col>
+
           <Col span={8} style={{margin: '8px 0'}}>
-            <Card title="Projetos Aprovados" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'approved').length}
+            <Card title="Projetos Pendentes" bordered={false}>
+              {filteredProjects.filter(e => e.status === 'pending').length}
             </Card>
           </Col>
+
           <Col span={8} style={{margin: '8px 0'}}>
             <Card title="Projetos Reprovados" bordered={false}>
               {filteredProjects.filter(e => e.status === 'reproved').length}
             </Card>
           </Col>
+
           <Col span={8} style={{margin: '8px 0'}}>
-            <Card title="Projetos Pendentes" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'pending' || e.status === 'adjust').length}
+            <Card title="Projetos Aprovados" bordered={false}>
+              {filteredProjects.filter(e => e.status === 'notSelected').length}
             </Card>
           </Col>
+
           <Col span={8} style={{margin: '8px 0'}}>
             <Card title="Projetos Selecionados" bordered={false}>
               {filteredProjects.filter(e => e.status === 'selected').length}

@@ -147,59 +147,23 @@ const Projects: React.FC = () =>
     dataIndex: "status",
     render: (status: string) =>
     {
-      let typeStatus;
       switch (status)
       {
         case "pending":
-          typeStatus =
-          {
-            color: "#f9a03f",
-            text: "Pendente"
-          };
-
-          break;
-
-        case "adjust":
-          typeStatus =
-          {
-            color: "#e1bc29",
-            text: "Correção"
-          };
-
-          break;
+          return (<Tag color="#f9a03f" key="Pendente">Pendente</Tag>);
 
         case "reproved":
-          typeStatus =
-          {
-            color: "#f71735",
-            text: "Reprovado"
-          };
+          return (<Tag color="#f71735" key="Reprovado">Reprovado</Tag>);
 
-          break;
+        case "notSelected":
+          return (<Tag color="#40f99b" key="Aprovado">Aprovado</Tag>);
 
-        case "approved":
-          typeStatus =
-          {
-            color: "#40f99b",
-            text: "Aprovado"
-          };
+        case "selected":
+          return (<Tag color="#ffffff" key="EmAndamento" style={{ color: "#000000" }}>Em andamento</Tag>);
 
-          break;
-
-        case "finish":
-          typeStatus =
-          {
-            color: "#000000",
-            text: "Finalizado"
-          };
-
-          break;
+        case "finished":
+          return (<Tag color="#000000" key="Finalizado">Finalizado</Tag>);
       }
-
-      return (
-        <Tag color={typeStatus?.color} key={typeStatus?.text}>
-          {typeStatus?.text}
-        </Tag>);
     },
   },
   {
