@@ -7,10 +7,9 @@ interface Props {
     pagination?: false
 }
 
-const MyTable: React.FC<Props> = ({ columns, data, pagination }) => {
-    return (
-        <Table pagination={pagination} columns={columns} dataSource={data} />
-    )
+const MyTable: React.FC<Props> = ({ columns, data, pagination }) =>
+{
+    return <Table pagination={pagination} columns={columns} dataSource={data} />;
 }
 
 export default MyTable

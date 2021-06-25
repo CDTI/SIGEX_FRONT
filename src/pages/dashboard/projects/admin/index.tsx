@@ -150,19 +150,19 @@ const Projects: React.FC = () =>
       switch (status)
       {
         case "pending":
-          return (<Tag color="#f9a03f" key="Pendente">Pendente</Tag>);
+          return (<Tag color="#f9a03f" key="Pendente" style={{ color: "#000" }}>Pendente</Tag>);
 
         case "reproved":
-          return (<Tag color="#f71735" key="Reprovado">Reprovado</Tag>);
+          return (<Tag color="#acc5cf" key="Reprovado" style={{ color: "#000" }}>Reprovado</Tag>);
 
         case "notSelected":
-          return (<Tag color="#40f99b" key="Aprovado">Aprovado</Tag>);
+          return (<Tag color="#b3afc8" key="AprovadoENãoSelecionado" style={{ color: "#000" }}>Aprovado e não selecionado</Tag>);
 
         case "selected":
-          return (<Tag color="#ffffff" key="EmAndamento" style={{ color: "#000000" }}>Em andamento</Tag>);
+          return (<Tag color="#8dc898" key="EmAndamento" style={{ color: "#000" }}>Selecionado</Tag>);
 
         case "finished":
-          return (<Tag color="#000000" key="Finalizado">Finalizado</Tag>);
+          return (<Tag color="#fff" key="Finalizado" style={{ color: "#000" }}>Finalizado</Tag>);
       }
     },
   },
@@ -180,7 +180,7 @@ const Projects: React.FC = () =>
   return (
     <Structure title="todas as propostas">
       <Row gutter={[8, 8]}>
-        <Col xs={24} md={12} xxl={4}>
+        <Col xs={24} lg={12} xl={8}>
           <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByCategory}>
             <Option value="0">Selecione uma Categoria</Option>
             {categories.map((e) =>
@@ -191,7 +191,7 @@ const Projects: React.FC = () =>
           </Select>
         </Col>
 
-        <Col xs={24} md={12} xxl={6}>
+        <Col xs={24} lg={12} xl={8}>
           <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByProgram}>
             <Option value="0">Selecione um Programa</Option>
             {programs.map((e) =>
@@ -202,7 +202,7 @@ const Projects: React.FC = () =>
           </Select>
         </Col>
 
-        <Col xs={24} md={12} xxl={6}>
+        <Col xs={24} xl={8}>
           <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByNotice}>
             <Option value="0">Selecione um Edital</Option>
             {periods.map((e) =>
@@ -213,17 +213,15 @@ const Projects: React.FC = () =>
           </Select>
         </Col>
 
-        <Col xs={24} md={12} xxl={4}>
+        <Col xs={24} md={12} xl={6}>
           <Input placeholder="Nome do autor" style={{ width: "100%" }} onChange={handleFilterByAuthor} />
         </Col>
 
-        <Col xs={24} xxl={4}>
+        <Col xs={24} md={12} xl={6}>
           <Input placeholder="Nome do projeto" style={{ width: "100%" }} onChange={handleFilterByName} />
         </Col>
-      </Row>
 
-      <Row gutter={8} justify={"end"}>
-        <Col xs={12} md={6} xxl={4}>
+        <Col xs={12} xl={6}>
           <Button
             block
             type="default"
@@ -235,7 +233,7 @@ const Projects: React.FC = () =>
           </Button>
         </Col>
 
-        <Col xs={12} md={6} xxl={4}>
+        <Col xs={12} xl={6}>
           <Button
             block
             type="default"
@@ -246,23 +244,24 @@ const Projects: React.FC = () =>
             Horários
           </Button>
         </Col>
+
+        <Col span={24}>
+          <MyTable data={filteredProject} columns={columns} />
+        </Col>
       </Row>
 
-      <ContainerFlex>
-        <MyTable data={filteredProject} columns={columns} />
-      </ContainerFlex>
-
-      <Modal visible={modal.visible} onCancel={closeModal} footer={[]} width="90%" style={{ minHeight: "90%" }}>
-        <>
-          <AdminViewProject project={modal.project} key={initialState} />
-          <Space style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
-            <p></p>
-
-            <Button onClick={closeModal} type="primary">
-              Sair
-            </Button>
-          </Space>
-        </>
+      <Modal
+        visible={modal.visible}
+        centered={true}
+        width="85%"
+        footer={<Button onClick={closeModal} type="primary">Sair</Button>}
+        onCancel={closeModal}
+      >
+        <Row>
+          <Col span={24}>
+            <AdminViewProject project={modal.project} key={initialState} />
+          </Col>
+        </Row>
       </Modal>
     </Structure>);
 };

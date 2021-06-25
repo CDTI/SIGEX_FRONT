@@ -62,19 +62,19 @@ const Projects: React.FC = () => {
         switch (status)
         {
           case "pending":
-            return (<Tag color="#f9a03f" key="Pendente">Pendente</Tag>);
+            return (<Tag color="#f9a03f" key="Pendente" style={{ color: "#000" }}>Pendente</Tag>);
 
           case "reproved":
-            return (<Tag color="#f71735" key="Reprovado">Reprovado</Tag>);
+            return (<Tag color="#acc5cf" key="Reprovado" style={{ color: "#000" }}>Reprovado</Tag>);
 
           case "notSelected":
-            return (<Tag color="#40f99b" key="Aprovado">Aprovado</Tag>);
+            return (<Tag color="#b3afc8" key="AprovadoENãoSelecionado" style={{ color: "#000" }}>Aprovado e não selecionado</Tag>);
 
           case "selected":
-            return (<Tag color="#ffffff" key="EmAndamento" style={{ color:"#000000" }}>Em andamento</Tag>);
+            return (<Tag color="#8dc898" key="EmAndamento" style={{ color: "#000" }}>Selecionado</Tag>);
 
           case "finished":
-            return (<Tag color="#000000" key="Finalizado">Finalizado</Tag>);
+            return (<Tag color="#fff" key="Finalizado" style={{ color: "#000" }}>Finalizado</Tag>);
         }
       },
     },

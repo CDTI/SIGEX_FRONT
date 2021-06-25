@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline } from "antd";
+import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline, Row, Col } from "antd";
 import Structure from "../../../../../components/layout/structure";
 import { ContainerFlex } from "../../../../../global/styles";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
@@ -20,13 +20,6 @@ const { TextArea } = Input;
 interface Props
 {
   project: IProject;
-}
-
-interface ResultProps
-{
-  message: string;
-  isError: boolean;
-  name?: string;
 }
 
 const currentProject = (project: IProject) =>
@@ -53,7 +46,7 @@ const currentProject = (project: IProject) =>
 
 const AdminViewProject: React.FC<Props> = ({ project }) =>
 {
-  const [edited, setEdited] = useState<ResultProps | null>(null);
+  const [edited, setEdited] = useState<ReturnResponse | null>(null);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory>(project.category as ICategory);
   const [program, setProgram] = useState<IPrograms | null>(null);
@@ -120,13 +113,13 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const changeStatus = async (status: "notSelected" | "selected") =>
+  const changeStatus = async (status: "reproved" | "notSelected" | "selected") =>
   {
     project.status = status;
 
     const update = await updateProject(project);
     setStatus(true);
-    setEdited({ message: update.message, isError: update.result === "error", name: update.project.name });
+    setEdited({ message: update.message, result: update.result, project: update.project });
   };
 
   const openModal = () => setVisible(true);
@@ -136,10 +129,9 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
     const submitFeedback = async (values: { text: string }) =>
     {
       setVisible(false);
-      const response = await createFeedbackProject(project._id, values);
-
-      setStatus(true);
-      setEdited({ message: response.message, isError: response.status === "error" });
+      let response = await createFeedbackProject(project._id, values);
+      if (response.status !== "error")
+        changeStatus("reproved");
     };
 
     const closeModal = () => setVisible(false);
@@ -243,137 +235,86 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
     <>
       {!status && (
         <Structure title="Dados do projeto">
-          <ContainerFlex>
-            <div>
-              <Steps direction="horizontal" current={currentProject(project)}>
-                {project.status === "reproved"
-                  ? (<Step title="Reprovado" description="Projeto foi reprovado" />)
-                  : (<Step title="Em análise" description="Projeto em ánalise." />)}
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <Row justify="center">
+              <Col span={16}>
+                <Steps direction="horizontal" current={currentProject(project)}>
+                  {project.status === "reproved"
+                    ? <Step title="Reprovado" />
+                    : <Step title="Em análise" />}
 
-                {/*
-                  project.status === "adjust" && (
-                    <Step title="Correção" description="Projeto aguardando correção" />)
-                */}
+                  <Step title="Aprovado" />
+                  <Step title="Em andamento" />
+                  <Step title="Finalizado" />
+                </Steps>
+              </Col>
+            </Row>
 
-                <Step title="Aprovado" description="Projeto aprovado." />
-                <Step title="Em andamento" description="Projeto em andamento." />
-                <Step title="Finalizado" description="Projeto finalizado." />
-              </Steps>
+            <Row justify="center">
+              <Col span={16}>
+                <Collapse accordion>
+                  <Panel header="Informações básicas" key="1">
+                    <Typography><b>Usuário:</b> {userName}</Typography>
+                    <Typography><b>Nome:</b> {project.name}</Typography>
+                    <Typography><b>Descrição:</b> {project.description}</Typography>
+                    <Typography><b>Categoria:</b> {category.name}</Typography>
+                    <Typography><b>Programa:</b> {program?.name}</Typography>
+                    <Typography><b>Tipo:</b> {typeProject}</Typography>
 
-              <Collapse accordion style={{ marginTop: "30px" }}>
-                <Panel header="Informações básicas" key="1">
-                  <Typography>
-                    <b>Usuário:</b> {userName}
-                  </Typography>
+                    {project.category !== "5fb8402399032945bc5c1fe2" && (
+                      <>
+                        <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
+                        <ul style={{ marginLeft: "18px" }}>
+                          {project.firstSemester.map((e) =>
+                            <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>)}
+                        </ul>
 
-                  <Typography>
-                    <b>Nome:</b> {project.name}
-                  </Typography>
+                        <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
+                        <ul style={{ marginLeft: "18px" }}>
+                          {project.secondSemester.map((e) =>
+                            <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>)}
+                        </ul>
 
-                  <Typography>
-                    <b>Descrição:</b> {project.description}
-                  </Typography>
+                        <Typography><b>CH disponível:</b> {project.totalCH}</Typography>
+                        <Typography><b>Máximo de turmas:</b> {project.maxClasses}</Typography>
+                      </>
+                    )}
 
-                  <Typography>
-                    <b>Categoria:</b> {category.name}
-                  </Typography>
+                    {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
+                      <>
+                        <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                        {project.teachers.map((t) =>
+                          <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>)}
 
-                  <Typography>
-                    <b>Programa:</b> {program?.name}
-                  </Typography>
+                        <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
+                        {project.disciplines.map((d) =>
+                          <li>{d.name}</li>)}
+                      </>
+                    )}
 
-                  <Typography key={project.typeProject}>
-                    <b>Tipo:</b> {typeProject}
-                  </Typography>
-
-                  {project.category !== "5fb8402399032945bc5c1fe2" && (
-                    <>
-                      <Typography>
-                        <b>Disponibilidades de horários primeiro semestre:</b>
-                      </Typography>
-
-                      <ul style={{ marginLeft: "18px" }}>
-                        {project.firstSemester.map((e) => (
-                          <li>
-                            {e.period} - {`${e.day}ª feira`} - {e.location}
-                          </li>))}
-                      </ul>
-
-                      <Typography>
-                        <b>Disponibilidades de horários segundo semestre:</b>
-                      </Typography>
-
-                      <ul style={{ marginLeft: "18px" }}>
-                        {project.secondSemester.map((e) => (
-                          <li>
-                            {e.period} - {`${e.day}ª feira`} - {e.location}
-                          </li>))}
-                      </ul>
-
-                      <Typography>
-                        <b>CH disponível:</b> {project.totalCH}
-                      </Typography>
-
-                      <Typography>
-                        <b>Máximo de turmas:</b> {project.maxClasses}
-                      </Typography>
-                    </>)}
-
-                  {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
-                    <>
-                      <Typography>
-                        {" "}
-                        <b> Professores </b>
-                        {" "}
-                      </Typography>
-
-                      {project.teachers.map((t) => (
-                        <li>
-                          {t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}
-                        </li>))}
-
-                      <Typography>
-                        {" "}
-                        <b> Disciplinas </b>
-                        {" "}
-                      </Typography>
-
-                      {project.disciplines.map((d) => (
-                        <li>{d.name}</li>))}
-                    </>)}
-
-                  {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
-                    <>
-                      <Typography>
-                        {" "}
-                        <b> Professores </b>
-                        {" "}
-                      </Typography>
-
-                      {project.teachers.map((t) => (
-                        <li>
-                          {t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}
-                        </li>))}
-                    </>)}
+                    {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
+                      <>
+                        <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                        {project.teachers.map((t) =>
+                          <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>)}
+                      </>
+                    )}
                 </Panel>
 
                 <Panel header="Parcerias" key="2">
                   <Collapse accordion>
                     {project.partnership?.map((partner, index) => (
                       <Panel header={"Parceria " + (index + 1)} key={index}>
-                        <Typography>
-                          Sobre: {partner.text}
-                        </Typography>
-
+                        <Typography>Sobre: {partner.text}</Typography>
                         {partner.contacts.map((contact, contactInd) => (
                           <div key={contactInd}>
                             <Typography>{contact.name}</Typography>
                             <Typography>{contact.phone}</Typography>
-                          </div>))}
-                      </Panel>))}
+                          </div>)
+                        )}
+                      </Panel>)
+                    )}
                   </Collapse>
-
-                  <Typography></Typography>
                 </Panel>
 
                 <Panel header="Comunidade" key="3">
@@ -391,7 +332,8 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                         <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
                         <Typography>Inicio: {planning.startDate}</Typography>
                         <Typography>Final: {planning.finalDate}</Typography>
-                      </Panel>))}
+                      </Panel>)
+                    )}
                   </Collapse>
                 </Panel>
 
@@ -421,14 +363,17 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                   </div>
                 </Panel>
               </Collapse>
+              </Col>
+            </Row>
 
-              <Space style={{ marginTop: "25px" }}>
+            <Row justify="center">
+              <Col span={16}>
                 {project.status !== "selected" && project.status !== "finished" && (
                   <>
                     <Button
                       style={{ backgroundColor: "#acc5cf", color: "#fff" }}
                       onClick={openModal}
-                    >
+                      >
                       Não aprovado
                     </Button>
 
@@ -439,28 +384,34 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                     <Button
                       style={{ backgroundColor: "#8dc898", color: "#fff" }}
                       onClick={() => changeStatus("selected")}
-                    >
+                      >
                       Selecionado
                     </Button>
-                  </>)}
-              </Space>
+                  </>
+                )}
+              </Col>
+            </Row>
 
-              <Timeline style={{ marginTop: "25px" }}>
-                {feedback?.registers.sort(compareDate).map((e) => (
-                  <Timeline.Item>
-                    {e.text} - {e.date} - {e.typeFeedback}
-                  </Timeline.Item>))}
-              </Timeline>
-            </div>
-          </ContainerFlex>
-        </Structure>)}
+            <Row justify="center">
+              <Col span={16}>
+                <Timeline style={{ marginTop: "25px" }}>
+                  {feedback?.registers.sort(compareDate).map((e) =>
+                    <Timeline.Item>{e.text} - {e.date} - {e.typeFeedback}</Timeline.Item>)}
+                </Timeline>
+              </Col>
+            </Row>
+          </Space>
+        </Structure>
+      )}
 
       {status && (
-        <ContainerFlex>
-          {edited !== null && (edited.name !== undefined
-            ? <Result status={edited.isError ? "error" : "success"} title={edited.message} subTitle={"Projeto editado: " + edited.name} />
-            : <Result status={edited.isError ? "error" : "success"} title={edited.message} />)}
-        </ContainerFlex>)}
+        <Row justify="center">
+          <Col span={16}>
+            {edited !== null &&
+              <Result status={edited.result} title={edited.message} subTitle={"Projeto editado: " + edited.project.name} />}
+          </Col>
+        </Row>
+      )}
 
       {modalFeedback}
     </>
