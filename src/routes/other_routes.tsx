@@ -13,8 +13,7 @@ import CreateProgram from '../pages/dashboard/programs/create'
 import CreateProject from '../pages/dashboard/projects/teacher/create-project'
 import ProjectsTeacher from '../pages/dashboard/projects/teacher'
 import ProjectsAdmin from '../pages/dashboard/projects/admin'
-import AdminViewProject from '../pages/dashboard/projects/admin/admin-view-projects'
-import SelectProjects from '../pages/dashboard/projects/admin/select-projects'
+import AdminViewProject from '../pages/dashboard/projects/admin/components/ProjectDetails'
 
 // Componentes Category
 import CreateCategory from '../pages/dashboard/category'
@@ -77,7 +76,6 @@ const OtherRoutes: React.FC = () => {
                                         component={CreateNoticeController} />
 
                                     <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
-                                    <Route path='/dashboard/selectProjects' component={SelectProjects} />
                                     <Route path='/dashboard/program/create' component={CreateProgram} />
                                     <Route path='/dashboard/categories' component={CreateCategory} />
                                     <Route path='/dashboard/users' component={Users} />

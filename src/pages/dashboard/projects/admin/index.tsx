@@ -3,49 +3,22 @@ import ReactDOM from "react-dom";
 import Structure from "../../../../components/layout/structure";
 import { IProject } from "../../../../interfaces/project";
 import { listAllProject } from "../../../../services/project_service";
-import { Tag, Space, Button, Select, Modal, Input, Row, Col, Table } from "antd";
-import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
-import AdminViewProject from "../admin/admin-view-projects";
+import { Button, Modal, Row, Col } from "antd";
+import ProjectDetails from "./components/ProjectDetails";
 
-import { IPrograms } from "../../../../interfaces/programs";
-import { listPrograms } from "../../../../services/program_service";
-import { base_url } from "../../../../services/api";
 import { INotice } from "../../../../interfaces/notice";
-import { getAllNotices } from "../../../../services/notice_service";
 import { ICategory } from "../../../../interfaces/category";
-import { getAllCategories } from "../../../../services/category_service";
 import IUser from "../../../../interfaces/user";
+import { IAction } from "../../../../util";
+import { base_url } from "../../../../services/api";
 
-interface IAction
-{
-  type: string;
-  payload?: any;
-}
+import Filters from "./components/Filters";
+import ProjectsTable from "./components/ProjectsTable";
 
 interface DetailsDialog
 {
   isVisible: boolean;
   data?: IProject;
-}
-
-interface DropDownData
-{
-  isLoading: boolean;
-  programs: IPrograms[];
-  categories: ICategory[];
-  notices: INotice[];
-}
-
-interface DataFiltering
-{
-  isLoading: boolean;
-  data: IProject[];
-  result: IProject[];
-  programId?: string;
-  categoryId?:string;
-  noticeId?: string;
-  projectName?: string;
-  authorName?: string;
 }
 
 const detailsDialogReducer = (state: DetailsDialog, action: IAction): DetailsDialog =>
@@ -66,29 +39,17 @@ const detailsDialogReducer = (state: DetailsDialog, action: IAction): DetailsDia
   }
 };
 
-const dropDownDataReducer = (state: DropDownData, action: IAction): DropDownData =>
+interface DataFiltering
 {
-  switch (action.type)
-  {
-    case "SET_DATA":
-      return (
-      {
-        ...state,
-        programs: action.payload.programs,
-        categories: action.payload.categories,
-        notices: action.payload.notices
-      });
-
-    case "LOADING":
-      return { ...state, isLoading: true };
-
-    case "NOT_LOADING":
-      return { ...state, isLoading: false };
-
-    default:
-      throw new Error();
-  }
-};
+  isLoading: boolean;
+  data: IProject[];
+  result: IProject[];
+  programId?: string;
+  categoryId?:string;
+  noticeId?: string;
+  projectName?: string;
+  authorName?: string;
+}
 
 const dataFilteringReducer = (state: DataFiltering, action: IAction): DataFiltering =>
 {
@@ -153,15 +114,6 @@ const dataFilteringReducer = (state: DataFiltering, action: IAction): DataFilter
 
 const Projects: React.FC = () =>
 {
-  const [dropDownDataState, dispatchDropDownData] = useReducer(
-    dropDownDataReducer,
-    {
-      isLoading: true,
-      programs: [],
-      categories: [],
-      notices: []
-    });
-
   const [dataFilteringState, dispatchDataFiltering] = useReducer(
     dataFilteringReducer, { isLoading: true, data: [], result: [] });
 
@@ -173,17 +125,6 @@ const Projects: React.FC = () =>
     (async () =>
     {
       dispatchDataFiltering({ type: "LOADING" });
-      dispatchDropDownData({ type: "LOADING" });
-      const response = await listPrograms();
-      const notices = await getAllNotices();
-      const categories = await getAllCategories();
-      dispatchDropDownData(
-      {
-        type: "SET_DATA",
-        payload: { programs: response.programs, categories, notices }
-      });
-
-      dispatchDropDownData({ type: "NOT_LOADING" });
 
       const projects = await listAllProject();
       dispatchDataFiltering(
@@ -191,6 +132,7 @@ const Projects: React.FC = () =>
         type: "SET_DATA",
         payload: { data: projects.map((p: IProject) => ({ ...p, key: p._id })) }
       });
+
       dispatchDataFiltering({ type: "NOT_LOADING" });
     })();
   }, []);
@@ -216,7 +158,7 @@ const Projects: React.FC = () =>
         <Row>
           <Col span={24}>
             {detailsDialogState.data !== undefined
-              ? <AdminViewProject project={detailsDialogState.data} />
+              ? <ProjectDetails project={detailsDialogState.data} />
               : "Nenhum conteúdo carregado!"}
           </Col>
         </Row>
@@ -224,94 +166,8 @@ const Projects: React.FC = () =>
     );
   }, [detailsDialogState]);
 
-  const columns =
-  [{
-    title: "Nome",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Data de início",
-    dataIndex: "dateStart",
-    key: "dateStart",
-    render: (dateStart: string) => new Date(dateStart).toLocaleString("pt-BR")
-  },
-  {
-    title: "Status",
-    key: "status",
-    dataIndex: "status",
-    render: (status: string) =>
-    {
-      switch (status)
-      {
-        case "pending":
-          return (
-            <Tag
-              color="#f9a03f"
-              style={{ color: "#000" }}
-            >
-              Pendente
-            </Tag>
-          );
-
-        case "reproved":
-          return (
-            <Tag
-              color="#acc5cf"
-              style={{ color: "#000" }}
-            >
-              Não aprovado
-            </Tag>
-          );
-
-        case "notSelected":
-          return (
-            <Tag
-              color="#b3afc8"
-              style={{ color: "#000" }}
-            >
-              Aprovado e não selecionado
-            </Tag>
-          );
-
-        case "selected":
-          return (
-            <Tag
-              color="#8dc898"
-              style={{ color: "#000" }}
-            >
-              Selecionado
-            </Tag>
-          );
-
-        case "finished":
-          return (
-            <Tag
-              color="#fff"
-              style={{ color: "#000" }}
-            >
-              Finalizado
-            </Tag>
-          );
-      }
-    },
-  },
-  {
-    title: "Ação",
-    key: "action",
-    render: (text: string, project: IProject) => (
-      <Space size="middle">
-        <Button
-          onClick={() =>
-          {
-            dispatchDetailsDialog({ type: "SET_DATA", payload: { data: project } });
-            dispatchDetailsDialog({ type: "SHOW_DIALOG" });
-          }}
-        >
-          <EyeOutlined /> Revisar
-        </Button>
-      </Space>),
-  }];
+  let projectsCsvPath = `${base_url}/extensao/downloadCsv/${programId ?? ""}`;
+  let scheduleCsvPath = `${base_url}/extensao/downloadCsvHours/${programId ?? ""}`;
 
   return (
     <>
@@ -319,131 +175,16 @@ const Projects: React.FC = () =>
 
       <Structure title="todas as propostas">
         <Row gutter={[8, 8]}>
-          <Col xs={24} lg={12} xl={8}>
-            <Select
-              loading={dropDownDataState.isLoading}
-              options={
-              [{
-                label: "Selecione um programa",
-                value: ""
-              }].concat(dropDownDataState.programs.map((p: IPrograms) =>
-              ({
-                label: p.name,
-                value: p._id!
-              })))}
-              defaultValue=""
-              style={{ width: "100%" }}
-              onChange={(programId: string) => dispatchDataFiltering(
-              {
-                type: "FILTER_BY_PROGRAM",
-                payload: { programId: programId !== "" ? programId : undefined }
-              })}
-            />
-          </Col>
+          <Filters
+            projectsCsvHref={projectsCsvPath}
+            scheduleCsvHref={scheduleCsvPath}
+            onFilterBy={dispatchDataFiltering} />
 
-          <Col xs={24} lg={12} xl={8}>
-            <Select
-              loading={dropDownDataState.isLoading}
-              options={
-              [{
-                label: "Selecione uma categoria",
-                value: ""
-              }].concat(dropDownDataState.categories.map((c: ICategory) =>
-              ({
-                label: c.name,
-                value: c._id
-              })))}
-              defaultValue=""
-              style={{ width: "100%" }}
-              onChange={(categoryId: string) => dispatchDataFiltering(
-              {
-                type: "FILTER_BY_CATEGORY",
-                payload: { categoryId: categoryId !== "" ? categoryId : undefined }
-              })}
-            />
-          </Col>
 
-          <Col xs={24} xl={8}>
-            <Select
-              loading={dropDownDataState.isLoading}
-              options={
-              [{
-                label: "Selecione um edital",
-                value: ""
-              }].concat(dropDownDataState.notices.map((n: INotice) =>
-              ({
-                label: n.name,
-                value: n._id!
-              })))}
-              defaultValue=""
-              style={{ width: "100%" }}
-              onChange={(noticeId: string) => dispatchDataFiltering(
-              {
-                type: "FILTER_BY_NOTICE",
-                payload: { noticeId: noticeId !== "" ? noticeId : undefined }
-              })}
-            />
-          </Col>
-
-          <Col xs={24} md={12} xl={6}>
-            <Input
-              placeholder="Nome do autor"
-              style={{ width: "100%" }}
-              onChange={(ev) =>
-              {
-                const authorName = ev.target.value;
-                dispatchDataFiltering(
-                {
-                  type: "FILTER_BY_AUTHOR_NAME",
-                  payload: { authorName: authorName !== "" ? authorName : undefined }
-                })
-              }}
-            />
-          </Col>
-
-          <Col xs={24} md={12} xl={6}>
-            <Input
-              placeholder="Nome do projeto"
-              style={{ width: "100%" }}
-              onChange={(ev) =>
-              {
-                const projectName = ev.target.value;
-                dispatchDataFiltering(
-                {
-                  type: "FILTER_BY_PROJECT_NAME",
-                  payload: { projectName: projectName !== "" ? projectName : undefined }
-                })
-              }}
-            />
-          </Col>
-
-          <Col xs={12} xl={6}>
-            <Button
-              block
-              type="default"
-              shape="round"
-              icon={<DownloadOutlined />}
-              href={base_url?.concat("extensao/downloadCsv/").concat(dataFilteringState.programId !== undefined ? dataFilteringState.programId : "")}
-            >
-              Projetos
-            </Button>
-          </Col>
-
-          <Col xs={12} xl={6}>
-            <Button
-              block
-              type="default"
-              shape="round"
-              icon={<DownloadOutlined />}
-              href={base_url?.concat("extensao/downloadCSVHours/").concat(dataFilteringState.programId !== undefined ? dataFilteringState.programId : "")}
-            >
-              Horários
-            </Button>
-          </Col>
-
-          <Col span={24}>
-            <Table loading={dataFilteringState.isLoading} dataSource={dataFilteringState.result} columns={columns} />
-          </Col>
+          <ProjectsTable
+            isLoading={dataFilteringState.isLoading}
+            data={dataFilteringState.result}
+            onShowDetails={dispatchDetailsDialog} />
         </Row>
       </Structure>
     </>
