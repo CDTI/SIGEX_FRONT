@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
-import { Tag, Space, Button, Spin, notification, Select, Col, Row, Modal } from "antd";
+import { Tag, Space, Button, Spin, notification, Select, Col, Row, Modal, Table } from "antd";
 import Structure from "../../../../components/layout/structure";
 import { IProject } from "../../../../interfaces/project";
 import { deleteProject, listProjectForTeacher } from "../../../../services/project_service";
 import { listFeedbackProject } from "../../../../services/feedback_service";
 
-import MyTable from "../../../../components/layout/table";
 import { Link } from "react-router-dom";
 import { IPrograms } from "../../../../interfaces/programs";
 import { listPrograms } from "../../../../services/program_service";
@@ -14,20 +13,85 @@ import { INotice } from "../../../../interfaces/notice";
 import { IRegister } from "../../../../interfaces/feedback";
 import { compareDate } from "../../../../util";
 
+interface IAction
+{
+  type: string;
+  data?: any
+}
+
+interface DialogState
+{
+  isVisible: boolean;
+  title: string;
+  content: string;
+  isWorking?: boolean;
+  targetId?: string;
+}
+
+const dialogReducer = (state: DialogState, action: IAction): DialogState =>
+{
+  switch (action.type)
+  {
+    case "SHOW_DIALOG":
+      return { ...state, isVisible: true };
+
+    case "HIDE_DIALOG":
+      return { ...state, isVisible: false };
+
+    case "WORKING":
+      return { ...state, isWorking: true };
+
+    case "NOT_WORKING":
+      return { ...state, isWorking: false };
+
+    case "SET_CONTENT":
+      return (
+      {
+        ...state,
+        title: action.data.title,
+        content: action.data.content,
+        targetId: action.data.targetId
+      });
+
+    default:
+      throw new Error();
+  }
+}
+
 const { Option } = Select;
 
-const Projects: React.FC = () => {
+const Projects: React.FC = () =>
+{
   const [projects, setProjects] = useState<IProject[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([]);
   const [programs, setPrograms] = useState<IPrograms[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogContent, setDialogContent] = useState({ title: "", content: "" });
-  const [initialState, setInitialState] = useState(0);
+  const [shouldReload, setShouldReload] = useState(false);
+
+  const [infoDialogState, dispatchInfoDialogState] = useReducer(
+    dialogReducer,
+    {
+      isVisible: false,
+      title: "",
+      content: ""
+    });
+
+  const [actionDialogState, dispatchActionDialogState] = useReducer(
+    dialogReducer,
+    {
+      isVisible: false,
+      title: "",
+      content: "",
+      isWorking: false,
+      targetId: ""
+    });
 
   useEffect(() =>
   {
     setLoading(true);
+    if (shouldReload)
+      setShouldReload(false);
+
     listProjectForTeacher().then((data) =>
     {
       setProjects(data);
@@ -35,26 +99,58 @@ const Projects: React.FC = () => {
       listPrograms().then((list) =>
       {
         setPrograms(list.programs);
-        setTimeout(() => setLoading(false), 2000);
+        setLoading(false);
       });
     });
-  }, [initialState]);
+  }, [shouldReload]);
 
-  const dialog = useMemo(() =>
+  const infoDialog = useMemo(() =>
   {
-    const dialogVisibilityHandler = () => setShowDialog(false);
+    const dialogVisibilityHandler = () =>
+      dispatchInfoDialogState({ type: "HIDE_DIALOG" });
 
     return (
       <Modal
-        visible={showDialog}
-        title={dialogContent.title}
+        visible={infoDialogState.isVisible}
+        title={infoDialogState.title}
         footer={<Button type="primary" onClick={dialogVisibilityHandler}>OK</Button>}
         onOk={dialogVisibilityHandler}
       >
-        <p>{dialogContent.content}</p>
+        <p>{infoDialogState.content}</p>
       </Modal>
     );
-  }, [showDialog, dialogContent]);
+  }, [infoDialogState]);
+
+  const actionDialog = useMemo(() =>
+  {
+    const cancelationHandler = () =>
+      dispatchActionDialogState({ type: "HIDE_DIALOG" });
+
+    const confirmationHandler = async (id: string) =>
+    {
+      dispatchActionDialogState({ type: "WORKING" });
+
+      const response = await deleteProject(id);
+      notification[response.result]({ message: response.message });
+
+      dispatchActionDialogState({ type: "NOT_WORKING" });
+      dispatchActionDialogState({ type: "HIDE_DIALOG" });
+
+      setShouldReload(true);
+    }
+
+    return (
+      <Modal
+        visible={actionDialogState.isVisible}
+        title={actionDialogState.title}
+        confirmLoading={actionDialogState.isWorking}
+        onCancel={cancelationHandler}
+        onOk={async () => await confirmationHandler(actionDialogState.targetId!)}
+      >
+        <p>{actionDialogState.content}</p>
+      </Modal>
+    );
+  }, [actionDialogState]);
 
   const handleChange = (event: string) =>
   {
@@ -86,7 +182,6 @@ const Projects: React.FC = () => {
         case "pending":
           return (
             <Tag
-              key="Pendente"
               color="#f9a03f"
               style={{ color: "#000" }}
             >
@@ -97,18 +192,16 @@ const Projects: React.FC = () => {
         case "reproved":
           return (
             <Tag
-              key="Reprovado"
               color="#acc5cf"
               style={{ color: "#000" }}
             >
-              Reprovado
+              Não aprovado
             </Tag>
           );
 
         case "notSelected":
           return (
             <Tag
-              key="AprovadoENãoSelecionado"
               color="#b3afc8"
               style={{ color: "#000" }}
             >
@@ -119,7 +212,6 @@ const Projects: React.FC = () => {
         case "selected":
           return (
             <Tag
-              key="EmAndamento"
               color="#8dc898"
               style={{ color: "#000" }}
             >
@@ -130,7 +222,6 @@ const Projects: React.FC = () => {
         case "finished":
           return (
             <Tag
-              key="Finalizado"
               color="#fff"
               style={{ color: "#000" }}
             >
@@ -143,74 +234,84 @@ const Projects: React.FC = () => {
   {
     title: "Ação",
     key: "action",
-    render: (text: string, record: IProject) =>
+    render: (text: string, project: IProject) =>
     {
       return (
         <Space size="middle">
-          {record.status !== "pending" && record.status !== "finished" && (
+          {project.status !== "pending" && project.status !== "finished" && (
             <Button
               onClick={async () =>
               {
-                switch (record.status)
+                let data;
+                switch (project.status)
                 {
                   case "reproved":
-                    const response = await listFeedbackProject(record._id);
-                    const denialJustification = response.feedback.registers
+                    const response = await listFeedbackProject(project._id);
+                    const justification = response.feedback.registers
                       .filter((r: IRegister) => r.typeFeedback === "user")
                       .sort(compareDate)[0].text;
 
-                    setDialogContent(
+                    data =
                     {
-                      title: "Não aprovado",
-                      content: denialJustification
-                    });
+                      type: "SET_CONTENT",
+                      data: { title: "Não aprovado", content: justification }
+                    };
 
                     break;
 
                   case "notSelected":
-                    setDialogContent(
+                    data =
                     {
                       title: "Não selecionado",
                       content:
                         "Professor, seu projeto atende os requisitos da extensão, " +
                         "entretanto não foi possível alocá-lo nas turmas disponíveis."
-                    });
+                    };
 
                     break;
 
                   case "selected":
-                    setDialogContent(
+                    data =
                     {
                       title: "Selecionado",
                       content:
                         "Parabéns, seu projeto foi selecionado. " +
                         "Por favor, confira as turmas para as quais " +
                         "foi alocado no edital de resultados."
-                    });
+                    };
 
                     break;
                 }
 
-                setShowDialog(true);
+                dispatchInfoDialogState({ type: "SET_CONTENT", data });
+                dispatchInfoDialogState({ type: "SHOW_DIALOG" });
               }}
             >
               Informações
             </Button>
           )}
 
-          {(record.notice as INotice).isActive && (record.status === "pending" || record.status === "reproved") && (
+          {(project.notice as INotice).isActive && (project.status === "pending" || project.status === "reproved") && (
             <>
               <Button>
-                <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
+                <Link to={{ pathname: "/dashboard/project/create", state: project }}>Editar</Link>
               </Button>
 
               <Button
-                onClick={async () =>
+                onClick={() =>
                 {
-                  const deleted = await deleteProject(record._id);
+                  dispatchActionDialogState(
+                  {
+                    type: "SET_CONTENT",
+                    data:
+                    {
+                      title: "Remover projeto",
+                      content: `Tem certeza que deseja remover o projeto ${project.name}?`,
+                      targetId: project._id
+                    }
+                  })
 
-                  notification[deleted.result]({ message: deleted.message });
-                  setInitialState(initialState + 1);
+                  dispatchActionDialogState({ type: "SHOW_DIALOG" });
                 }}
               >
                 Deletar
@@ -223,7 +324,8 @@ const Projects: React.FC = () => {
 
   return (
     <>
-      {ReactDOM.createPortal(dialog, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(infoDialog, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(actionDialog, document.getElementById("dialog-overlay")!)}
 
       <Structure title="Meus Projetos">
         <Row gutter={[8, 8]}>
@@ -238,10 +340,8 @@ const Projects: React.FC = () => {
             </Select>
           </Col>
 
-          <Col span={24} style={loading ? { width: "100%", display: "flex", justifyContent: "center" } : {}}>
-            {loading
-              ? <Spin />
-              : <MyTable data={filteredProjects} columns={columns}/>}
+          <Col span={24}>
+              <Table loading={loading} dataSource={filteredProjects} columns={columns}/>
           </Col>
         </Row>
       </Structure>

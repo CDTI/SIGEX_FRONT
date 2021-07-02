@@ -1,133 +1,228 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useReducer } from "react";
+import ReactDOM from "react-dom";
 import Structure from "../../../../components/layout/structure";
-import { ContainerFlex } from "../../../../global/styles";
 import { IProject } from "../../../../interfaces/project";
 import { listAllProject } from "../../../../services/project_service";
-import { Tag, Space, Button, Select, Modal, Input, Row, Col } from "antd";
+import { Tag, Space, Button, Select, Modal, Input, Row, Col, Table } from "antd";
 import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
 import AdminViewProject from "../admin/admin-view-projects";
 
-import MyTable from "../../../../components/layout/table";
 import { IPrograms } from "../../../../interfaces/programs";
 import { listPrograms } from "../../../../services/program_service";
 import { base_url } from "../../../../services/api";
-import { newProject } from "../../../../mocks/mockDefaultValue";
 import { INotice } from "../../../../interfaces/notice";
 import { getAllNotices } from "../../../../services/notice_service";
 import { ICategory } from "../../../../interfaces/category";
 import { getAllCategories } from "../../../../services/category_service";
 import IUser from "../../../../interfaces/user";
 
-const { Option } = Select;
-
-interface IModal
+interface IAction
 {
-  project: IProject;
-  visible: boolean;
-  category: ICategory | undefined;
+  type: string;
+  payload?: any;
 }
 
-interface State
+interface DetailsDialog
 {
-  notice?: string
-  program?: string
-  category?: string
+  isVisible: boolean;
+  data?: IProject;
 }
+
+interface DropDownData
+{
+  isLoading: boolean;
+  programs: IPrograms[];
+  categories: ICategory[];
+  notices: INotice[];
+}
+
+interface DataFiltering
+{
+  isLoading: boolean;
+  data: IProject[];
+  result: IProject[];
+  programId?: string;
+  categoryId?:string;
+  noticeId?: string;
+  projectName?: string;
+  authorName?: string;
+}
+
+const detailsDialogReducer = (state: DetailsDialog, action: IAction): DetailsDialog =>
+{
+  switch (action.type)
+  {
+    case "SHOW_DIALOG":
+      return { ...state, isVisible: true };
+
+    case "HIDE_DIALOG":
+      return { ...state, isVisible: false };
+
+    case "SET_DATA":
+      return { ...state, data: action.payload.data };
+
+    default:
+      throw new Error();
+  }
+};
+
+const dropDownDataReducer = (state: DropDownData, action: IAction): DropDownData =>
+{
+  switch (action.type)
+  {
+    case "SET_DATA":
+      return (
+      {
+        ...state,
+        programs: action.payload.programs,
+        categories: action.payload.categories,
+        notices: action.payload.notices
+      });
+
+    case "LOADING":
+      return { ...state, isLoading: true };
+
+    case "NOT_LOADING":
+      return { ...state, isLoading: false };
+
+    default:
+      throw new Error();
+  }
+};
+
+const dataFilteringReducer = (state: DataFiltering, action: IAction): DataFiltering =>
+{
+  switch (action.type)
+  {
+    case "LOADING":
+      return { ...state, isLoading: true };
+
+    case "NOT_LOADING":
+      return { ...state, isLoading: false };
+
+    case "SET_DATA":
+      return { ...state, data: action.payload.data };
+
+    case "FILTER_BY_PROGRAM":
+      return { ...state, programId: action.payload.programId };
+
+    case "FILTER_BY_CATEGORY":
+      return { ...state, categoryId: action.payload.categoryId };
+
+    case "FILTER_BY_NOTICE":
+      return { ...state, noticeId: action.payload.noticeId };
+
+    case "FILTER_BY_PROJECT_NAME":
+      return { ...state, projectName: action.payload.projectName };
+
+    case "FILTER_BY_AUTHOR_NAME":
+      return { ...state, authorName: action.payload.authorName };
+
+    case "FILTER":
+      return (
+      {
+        ...state,
+        result: state.data.filter((p: IProject) =>
+        {
+          let shouldKeep = true;
+          if (state.programId !== undefined)
+            shouldKeep = shouldKeep && p.programId === state.programId;
+
+          if (state.categoryId !== undefined)
+            shouldKeep = shouldKeep && (p.category as ICategory)._id === state.categoryId;
+
+          if (state.noticeId !== undefined)
+            shouldKeep = shouldKeep && (p.notice as INotice)._id === state.noticeId;
+
+          if (state.projectName !== undefined)
+            shouldKeep = shouldKeep && p.name.toLocaleUpperCase().includes(
+              state.projectName.toLocaleUpperCase());
+
+          if (state.authorName !== undefined)
+            shouldKeep = shouldKeep && (p.author as IUser)?.name.toLocaleUpperCase().includes(
+              state.authorName.toLocaleUpperCase());
+
+          return shouldKeep;
+        })
+      });
+
+    default:
+      throw new Error();
+  }
+};
 
 const Projects: React.FC = () =>
 {
-  const [projects, setProjects] = useState<IProject[]>([]);
-  const [filteredProject, setFilteredProjects] = useState<IProject[]>([]);
-  const [category, setCategory] = useState<ICategory>();
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [programs, setPrograms] = useState<IPrograms[]>([]);
-  const [periods, setPeriods] = useState<INotice[]>([]);
-  const [modal, setModal] = useState<IModal>(
-  {
-    visible: false,
-    project: newProject,
-    category: undefined
-  });
+  const [dropDownDataState, dispatchDropDownData] = useReducer(
+    dropDownDataReducer,
+    {
+      isLoading: true,
+      programs: [],
+      categories: [],
+      notices: []
+    });
 
-  const [state, setState] = useState<State>({});
-  const [initialState, setInitialState] = useState(0);
+  const [dataFilteringState, dispatchDataFiltering] = useReducer(
+    dataFilteringReducer, { isLoading: true, data: [], result: [] });
+
+  const [detailsDialogState, dispatchDetailsDialog] = useReducer(
+    detailsDialogReducer, { isVisible: false });
 
   useEffect(() =>
   {
-    getAllCategories().then((data) => setCategories(data));
-    listAllProject().then((data) =>
+    (async () =>
     {
-      setProjects(data);
-      setFilteredProjects(data);
-      listPrograms().then((listPrograms) =>
-        getAllNotices().then((listNotices) =>
-        {
-          setPrograms(listPrograms.programs);
-          setPeriods(listNotices);
-        }));
-    });
-  }, [state]);
+      dispatchDataFiltering({ type: "LOADING" });
+      dispatchDropDownData({ type: "LOADING" });
+      const response = await listPrograms();
+      const notices = await getAllNotices();
+      const categories = await getAllCategories();
+      dispatchDropDownData(
+      {
+        type: "SET_DATA",
+        payload: { programs: response.programs, categories, notices }
+      });
 
-  const handleChange = () =>
+      dispatchDropDownData({ type: "NOT_LOADING" });
+
+      const projects = await listAllProject();
+      dispatchDataFiltering(
+      {
+        type: "SET_DATA",
+        payload: { data: projects.map((p: IProject) => ({ ...p, key: p._id })) }
+      });
+      dispatchDataFiltering({ type: "NOT_LOADING" });
+    })();
+  }, []);
+
+  const { programId, categoryId, noticeId, projectName, authorName, data } = dataFilteringState;
+  useEffect(() =>
   {
-    setFilteredProjects(projects.filter((p: IProject) =>
-    {
-      let shouldKeep = true;
-      if (state.program !== undefined)
-        shouldKeep = shouldKeep && p.programId === state.program;
+    dispatchDataFiltering({ type: "FILTER" });
+  }, [programId, categoryId, noticeId, projectName, authorName, data]);
 
-      if (state.category !== undefined)
-      shouldKeep = shouldKeep && (p.category as ICategory)._id === state.category;
-
-      if (state.notice !== undefined)
-      shouldKeep = shouldKeep && (p.notice as INotice)._id === state.notice;
-
-      return shouldKeep;
-    }));
-  };
-
-  const handleFilterByProgram = (program: string) =>
+  const projectDetails = useMemo(() =>
   {
-    state.program = program !== "0" ? program : undefined;
-    handleChange();
-  };
+    const closeModal = () => dispatchDetailsDialog({ type: "HIDE_DIALOG" });
 
-  const handleFilterByNotice = (notice: string) =>
-  {
-    state.notice = notice !== "0" ? notice : undefined;
-    handleChange();
-  };
-
-  const handleFilterByCategory = (category: string) =>
-  {
-    state.category = category !== "0" ? category : undefined;
-    handleChange();
-  }
-
-  const openModal = (project: IProject) =>
-  {
-    setInitialState(initialState + 1);
-    setCategory(project.category as ICategory);
-    setModal({ visible: true, project: project, category: category });
-  };
-
-  const closeModal = () => setModal({ visible: false, project: newProject, category: undefined });
-
-  const handleFilterByName = (ev: any) =>
-  {
-    setFilteredProjects(ev.target.value.length >= 3
-      ? projects.filter((p: IProject) =>
-          p.name.toLocaleUpperCase().includes(ev.target.value.toLocaleLowerCase()))
-      : projects);
-  };
-
-  const handleFilterByAuthor = (ev: any) =>
-  {
-    setFilteredProjects(ev.target.value.length >= 3
-      ? projects.filter((p: IProject) =>
-          (p.author as IUser)?.name.toLocaleUpperCase().includes(ev.target.value.toLocaleUpperCase()))
-      : projects);
-  };
+    return (
+      <Modal
+        visible={detailsDialogState.isVisible}
+        centered={true}
+        width="85%"
+        footer={<Button onClick={closeModal} type="primary">OK</Button>}
+        onCancel={closeModal}
+      >
+        <Row>
+          <Col span={24}>
+            {detailsDialogState.data !== undefined
+              ? <AdminViewProject project={detailsDialogState.data} />
+              : "Nenhum conteúdo carregado!"}
+          </Col>
+        </Row>
+      </Modal>
+    );
+  }, [detailsDialogState]);
 
   const columns =
   [{
@@ -139,7 +234,7 @@ const Projects: React.FC = () =>
     title: "Data de início",
     dataIndex: "dateStart",
     key: "dateStart",
-    render: (dateStart: string) => (<>{new Date(dateStart).toLocaleString("pt-BR")}</>)
+    render: (dateStart: string) => new Date(dateStart).toLocaleString("pt-BR")
   },
   {
     title: "Status",
@@ -150,120 +245,209 @@ const Projects: React.FC = () =>
       switch (status)
       {
         case "pending":
-          return (<Tag color="#f9a03f" key="Pendente" style={{ color: "#000" }}>Pendente</Tag>);
+          return (
+            <Tag
+              color="#f9a03f"
+              style={{ color: "#000" }}
+            >
+              Pendente
+            </Tag>
+          );
 
         case "reproved":
-          return (<Tag color="#acc5cf" key="Reprovado" style={{ color: "#000" }}>Reprovado</Tag>);
+          return (
+            <Tag
+              color="#acc5cf"
+              style={{ color: "#000" }}
+            >
+              Não aprovado
+            </Tag>
+          );
 
         case "notSelected":
-          return (<Tag color="#b3afc8" key="AprovadoENãoSelecionado" style={{ color: "#000" }}>Aprovado e não selecionado</Tag>);
+          return (
+            <Tag
+              color="#b3afc8"
+              style={{ color: "#000" }}
+            >
+              Aprovado e não selecionado
+            </Tag>
+          );
 
         case "selected":
-          return (<Tag color="#8dc898" key="EmAndamento" style={{ color: "#000" }}>Selecionado</Tag>);
+          return (
+            <Tag
+              color="#8dc898"
+              style={{ color: "#000" }}
+            >
+              Selecionado
+            </Tag>
+          );
 
         case "finished":
-          return (<Tag color="#fff" key="Finalizado" style={{ color: "#000" }}>Finalizado</Tag>);
+          return (
+            <Tag
+              color="#fff"
+              style={{ color: "#000" }}
+            >
+              Finalizado
+            </Tag>
+          );
       }
     },
   },
   {
     title: "Ação",
     key: "action",
-    render: (text: string, record: IProject) => (
+    render: (text: string, project: IProject) => (
       <Space size="middle">
-        <Button onClick={() => openModal(record)}>
+        <Button
+          onClick={() =>
+          {
+            dispatchDetailsDialog({ type: "SET_DATA", payload: { data: project } });
+            dispatchDetailsDialog({ type: "SHOW_DIALOG" });
+          }}
+        >
           <EyeOutlined /> Revisar
         </Button>
       </Space>),
   }];
 
   return (
-    <Structure title="todas as propostas">
-      <Row gutter={[8, 8]}>
-        <Col xs={24} lg={12} xl={8}>
-          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByCategory}>
-            <Option value="0">Selecione uma Categoria</Option>
-            {categories.map((e) =>
-            {
-              if (e._id !== undefined)
-                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-            })}
-          </Select>
-        </Col>
+    <>
+      {ReactDOM.createPortal(projectDetails, document.getElementById("dialog-overlay")!)}
 
-        <Col xs={24} lg={12} xl={8}>
-          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByProgram}>
-            <Option value="0">Selecione um Programa</Option>
-            {programs.map((e) =>
-            {
-              if (e._id !== undefined)
-                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-            })}
-          </Select>
-        </Col>
+      <Structure title="todas as propostas">
+        <Row gutter={[8, 8]}>
+          <Col xs={24} lg={12} xl={8}>
+            <Select
+              loading={dropDownDataState.isLoading}
+              options={
+              [{
+                label: "Selecione um programa",
+                value: ""
+              }].concat(dropDownDataState.programs.map((p: IPrograms) =>
+              ({
+                label: p.name,
+                value: p._id!
+              })))}
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(programId: string) => dispatchDataFiltering(
+              {
+                type: "FILTER_BY_PROGRAM",
+                payload: { programId: programId !== "" ? programId : undefined }
+              })}
+            />
+          </Col>
 
-        <Col xs={24} xl={8}>
-          <Select defaultValue="0" style={{ width: "100%" }} onChange={handleFilterByNotice}>
-            <Option value="0">Selecione um Edital</Option>
-            {periods.map((e) =>
-            {
-              if (e._id !== undefined)
-                return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-            })}
-          </Select>
-        </Col>
+          <Col xs={24} lg={12} xl={8}>
+            <Select
+              loading={dropDownDataState.isLoading}
+              options={
+              [{
+                label: "Selecione uma categoria",
+                value: ""
+              }].concat(dropDownDataState.categories.map((c: ICategory) =>
+              ({
+                label: c.name,
+                value: c._id
+              })))}
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(categoryId: string) => dispatchDataFiltering(
+              {
+                type: "FILTER_BY_CATEGORY",
+                payload: { categoryId: categoryId !== "" ? categoryId : undefined }
+              })}
+            />
+          </Col>
 
-        <Col xs={24} md={12} xl={6}>
-          <Input placeholder="Nome do autor" style={{ width: "100%" }} onChange={handleFilterByAuthor} />
-        </Col>
+          <Col xs={24} xl={8}>
+            <Select
+              loading={dropDownDataState.isLoading}
+              options={
+              [{
+                label: "Selecione um edital",
+                value: ""
+              }].concat(dropDownDataState.notices.map((n: INotice) =>
+              ({
+                label: n.name,
+                value: n._id!
+              })))}
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(noticeId: string) => dispatchDataFiltering(
+              {
+                type: "FILTER_BY_NOTICE",
+                payload: { noticeId: noticeId !== "" ? noticeId : undefined }
+              })}
+            />
+          </Col>
 
-        <Col xs={24} md={12} xl={6}>
-          <Input placeholder="Nome do projeto" style={{ width: "100%" }} onChange={handleFilterByName} />
-        </Col>
+          <Col xs={24} md={12} xl={6}>
+            <Input
+              placeholder="Nome do autor"
+              style={{ width: "100%" }}
+              onChange={(ev) =>
+              {
+                const authorName = ev.target.value;
+                dispatchDataFiltering(
+                {
+                  type: "FILTER_BY_AUTHOR_NAME",
+                  payload: { authorName: authorName !== "" ? authorName : undefined }
+                })
+              }}
+            />
+          </Col>
 
-        <Col xs={12} xl={6}>
-          <Button
-            block
-            type="default"
-            shape="round"
-            icon={<DownloadOutlined />}
-            href={base_url?.concat("extensao/downloadCsv/").concat(state.program !== undefined ? state.program : "")}
-          >
-            Projetos
-          </Button>
-        </Col>
+          <Col xs={24} md={12} xl={6}>
+            <Input
+              placeholder="Nome do projeto"
+              style={{ width: "100%" }}
+              onChange={(ev) =>
+              {
+                const projectName = ev.target.value;
+                dispatchDataFiltering(
+                {
+                  type: "FILTER_BY_PROJECT_NAME",
+                  payload: { projectName: projectName !== "" ? projectName : undefined }
+                })
+              }}
+            />
+          </Col>
 
-        <Col xs={12} xl={6}>
-          <Button
-            block
-            type="default"
-            shape="round"
-            icon={<DownloadOutlined />}
-            href={base_url?.concat("extensao/downloadCSVHours/").concat(state.program !== undefined ? state.program : "")}
-          >
-            Horários
-          </Button>
-        </Col>
+          <Col xs={12} xl={6}>
+            <Button
+              block
+              type="default"
+              shape="round"
+              icon={<DownloadOutlined />}
+              href={base_url?.concat("extensao/downloadCsv/").concat(dataFilteringState.programId !== undefined ? dataFilteringState.programId : "")}
+            >
+              Projetos
+            </Button>
+          </Col>
 
-        <Col span={24}>
-          <MyTable data={filteredProject} columns={columns} />
-        </Col>
-      </Row>
+          <Col xs={12} xl={6}>
+            <Button
+              block
+              type="default"
+              shape="round"
+              icon={<DownloadOutlined />}
+              href={base_url?.concat("extensao/downloadCSVHours/").concat(dataFilteringState.programId !== undefined ? dataFilteringState.programId : "")}
+            >
+              Horários
+            </Button>
+          </Col>
 
-      <Modal
-        visible={modal.visible}
-        centered={true}
-        width="85%"
-        footer={<Button onClick={closeModal} type="primary">Sair</Button>}
-        onCancel={closeModal}
-      >
-        <Row>
           <Col span={24}>
-            <AdminViewProject project={modal.project} key={initialState} />
+            <Table loading={dataFilteringState.isLoading} dataSource={dataFilteringState.result} columns={columns} />
           </Col>
         </Row>
-      </Modal>
-    </Structure>);
+      </Structure>
+    </>
+  );
 };
 
 export default Projects;

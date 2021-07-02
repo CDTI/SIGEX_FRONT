@@ -4,6 +4,7 @@ import IUser from "./user";
 
 export interface IProject {
     _id: string
+    key?: string
     name: string
     programId: string
     category: ICategory | string
