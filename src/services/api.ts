@@ -2,8 +2,16 @@ import axios from 'axios'
 
 export const base_url = process.env.REACT_APP_BASE_URL
 
-const api = axios.create({
-    baseURL: base_url?.concat('/extensao')
-})
+const axiosInstance = axios.create({ baseURL: `${base_url}/extensao` });
+axiosInstance.interceptors.request.use(
+  (config) =>
+  {
+    if (config.baseURL !== undefined && config.baseURL.substr(-1) === '/')
+      config.baseURL = config.baseURL.substr(0, config.baseURL.length - 1);
 
-export default api
+    return config;
+  },
+  (error) => Promise.reject(error));
+
+
+export default axiosInstance;
