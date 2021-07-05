@@ -26,3 +26,8 @@ export interface INotice
   createdAt?: Date;
   updateAt?: Date;
 };
+
+export function isNotice(n : string | INotice): n is INotice
+{
+  return (n as INotice)._id !== undefined;
+}

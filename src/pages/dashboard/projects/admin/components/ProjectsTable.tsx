@@ -4,6 +4,7 @@ import { Button, Col, Space, Table, Tag } from "antd";
 import { IProject } from "../../../../../interfaces/project";
 import { IAction } from "../../../../../util";
 import { EyeOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 
 interface Props
 {
@@ -55,6 +56,10 @@ const ProjectsTable: React.FC<Props> = (props) =>
     title: "Ação",
     render: (text: string, record: IProject) => (
       <Space size="middle">
+        <Button>
+          <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
+        </Button>
+
         <Button
           onClick={() =>
           {

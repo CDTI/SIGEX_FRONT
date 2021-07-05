@@ -24,7 +24,9 @@ import { useAuth } from "../../../../../context/auth";
 import { createProject, updateProject } from "../../../../../services/project_service";
 import Modal from "antd/lib/modal/Modal";
 import { getActiveNoticesForUser } from "../../../../../services/notice_service";
-import { INotice, ISchedule } from "../../../../../interfaces/notice";
+import { INotice, ISchedule, isNotice } from "../../../../../interfaces/notice";
+import IUser, { isUser } from "../../../../../interfaces/user";
+import { ICategory, isCategory } from "../../../../../interfaces/category";
 
 const { Step } = Steps;
 
@@ -60,34 +62,51 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const [edited, setEdited] = useState(false);
   const [commom, setCommom] = useState(false);
   const [specific, setSpecific] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState<INotice>();
   const { user } = useAuth();
 
   useEffect(() =>
   {
     // Verifica se os periodos estão ativos
-    getActiveNoticesForUser(user?._id).then((notices) => {
-      for (let notice of notices) {
-        if (notice.type === "common") {
+    getActiveNoticesForUser(user?._id).then((notices) =>
+    {
+      for (let notice of notices)
+      {
+        if (notice.type === "common")
           setCommom(notice.isActive);
-        } else if (notice.type === "specific") {
+        else if (notice.type === "specific")
           setSpecific(notice.isActive);
-        }
       }
 
-      if (user !== null) {
-        if (primary && editProject === undefined) {
+      if (user !== null)
+      {
+        if (primary && editProject === undefined)
+        {
           const loadProject = localStorage.getItem("registerProject");
-          if (loadProject !== null) {
+          if (loadProject !== null)
             setVisible(true);
-          } else {
+          else
             setPrimary(false);
-          }
-        } else if (editProject !== undefined) {
+        }
+        else if (editProject !== undefined)
+        {
           setTitle("Editar projeto");
 
           const savedState = location?.state as IProject;
           if (savedState !== undefined)
-            savedState.notice = (savedState.notice as INotice)._id as string;
+          {
+            if (isUser(savedState.author))
+              savedState.author = (savedState.author as IUser)._id as string;
+
+            if (isCategory(savedState.category))
+              savedState.category = (savedState.category as ICategory)._id as string;
+
+            if (isNotice(savedState.notice))
+            {
+              setSelectedNotice(savedState.notice);
+              savedState.notice = (savedState.notice as INotice)._id as string;
+            }
+          }
 
           setProject(savedState);
           setEdited(true);
@@ -95,14 +114,19 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         }
       }
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primary]);
 
-  useEffect(() => {
-    if (!primary && title === "Criar projeto") {
+  useEffect(() =>
+  {
+    if (!primary && title === "Criar projeto")
+    {
       setPrimary(false);
-      if (!edited) localStorage.setItem("registerProject", JSON.stringify(project));
+      if (!edited)
+        localStorage.setItem("registerProject", JSON.stringify(project));
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project]);
 
@@ -236,10 +260,12 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   // Adicionar um array de parceiros se ele for diferente de undefined
   const changePartner = (partner: IPartnership[] | undefined) => {
-    if (partner !== undefined) {
-      partner.map((e) => {
-        if (e.contacts === undefined) e.contacts = [];
-      });
+    if (partner !== undefined)
+    {
+      for (const p of partner)
+        if (p.contacts === undefined)
+          p.contacts = [];
+
       const partners = project.partnership?.concat(partner);
       setProject({ ...project, partnership: partners });
     }
@@ -308,10 +334,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
       title: "Informações Básicas",
       content: (
         <BasicInfo
-          specific={specific}
-          commom={commom}
           changeBasicInfo={changeBasicInfo}
           project={project}
+          selectedNotice={selectedNotice}
           removeLocal={removeLocal}
         />
       ),

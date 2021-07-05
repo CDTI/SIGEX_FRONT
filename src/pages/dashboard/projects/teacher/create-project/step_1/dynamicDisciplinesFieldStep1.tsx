@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { MinusCircleOutlined, BookOutlined } from "@ant-design/icons";
-import { Form, Divider, Button, Select, Input } from "antd";
+import { Form, Divider, Button, Input } from "antd";
 
 function DynamicDisciplinesFieldStep1() {
   return (

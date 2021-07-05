@@ -6,7 +6,6 @@ import IUser from '../../../interfaces/user'
 import { getUsers } from '../../../services/user_service'
 import CreateUser from '../../../components/forms/create-user'
 import MyTable from '../../../components/layout/table'
-import { typeUser } from '../../../util'
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 
 interface State {

@@ -94,7 +94,7 @@ const CreateCategory: React.FC = () => {
       </Modal>
       // eslint-disable-next-line react-hooks/exhaustive-deps
     ),
-    [state]
+    [state, formModal, onCancel, submitEdit]
   );
 
   return (

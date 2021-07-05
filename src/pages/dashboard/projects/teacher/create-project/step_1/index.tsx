@@ -31,7 +31,7 @@ import
   getCategoriesByNotice,
   getActiveCategories
 } from "../../../../../../services/category_service";
-import { getActiveNoticesForUser } from "../../../../../../services/notice_service";
+import { getActiveNoticesForUser, getAllNotices } from "../../../../../../services/notice_service";
 
 
 const { Option } = Select;
@@ -41,9 +41,8 @@ export interface Props
 {
   changeBasicInfo(values: IBasicInfo, firstSemester: ISchedule[], secondSemester: ISchedule[]): void;
   removeLocal(index: number, name: "firstSemester" | "secondSemester"): void;
-  specific: boolean;
-  commom: boolean;
   project: IProject;
+  preSelectedNotice?: INotice;
 }
 
 export interface ICal
@@ -54,8 +53,21 @@ export interface ICal
   checked?: boolean;
 }
 
-const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, specific, commom }) =>
+const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, preSelectedNotice }) =>
 {
+  const [programs, setPrograms] = useState<IPrograms[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categoryId, setCategoryId] = useState(project.category);
+  const [category, setCategory] = useState<ICategory | null>(null);
+  const [notices, setNotices] = useState<INotice[]>([]);
+  const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
+  const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
+  const [typeProject, setTypeProject] = useState<"extraCurricular" | "curricularComponent" | "common">("common");
+  const firstSemester: ICal[] = [];
+  const secondSemester: ICal[] = [];
+  const { user } = useAuth();
+  const [form] = Form.useForm();
+
   const compareChecked = (s: ISchedule, nameArray: "firstSemester" | "secondSemester") =>
   {
     const filterLocal = project[nameArray].find((e) => e.day === s.day && e.location === s.location && e.period === s.period) as
@@ -75,26 +87,18 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
     return compareA.some((key, index) => compareA[index] === compareB[index]);
   };
 
-  const [programs, setPrograms] = useState<IPrograms[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [categoryId, setCategoryId] = useState(project.category);
-  const [category, setCategory] = useState<ICategory | null>(null);
-  const [notices, setNotices] = useState<INotice[]>([]);
-  const [firstCalendar, setFirstCalendar] = useState<ICal[]>([]);
-  const [secondCalendar, setSecondCalendar] = useState<ICal[]>([]);
-  const [typeProject, setTypeProject] = useState<"extraCurricular" | "curricularComponent" | "common">("common");
-  let firstSemester: ICal[] = [];
-  const secondSemester: ICal[] = [];
-  const { user } = useAuth();
-  const [form] = Form.useForm();
-
   useEffect(() =>
   {
     (async () =>
     {
       const response = await listPrograms();
       setPrograms(response.programs);
-      setNotices(await getActiveNoticesForUser(user?._id));
+      const notices = await getActiveNoticesForUser(user?._id);
+      if (preSelectedNotice !== undefined
+          && !notices.find((n: INotice) => n._id === preSelectedNotice._id))
+        notices.push(preSelectedNotice);
+
+      setNotices(notices);
       setCategories(await getActiveCategories());
       if (categoryId)
         setCategory(categories.find((c) => c._id === categoryId) as ICategory);
@@ -164,52 +168,52 @@ const BasicInfo: React.FC<Props> = ({ changeBasicInfo, project, removeLocal, spe
       changeBasicInfo(value, firstSemester, secondSemester);
   };
 
-  const changeDaysFirst = async (e: CheckboxChangeEvent) =>
-  {
-    if (e.target.checked)
-    {
-      if (!compareChecked(e.target.value, "firstSemester"))
-        if (firstSemester.findIndex((local) =>
-            local.day === e.target.value.day &&
-            local.location === e.target.value.location &&
-            local.period === e.target.value.period) === -1)
-          firstSemester.push(e.target.value);
-    }
-    else
-    {
-      const exist = firstSemester.findIndex((local) =>
-        local.day === e.target.value.day &&
-        local.location === e.target.value.location &&
-        local.period === e.target.value.period);
+  // const changeDaysFirst = async (e: CheckboxChangeEvent) =>
+  // {
+  //   if (e.target.checked)
+  //   {
+  //     if (!compareChecked(e.target.value, "firstSemester"))
+  //       if (firstSemester.findIndex((local) =>
+  //           local.day === e.target.value.day &&
+  //           local.location === e.target.value.location &&
+  //           local.period === e.target.value.period) === -1)
+  //         firstSemester.push(e.target.value);
+  //   }
+  //   else
+  //   {
+  //     const exist = firstSemester.findIndex((local) =>
+  //       local.day === e.target.value.day &&
+  //       local.location === e.target.value.location &&
+  //       local.period === e.target.value.period);
 
-      if (exist !== -1)
-      {
-        firstSemester.splice(exist, 1);
-      }
-      else
-      {
-        const exist2 = project.firstSemester.findIndex((local) =>
-          local.day === e.target.value.day &&
-          local.location === e.target.value.location &&
-          local.period === e.target.value.period);
+  //     if (exist !== -1)
+  //     {
+  //       firstSemester.splice(exist, 1);
+  //     }
+  //     else
+  //     {
+  //       const exist2 = project.firstSemester.findIndex((local) =>
+  //         local.day === e.target.value.day &&
+  //         local.location === e.target.value.location &&
+  //         local.period === e.target.value.period);
 
-        if (exist2 !== -1)
-        {
-          removeLocal(exist2, "firstSemester");
-          const indexCalendar = firstCalendar.findIndex((local) =>
-            local.day === e.target.value.day &&
-            local.location === e.target.value.location &&
-            local.period === e.target.value.period);
+  //       if (exist2 !== -1)
+  //       {
+  //         removeLocal(exist2, "firstSemester");
+  //         const indexCalendar = firstCalendar.findIndex((local) =>
+  //           local.day === e.target.value.day &&
+  //           local.location === e.target.value.location &&
+  //           local.period === e.target.value.period);
 
-          if (indexCalendar !== -1)
-          {
-            firstCalendar[indexCalendar].checked = false;
-            setFirstCalendar(firstCalendar);
-          }
-        }
-      }
-    }
-  };
+  //         if (indexCalendar !== -1)
+  //         {
+  //           firstCalendar[indexCalendar].checked = false;
+  //           setFirstCalendar(firstCalendar);
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
 
   const changeDaysSecond = async (e: CheckboxChangeEvent) =>
   {

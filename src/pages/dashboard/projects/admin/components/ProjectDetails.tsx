@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline, Row, Col } from "antd";
 import Structure from "../../../../../components/layout/structure";
-import { ContainerFlex } from "../../../../../global/styles";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
 import { compareDate } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
@@ -163,7 +162,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
           </Form.Item>
         </Form>
       </Modal>);
-  }, [form, project._id, visible]);
+  }, [form, project._id, visible, changeStatus]);
 
   const columnsMaterials = [
     {

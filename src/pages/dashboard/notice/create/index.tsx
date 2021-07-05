@@ -33,14 +33,12 @@ const CreateNoticeController: React.FC = () =>
     updateAt: new Date()
   });
 
+  const { id: noticeId } = params;
   useEffect(() =>
   {
-    (async () =>
-    {
-      if (params.id !== undefined)
-        setNotice(await getNotice(params.id));
-    })();
-  }, []);
+    if (noticeId !== undefined)
+      (async () => setNotice(await getNotice(noticeId)))();
+  }, [noticeId]);
 
   const handleOnBack = () =>
   {

@@ -13,3 +13,8 @@ export default interface IUser
   createdAt: Date;
   updatedAt: Date;
 };
+
+export function isUser(u: string | IUser): u is IUser
+{
+  return (u as IUser)._id !== undefined;
+}
