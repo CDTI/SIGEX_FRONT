@@ -336,7 +336,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         <BasicInfo
           changeBasicInfo={changeBasicInfo}
           project={project}
-          selectedNotice={selectedNotice}
+          preSelectedNotice={selectedNotice}
           removeLocal={removeLocal}
         />
       ),
