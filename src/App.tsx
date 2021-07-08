@@ -5,12 +5,17 @@ import GlobalStyled from './global/global-style'
 import Routes from './routes'
 import { AuthProvider } from './context/auth'
 
+import { ConfigProvider } from "antd";
+import ptBR from "antd/lib/locale/pt_BR";
+
 function App() {
   return (
     <div className="App">
       <GlobalStyled />
       <AuthProvider>
-        <Routes />
+        <ConfigProvider locale={ptBR}>
+          <Routes />
+        </ConfigProvider>
       </AuthProvider>
     </div>
   );

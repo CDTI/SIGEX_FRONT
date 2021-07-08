@@ -1,3 +1,5 @@
+import { Moment } from "moment";
+
 import { ICategory } from "./category";
 import { IRole } from "./role";
 
@@ -23,6 +25,9 @@ export interface INotice
   canAccess: (string | IRole)[];
   timetables: ITimetable[];
   isActive: boolean;
+  effectiveDate: Date;
+  expirationDate: Date;
+  reportDeadline: Date;
   createdAt?: Date;
   updateAt?: Date;
 };

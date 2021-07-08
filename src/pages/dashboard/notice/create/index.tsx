@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 
-import CreateNotice from "./CreateNotice";
-import AddCategories from "./AddCategories";
+import CreateNotice from "./components/CreateNotice";
+import AddCategories from "./components/AddCategories";
 
 import Structure from "../../../../components/layout/structure";
 import { INotice } from "../../../../interfaces/notice";
 import { createNotice, getNotice, updateNotice } from "../../../../services/notice_service";
+import { notification } from "antd";
 
 interface UrlParams
 {
@@ -21,23 +22,16 @@ const CreateNoticeController: React.FC = () =>
   const [content, setContent] =
     useState<"CreateNotice" | "AddCategories">("CreateNotice");
 
-  const [notice, setNotice] = useState<INotice>(
-  {
-    number: 0,
-    name: "",
-    type: "common",
-    canAccess: [],
-    timetables: [],
-    isActive: false,
-    createdAt: new Date(),
-    updateAt: new Date()
-  });
+  const [notice, setNotice] = useState<INotice>();
 
   const { id: noticeId } = params;
   useEffect(() =>
   {
-    if (noticeId !== undefined)
-      (async () => setNotice(await getNotice(noticeId)))();
+    (async () =>
+    {
+      if (noticeId !== undefined)
+        setNotice(await getNotice(noticeId));
+    })();
   }, [noticeId]);
 
   const handleOnBack = () =>
@@ -52,31 +46,46 @@ const CreateNoticeController: React.FC = () =>
   {
     if (content === "CreateNotice")
     {
-      setNotice(
+      setNotice((prevState) =>
       {
-        ...notice,
-        number: values.number,
-        name: values.name,
-        canAccess: values.canAccess
+        const newState =
+        {
+          number: values.number,
+          name: values.name,
+          canAccess: values.canAccess,
+          effectiveDate: values.effectiveDate,
+          expirationDate: values.expirationDate,
+          reportDeadline: values.reportDeadline
+        };
+
+        if (prevState !== undefined)
+          return { ...prevState, ...newState };
+
+        return (
+        {
+          ...newState,
+          type: "common",
+          timetables: [],
+          isActive: true
+        });
       });
 
       setContent("AddCategories");
     }
     else
     {
-      await (params.id === undefined
-        ? createNotice({
-          ...notice,
-          timetables: values.timetables,
-          isActive: true
-        })
-        : updateNotice(params.id , {
-          ...notice,
-          timetables: values.timetables,
-          isActive: true
-        }));
+      try
+      {
+        await (params.id === undefined
+          ? createNotice({ ...notice!, timetables: values.timetables })
+          : updateNotice(params.id, { ...notice!, timetables: values.timetables }));
 
-      history.push("/dashboard/notices");
+        history.push("/dashboard/notices");
+      }
+      catch (err)
+      {
+        notification.error({ message: err.response?.data ?? err.message });
+      }
     }
   };
 
@@ -96,7 +105,7 @@ const CreateNoticeController: React.FC = () =>
   };
 
   return (
-    <Structure title={`${notice._id === "" ? "Criar" : "Alterar"} edital`}>
+    <Structure title={`${notice === undefined ? "Cadastrar" : "Alterar"} edital`}>
       {contents[content]}
     </Structure>);
 };
