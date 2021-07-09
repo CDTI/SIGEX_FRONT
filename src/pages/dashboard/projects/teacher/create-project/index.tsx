@@ -67,16 +67,14 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   useEffect(() =>
   {
-    // Verifica se os periodos estão ativos
-    getActiveNoticesForUser(user?._id).then((notices) =>
+    (async () =>
     {
+      const notices = await getActiveNoticesForUser(user!._id);
       for (let notice of notices)
-      {
         if (notice.type === "common")
           setCommom(notice.isActive);
-        else if (notice.type === "specific")
+        else
           setSpecific(notice.isActive);
-      }
 
       if (user !== null)
       {
@@ -84,9 +82,9 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         {
           const loadProject = localStorage.getItem("registerProject");
           if (loadProject !== null)
-            setVisible(true);
+          setVisible(true);
           else
-            setPrimary(false);
+          setPrimary(false);
         }
         else if (editProject !== undefined)
         {
@@ -96,10 +94,10 @@ const CreateProject: React.FC<Props> = ({ location }) => {
           if (savedState !== undefined)
           {
             if (isUser(savedState.author))
-              savedState.author = (savedState.author as IUser)._id as string;
+            savedState.author = (savedState.author as IUser)._id as string;
 
             if (isCategory(savedState.category))
-              savedState.category = (savedState.category as ICategory)._id as string;
+            savedState.category = (savedState.category as ICategory)._id as string;
 
             if (isNotice(savedState.notice))
             {
@@ -113,7 +111,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
           setPrimary(false);
         }
       }
-    });
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primary]);
@@ -402,11 +400,13 @@ const CreateProject: React.FC<Props> = ({ location }) => {
               <Button type="primary" style={{ backgroundColor: "#a31621" }} onClick={() => changeLoadProject("no")}>
                 Não
               </Button>
+
               <Button type="primary" style={{ backgroundColor: "#439A86" }} onClick={() => changeLoadProject("yes")}>
                 Sim
               </Button>
             </Space>
           </Modal>
+
           {!finish && !primary && (
             <Structure title={title}>
               <Steps current={current}>
@@ -417,20 +417,22 @@ const CreateProject: React.FC<Props> = ({ location }) => {
               <div className="steps-content">{steps[current].content}</div>
             </Structure>
           )}
+
           {finish && (
             <Result
               status="success"
               title="Seu projeto foi registrado com sucesso"
               subTitle="Você pode acompanhar os seus projetos no menu 'Meus Projetos'."
-              extra={[
+              extra={
                 <Button type="primary" key="console">
                   <Link to="/dashboard">Voltar</Link>
-                </Button>,
-              ]}
+                </Button>
+              }
             />
           )}
         </>
       )}
+
       {!commom && !specific && (
         <Result
           status="403"

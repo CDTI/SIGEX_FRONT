@@ -18,6 +18,7 @@ import ProjectsTable from "./components/ProjectsTable";
 interface DetailsDialog
 {
   isVisible: boolean;
+  isRated: boolean;
   data?: IProject;
 }
 
@@ -33,6 +34,12 @@ const detailsDialogReducer = (state: DetailsDialog, action: IAction): DetailsDia
 
     case "SET_DATA":
       return { ...state, data: action.payload.data };
+
+    case "RATED":
+      return { ...state, isRated: true };
+
+    case "NOT_RATED":
+      return { ...state, isRated: false };
 
     default:
       throw new Error();
@@ -118,7 +125,7 @@ const Projects: React.FC = () =>
     dataFilteringReducer, { isLoading: true, data: [], result: [] });
 
   const [detailsDialogState, dispatchDetailsDialog] = useReducer(
-    detailsDialogReducer, { isVisible: false });
+    detailsDialogReducer, { isVisible: false, isRated: false });
 
   useEffect(() =>
   {
@@ -145,7 +152,11 @@ const Projects: React.FC = () =>
 
   const projectDetails = useMemo(() =>
   {
-    const closeModal = () => dispatchDetailsDialog({ type: "HIDE_DIALOG" });
+    const closeModal = () =>
+    {
+      dispatchDetailsDialog({ type: "HIDE_DIALOG" });
+      dispatchDetailsDialog({ type: "NOT_RATED" });
+    }
 
     return (
       <Modal
@@ -158,7 +169,11 @@ const Projects: React.FC = () =>
         <Row>
           <Col span={24}>
             {detailsDialogState.data !== undefined
-              ? <ProjectDetails project={detailsDialogState.data} />
+              ? <ProjectDetails
+                  project={detailsDialogState.data}
+                  showResult={detailsDialogState.isRated}
+                  onRate={dispatchDetailsDialog}
+                />
               : "Nenhum conteúdo carregado!"}
           </Col>
         </Row>

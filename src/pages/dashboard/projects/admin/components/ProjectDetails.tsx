@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline, Row, Col } from "antd";
 import Structure from "../../../../../components/layout/structure";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
-import { compareDate } from "../../../../../util";
+import { compareDate, IAction } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
 import { ICategory } from "../../../../../interfaces/category";
 import { listPrograms } from "../../../../../services/program_service";
@@ -19,6 +19,8 @@ const { TextArea } = Input;
 interface Props
 {
   project: IProject;
+  showResult: boolean;
+  onRate(action: IAction): void;
 }
 
 const currentProject = (project: IProject) =>
@@ -43,14 +45,13 @@ const currentProject = (project: IProject) =>
   }
 }
 
-const AdminViewProject: React.FC<Props> = ({ project }) =>
+const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 {
   const [edited, setEdited] = useState<ReturnResponse | null>(null);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [category, setCategory] = useState<ICategory>(project.category as ICategory);
   const [program, setProgram] = useState<IPrograms | null>(null);
   const [userName, setUserName] = useState("");
-  const [status, setStatus] = useState(false);
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
   const [total, setTotal] = useState("");
@@ -117,8 +118,8 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
     project.status = status;
 
     const update = await updateProject(project);
-    setStatus(true);
     setEdited({ message: update.message, result: update.result, project: update.project });
+    onRate({ type: "RATED" });
   };
 
   const openModal = () => setVisible(true);
@@ -232,7 +233,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
 
   return (
     <>
-      {!status && (
+      {!showResult && (
         <Structure title="Dados do projeto">
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
             <Row justify="center">
@@ -406,7 +407,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
         </Structure>
       )}
 
-      {status && (
+      {showResult && (
         <Row justify="center">
           <Col span={16}>
             {edited !== null &&
