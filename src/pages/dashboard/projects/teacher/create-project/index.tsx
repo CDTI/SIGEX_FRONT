@@ -60,9 +60,8 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   const [primary, setPrimary] = useState(true);
   const [title, setTitle] = useState("Criar projeto");
   const [edited, setEdited] = useState(false);
-  const [commom, setCommom] = useState(false);
-  const [specific, setSpecific] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<INotice>();
+  const [anyActiveNotice, setAnyActiveNotice] = useState(false);
   const { user } = useAuth();
 
   useEffect(() =>
@@ -70,47 +69,39 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     (async () =>
     {
       const notices = await getActiveNoticesForUser(user!._id);
-      for (let notice of notices)
-        if (notice.type === "common")
-          setCommom(notice.isActive);
-        else
-          setSpecific(notice.isActive);
-
-      if (user !== null)
+      if (editProject !== undefined)
       {
-        if (primary && editProject === undefined)
+        setTitle("Editar projeto");
+
+        if (isUser(editProject.author))
+          editProject.author = (editProject.author as IUser)._id;
+
+        if (isCategory(editProject.category))
+          editProject.category = (editProject.category as ICategory)._id;
+
+        if (isNotice(editProject.notice))
         {
-          const loadProject = localStorage.getItem("registerProject");
-          if (loadProject !== null)
-          setVisible(true);
-          else
-          setPrimary(false);
+          if (!notices.some((n: INotice) => n._id === (editProject.notice as INotice)._id))
+            notices.push(editProject.notice);
+
+          setSelectedNotice(editProject.notice);
+          editProject.notice = (editProject.notice as INotice)._id!;
         }
-        else if (editProject !== undefined)
-        {
-          setTitle("Editar projeto");
 
-          const savedState = location?.state as IProject;
-          if (savedState !== undefined)
-          {
-            if (isUser(savedState.author))
-            savedState.author = (savedState.author as IUser)._id as string;
-
-            if (isCategory(savedState.category))
-            savedState.category = (savedState.category as ICategory)._id as string;
-
-            if (isNotice(savedState.notice))
-            {
-              setSelectedNotice(savedState.notice);
-              savedState.notice = (savedState.notice as INotice)._id as string;
-            }
-          }
-
-          setProject(savedState);
-          setEdited(true);
-          setPrimary(false);
-        }
+        setProject(editProject);
+        setEdited(true);
+        setPrimary(false);
       }
+      else if (primary)
+      {
+        const loadProject = localStorage.getItem("registerProject");
+        if (loadProject !== null)
+          setVisible(true);
+        else
+          setPrimary(false);
+      }
+
+      setAnyActiveNotice(selectedNotice !== undefined || notices.length !== 0);
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,12 +109,8 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   useEffect(() =>
   {
-    if (!primary && title === "Criar projeto")
-    {
-      setPrimary(false);
-      if (!edited)
-        localStorage.setItem("registerProject", JSON.stringify(project));
-    }
+    if (!primary && title === "Criar projeto" && !edited)
+      localStorage.setItem("registerProject", JSON.stringify(project));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project]);
@@ -393,7 +380,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 
   return (
     <>
-      {(commom || specific) && (
+      {anyActiveNotice && (
         <>
           <Modal visible={visible} title="Existe um cadastro em andamento, deseja carregar?" footer={[]}>
             <Space>
@@ -433,7 +420,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         </>
       )}
 
-      {!commom && !specific && (
+      {!anyActiveNotice && (
         <Result
           status="403"
           title="403"
@@ -452,3 +439,5 @@ const CreateProject: React.FC<Props> = ({ location }) => {
 };
 
 export default CreateProject;
+
+// TODO: alterar lógica para permitir edição do projeto por um administrador mesmo sem editais ativos
