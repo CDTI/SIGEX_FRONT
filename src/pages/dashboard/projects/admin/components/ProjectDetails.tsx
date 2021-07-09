@@ -142,7 +142,7 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
             name="text"
             rules={
             [
-              { required: true, message: "Campo Obrigatório" },
+              { required: true, message: "Campo obrigatório" },
               { max: 3000, message: "Número máximo de caracteres extrapolado" }
             ]}
           >
@@ -372,18 +372,21 @@ const AdminViewProject: React.FC<Props> = ({ project }) =>
                     <Button
                       style={{ backgroundColor: "#acc5cf", color: "#fff" }}
                       onClick={openModal}
-                      >
+                    >
                       Não aprovado
                     </Button>
 
-                    <Button style={{ backgroundColor: "#b3afc8", color: "#fff" }} onClick={() => changeStatus("notSelected")}>
+                    <Button
+                      style={{ backgroundColor: "#b3afc8", color: "#fff" }}
+                      onClick={() => changeStatus("notSelected")}
+                    >
                       Aprovado e não selecionado
                     </Button>
 
                     <Button
                       style={{ backgroundColor: "#8dc898", color: "#fff" }}
                       onClick={() => changeStatus("selected")}
-                      >
+                    >
                       Selecionado
                     </Button>
                   </>

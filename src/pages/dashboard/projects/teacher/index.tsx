@@ -253,8 +253,8 @@ const Projects: React.FC = () =>
 
                     data =
                     {
-                      type: "SET_CONTENT",
-                      data: { title: "Não aprovado", content: justification }
+                      title: "Não aprovado",
+                      content: justification
                     };
 
                     break;
