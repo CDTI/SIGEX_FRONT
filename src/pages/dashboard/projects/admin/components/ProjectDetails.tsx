@@ -11,6 +11,8 @@ import { ReturnResponse, updateProject } from "../../../../../services/project_s
 import { IFeedback } from "../../../../../interfaces/feedback";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
 import IUser from "../../../../../interfaces/user";
+import { useAuth } from "../../../../../context/auth";
+import { IRole } from "../../../../../interfaces/role";
 
 const { Step } = Steps;
 const { Panel } = Collapse;
@@ -56,6 +58,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
   const [form] = Form.useForm();
   const [total, setTotal] = useState("");
   const [typeProject, setTypeProject] = useState("");
+  const { user } = useAuth();
 
   const formatReal = (value: any) =>
   {
@@ -231,6 +234,8 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
     },
   ];
 
+  const userRoles = user!.roles.map((r: string | IRole) => (r as IRole).description);
+
   return (
     <>
       {!showResult && (
@@ -368,8 +373,8 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 
             <Row justify="center">
               <Col span={16}>
-                {project.status !== "selected" && project.status !== "finished" && (
-                  <>
+                {userRoles.includes("Administrador") && project.status !== "finished" && (
+                  <Space>
                     <Button
                       style={{ backgroundColor: "#acc5cf", color: "#fff" }}
                       onClick={openModal}
@@ -390,7 +395,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
                     >
                       Selecionado
                     </Button>
-                  </>
+                  </Space>
                 )}
               </Col>
             </Row>
