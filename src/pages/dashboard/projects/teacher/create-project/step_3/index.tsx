@@ -1,12 +1,13 @@
 import React from 'react'
 import { ContainerFlex } from '../../../../../../global/styles'
 import { Form, Input, Button, InputNumber, Space } from 'antd'
-import { IProject, ISpecificCommunity } from '../../../../../../interfaces/project'
+import { IProject } from '../../../../../../interfaces/project'
+import { ICommunity } from '../../../../../../interfaces/community'
 
 const { TextArea } = Input
 
 interface Props {
-    changeCommunitySpecific(specificCommunity: ISpecificCommunity): void
+    changeCommunitySpecific(specificCommunity: ICommunity): void
     previous(): void
     project: IProject
 }

@@ -15,7 +15,6 @@ import {
   IPartnership,
   IPlanning,
   IProject,
-  ISpecificCommunity,
   ITeacher,
 } from "../../../../../interfaces/project";
 import { newProject } from "../../../../../mocks/mockDefaultValue";
@@ -27,6 +26,7 @@ import { getActiveNoticesForUser } from "../../../../../services/notice_service"
 import { INotice, ISchedule, isNotice } from "../../../../../interfaces/notice";
 import IUser, { isUser } from "../../../../../interfaces/user";
 import { ICategory, isCategory } from "../../../../../interfaces/category";
+import { ICommunity } from "../../../../../interfaces/community";
 
 const { Step } = Steps;
 
@@ -174,7 +174,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     setCurrent(current + 1);
   };
 
-  const changeSpecificCommunity = (specificCommunity: ISpecificCommunity) => {
+  const changeSpecificCommunity = (specificCommunity: ICommunity) => {
     setProject({ ...project, specificCommunity: specificCommunity });
     setCurrent(current + 1);
   };

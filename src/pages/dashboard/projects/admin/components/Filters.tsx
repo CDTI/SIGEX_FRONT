@@ -8,87 +8,60 @@ import { IPrograms } from "../../../../../interfaces/programs";
 import { getAllCategories } from "../../../../../services/category_service";
 import { getAllNotices } from "../../../../../services/notice_service";
 import { listPrograms } from "../../../../../services/program_service";
-import { IAction } from "../../../../../util";
+import { dropDownStateReducer } from "../helpers/dropDownStateMachine";
 
-interface DropDownData
-{
-  isLoading: boolean;
-  programs: IPrograms[];
-  categories: ICategory[];
-  notices: INotice[];
-}
-
-const dropDownDataReducer = (state: DropDownData, action: IAction): DropDownData =>
-{
-  switch (action.type)
-  {
-    case "SET_DATA":
-      return (
-      {
-        ...state,
-        programs: action.payload.programs,
-        categories: action.payload.categories,
-        notices: action.payload.notices
-      });
-
-    case "LOADING":
-      return { ...state, isLoading: true };
-
-    case "NOT_LOADING":
-      return { ...state, isLoading: false };
-
-    default:
-      throw new Error();
-  }
-};
+type Filters =
+  | "FILTER_BY_AUTHOR_NAME"
+  | "FILTER_BY_CATEGORY"
+  | "FILTER_BY_NOTICE"
+  | "FILTER_BY_PROGRAM"
+  | "FILTER_BY_PROJECT_NAME";
 
 interface Props
 {
   projectsCsvHref: string;
   scheduleCsvHref: string;
-  onFilterBy(action: IAction): void;
+  onFilterBy(action: { type: Filters, payload?: string }): void;
 }
 
 const Filters: React.FC<Props> = (props) =>
 {
-  const [dropDownDataState, dispatchDropDownData] = useReducer(
-    dropDownDataReducer,
+  const [programsDropDownState, dispatchProgramsDropDownState] = useReducer(
+    dropDownStateReducer,
+    { isLoading: true, data: [] });
+
+  const [categoriesDropDownState, dispatchCategoriesDropDownState] = useReducer(
+    dropDownStateReducer,
+    { isLoading: true, data: [] });
+
+  const [noticesDropDownState, dispatchNoticesDropDownState] = useReducer(
+    dropDownStateReducer,
+    { isLoading: true, data: [] });
+
+  useEffect(() =>
+  {
+    (async () =>
     {
-      isLoading: true,
-      programs: [],
-      categories: [],
-      notices: []
-    });
+      dispatchProgramsDropDownState({ type: "LOADING" });
+      dispatchCategoriesDropDownState({ type: "LOADING" });
+      dispatchNoticesDropDownState({ type: "LOADING" });
 
-    useEffect(() =>
-    {
-      (async () =>
-      {
-        dispatchDropDownData({ type: "LOADING" });
-
-        const response = await listPrograms();
-        const notices = await getAllNotices();
-        const categories = await getAllCategories();
-        dispatchDropDownData(
-        {
-          type: "SET_DATA",
-          payload: { programs: response.programs, categories, notices }
-        });
-
-        dispatchDropDownData({ type: "NOT_LOADING" });
-      })();
-    }, []);
+      dispatchProgramsDropDownState({ type: "SET_DATA", payload: (await listPrograms()).programs });
+      dispatchNoticesDropDownState({ type: "SET_DATA", payload: await getAllNotices() });
+      dispatchCategoriesDropDownState({ type: "SET_DATA", payload: await getAllCategories() });
+    })();
+  }, []);
 
   return (
     <>
       <Col xs={24} lg={12} xl={8}>
         <Select
-           loading={dropDownDataState.isLoading}
+           loading={programsDropDownState.isLoading}
            options={
            [{
               label: "Selecione um programa",
               value: ""
-            }].concat(dropDownDataState.programs.map((p: IPrograms) =>
+            }].concat(programsDropDownState.data.map((p: IPrograms) =>
             ({
               label: p.name,
               value: p._id!
@@ -98,19 +71,19 @@ const Filters: React.FC<Props> = (props) =>
             onChange={(programId: string) => props.onFilterBy(
             {
               type: "FILTER_BY_PROGRAM",
-              payload: { programId: programId !== "" ? programId : undefined }
+              payload: programId !== "" ? programId : undefined
             })}
           />
         </Col>
 
           <Col xs={24} lg={12} xl={8}>
             <Select
-              loading={dropDownDataState.isLoading}
+              loading={categoriesDropDownState.isLoading}
               options={
               [{
                 label: "Selecione uma categoria",
                 value: ""
-              }].concat(dropDownDataState.categories.map((c: ICategory) =>
+              }].concat(categoriesDropDownState.data.map((c: ICategory) =>
               ({
                 label: c.name,
                 value: c._id
@@ -120,19 +93,19 @@ const Filters: React.FC<Props> = (props) =>
               onChange={(categoryId: string) => props.onFilterBy(
               {
                 type: "FILTER_BY_CATEGORY",
-                payload: { categoryId: categoryId !== "" ? categoryId : undefined }
+                payload: categoryId !== "" ? categoryId : undefined
               })}
             />
           </Col>
 
           <Col xs={24} xl={8}>
             <Select
-              loading={dropDownDataState.isLoading}
+              loading={noticesDropDownState.isLoading}
               options={
               [{
                 label: "Selecione um edital",
                 value: ""
-              }].concat(dropDownDataState.notices.map((n: INotice) =>
+              }].concat(noticesDropDownState.data.map((n: INotice) =>
               ({
                 label: n.name,
                 value: n._id!
@@ -142,7 +115,7 @@ const Filters: React.FC<Props> = (props) =>
               onChange={(noticeId: string) => props.onFilterBy(
               {
                 type: "FILTER_BY_NOTICE",
-                payload: { noticeId: noticeId !== "" ? noticeId : undefined }
+                payload: noticeId !== "" ? noticeId : undefined
               })}
             />
           </Col>
@@ -157,7 +130,7 @@ const Filters: React.FC<Props> = (props) =>
                 props.onFilterBy(
                 {
                   type: "FILTER_BY_AUTHOR_NAME",
-                  payload: { authorName: authorName !== "" ? authorName : undefined }
+                  payload:authorName !== "" ? authorName : undefined
                 })
               }}
             />
@@ -173,7 +146,7 @@ const Filters: React.FC<Props> = (props) =>
                 props.onFilterBy(
                 {
                   type: "FILTER_BY_PROJECT_NAME",
-                  payload: { projectName: projectName !== "" ? projectName : undefined }
+                  payload: projectName !== "" ? projectName : undefined
                 })
               }}
             />

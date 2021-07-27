@@ -6,16 +6,17 @@ import { IRole } from "../../../../../interfaces/role";
 import { INotice } from "../../../../../interfaces/notice";
 import { getRoles } from "../../../../../services/role_service";
 
-function disableDateRange(currentDate: moment.Moment)
-{
-  return currentDate < moment().startOf("day") || currentDate > moment().endOf("day").add(4, "years");
-}
-
 interface Props
 {
   onBack(): void;
   onSubmit(notice: INotice): void;
   notice?: INotice;
+}
+
+function disableDateRange(currentDate: moment.Moment)
+{
+  return currentDate < moment().startOf("day")
+    || currentDate > moment().endOf("day").add(4, "years");
 }
 
 const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>

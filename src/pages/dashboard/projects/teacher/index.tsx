@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
-import { Tag, Space, Button, Spin, notification, Select, Col, Row, Modal, Table } from "antd";
+import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
 import Structure from "../../../../components/layout/structure";
 import { IProject } from "../../../../interfaces/project";
 import { deleteProject, listProjectForTeacher } from "../../../../services/project_service";
@@ -12,6 +12,7 @@ import { listPrograms } from "../../../../services/program_service";
 import { INotice } from "../../../../interfaces/notice";
 import { IRegister } from "../../../../interfaces/feedback";
 import { compareDate } from "../../../../util";
+import { isReport } from "../../../../interfaces/report";
 
 interface IAction
 {
@@ -57,8 +58,6 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState =>
       throw new Error();
   }
 }
-
-const { Option } = Select;
 
 const Projects: React.FC = () =>
 {
@@ -154,7 +153,7 @@ const Projects: React.FC = () =>
 
   const handleChange = (event: string) =>
   {
-    setFilteredProjects(event !== "null"
+    setFilteredProjects(event !== ""
       ? projects.filter((p: IProject) => p.programId === event)
       : projects);
   };
@@ -291,6 +290,26 @@ const Projects: React.FC = () =>
             </Button>
           )}
 
+          {project.status === "selected" &&
+            <Button>
+              {project.report === undefined
+                ? <Link to={`/dashboard/project/report/create?project=${project._id}`}>Relatório</Link>
+                : (<Link
+                    to={
+                    {
+                      pathname:
+                        `/dashboard/project/report/edit/` +
+                        `${isReport(project.report) ? project.report._id : project.report}` +
+                        `?project=${project._id}`,
+
+                      state: project.report
+                    }}
+                  >
+                    Relatório
+                  </Link>)}
+            </Button>
+          }
+
           {(project.notice as INotice).isActive && (project.status === "pending" || project.status === "reproved") && (
             <>
               <Button>
@@ -330,14 +349,15 @@ const Projects: React.FC = () =>
       <Structure title="Meus Projetos">
         <Row gutter={[8, 8]}>
           <Col xs={24}>
-            <Select defaultValue="null" onChange={handleChange} style={{ width: "100%" }}>
-              <Option value="null">Sem filtro</Option>
-              {programs.map((e) =>
-              {
-                if (e._id !== undefined)
-                  return (<Option key={e._id} value={e._id}>{e.name}</Option>);
-              })}
-            </Select>
+            <Select
+              options={
+                [{ label: "Sem filtro", value: "" }].concat(programs
+                  .filter((p: IPrograms) => p._id !== undefined)
+                  .map((p: IPrograms) => ({ label: p.name, value: p._id! })))}
+              defaultValue=""
+              onChange={handleChange}
+              style={{ width: "100%" }}
+            />
           </Col>
 
           <Col span={24}>

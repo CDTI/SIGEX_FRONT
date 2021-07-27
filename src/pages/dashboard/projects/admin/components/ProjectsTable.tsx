@@ -2,7 +2,6 @@ import React from "react";
 
 import { Button, Col, Space, Table, Tag } from "antd";
 import { IProject } from "../../../../../interfaces/project";
-import { IAction } from "../../../../../util";
 import { EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
@@ -10,7 +9,7 @@ interface Props
 {
   data: IProject[];
   isLoading: boolean;
-  onShowDetails(action: IAction): void;
+  onShowDetails(record: IProject): void;
 }
 
 const ProjectsTable: React.FC<Props> = (props) =>
@@ -61,11 +60,7 @@ const ProjectsTable: React.FC<Props> = (props) =>
         </Button>
 
         <Button
-          onClick={() =>
-          {
-            props.onShowDetails({ type: "SET_DATA", payload: { data: record } });
-            props.onShowDetails({ type: "SHOW_DIALOG" });
-          }}
+          onClick={() => props.onShowDetails(record)}
         >
           <EyeOutlined /> Revisar
         </Button>

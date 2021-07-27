@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline, Row, Col } from "antd";
 import Structure from "../../../../../components/layout/structure";
 import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
-import { compareDate, IAction } from "../../../../../util";
+import { compareDate } from "../../../../../util";
 import MyTable from "../../../../../components/layout/table";
 import { ICategory } from "../../../../../interfaces/category";
 import { listPrograms } from "../../../../../services/program_service";
@@ -22,10 +22,10 @@ interface Props
 {
   project: IProject;
   showResult: boolean;
-  onRate(action: IAction): void;
+  onRate(): void;
 }
 
-const currentProject = (project: IProject) =>
+function currentProject(project: IProject)
 {
   switch (project.status)
   {
@@ -122,7 +122,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 
     const update = await updateProject(project);
     setEdited({ message: update.message, result: update.result, project: update.project });
-    onRate({ type: "RATED" });
+    onRate();
   };
 
   const openModal = () => setVisible(true);

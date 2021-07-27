@@ -1,4 +1,5 @@
 import { IProject } from '../../interfaces/project'
+import { IReport } from '../../interfaces/report'
 import api from '../api'
 
 export interface ReturnResponse {
@@ -59,4 +60,18 @@ export const downloadCSV = async(programId: string): Promise<any> => {
         window.open(response.data)
         return response.data
     }
+}
+
+export async function createReport(projectId: string, report: IReport): Promise<string>
+{
+  const response = await api.post(`/project/report/${projectId}`, report);
+
+  return response.data;
+}
+
+export async function updateReport(id: string, report: IReport): Promise<string>
+{
+  const response = await api.put(`/project/report/${id}`, report);
+
+  return response.data;
 }

@@ -29,6 +29,7 @@ import { useAuth } from '../context/auth'
 import RegistrationPeriods from '../pages/dashboard/notice'
 import CreateNoticeController from '../pages/dashboard/notice/create'
 import { IRole } from '../interfaces/role'
+import Report from '../pages/dashboard/projects/teacher/report'
 
 const OtherRoutes: React.FC = () => {
     const { user } = useAuth()
@@ -57,6 +58,8 @@ const OtherRoutes: React.FC = () => {
                             (userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
                                 <>
                                     <Route path='/dashboard/project/create' component={CreateProject} />
+                                    <Route path='/dashboard/project/report/create' component={Report} />
+                                    <Route path='/dashboard/project/report/edit/:id' component={Report} />
                                     <Route path='/dashboard/myProjects' component={ProjectsTeacher} />
                                 </>
                         )}

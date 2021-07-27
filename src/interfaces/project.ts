@@ -1,5 +1,7 @@
 import { ICategory } from "./category";
+import { ICommunity } from "./community";
 import { INotice, ISchedule } from "./notice";
+import { IReport } from "./report";
 import IUser from "./user";
 
 export interface IProject {
@@ -14,7 +16,7 @@ export interface IProject {
     secondSemester: ISchedule[]
     totalCH: number
     partnership: IPartnership[] | undefined
-    specificCommunity: ISpecificCommunity
+    specificCommunity: ICommunity
     description: string
     planning: IPlanning[]
     results: string
@@ -27,6 +29,7 @@ export interface IProject {
     disciplines: IDiscipline[]
     teachers : ITeacher[]
     maxClasses: number
+    report?: IReport | string
 }
 
 export interface IPartnership {
@@ -49,12 +52,6 @@ export interface IDiscipline {
 export interface IContact {
     name: string
     phone: string
-}
-
-export interface ISpecificCommunity {
-    text: string
-    location: string
-    peopleInvolved: number
 }
 
 export interface IPlanning {
