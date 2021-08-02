@@ -1,8 +1,7 @@
 import React from 'react'
 import { ContainerFlex } from '../../../../../../global/styles'
 import { Form, Input, Button, InputNumber, Space } from 'antd'
-import { IProject } from '../../../../../../interfaces/project'
-import { ICommunity } from '../../../../../../interfaces/community'
+import { IProject, ICommunity } from '../../../../../../interfaces/project'
 
 const { TextArea } = Input
 

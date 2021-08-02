@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 
-import { Col, Form, Input, InputNumber, Row } from "antd";
+import { Button, Col, Form, Input, Row } from "antd";
 import { FormInstance } from "antd/lib/form";
-
-import { ICommunity } from "../../../../../../interfaces/community";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { ICommunityContact } from "../../../../../../interfaces/report";
 
 interface Props
 {
   formController: FormInstance;
-  initialValues?: ICommunity;
+  initialValues?: ICommunityContact[];
 }
 
 const Community: React.FC<Props> = ({ formController, initialValues }) =>
@@ -26,6 +26,7 @@ const Community: React.FC<Props> = ({ formController, initialValues }) =>
       form={formController}
     >
       <Row>
+        {/*
         <Col span={24}>
           <Form.Item
             name="text"
@@ -54,6 +55,75 @@ const Community: React.FC<Props> = ({ formController, initialValues }) =>
           >
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
+        </Col>
+        */}
+
+        <Col span={24}>
+          <Form.List name="communityContacts">
+            {(communityContactsFields, { add, remove }) => (
+              <>
+                <Row gutter={[8,8]}>
+                  {communityContactsFields.map((communityContactsField) => (
+                    <>
+                      <Col xs={24} md={4} xl={2}>
+                        <Form.Item label={<label></label>}>
+                          <Button
+                            danger
+                            block
+                            type="primary"
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(communityContactsField.name)}
+                          />
+                        </Form.Item>
+                      </Col>
+
+                      <Col xs={24} md={10} xl={11}>
+                        <Form.Item
+                          {...communityContactsField}
+                          label="Nome da comunidade"
+                          name={[communityContactsField.name, "name"]}
+                          fieldKey={[communityContactsField.fieldKey, "name"]}
+                          rules={
+                          [
+                            { required: true, message: "Campo obrigatório" },
+                            { type: "string", max: 200, message: "O número máximo de caracteres foi extrapolado!" }
+                          ]}
+                        >
+                          <Input style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
+
+                      <Col xs={24} md={10} xl={11}>
+                        <Form.Item
+                          {...communityContactsField}
+                          label="Contato da comunidade"
+                          name={[communityContactsField.name, "contact"]}
+                          fieldKey={[communityContactsField.fieldKey, "contact"]}
+                          rules={
+                          [
+                            { required: true, message: "Campo obrigatório" },
+                            { type: "string", max: 200, message: "O número máximo de caracteres foi extrapolado!" }
+                          ]}
+                        >
+                          <Input style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
+                    </>
+                  ))}
+                </Row>
+
+                <Row>
+                  <Col span={24}>
+                    <Form.Item>
+                      <Button type="dashed" block onClick={() => add()}>
+                        <PlusOutlined /> Adicionar contato
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Form.List>
         </Col>
       </Row>
     </Form>

@@ -1,5 +1,4 @@
 import { ICategory } from "./category";
-import { ICommunity } from "./community";
 import { INotice, ISchedule } from "./notice";
 import { IReport } from "./report";
 import IUser from "./user";
@@ -83,4 +82,11 @@ export interface IMaterials {
     quantity: number
     unitaryValue: number
     totalPrice: number
+}
+
+export interface ICommunity
+{
+  text: string;
+  location: string;
+  peopleInvolved: number;
 }

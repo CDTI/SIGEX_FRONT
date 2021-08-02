@@ -14,8 +14,7 @@ import
   Form
 } from "antd";
 
-import { ICommunity } from "../../../../../interfaces/community";
-import { IReport } from "../../../../../interfaces/report";
+import { ICommunityContact, IReport } from "../../../../../interfaces/report";
 
 import Structure from "../../../../../components/layout/structure";
 
@@ -132,7 +131,7 @@ const ReportForm: React.FC = () =>
       dispatchReportFormState({ type: "PREVIOUS" });
   }, [reportFormState.step]);
 
-  const handleOnFormFinish = useCallback((values: IReport | ICommunity) =>
+  const handleOnFormFinish = useCallback((values: IReport) =>
   {
     dispatchReportFormState({ type: "NEXT", payload: { ...values } });
   }, [reportFormState.step]);
@@ -189,7 +188,7 @@ const ReportForm: React.FC = () =>
       content: (
         <Community
           formController={reportForm}
-          initialValues={reportFormState.data?.community}
+          initialValues={reportFormState.data?.communityContacts}
         />
       )
     }
@@ -218,7 +217,7 @@ const ReportForm: React.FC = () =>
       <Structure title={`${id === undefined ? "Cadastrar" : "Alterar"} relatório`}>
         <Form.Provider
           onFormFinish={(name, { values, forms }) =>
-            handleOnFormFinish(values as IReport | ICommunity)
+            handleOnFormFinish(values as IReport)
           }
         >
           <Row gutter={[8, 8]} justify="center">

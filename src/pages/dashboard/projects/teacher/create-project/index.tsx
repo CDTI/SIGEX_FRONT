@@ -16,6 +16,7 @@ import {
   IPlanning,
   IProject,
   ITeacher,
+  ICommunity
 } from "../../../../../interfaces/project";
 import { newProject } from "../../../../../mocks/mockDefaultValue";
 import { Link, RouteProps } from "react-router-dom";
@@ -26,7 +27,6 @@ import { getActiveNoticesForUser } from "../../../../../services/notice_service"
 import { INotice, ISchedule, isNotice } from "../../../../../interfaces/notice";
 import IUser, { isUser } from "../../../../../interfaces/user";
 import { ICategory, isCategory } from "../../../../../interfaces/category";
-import { ICommunity } from "../../../../../interfaces/community";
 
 const { Step } = Steps;
 

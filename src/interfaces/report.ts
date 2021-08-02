@@ -1,8 +1,7 @@
-import { ICommunity } from "./community";
-
-export function isReport(r : string | IReport): r is IReport
+export interface ICommunityContact
 {
-  return r !== undefined && (r as IReport)._id !== undefined;
+  name: string;
+  contact: string;
 }
 
 export interface IReport
@@ -17,5 +16,10 @@ export interface IReport
   communityPeople: number;
   affectedPeople: number;
   discussion: string;
-  community: ICommunity;
+  communityContacts: ICommunityContact[];
+}
+
+export function isReport(r : string | IReport): r is IReport
+{
+  return r !== undefined && (r as IReport)._id !== undefined;
 }

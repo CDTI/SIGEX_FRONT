@@ -1,5 +1,4 @@
-import { ICommunity } from "../../../../../../interfaces/community";
-import { IReport } from "../../../../../../interfaces/report";
+import { ICommunityContact, IReport } from "../../../../../../interfaces/report";
 
 type FormStep =
   | "introduction"
@@ -121,7 +120,7 @@ export function reportFormStateReducer(
             data:
             {
               ...state.data!,
-              community: { ...(action.payload as ICommunity) }
+              communityContacts: action.payload.communityContacts
             }
           });
 
