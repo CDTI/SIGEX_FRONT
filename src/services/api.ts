@@ -6,8 +6,8 @@ const axiosInstance = axios.create({ baseURL: `${base_url}/extensao` });
 axiosInstance.interceptors.request.use(
   (config) =>
   {
-    if (config.baseURL !== undefined && config.baseURL.substr(-1) === '/')
-      config.baseURL = config.baseURL.substr(0, config.baseURL.length - 1);
+    if (config.baseURL !== undefined)
+      config.baseURL = config.baseURL.replace(/([^:]\/)\/+/g, "$1");
 
     return config;
   },
