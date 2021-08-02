@@ -16,13 +16,13 @@ interface ReturnResponseGet {
 }
 
 export const createProgram = async (program: IPrograms): Promise<ReturnResponsePost> => {
-    const response = await api.post('/program', program)
+    const response = await api.post('program', program)
 
     return response.data
 }
 
 export const listPrograms = async (): Promise<ReturnResponseGet> => {
-    const response = await api.get('/program')
+    const response = await api.get('program')
 
     return response.data
 }
