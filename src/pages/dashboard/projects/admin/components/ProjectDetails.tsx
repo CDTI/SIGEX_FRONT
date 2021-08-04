@@ -89,32 +89,32 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 
   useEffect(() =>
   {
-    listPrograms().then((programsData) =>
+    (async () =>
     {
-      const programSelected = programsData.programs.find((e) => e._id === project.programId);
-      if (programSelected !== undefined)
-        setProgram(programSelected);
+      const programsResponse = await listPrograms();
+      const projectsProgram = programsResponse.programs.find((p: IPrograms) => p._id === project.programId);
+      if (projectsProgram !== undefined)
+        setProgram(projectsProgram);
 
-      listFeedbackProject(project._id).then((data) =>
-      {
-        setFeedback(data.feedback);
-        const resource = project.resources;
-        let value = 0;
+      const feedbacksResponse = await listFeedbackProject(project._id);
+      setFeedback(feedbacksResponse.feedback);
 
-        if (resource.transport !== null && resource.transport !== undefined)
-          value += resource.transport.quantity * parseInt(formatReal(resource.transport.unitaryValue.toString()));
+      const resources = project.resources;
 
-        resource.materials?.map((e: IMaterials) =>
-          (value += e.quantity * parseInt(formatReal(e.unitaryValue.toString()))));
+      let value = 0;
+      if (resources.transport !== null && resources.transport !== undefined)
+        value += resources.transport.quantity * parseInt(formatReal(resources.transport.unitaryValue.toString()));
 
-        setTotal(formatReal(value));
-        setUserName((project.author as IUser)?.name);
-        defineTypeProject();
-      });
-    });
+      resources.materials?.forEach((m: IMaterials) =>
+        value += m.quantity * parseInt(formatReal(m.unitaryValue.toString())));
+
+      setTotal(formatReal(value));
+      setUserName((project.author as IUser)?.name);
+      defineTypeProject();
+    })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [project]);
 
   const changeStatus = async (status: "reproved" | "notSelected" | "selected") =>
   {
