@@ -17,6 +17,8 @@ export interface IReport
   affectedPeople: number;
   discussion: string;
   communityContacts: ICommunityContact[];
+  isLate: boolean;
+  createdAt: Date;
 }
 
 export function isReport(r : string | IReport): r is IReport

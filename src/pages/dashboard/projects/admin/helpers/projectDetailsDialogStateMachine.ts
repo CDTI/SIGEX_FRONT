@@ -6,17 +6,17 @@ type Action =
   | { type: "RATED"                           }
   | { type: "SHOW_DIALOG", payload: IProject  };
 
-interface DetailsDialogState
+interface ProjectDetailsDialogState
 {
   isRated: boolean;
   isVisible: boolean;
   data?: IProject;
 }
 
-export function detailsDialogStateReducer(
-  state: DetailsDialogState,
+export function projectDetailsDialogStateReducer(
+  state: ProjectDetailsDialogState,
   action: Action)
-  : DetailsDialogState
+  : ProjectDetailsDialogState
 {
   switch (action.type)
   {

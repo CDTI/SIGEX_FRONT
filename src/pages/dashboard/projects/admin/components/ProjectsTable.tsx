@@ -1,15 +1,18 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import { Button, Col, Space, Table, Tag } from "antd";
-import { IProject } from "../../../../../interfaces/project";
 import { EyeOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+
+import { IProject } from "../../../../../interfaces/project";
+import { IReport } from "../../../../../interfaces/report";
 
 interface Props
 {
   data: IProject[];
   isLoading: boolean;
-  onShowDetails(record: IProject): void;
+  onShowProjectDetails(record: IProject): void;
+  onShowReportDetails(record: IReport): void;
 }
 
 const ProjectsTable: React.FC<Props> = (props) =>
@@ -60,10 +63,18 @@ const ProjectsTable: React.FC<Props> = (props) =>
         </Button>
 
         <Button
-          onClick={() => props.onShowDetails(record)}
+          onClick={() => props.onShowProjectDetails(record)}
         >
           <EyeOutlined /> Revisar
         </Button>
+
+        {record.report !== undefined && (
+          <Button
+            onClick={() => props.onShowReportDetails(record.report as IReport)}
+          >
+            <EyeOutlined /> Relatório
+          </Button>
+        )}
       </Space>
     )
   }];

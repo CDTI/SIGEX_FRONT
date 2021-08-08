@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 
 import { Button, Col, Form, Input, Row } from "antd";
+import MaskedInput from "antd-mask-input";
 import { FormInstance } from "antd/lib/form";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { ICommunityContact } from "../../../../../../interfaces/report";
@@ -105,7 +106,7 @@ const Community: React.FC<Props> = ({ formController, initialValues }) =>
                             { type: "string", max: 200, message: "O número máximo de caracteres foi extrapolado!" }
                           ]}
                         >
-                          <Input style={{ width: "100%" }} />
+                          <MaskedInput mask="(11)11111-1111" style={{ width: "100%" }} />
                         </Form.Item>
                       </Col>
                     </>

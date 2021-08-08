@@ -239,184 +239,197 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
   return (
     <>
       {!showResult && (
-        <Structure title="Dados do projeto">
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
-            <Row justify="center">
-              <Col span={16}>
-                <Steps direction="horizontal" current={currentProject(project)}>
-                  {project.status === "reproved"
-                    ? <Step title="Reprovado" />
-                    : <Step title="Em análise" />}
+        <Row justify="center" gutter={[0,32]}>
+          <Col span={21}>
+            <Steps direction="horizontal" current={currentProject(project)}>
+              {project.status === "reproved"
+                ? <Step title="Reprovado" />
+                : <Step title="Em análise" />}
 
-                  <Step title="Aprovado" />
-                  <Step title="Em andamento" />
-                  <Step title="Finalizado" />
-                </Steps>
-              </Col>
-            </Row>
+              <Step title="Aprovado" />
+              <Step title="Em andamento" />
+              <Step title="Finalizado" />
+            </Steps>
+          </Col>
 
-            <Row justify="center">
-              <Col span={16}>
-                <Collapse accordion>
-                  <Panel header="Informações básicas" key="1">
-                    <Typography><b>Usuário:</b> {userName}</Typography>
-                    <Typography><b>Nome:</b> {project.name}</Typography>
-                    <Typography><b>Descrição:</b> {project.description}</Typography>
-                    <Typography><b>Categoria:</b> {category.name}</Typography>
-                    <Typography><b>Programa:</b> {program?.name}</Typography>
-                    <Typography><b>Tipo:</b> {typeProject}</Typography>
+          <Col span={21}>
+            <Collapse accordion>
+              <Panel header="Informações básicas" key="1">
+                <Typography><b>Usuário:</b> {userName}</Typography>
+                <Typography><b>Nome:</b> {project.name}</Typography>
+                <Typography><b>Descrição:</b> {project.description}</Typography>
+                <Typography><b>Categoria:</b> {category.name}</Typography>
+                <Typography><b>Programa:</b> {program?.name}</Typography>
+                <Typography><b>Tipo:</b> {typeProject}</Typography>
 
-                    {project.category !== "5fb8402399032945bc5c1fe2" && (
-                      <>
-                        <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
-                        <ul style={{ marginLeft: "18px" }}>
-                          {project.firstSemester.map((e) =>
-                            <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>)}
-                        </ul>
+                {project.category !== "5fb8402399032945bc5c1fe2" && (
+                  <>
+                    <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
+                    <ul style={{ marginLeft: "18px" }}>
+                      {project.firstSemester.map((e) =>
+                        <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
+                      )}
+                    </ul>
 
-                        <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
-                        <ul style={{ marginLeft: "18px" }}>
-                          {project.secondSemester.map((e) =>
-                            <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>)}
-                        </ul>
+                    <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
+                    <ul style={{ marginLeft: "18px" }}>
+                      {project.secondSemester.map((e) =>
+                        <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
+                      )}
+                    </ul>
 
-                        <Typography><b>CH disponível:</b> {project.totalCH}</Typography>
-                        <Typography><b>Máximo de turmas:</b> {project.maxClasses}</Typography>
-                      </>
-                    )}
-
-                    {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
-                      <>
-                        <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                        {project.teachers.map((t) =>
-                          <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>)}
-
-                        <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
-                        {project.disciplines.map((d) =>
-                          <li>{d.name}</li>)}
-                      </>
-                    )}
-
-                    {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
-                      <>
-                        <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                        {project.teachers.map((t) =>
-                          <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>)}
-                      </>
-                    )}
-                </Panel>
-
-                <Panel header="Parcerias" key="2">
-                  <Collapse accordion>
-                    {project.partnership?.map((partner, index) => (
-                      <Panel header={"Parceria " + (index + 1)} key={index}>
-                        <Typography>Sobre: {partner.text}</Typography>
-                        {partner.contacts.map((contact, contactInd) => (
-                          <div key={contactInd}>
-                            <Typography>{contact.name}</Typography>
-                            <Typography>{contact.phone}</Typography>
-                          </div>)
-                        )}
-                      </Panel>)
-                    )}
-                  </Collapse>
-                </Panel>
-
-                <Panel header="Comunidade" key="3">
-                  <Typography>Sobre: {project.specificCommunity.text}</Typography>
-                  <Typography>Localização: {project.specificCommunity.location}</Typography>
-                  <Typography>Pessoas envolvidas: {project.specificCommunity.peopleInvolved}</Typography>
-                </Panel>
-
-                <Panel header="Planejamento" key="4">
-                  <Collapse>
-                    {project.planning?.map((planning, planningIdx) => (
-                      <Panel header={"Etapas " + (planningIdx + 1)} key={planningIdx}>
-                        <Typography>Sobre: {planning.text}</Typography>
-                        <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
-                        <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
-                        <Typography>Inicio: {planning.startDate}</Typography>
-                        <Typography>Final: {planning.finalDate}</Typography>
-                      </Panel>)
-                    )}
-                  </Collapse>
-                </Panel>
-
-                <Panel header="Recursos" key="5">
-                  <h2>Materiais</h2>
-                  {project.resources.materials !== undefined && (
-                    <MyTable columns={columnsMaterials} pagination={false} data={project.resources.materials} />)}
-
-                  <Divider />
-
-                  <h2>Transportes</h2>
-                  {project.resources.transport !== null && project.resources.transport !== undefined && (
-                    <MyTable
-                      columns={columnsTransport}
-                      pagination={false}
-                      data={[project.resources.transport]}
-                    ></MyTable>)}
-
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography style={{ marginLeft: "10px", fontWeight: "bold", fontSize: "16pt", color: "#b80c09" }}>
-                      Valor total do projeto
-                    </Typography>
-
-                    <Typography style={{ marginRight: "50px", fontWeight: "bold", fontSize: "16pt", color: "#b80c09" }}>
-                      {total}
-                    </Typography>
-                  </div>
-                </Panel>
-              </Collapse>
-              </Col>
-            </Row>
-
-            <Row justify="center">
-              <Col span={16}>
-                {userRoles.includes("Administrador") && project.status !== "finished" && (
-                  <Space>
-                    <Button
-                      style={{ backgroundColor: "#acc5cf", color: "#fff" }}
-                      onClick={openModal}
-                    >
-                      Não aprovado
-                    </Button>
-
-                    <Button
-                      style={{ backgroundColor: "#b3afc8", color: "#fff" }}
-                      onClick={() => changeStatus("notSelected")}
-                    >
-                      Aprovado e não selecionado
-                    </Button>
-
-                    <Button
-                      style={{ backgroundColor: "#8dc898", color: "#fff" }}
-                      onClick={() => changeStatus("selected")}
-                    >
-                      Selecionado
-                    </Button>
-                  </Space>
+                    <Typography><b>CH disponível:</b> {project.totalCH}</Typography>
+                    <Typography><b>Máximo de turmas:</b> {project.maxClasses}</Typography>
+                  </>
                 )}
-              </Col>
-            </Row>
 
-            <Row justify="center">
-              <Col span={16}>
-                <Timeline style={{ marginTop: "25px" }}>
-                  {feedback?.registers.sort(compareDate).map((e) =>
-                    <Timeline.Item>{e.text} - {e.date} - {e.typeFeedback}</Timeline.Item>)}
-                </Timeline>
-              </Col>
-            </Row>
-          </Space>
-        </Structure>
+                {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
+                  <>
+                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                    {project.teachers.map((t) =>
+                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
+                    )}
+
+                    <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
+                    {project.disciplines.map((d) =>
+                      <li>{d.name}</li>
+                    )}
+                  </>
+                )}
+
+                {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
+                  <>
+                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                    {project.teachers.map((t) =>
+                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
+                    )}
+                  </>
+                )}
+              </Panel>
+
+              <Panel header="Parcerias" key="2">
+                <Collapse accordion>
+                  {project.partnership?.map((partner, index) => (
+                    <Panel header={"Parceria " + (index + 1)} key={index}>
+                      <Typography>Sobre: {partner.text}</Typography>
+                      {partner.contacts.map((contact, contactInd) => (
+                        <div key={contactInd}>
+                          <Typography>{contact.name}</Typography>
+                          <Typography>{contact.phone}</Typography>
+                        </div>
+                      ))}
+                    </Panel>
+                  ))}
+                </Collapse>
+              </Panel>
+
+              <Panel header="Comunidade" key="3">
+                <Typography>Sobre: {project.specificCommunity.text}</Typography>
+                <Typography>Localização: {project.specificCommunity.location}</Typography>
+                <Typography>Pessoas envolvidas: {project.specificCommunity.peopleInvolved}</Typography>
+              </Panel>
+
+              <Panel header="Planejamento" key="4">
+                <Collapse>
+                  {project.planning?.map((planning, planningIdx) => (
+                    <Panel header={"Etapas " + (planningIdx + 1)} key={planningIdx}>
+                      <Typography>Sobre: {planning.text}</Typography>
+                      <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
+                      <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
+                      <Typography>Inicio: {planning.startDate}</Typography>
+                      <Typography>Final: {planning.finalDate}</Typography>
+                    </Panel>
+                  ))}
+                </Collapse>
+              </Panel>
+
+              <Panel header="Recursos" key="5">
+                <Row gutter={[0, 24]}>
+                  <Col span={24}>
+                    <Typography.Title level={3}>Materiais</Typography.Title>
+                    {project.resources.materials !== undefined && (
+                      <MyTable
+                        columns={columnsMaterials}
+                        pagination={false}
+                        data={project.resources.materials}
+                      />
+                    )}
+                  </Col>
+
+                  <Col span={24}>
+                    <Typography.Title level={3}>Transportes</Typography.Title>
+                    {project.resources.transport !== null && project.resources.transport !== undefined && (
+                      <MyTable
+                        columns={columnsTransport}
+                        pagination={false}
+                        data={[project.resources.transport]}
+                      />
+                    )}
+                  </Col>
+
+                  <Col span={24}>
+                    <Row justify="space-between">
+                      <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
+                        Valor total do projeto
+                      </Typography.Text>
+
+                      <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
+                        {total}
+                      </Typography.Text>
+                    </Row>
+                  </Col>
+                </Row>
+              </Panel>
+            </Collapse>
+          </Col>
+
+          {userRoles.includes("Administrador") && project.status !== "finished" && (
+            <Col span={21}>
+              <Space>
+                <Button
+                  style={{ backgroundColor: "#acc5cf", color: "#fff" }}
+                  onClick={openModal}
+                >
+                  Não aprovado
+                </Button>
+
+                <Button
+                  style={{ backgroundColor: "#b3afc8", color: "#fff" }}
+                  onClick={() => changeStatus("notSelected")}
+                >
+                  Aprovado e não selecionado
+                </Button>
+
+                <Button
+                  style={{ backgroundColor: "#8dc898", color: "#fff" }}
+                  onClick={() => changeStatus("selected")}
+                >
+                  Selecionado
+                </Button>
+              </Space>
+            </Col>
+          )}
+
+          <Col span={21}>
+            <Timeline>
+              {feedback?.registers.sort(compareDate).map((e) =>
+                <Timeline.Item>{e.text} - {e.date} - {e.typeFeedback}</Timeline.Item>
+              )}
+            </Timeline>
+          </Col>
+        </Row>
       )}
 
       {showResult && (
         <Row justify="center">
           <Col span={16}>
-            {edited !== null &&
-              <Result status={edited.result} title={edited.message} subTitle={"Projeto editado: " + edited.project.name} />}
+            {edited !== null && (
+              <Result
+                status={edited.result}
+                title={edited.message}
+                subTitle={"Projeto editado: " + edited.project.name}
+              />
+            )}
           </Col>
         </Row>
       )}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
 import ReactDOM from "react-dom";
 import Structure from "../../../../components/layout/structure";
 import { IProject } from "../../../../interfaces/project";
@@ -11,7 +11,10 @@ import { base_url } from "../../../../services/api";
 import Filters from "./components/Filters";
 import ProjectsTable from "./components/ProjectsTable";
 import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
-import { detailsDialogStateReducer } from "./helpers/detailsDialogStateMachine";
+import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
+import { reportDetailsDialogStateReducer } from "./helpers/reportDetailsDialogStateMachine";
+import ReportDetails from "./components/ReportDetails";
+import { IReport } from "../../../../interfaces/report";
 
 const Projects: React.FC = () =>
 {
@@ -19,9 +22,13 @@ const Projects: React.FC = () =>
     dataFilteringStateReducer,
     { isLoading: true, data: [], result: [] });
 
-  const [detailsDialogState, dispatchDetailsDialog] = useReducer(
-    detailsDialogStateReducer,
+  const [projectDetailsDialogState, dispatchProjectDetailsDialog] = useReducer(
+    projectDetailsDialogStateReducer,
     { isVisible: false, isRated: false });
+
+  const [reportDetailsDialogState, dispatchReportDetailsDialog] = useReducer(
+    reportDetailsDialogStateReducer,
+    { isVisible: false });
 
   useEffect(() =>
   {
@@ -46,28 +53,53 @@ const Projects: React.FC = () =>
     dispatchDataFiltering({ type: "FILTER" });
   }, [programId, categoryId, noticeId, projectName, authorName, data]);
 
-  const closeModal = useCallback(() =>
+  const closeProjectDetails = useCallback(() =>
   {
-    dispatchDetailsDialog({ type: "HIDE_DIALOG" });
-    dispatchDetailsDialog({ type: "NOT_RATED" });
+    dispatchProjectDetailsDialog({ type: "HIDE_DIALOG" });
+    dispatchProjectDetailsDialog({ type: "NOT_RATED" });
   }, []);
 
   const projectDetails = (
     <Modal
-      visible={detailsDialogState.isVisible}
+      visible={projectDetailsDialogState.isVisible}
       centered={true}
       width="85%"
-      footer={<Button onClick={closeModal} type="primary">OK</Button>}
-      onCancel={closeModal}
+      title="Detalhes do projeto"
+      footer={<Button onClick={closeProjectDetails} type="primary">OK</Button>}
+      onCancel={closeProjectDetails}
     >
       <Row>
         <Col span={24}>
-          {detailsDialogState.data !== undefined
+          {projectDetailsDialogState.data !== undefined
             ? <ProjectDetails
-                project={detailsDialogState.data}
-                showResult={detailsDialogState.isRated}
-                onRate={() => dispatchDetailsDialog({ type: "RATED" })}
+                project={projectDetailsDialogState.data}
+                showResult={projectDetailsDialogState.isRated}
+                onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
               />
+            : "Nenhum conteúdo carregado!"}
+        </Col>
+      </Row>
+    </Modal>
+  );
+
+  const closeReportDetails = useCallback(() =>
+  {
+    dispatchReportDetailsDialog({ type: "HIDE_DIALOG" })
+  }, []);
+
+  const reportDetails = (
+    <Modal
+      visible={reportDetailsDialogState.isVisible}
+      centered={true}
+      width="85%"
+      title="Detalhes do relatório"
+      footer={<Button onClick={closeReportDetails} type="primary">OK</Button>}
+      onCancel={closeReportDetails}
+    >
+      <Row>
+        <Col span={24}>
+          {reportDetailsDialogState.data !== undefined
+            ? <ReportDetails report={reportDetailsDialogState.data} />
             : "Nenhum conteúdo carregado!"}
         </Col>
       </Row>
@@ -80,6 +112,7 @@ const Projects: React.FC = () =>
   return (
     <>
       {ReactDOM.createPortal(projectDetails, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(reportDetails, document.getElementById("dialog-overlay")!)}
 
       <Structure title="todas as propostas">
         <Row gutter={[8, 8]}>
@@ -92,8 +125,11 @@ const Projects: React.FC = () =>
           <ProjectsTable
             isLoading={dataFilteringState.isLoading}
             data={dataFilteringState.result}
-            onShowDetails={(record: IProject) =>
-              dispatchDetailsDialog({ type: "SHOW_DIALOG", payload: record })
+            onShowProjectDetails={(record: IProject) =>
+              dispatchProjectDetailsDialog({ type: "SHOW_DIALOG", payload: record })
+            }
+            onShowReportDetails={(record: IReport) =>
+              dispatchReportDetailsDialog({ type: "SHOW_DIALOG", payload: record })
             }
           />
         </Row>
