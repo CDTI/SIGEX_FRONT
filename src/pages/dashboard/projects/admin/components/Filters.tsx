@@ -21,6 +21,7 @@ interface Props
 {
   projectsCsvHref: string;
   scheduleCsvHref: string;
+  reportsCsvHref: string;
   onFilterBy(action: { type: Filters, payload?: string }): void;
 }
 
@@ -152,7 +153,7 @@ const Filters: React.FC<Props> = (props) =>
             />
           </Col>
 
-          <Col xs={12} xl={6}>
+          <Col xs={8} xl={4}>
             <Button
               block
               type="default"
@@ -164,7 +165,7 @@ const Filters: React.FC<Props> = (props) =>
             </Button>
           </Col>
 
-          <Col xs={12} xl={6}>
+          <Col xs={8} xl={4}>
             <Button
               block
               type="default"
@@ -173,6 +174,18 @@ const Filters: React.FC<Props> = (props) =>
               href={props.scheduleCsvHref}
             >
               Horários
+            </Button>
+          </Col>
+
+          <Col xs={8} xl={4}>
+            <Button
+              block
+              type="default"
+              shape="round"
+              icon={<DownloadOutlined />}
+              href={props.reportsCsvHref}
+            >
+              Relatórios
             </Button>
           </Col>
     </>

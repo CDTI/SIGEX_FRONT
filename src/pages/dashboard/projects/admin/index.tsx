@@ -108,6 +108,7 @@ const Projects: React.FC = () =>
 
   let projectsCsvPath = `${base_url}/extensao/downloadCsv/${programId ?? ""}`;
   let scheduleCsvPath = `${base_url}/extensao/downloadCsvHours/${programId ?? ""}`;
+  let reportsCsvPath = `${base_url}/extensao/project/report/download/${programId ?? ""}`;
 
   return (
     <>
@@ -119,6 +120,7 @@ const Projects: React.FC = () =>
           <Filters
             projectsCsvHref={projectsCsvPath}
             scheduleCsvHref={scheduleCsvPath}
+            reportsCsvHref={reportsCsvPath}
             onFilterBy={dispatchDataFiltering}
           />
 
