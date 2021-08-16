@@ -153,7 +153,7 @@ export const Dashboard: React.FC = (props) =>
             </>
           )}
 
-          {userRoles.includes("Professor") || userRoles.includes("Presidente do NDE") && (
+          {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE")) && (
             <>
               <SubMenu
                 key="myProjects"

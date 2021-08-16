@@ -48,20 +48,13 @@ export const CreateProject: React.FC<Props> = (props) =>
       {
         setTitle("Editar projeto");
 
-        if (isUser(editProject.author))
-          editProject.author = (editProject.author as User)._id!;
+        editProject.author = (editProject.author as User)._id!;
+        editProject.category = (editProject.category as Category)._id!;
+        if (!notices.some((n: Notice) => n._id === (editProject.notice as Notice)._id!))
+          notices.push(editProject.notice as Notice);
 
-        if (isCategory(editProject.category))
-          editProject.category = (editProject.category as Category)._id!;
-
-        if (isNotice(editProject.notice))
-        {
-          if (!notices.some((n: Notice) => n._id === (editProject.notice as Notice)._id!))
-            notices.push(editProject.notice);
-
-          setSelectedNotice(editProject.notice);
-          editProject.notice = (editProject.notice as Notice)._id!;
-        }
+        setSelectedNotice(editProject.notice as Notice);
+        editProject.notice = (editProject.notice as Notice)._id!;
 
         setProject(editProject);
         setEdited(true);
@@ -238,28 +231,29 @@ export const CreateProject: React.FC<Props> = (props) =>
   };
 
   // Adicionar um array de parceiros se ele for diferente de undefined
-  const changePartner = (partners: Partnership[]) =>
+  const changePartner = (partners?: Partnership[]) =>
   {
-    setProject((prevState) =>
-    {
-      const partnersWithContacts = partners.filter((p: Partnership) =>
-        p.contacts !== undefined);
-
-      const partnersWithoutContacts = partners
-        .filter((p: Partnership) => p.contacts === undefined)
-        .map((p: Partnership) => ({ ...p, contacts: [] }));
-
-      return (
+    if (partners !== undefined)
+      setProject((prevState) =>
       {
-        ...prevState,
-        partnership:
-        [
-          ...prevState.partnership,
-          ...partnersWithContacts,
-          ...partnersWithoutContacts
-        ]
+        const partnersWithContacts = partners.filter((p: Partnership) =>
+          p.contacts !== undefined);
+
+        const partnersWithoutContacts = partners
+          .filter((p: Partnership) => p.contacts === undefined)
+          .map((p: Partnership) => ({ ...p, contacts: [] }));
+
+        return (
+        {
+          ...prevState,
+          partnership:
+          [
+            ...prevState.partnership,
+            ...partnersWithContacts,
+            ...partnersWithoutContacts
+          ]
+        });
       });
-    });
 
     next();
   };

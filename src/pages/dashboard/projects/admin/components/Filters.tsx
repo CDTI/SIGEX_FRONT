@@ -47,9 +47,14 @@ export const Filters: React.FC<Props> = (props) =>
       dispatchCategoriesDropDownState({ type: "LOADING" });
       dispatchNoticesDropDownState({ type: "LOADING" });
 
-      dispatchProgramsDropDownState({ type: "SET_DATA", payload: (await listPrograms()).programs });
-      dispatchNoticesDropDownState({ type: "SET_DATA", payload: await getAllNotices() });
-      dispatchCategoriesDropDownState({ type: "SET_DATA", payload: await getAllCategories() });
+      const response = await listPrograms();
+      dispatchProgramsDropDownState({ type: "SET_DATA", payload: response.programs });
+
+      const notices = await getAllNotices();
+      dispatchNoticesDropDownState({ type: "SET_DATA", payload: notices });
+
+      const categories = await getAllCategories();
+      dispatchCategoriesDropDownState({ type: "SET_DATA", payload: categories });
     })();
   }, []);
 

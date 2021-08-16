@@ -8,8 +8,5 @@ export interface Category
 
 export function isCategory(c: any): c is Category
 {
-  return c
-    && "createdAt" in c
-    && "isActive" in c
-    && "name" in c;
+  return c;
 }

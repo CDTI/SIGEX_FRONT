@@ -15,26 +15,26 @@ export const getAllCategories = async (): Promise<Category[]> =>
 {
   const response = await api.get("/categories");
 
-  return response.data.categories;
+  return response.data;
 };
 
 export const getActiveCategories = async (): Promise<Category[]> =>
 {
   const response = await api.get("/categories/active");
-  return response.data.categories;
+  return response.data;
 }
 
 export const getCategoriesByNotice = async (id: string): Promise<Category[]> => {
   const response = await api.get(`/categories/byNotice/${id}`);
 
-  return response.data.categories;
+  return response.data;
 };
 
 export const getCategory = async (id: string): Promise<Category> =>
 {
   const response = await api.get(`/category/${id}`);
 
-  return response.data.category;
+  return response.data;
 };
 
 export const createCategory = async (category: Category): Promise<ReturnRequest> =>
