@@ -1,39 +1,38 @@
 import React, { useEffect } from "react";
-
 import { Col, Form, Input, Row } from "antd";
 import { FormInstance } from "antd/lib/form";
 
-import { IReport } from "../../../../../../interfaces/report";
+import { Report } from "../../../../../../interfaces/project";
 
 interface Props
 {
   formController: FormInstance;
-  initialValues?: IReport;
+  initialValues?: Report;
 }
 
-const Methodology: React.FC<Props> = ({ formController, initialValues }) =>
+export const DiscussionForm: React.FC<Props> = (props) =>
 {
   useEffect(() =>
   {
-    if (initialValues !== undefined)
-      formController.setFieldsValue(initialValues);
-  }, [initialValues]);
+    if (props.initialValues !== undefined)
+      props.formController.setFieldsValue(props.initialValues);
+  }, [props.initialValues]);
 
   return (
     <Form
-      name="methodology"
+      name="discussion"
       layout="vertical"
-      form={formController}
+      form={props.formController}
     >
       <Row>
         <Col span={24}>
           <Form.Item
-            name="methodology"
-            label="Procedimentos metodológicos"
+            name="discussion"
+            label="Discussão"
             rules={
             [
               { required: true, message: "Campo obrigatório!" },
-              { type: "string", max: 6000, message: "O número máximo de caracteres foi extrapolado!" }
+              { type: "string", max: 4000, message: "O número máximo de caracteres foi extrapolado!" }
             ]}
           >
             <Input.TextArea autoSize={{ minRows: 3, maxRows: 5 }} style={{ width: "100%" }} />
@@ -43,5 +42,3 @@ const Methodology: React.FC<Props> = ({ formController, initialValues }) =>
     </Form>
   );
 };
-
-export default Methodology;

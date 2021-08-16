@@ -1,18 +1,17 @@
-import React from 'react'
-import { BrowserRouter, Route } from 'react-router-dom'
-import Home from '../pages/home'
-import ChangePassword from '../pages/change-password'
+import React from "react";
+import { BrowserRouter, Route } from "react-router-dom";
 
-import Login from '../pages/login'
+import { LoginPage } from "../pages/login";
+import { ChangePasswordPage } from "../pages/change-password";
+import { HomePage } from "../pages/home";
 
-const SignRoutes: React.FC = () => {
-    return (
-        <BrowserRouter>
-            <Route path='/' exact={true} component={Home} />
-            <Route path='/login' component={Login} />
-            <Route path='/changePassword' component={ChangePassword} />
-        </BrowserRouter>
-    )
-}
-
-export default SignRoutes
+export const SignRoutes: React.FC = () =>
+{
+  return (
+    <BrowserRouter>
+      <Route path="/" exact={true} component={HomePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/changePassword" component={ChangePasswordPage} />
+    </BrowserRouter>
+  );
+};

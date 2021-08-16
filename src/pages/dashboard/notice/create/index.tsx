@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 
-import CreateNotice from "./components/CreateNotice";
-import AddCategories from "./components/AddCategories";
+import { CreateNotice } from "./components/CreateNotice";
+import { AddCategories } from "./components/AddCategories";
 
 import Structure from "../../../../components/layout/structure";
-import { INotice } from "../../../../interfaces/notice";
+import { Notice } from "../../../../interfaces/notice";
 import { createNotice, getNotice, updateNotice } from "../../../../services/notice_service";
 import { notification } from "antd";
 
@@ -14,7 +14,7 @@ interface UrlParams
   id: string;
 }
 
-const CreateNoticeController: React.FC = () =>
+export const CreateNoticeController: React.FC = () =>
 {
   const params = useParams<UrlParams>();
   const history = useHistory();
@@ -22,7 +22,7 @@ const CreateNoticeController: React.FC = () =>
   const [content, setContent] =
     useState<"CreateNotice" | "AddCategories">("CreateNotice");
 
-  const [notice, setNotice] = useState<INotice>();
+  const [notice, setNotice] = useState<Notice>();
 
   const { id: noticeId } = params;
   useEffect(() =>
@@ -42,7 +42,7 @@ const CreateNoticeController: React.FC = () =>
       setContent("CreateNotice");
   };
 
-  const handleOnSubmit = async (values: INotice) =>
+  const handleOnSubmit = async (values: Notice) =>
   {
     if (content === "CreateNotice")
     {

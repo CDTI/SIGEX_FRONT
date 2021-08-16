@@ -1,30 +1,29 @@
 import React, { useEffect } from "react";
-
 import { Col, Form, Input, Row } from "antd";
 import { FormInstance } from "antd/lib/form";
 
-import { IReport } from "../../../../../../interfaces/report";
+import { Report } from "../../../../../../interfaces/project";
 
 interface Props
 {
   formController: FormInstance
-  initialValues?: IReport;
+  initialValues?: Report;
 }
 
-const Introduction: React.FC<Props> = ({ formController, initialValues }) =>
+export const IntroductionForm: React.FC<Props> = (props) =>
 {
   useEffect(() =>
   {
-    if (initialValues !== undefined)
-      formController.setFieldsValue(initialValues);
-  }, [initialValues]);
+    if (props.initialValues !== undefined)
+      props.formController.setFieldsValue(props.initialValues);
+  }, [props.initialValues]);
 
   return (
     <Form
       name="introduction"
       layout="vertical"
-      form={formController}
-      initialValues={initialValues}
+      form={props.formController}
+      initialValues={props.initialValues}
     >
       <Row>
         <Col span={24}>
@@ -58,5 +57,3 @@ const Introduction: React.FC<Props> = ({ formController, initialValues }) =>
     </Form>
   );
 };
-
-export default Introduction;

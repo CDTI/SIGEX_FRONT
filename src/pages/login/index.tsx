@@ -1,50 +1,59 @@
-import React, { useState } from 'react'
-import { Form, Button, Input, Spin, notification } from 'antd'
-import InputMask from 'antd-mask-input'
-import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from './style'
-import { ArrowLeftOutlined } from '@ant-design/icons'
-import { useAuth } from '../../context/auth'
-import logo from '../../sigex.png'
-import { checkUser, createUser, hasPasswordChangeToken } from '../../services/user_service'
-import { useHistory } from "react-router-dom";
 import crypto from "crypto";
-import { getRoles } from '../../services/role_service'
-import { IRole } from '../../interfaces/role'
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { Form, Button, Input, Spin, notification } from "antd";
+import InputMask from "antd-mask-input";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 
-interface ValueLogin {
+import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from "./style";
+
+import { Role } from "../../interfaces/user";
+import { checkUser, createUser, hasPasswordChangeToken } from "../../services/user_service";
+import { getRoles } from "../../services/role_service";
+import { useAuth } from "../../context/auth";
+import logo from "../../sigex.png";
+
+interface ValueLogin
+{
   cpf: string,
   password: string
 }
 
-interface Props {
+interface Props
+{
   user: any
 }
 
-const LoginPage: React.FC<Props> = () => {
+export const LoginPage: React.FC<Props> = () =>
+{
   const history = useHistory();
-  const context = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [cpf, setCpf] = useState('')
-  const [newUser, setNewUser] = useState(false)
-  const [loginUser, setLoginUser] = useState(false)
-  const [password, setPassword] = useState('')
-  const [forgotPassword, setForgotPassword] = useState(false)
-  const [form] = Form.useForm()
+  const context = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [cpf, setCpf] = useState("");
+  const [newUser, setNewUser] = useState(false);
+  const [loginUser, setLoginUser] = useState(false);
+  const [password, setPassword] = useState("");
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [form] = Form.useForm();
 
-  const onFinish = (values: ValueLogin) => {
-    setLoading(false)
-    context.login(values)
-  }
+  const onFinish = (values: ValueLogin) =>
+  {
+    setLoading(false);
+    context.login(values);
+  };
 
-  const back = () => {
-    setCpf('')
-    form.resetFields()
-    setNewUser(false)
-    setLoginUser(false)
-  }
+  const back = () =>
+  {
+    setCpf("");
+    form.resetFields();
+    setNewUser(false);
+    setLoginUser(false);
+  };
 
-  const handleCreateUser = async (userNew: any) => {
-    try {
+  const handleCreateUser = async (userNew: any) =>
+  {
+    try
+    {
       const roles = await getRoles();
       const cUser =
       {
@@ -53,35 +62,37 @@ const LoginPage: React.FC<Props> = () => {
         lattes: userNew.lattes,
         name: userNew.name,
         password: userNew.password,
-        roles: roles.filter((r: IRole) => r.description === "Professor").map((r:IRole) => r._id),
+        roles: roles.filter((r: Role) => r.description === "Professor").map((r: Role) => r._id),
         isActive: true
-      }
+      };
 
-      setPassword(userNew.password)
-      const newUser = await createUser(cUser)
-      const login = { cpf, password }
-      console.log(newUser)
-      setCpf(userNew.cpf)
-      setNewUser(false)
-      setLoginUser(true)
-      notification.success({ message: 'Usuário cadastrado com sucesso' })
-      context.login(login)
-    }catch(e){
-      notification.error({ message: 'Erro ao cadastrar usuário' })
+      setPassword(userNew.password);
+      const newUser = await createUser(cUser);
+      const login = { cpf, password };
+      console.log(newUser);
+      setCpf(userNew.cpf);
+      setNewUser(false);
+      setLoginUser(true);
+      notification.success({ message: "Usuário cadastrado com sucesso" });
+      context.login(login);
     }
-  }
+    catch (err)
+    {
+      notification.error({ message: "Erro ao cadastrar usuário" });
+    }
+  };
 
-  const handleCheckUser = async (value: any) => {
-    const check = await checkUser(value)
-    setCpf(value.cpf)
-    const cpf = { cpf: value.cpf }
-    form.setFieldsValue(cpf)
-    if (check) {
-      setLoginUser(true)
-    } else {
-      setNewUser(true)
-    }
-  }
+  const handleCheckUser = async (value: any) =>
+  {
+    const check = await checkUser(value);
+    setCpf(value.cpf);
+    const cpf = { cpf: value.cpf };
+    form.setFieldsValue(cpf);
+    if (check)
+      setLoginUser(true);
+    else
+      setNewUser(true);
+  };
 
   const handleForgotPassword = () =>
   {
@@ -89,7 +100,7 @@ const LoginPage: React.FC<Props> = () => {
     setNewUser(false);
     setLoginUser(false);
     setForgotPassword(true);
-  }
+  };
 
   const handlePasswordChangeRequest = async (value: any) =>
   {
@@ -116,188 +127,183 @@ const LoginPage: React.FC<Props> = () => {
       setForgotPassword(false);
       setLoginUser(true);
     }
-  }
+  };
 
   return (
     <Container>
       {!loading && (
         <FormDiv>
-          <>
-            <ContainerImage>
-              <ImageLogo src={logo} />
-            </ContainerImage>
+          <ContainerImage>
+            <ImageLogo src={logo} />
+          </ContainerImage>
 
-            {(!newUser && !loginUser && !forgotPassword) && (
+          {(!newUser && !loginUser && !forgotPassword) && (
+            <Form
+              form={form}
+              onFinish={handleCheckUser}
+              style={{ maxWidth: "520px", width: "100%", color: "#fff !important" }}
+              layout="vertical"
+            >
+              <LabelInput>CPF</LabelInput>
+              <Form.Item
+                name="cpf"
+                rules={[{ required: true, message: "Campo Obrigatório " }]}
+              >
+                <InputMask mask="111.111.111-11" />
+              </Form.Item>
+
+              <Form.Item>
+                <Button htmlType="submit" type="primary">Avançar</Button>
+              </Form.Item>
+            </Form>
+          )}
+
+          {loginUser && (
+            <>
+              <Button
+                type="link"
+                style={{ margin: "10px 0", padding: "5px 0", color: "#fff" }}
+                onClick={back}
+              >
+                <ArrowLeftOutlined />Voltar
+              </Button>
+
               <Form
+                name="basic"
+                onFinish={onFinish}
                 form={form}
-                onFinish={handleCheckUser}
-                style={{ maxWidth: '520px', width: '100%', color: '#fff !important' }}
-                layout='vertical'
               >
                 <LabelInput>CPF</LabelInput>
                 <Form.Item
-                  name='cpf'
-                  rules={[{ required: true, message: 'Campo Obrigatório ' }]}
+                  name="cpf"
+                  rules={[{ required: true, message: "Campo obrigatório" }]}
                 >
-                  <InputMask mask='111.111.111-11' />
+                  <Input placeholder="Digite seu CPF" disabled />
+                </Form.Item>
+
+                <LabelInput>Senha</LabelInput>
+                <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: "Campo obrigatório" }]}
+                >
+                  <Input.Password draggable type="password" placeholder="Digite sua senha" />
                 </Form.Item>
 
                 <Form.Item>
-                  <Button htmlType='submit' type='primary'>Avançar</Button>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button type="link" htmlType="button" onClick={handleForgotPassword}>
+                      Esqueceu sua senha?
+                    </Button>
+                  </div>
+                </Form.Item>
+
+                <Form.Item>
+                  <p style={{ textAlign: "center" }}>
+                    <Button type="primary" htmlType="submit">Login</Button>
+                  </p>
                 </Form.Item>
               </Form>
-            )}
+            </>
+          )}
 
-            {loginUser && (
-              <>
-                <Button
-                  type='link'
-                  style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }}
-                  onClick={back}
+          {newUser && (
+            <>
+              <Button
+                type="link"
+                style={{ margin: "10px 0", padding: "5px 0", color: "#fff" }}
+                onClick={back}
+              >
+                <ArrowLeftOutlined />Voltar
+              </Button>
+
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleCreateUser}
+                style={{ maxWidth: "520px", width: "100%" }}
+              >
+                <LabelInput>CPF</LabelInput>
+                <Form.Item
+                  name="cpf"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
                 >
-                  <ArrowLeftOutlined />Voltar
-                </Button>
+                  <InputMask mask="111.111.111-11" disabled />
+                </Form.Item>
 
-                <Form
-                  onFinish={onFinish}
-                  name="basic"
-                  form={form}
+                <LabelInput>Name</LabelInput>
+                <Form.Item
+                  name="name"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
                 >
-                  <LabelInput>CPF</LabelInput>
-                  <Form.Item name="cpf"
-                    rules={[{ required: true, message: 'Campo obrigatório' }]}
-                  >
-                    <Input placeholder='Digite seu CPF' disabled />
-                  </Form.Item>
+                  <Input placeholder="Digite o seu Nome" />
+                </Form.Item>
 
-                  <LabelInput>Senha</LabelInput>
-                  <Form.Item name="password"
-                    rules={[{ required: true, message: 'Campo obrigatório' }]}
-                  >
-                    <Input.Password draggable type='password' placeholder='Digite sua senha' />
-                  </Form.Item>
-
-                  {
-                    <Form.Item>
-                      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button type="link" htmlType="button" onClick={handleForgotPassword}>
-                          Esqueceu sua senha?
-                        </Button>
-                      </div>
-                    </Form.Item>
-                  }
-
-                  <Form.Item>
-                    <p style={{ textAlign: 'center' }}>
-                      <Button type="primary" htmlType="submit">Login</Button>
-                    </p>
-                  </Form.Item>
-                </Form>
-              </>
-            )}
-
-            {newUser && (
-              <>
-                <Button
-                  type='link'
-                  style={{ margin: '10px 0', padding: '5px 0', color: '#fff' }}
-                  onClick={back}
+                <LabelInput>E-Mail</LabelInput>
+                <Form.Item
+                  name="email"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
                 >
-                  <ArrowLeftOutlined />Voltar
-                </Button>
+                  <Input placeholder="Digite o E-Mail" />
+                </Form.Item>
 
-                <Form
-                  form={form}
-                  layout='vertical'
-                  onFinish={handleCreateUser}
-                  style={{ maxWidth: '520px', width: '100%' }}
+                <LabelInput>Cod. Lattes</LabelInput>
+                <Form.Item name="lattes">
+                  <Input addonBefore="https://cnpq.lattes/" placeholder="Digite o código lattes" />
+                </Form.Item>
+
+                <LabelInput>Senha</LabelInput>
+                <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: "Campo Obrigatório" }]}
                 >
-                  <LabelInput>CPF</LabelInput>
-                  <Form.Item
-                    name='cpf'
-                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
-                  >
-                    <InputMask mask='111.111.111-11' disabled />
-                  </Form.Item>
+                  <Input.Password draggable type="password" placeholder="Digite a Senha" />
+                </Form.Item>
 
-                  <LabelInput>Name</LabelInput>
-                  <Form.Item
-                    name='name'
-                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
-                  >
-                    <Input placeholder='Digite o seu Nome' />
-                  </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">Cadastrar</Button>
+                </Form.Item>
+              </Form>
+            </>
+          )}
 
-                  <LabelInput>E-Mail</LabelInput>
-                  <Form.Item
-                    name='email'
-                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
-                  >
-                    <Input placeholder='Digite o E-Mail' />
-                  </Form.Item>
+          {forgotPassword && (
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handlePasswordChangeRequest}
+              style={{ maxWidth: "520px", width: "100%" }}
+            >
+              <Form.Item>
+                <LabelInput>Forneça alguns dados para completar a redefinição da sua senha.</LabelInput>
+              </Form.Item>
 
-                  <LabelInput>Cod. Lattes</LabelInput>
-                  <Form.Item name='lattes'>
-                    <Input addonBefore='https://cnpq.lattes/' placeholder='Digite o código lattes' />
-                  </Form.Item>
+              <LabelInput>Nome</LabelInput>
+              <Form.Item
+                name="name"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Input placeholder="Digite seu nome"></Input>
+              </Form.Item>
 
-                  <LabelInput>Senha</LabelInput>
-                  <Form.Item
-                    name='password'
-                    rules={[{ required: true, message: 'Campo Obrigatório' }]}
-                  >
-                    <Input.Password draggable type='password' placeholder='Digite a Senha' />
-                  </Form.Item>
+              <LabelInput>E-mail</LabelInput>
+              <Form.Item
+                name="email"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Input placeholder="Digite o e-mail"></Input>
+              </Form.Item>
 
-                  <Form.Item>
-                    <Button type='primary' htmlType='submit'>Cadastrar</Button>
-                  </Form.Item>
-                </Form>
-              </>
-            )}
-
-            {forgotPassword && (
-              <>
-                <Form
-                  form={form}
-                  layout="vertical"
-                  onFinish={handlePasswordChangeRequest}
-                  style={{ maxWidth: "520px", width: "100%" }}
-                >
-                  <Form.Item>
-                    <LabelInput>Forneça alguns dados para completar a redefinição da sua senha.</LabelInput>
-                  </Form.Item>
-
-                  <LabelInput>Nome</LabelInput>
-                  <Form.Item
-                    name="name"
-                    rules={[{ required: true, message: "Campo obrigatório" }]}
-                  >
-                    <Input placeholder="Digite seu nome"></Input>
-                  </Form.Item>
-
-                  <LabelInput>E-mail</LabelInput>
-                  <Form.Item
-                    name="email"
-                    rules={[{ required: true, message: "Campo obrigatório" }]}
-                  >
-                    <Input placeholder="Digite o e-mail"></Input>
-                  </Form.Item>
-
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit">Enviar</Button>
-                  </Form.Item>
-                </Form>
-              </>
-            )}
-          </>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">Enviar</Button>
+              </Form.Item>
+            </Form>
+          )}
         </FormDiv>
       )}
 
       {loading && (
         <Spin size="large" />
       )}
-    </Container >)
-}
-
-export default LoginPage
+    </Container >
+  );
+};

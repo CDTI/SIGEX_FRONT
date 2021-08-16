@@ -1,38 +1,34 @@
-import { Moment } from "moment";
+import { Category } from "./category";
+import { Role } from "./user";
 
-import { ICategory } from "./category";
-import { IRole } from "./role";
-
-export interface ISchedule
+export interface Schedule
 {
+  day: number;
   location: string;
   period: string;
-  day: number;
 };
 
-export interface ITimetable
+export interface Timetable
 {
-  category: string | ICategory;
-  schedules: ISchedule[];
+  category: string | Category;
+  schedules: Schedule[];
 }
 
-export interface INotice
+export interface Notice
 {
   _id?: string;
-  number: number;
-  name: string;
-  type: "common" | "specific";
-  canAccess: (string | IRole)[];
-  timetables: ITimetable[];
-  isActive: boolean;
+  canAccess: (string | Role)[];
   effectiveDate: Date;
   expirationDate: Date;
+  isActive: boolean;
+  name: string;
+  number: number;
   reportDeadline: Date;
-  createdAt?: Date;
-  updateAt?: Date;
+  timetables: Timetable[];
+  type: "common" | "specific";
 };
 
-export function isNotice(n : string | INotice): n is INotice
+export function isNotice(n : any): n is Notice
 {
-  return (n as INotice)._id !== undefined;
+  return n && (n as Notice)._id !== undefined;
 }

@@ -1,4 +1,4 @@
-import { ICommunityContact, IReport } from "../../../../../../interfaces/report";
+import { Report } from "../../../../../../interfaces/project";
 
 type FormStep =
   | "introduction"
@@ -10,7 +10,7 @@ type FormStep =
 
 type Action =
   | { type: "RESTORE",  payload: { step: FormStep, data: any }  }
-  | { type: "SET_DATA", payload: IReport                        }
+  | { type: "SET_DATA", payload: Report                        }
   | { type: "PREVIOUS"                                          }
   | { type: "NEXT",     payload: any                            };
 
@@ -26,7 +26,7 @@ type FormStepDefinition =
 
 interface ReportFormState
 {
-  data?: IReport;
+  data?: Report;
   step: FormStep;
 }
 

@@ -1,13 +1,13 @@
-import { IReport } from "../../../../../interfaces/report";
+import { Report } from "../../../../../interfaces/project";
 
 type Action =
   | { type: "HIDE_DIALOG"                     }
-  | { type: "SHOW_DIALOG", payload: IReport  };
+  | { type: "SHOW_DIALOG", payload: Report  };
 
 interface ReportDetailsDialogState
 {
   isVisible: boolean;
-  data?: IReport;
+  data?: Report;
 }
 
 export function reportDetailsDialogStateReducer(

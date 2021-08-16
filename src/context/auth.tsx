@@ -1,74 +1,77 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { notification } from 'antd'
-import IUser from '../interfaces/user'
-import api from '../services/api'
-import history from '../global/history'
-import { AxiosError } from 'axios'
+import { AxiosError } from "axios";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { notification } from "antd";
+import { User } from "../interfaces/user";
+import api from "../services/api";
+import history from "../global/history";
 
-export interface Login {
-    cpf: string
-    password: string
+export interface Login
+{
+  cpf: string;
+  password: string;
 }
 
-interface AuthContextData {
-    signed: boolean
-    user: IUser | null
-    login(login: Login): Promise<void>
-    logout(): void
+interface AuthContextData
+{
+  signed: boolean;
+  user: User | null;
+  login(login: Login): Promise<void>;
+  logout(): void;
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData)
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC = ({ children }) =>
+{
     // const initialValue = {
-    //     email: '',
-    //     password: '',
-    //     lattes: '',
-    //     cpf: '',
-    //     name: '',
-    //     _id: '',
-    //     role: '',
+    //     email: "",
+    //     password: "",
+    //     lattes: "",
+    //     cpf: "",
+    //     name: "",
+    //     _id: "",
+    //     role: "",
     // }
-    const [user, setUser] = useState<IUser | null>(null)
+    const [user, setUser] = useState<User | null>(null)
 
     useEffect(() => {
-        const storageUser = localStorage.getItem('@pp:user')
-        const storageToken = localStorage.getItem('@pp:token')
+        const storageUser = localStorage.getItem("@pp:user")
+        const storageToken = localStorage.getItem("@pp:token")
 
         if (storageToken && storageUser) {
             setUser(JSON.parse(storageUser.toString()))
             api.defaults.headers.Authorization = `Bearer ${storageToken}`
-            history.push('/dashboard')
+            history.push("/dashboard")
         }
     }, [])
 
     const logout = () => {
         setUser(null)
 
-        localStorage.removeItem('@pp:user')
-        localStorage.removeItem('@pp:token')
+        localStorage.removeItem("@pp:user")
+        localStorage.removeItem("@pp:token")
     }
 
     const login = async (login: Login) => {
         try {
-            let status: 'success' | 'error' = 'success'
-            const response = await api.post('/login', {
+            let status: "success" | "error" = "success"
+            const response = await api.post("/login", {
                 cpf: login.cpf,
                 password: login.password
             })
             console.log(response)
             status = response.data.status
-            if (response.data.token !== null && response.data.status === 'success') {
+            if (response.data.token !== null && response.data.status === "success") {
                 notification[status]({ message: response.data.message })
                 setUser(response.data.user)
                 api.defaults.headers.Authorization = `Bearer ${response.data.token}`
 
-                localStorage.setItem('@pp:user', JSON.stringify(response.data.user))
-                localStorage.setItem('@pp:token', response.data.token)
+                localStorage.setItem("@pp:user", JSON.stringify(response.data.user))
+                localStorage.setItem("@pp:token", response.data.token)
 
 
-                history.push('/dashboard')
-            } else if (response.data.token === null && response.data.status === 'error') {
+                history.push("/dashboard")
+            } else if (response.data.token === null && response.data.status === "error") {
                 notification[status]({ message: response.data.message })
             }
         } catch (err) {

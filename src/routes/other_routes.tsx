@@ -1,107 +1,87 @@
-import React from 'react'
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import React from "react";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
-// Componentes Dashboard
-import DashboardHome from '../pages/dashboard/home'
-import Dashboard from '../pages/dashboard'
+import { HomeDashboard } from "../pages/dashboard/home";
+import { Dashboard } from "../pages/dashboard";
+import { Programs } from "../pages/dashboard/programs";
+import { CreateProgram } from "../pages/dashboard/programs/create";
+import { CreateProject } from "../pages/dashboard/projects/teacher/create-project";
+import { TeacherProjects } from "../pages/dashboard/projects/teacher";
+import { AllProjects } from "../pages/dashboard/projects/admin";
+import { AdminViewProject } from "../pages/dashboard/projects/admin/components/ProjectDetails";
+import { CreateCategory } from "../pages/dashboard/category";
+import { Users } from "../pages/dashboard/users";
+import { HomePage } from "../pages/home";
+import { NotFound } from "../pages/404";
+import { Notices } from "../pages/dashboard/notice";
+import { CreateNoticeController } from "../pages/dashboard/notice/create";
+import { ReportForm } from "../pages/dashboard/projects/teacher/report";
 
-// Componentes Programas
-import Programs from '../pages/dashboard/programs'
-import CreateProgram from '../pages/dashboard/programs/create'
+import { useAuth } from "../context/auth";
+import { Restricted } from "../components/Restricted";
+import { Courses } from "../pages/dashboard/courses";
 
-// Componentes Project
-import CreateProject from '../pages/dashboard/projects/teacher/create-project'
-import ProjectsTeacher from '../pages/dashboard/projects/teacher'
-import ProjectsAdmin from '../pages/dashboard/projects/admin'
-import AdminViewProject from '../pages/dashboard/projects/admin/components/ProjectDetails'
+export const OtherRoutes: React.FC = () =>
+{
+  const { user } = useAuth();
 
-// Componentes Category
-import CreateCategory from '../pages/dashboard/category'
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/" exact={true} component={HomePage} />
+        <Dashboard>
+          {/* Rota base */
+            <Route path="/dashboard" exact={true} component={HomeDashboard} />
+          }
 
-// Componentes Usuário
-import Users from '../pages/dashboard/users'
+          {
+            <>
+            </>
+          }
 
-// Outros Componentes
-import Home from '../pages/home'
-import NotFound from '../pages/404'
-import { useAuth } from '../context/auth'
+          {/* Rotas acessadas apenas por professore e ou predidentes do NDE */
+            <Restricted allowedRoles={["Professor", "Presidente do NDE"]}>
+              <Route path="/dashboard/project/create" component={CreateProject} />
+              <Route path="/dashboard/project/report/create" component={ReportForm} />
+              <Route path="/dashboard/project/report/edit/:id" component={ReportForm} />
+              <Route path="/dashboard/myProjects" component={TeacherProjects} />
+            </Restricted>
+          }
 
-import RegistrationPeriods from '../pages/dashboard/notice'
-import CreateNoticeController from '../pages/dashboard/notice/create'
-import { IRole } from '../interfaces/role'
-import Report from '../pages/dashboard/projects/teacher/report'
+          {/* Rotas acessadas apenas por administradores */
+            <Restricted allowedRoles={["Administrador"]}>
+              <Route exact={true} path="/dashboard/notices" component={Notices} />
+              <Route
+                  exact={true}
+                  path={"/dashboard/notices/create"}
+                  component={CreateNoticeController} />
 
-const OtherRoutes: React.FC = () => {
-    const { user } = useAuth()
+              <Route
+                  exact={true}
+                  path={"/dashboard/notices/edit/:id"}
+                  component={CreateNoticeController} />
 
-    const isIRole = (v: string | IRole): v is IRole =>
-    {
-      if ((v as IRole)._id)
-        return true;
+              <Route path="/dashboard/project/admin-view" component={AdminViewProject} />
+              <Route path="/dashboard/program/create" component={CreateProgram} />
+              <Route path="/dashboard/categories" component={CreateCategory} />
+              <Route path="/dashboard/users" component={Users} />
+              <Route path="/dashboard/courses" component={Courses}/>
+            </Restricted>
+          }
 
-      return false;
-    };
+          {/* Rotas acessadas pelo comitê de extensão */
+            <Restricted allowedRoles={["Administrador", "Comitê de extensão"]}>
+              <Route path="/dashboard/projects" component={AllProjects}/>
+            </Restricted>
+          }
 
-    let userRoles = user?.roles?.map((r: any) => (isIRole(r)) ? r.description : r) ?? [];
+          {/* Rotas de programas */
+            <Route path="/dashboard/programs" component={Programs} />
+          }
+        </Dashboard>
 
-    return (
-        <>
-            <BrowserRouter>
-                <Switch>
-                    <Route path='/' exact={true} component={Home} />
-                    <Dashboard>
-                        {/* Rota base */
-                            <Route path='/dashboard' exact={true} component={DashboardHome} />
-                        }
-
-                        {/* Rotas acessadas apenas por professore e ou predidentes do NDE */
-                            (userRoles.includes('Professor') || userRoles.includes('Presidente do NDE')) && (
-                                <>
-                                    <Route path='/dashboard/project/create' component={CreateProject} />
-                                    <Route path='/dashboard/project/report/create' component={Report} />
-                                    <Route path='/dashboard/project/report/edit/:id' component={Report} />
-                                    <Route path='/dashboard/myProjects' component={ProjectsTeacher} />
-                                </>
-                        )}
-
-                        {/* Rotas acessadas apenas por administradores */
-                            userRoles.includes('Administrador') && (
-                                <>
-                                    <Route exact={true} path='/dashboard/notices' component={RegistrationPeriods} />
-                                    <Route
-                                        exact={true}
-                                        path={'/dashboard/notices/create'}
-                                        component={CreateNoticeController} />
-
-                                    <Route
-                                        exact={true}
-                                        path={'/dashboard/notices/edit/:id'}
-                                        component={CreateNoticeController} />
-
-                                    <Route path='/dashboard/project/admin-view' component={AdminViewProject} />
-                                    <Route path='/dashboard/program/create' component={CreateProgram} />
-                                    <Route path='/dashboard/categories' component={CreateCategory} />
-                                    <Route path='/dashboard/users' component={Users} />
-                                </>
-                        )}
-
-                        {/* Rotas acessadas pelo comitê de extensão */
-                            (userRoles.includes("Administrador") || userRoles.includes("Comitê de extensão")) && (
-                              <>
-                                  <Route path='/dashboard/projects' component={ProjectsAdmin}/>
-                              </>
-                        )}
-
-                        {/* Rotas de programas */
-                            <Route path='/dashboard/programs' component={Programs} />
-                        }
-                    </Dashboard>
-
-                    <Route component={NotFound} />
-                </Switch>
-            </BrowserRouter>
-        </>
-    )
-}
-
-export default OtherRoutes
+        <Route component={NotFound} />
+      </Switch>
+    </BrowserRouter>
+  );
+};

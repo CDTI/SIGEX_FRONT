@@ -1,28 +1,33 @@
-import { IPrograms } from '../../interfaces/programs'
-import api from '../api'
+import api from "../api";
 
-declare type ResultResponse = 'success' | 'error'
+import { Program } from "../../interfaces/program";
 
-export interface ReturnResponsePost {
-    program?: IPrograms,
+declare type ResultResponse = "success" | "error";
+
+export interface ReturnResponsePost
+{
+    program?: Program,
     message: string,
     created: boolean,
     result: ResultResponse
 }
 
-interface ReturnResponseGet {
+interface ReturnResponseGet
+{
     message: string,
-    programs: IPrograms[]
+    programs: Program[]
 }
 
-export const createProgram = async (program: IPrograms): Promise<ReturnResponsePost> => {
-    const response = await api.post('/program', program)
+export const createProgram = async (program: Program): Promise<ReturnResponsePost> =>
+{
+    const response = await api.post("/program", program)
 
     return response.data
 }
 
-export const listPrograms = async (): Promise<ReturnResponseGet> => {
-    const response = await api.get('/program')
+export const listPrograms = async (): Promise<ReturnResponseGet> =>
+{
+    const response = await api.get("/program")
 
     return response.data
 }

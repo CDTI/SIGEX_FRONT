@@ -1,64 +1,32 @@
 import React, { useEffect } from "react";
-
 import { Button, Col, Form, Input, Row } from "antd";
-import MaskedInput from "antd-mask-input";
 import { FormInstance } from "antd/lib/form";
+import MaskedInput from "antd-mask-input";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { ICommunityContact } from "../../../../../../interfaces/report";
+
+import { Contact } from "../../../../../../interfaces/project";
 
 interface Props
 {
   formController: FormInstance;
-  initialValues?: ICommunityContact[];
+  initialValues?: Contact[];
 }
 
-const Community: React.FC<Props> = ({ formController, initialValues }) =>
+export const ContactsForm: React.FC<Props> = (props) =>
 {
   useEffect(() =>
   {
-    if (initialValues !== undefined)
-      formController.setFieldsValue(initialValues);
-  }, [initialValues]);
+    if (props.initialValues !== undefined)
+      props.formController.setFieldsValue(props.initialValues);
+  }, [props.initialValues]);
 
   return (
     <Form
       name="community"
       layout="vertical"
-      form={formController}
+      form={props.formController}
     >
       <Row>
-        {/*
-        <Col span={24}>
-          <Form.Item
-            name="text"
-            label="Sobre"
-            rules={[{ required: true, message: "Campo obrigatório!" }]}
-          >
-            <Input.TextArea autoSize={{ minRows: 3, maxRows: 5 }} style={{ width: "100%" }} />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-          <Form.Item
-            name="location"
-            label="Localização"
-            rules={[{ required: true, message: "Campo obrigatório!" }]}
-          >
-            <Input style={{ width: "100%" }} />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-          <Form.Item
-            name="peopleInvolved"
-            label="Número de pessoas envolvidas"
-            rules={[{ required: true, message: "Campo obrigatório!" }]}
-          >
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-        </Col>
-        */}
-
         <Col span={24}>
           <Form.List name="communityContacts">
             {(communityContactsFields, { add, remove }) => (
@@ -130,5 +98,3 @@ const Community: React.FC<Props> = ({ formController, initialValues }) =>
     </Form>
   );
 };
-
-export default Community;

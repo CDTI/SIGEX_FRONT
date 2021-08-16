@@ -1,22 +1,21 @@
 import React, { useCallback, useEffect, useReducer } from "react";
 import ReactDOM from "react-dom";
-import Structure from "../../../../components/layout/structure";
-import { IProject } from "../../../../interfaces/project";
-import { listAllProject } from "../../../../services/project_service";
 import { Button, Modal, Row, Col } from "antd";
-import ProjectDetails from "./components/ProjectDetails";
 
-import { base_url } from "../../../../services/api";
-
-import Filters from "./components/Filters";
-import ProjectsTable from "./components/ProjectsTable";
+import { AdminViewProject } from "./components/ProjectDetails";
+import { ProjectsTable } from "./components/ProjectsTable";
+import { Filters } from "./components/Filters";
+import { ReportDetails } from "./components/ReportDetails";
 import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
 import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
 import { reportDetailsDialogStateReducer } from "./helpers/reportDetailsDialogStateMachine";
-import ReportDetails from "./components/ReportDetails";
-import { IReport } from "../../../../interfaces/report";
 
-const Projects: React.FC = () =>
+import { Project, Report } from "../../../../interfaces/project";
+import { base_url } from "../../../../services/api";
+import { listAllProject } from "../../../../services/project_service";
+import Structure from "../../../../components/layout/structure";
+
+export const AllProjects: React.FC = () =>
 {
   const [dataFilteringState, dispatchDataFiltering] = useReducer(
     dataFilteringStateReducer,
@@ -40,7 +39,7 @@ const Projects: React.FC = () =>
       dispatchDataFiltering(
       {
         type: "SET_DATA",
-        payload: { data: projects.map((p: IProject) => ({ ...p, key: p._id })) }
+        payload: { data: projects.map((p: Project) => ({ ...p, key: p._id })) }
       });
 
       dispatchDataFiltering({ type: "NOT_LOADING" });
@@ -71,7 +70,7 @@ const Projects: React.FC = () =>
       <Row>
         <Col span={24}>
           {projectDetailsDialogState.data !== undefined
-            ? <ProjectDetails
+            ? <AdminViewProject
                 project={projectDetailsDialogState.data}
                 showResult={projectDetailsDialogState.isRated}
                 onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
@@ -127,10 +126,10 @@ const Projects: React.FC = () =>
           <ProjectsTable
             isLoading={dataFilteringState.isLoading}
             data={dataFilteringState.result}
-            onShowProjectDetails={(record: IProject) =>
+            onShowProjectDetails={(record: Project) =>
               dispatchProjectDetailsDialog({ type: "SHOW_DIALOG", payload: record })
             }
-            onShowReportDetails={(record: IReport) =>
+            onShowReportDetails={(record: Report) =>
               dispatchReportDetailsDialog({ type: "SHOW_DIALOG", payload: record })
             }
           />
@@ -139,5 +138,3 @@ const Projects: React.FC = () =>
     </>
   );
 };
-
-export default Projects;

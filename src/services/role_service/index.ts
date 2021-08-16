@@ -1,7 +1,8 @@
-import { IRole } from "../../interfaces/role";
 import api from "../api";
 
-export async function getRoles(): Promise<IRole[]>
+import { Role } from "../../interfaces/user";
+
+export async function getRoles(): Promise<Role[]>
 {
   const response = await api.get("/roles");
 

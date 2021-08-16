@@ -1,16 +1,16 @@
-import { IProject } from "../../../../../interfaces/project";
+import { Project } from "../../../../../interfaces/project";
 
 type Action =
   | { type: "HIDE_DIALOG"                     }
   | { type: "NOT_RATED"                       }
   | { type: "RATED"                           }
-  | { type: "SHOW_DIALOG", payload: IProject  };
+  | { type: "SHOW_DIALOG", payload: Project  };
 
 interface ProjectDetailsDialogState
 {
   isRated: boolean;
   isVisible: boolean;
-  data?: IProject;
+  data?: Project;
 }
 
 export function projectDetailsDialogStateReducer(

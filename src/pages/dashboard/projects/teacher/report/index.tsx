@@ -14,22 +14,20 @@ import
   Form
 } from "antd";
 
-import { ICommunityContact, IReport } from "../../../../../interfaces/report";
-
-import Structure from "../../../../../components/layout/structure";
-
-import Introduction from "./components/Introduction";
-import Methodology from "./components/Methodology";
-import Results from "./components/Results";
-import Discussion from "./components/Discussion";
-import Community from "./components/Community";
-
+import { IntroductionForm } from "./components/IntroductionForm";
+import { MethodologyForm } from "./components/MethodologyForm";
+import { ResultsForm } from "./components/ResultsForm";
+import { DiscussionForm } from "./components/DiscussionForm";
+import { ContactsForm } from "./components/ContactsForm";
 import { FormSteps, reportFormStateReducer } from "./helpers/stateMachine";
 import { ContentMap, UrlParams } from "./helpers/types";
+
+import { Report } from "../../../../../interfaces/project";
 import { createReport, updateReport } from "../../../../../services/project_service";
+import Structure from "../../../../../components/layout/structure";
 import { useUrlQuery } from "../../../../../util";
 
-const ReportForm: React.FC = () =>
+export const ReportForm: React.FC = () =>
 {
   const [firstExecution, setFirstExecution] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -51,7 +49,7 @@ const ReportForm: React.FC = () =>
   {
     const report = location.state;
     if (report !== undefined)
-      dispatchReportFormState({ type: "SET_DATA", payload: report as IReport });
+      dispatchReportFormState({ type: "SET_DATA", payload: report as Report });
     else if (localStorage.getItem(savedStateKey) !== null)
       setShowDialog(true);
 
@@ -131,7 +129,7 @@ const ReportForm: React.FC = () =>
       dispatchReportFormState({ type: "PREVIOUS" });
   }, [reportFormState.step]);
 
-  const handleOnFormFinish = useCallback((values: IReport) =>
+  const handleOnFormFinish = useCallback((values: Report) =>
   {
     dispatchReportFormState({ type: "NEXT", payload: { ...values } });
   }, [reportFormState.step]);
@@ -142,7 +140,7 @@ const ReportForm: React.FC = () =>
     {
       title: "Introdução",
       content: (
-        <Introduction
+        <IntroductionForm
           formController={reportForm}
           initialValues={reportFormState.data}
         />
@@ -153,7 +151,7 @@ const ReportForm: React.FC = () =>
     {
       title: "Procedimentos metodológicos",
       content: (
-        <Methodology
+        <MethodologyForm
           formController={reportForm}
           initialValues={reportFormState.data}
         />
@@ -164,7 +162,7 @@ const ReportForm: React.FC = () =>
     {
       title: "Resultados",
       content: (
-        <Results
+        <ResultsForm
           formController={reportForm}
           initialValues={reportFormState.data}
         />
@@ -175,7 +173,7 @@ const ReportForm: React.FC = () =>
     {
       title: "Discussão",
       content: (
-        <Discussion
+        <DiscussionForm
           formController={reportForm}
           initialValues={reportFormState.data}
         />
@@ -186,7 +184,7 @@ const ReportForm: React.FC = () =>
     {
       title: "Comunidades",
       content: (
-        <Community
+        <ContactsForm
           formController={reportForm}
           initialValues={reportFormState.data?.communityContacts}
         />
@@ -217,7 +215,7 @@ const ReportForm: React.FC = () =>
       <Structure title={`${id === undefined ? "Cadastrar" : "Alterar"} relatório`}>
         <Form.Provider
           onFormFinish={(name, { values, forms }) =>
-            handleOnFormFinish(values as IReport)
+            handleOnFormFinish(values as Report)
           }
         >
           <Row gutter={[8, 8]} justify="center">
@@ -252,4 +250,5 @@ const ReportForm: React.FC = () =>
   );
 };
 
-export default ReportForm;
+// TODO: Adicionar lógica para processando
+// TODO: Adicionar telas para resultados

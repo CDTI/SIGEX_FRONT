@@ -1,31 +1,25 @@
 import React from "react";
-
 import { Alert, Col, Collapse, List, Row, Space, Typography } from "antd";
 
-import { ICommunityContact, IReport } from "../../../../../interfaces/report";
+import { Contact, Report } from "../../../../../interfaces/project";
 
 const { Title, Text, Paragraph } = Typography;
 
 interface Props
 {
-  report: IReport
-}
-
-function padNumber(n: number): string
-{
-  return n < 10 ? `0${n}` : n.toString();
+  report: Report
 }
 
 function formatDate(date: Date): string
 {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().padStart(4, '0');
 
-  return `${padNumber(day)}/${padNumber(month)}/${year}`;
+  return `${day}/${month}/${year}`;
 }
 
-const ReportDetails: React.FC<Props> = (props) =>
+export const ReportDetails: React.FC<Props> = (props) =>
 {
   return (
     <Row justify="center" gutter={[0, 24]}>
@@ -69,10 +63,10 @@ const ReportDetails: React.FC<Props> = (props) =>
           <Collapse.Panel key="community" header="Comunidades">
             <List
               dataSource={props.report.communityContacts}
-              renderItem={(cc: ICommunityContact) => (
+              renderItem={(c: Contact) => (
                 <List.Item>
-                  <Title level={5}>{cc.name}</Title>
-                  <Text>{cc.contact}</Text>
+                  <Title level={5}>{c.name}</Title>
+                  <Text>{c.phone}</Text>
                 </List.Item>
               )}
             />
@@ -91,5 +85,3 @@ const ReportDetails: React.FC<Props> = (props) =>
     </Row>
   );
 };
-
-export default ReportDetails;

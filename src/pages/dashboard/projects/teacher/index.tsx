@@ -1,18 +1,17 @@
 import React, { useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
-import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
-import Structure from "../../../../components/layout/structure";
-import { IProject } from "../../../../interfaces/project";
-import { deleteProject, listProjectForTeacher } from "../../../../services/project_service";
-import { listFeedbackProject } from "../../../../services/feedback_service";
-
 import { Link } from "react-router-dom";
-import { IPrograms } from "../../../../interfaces/programs";
+import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
+
+import { Register } from "../../../../interfaces/feedback";
+import { Notice } from "../../../../interfaces/notice";
+import { Program } from "../../../../interfaces/program";
+import { Project, isReport } from "../../../../interfaces/project";
+import { listFeedbackProject } from "../../../../services/feedback_service";
 import { listPrograms } from "../../../../services/program_service";
-import { INotice } from "../../../../interfaces/notice";
-import { IRegister } from "../../../../interfaces/feedback";
+import { deleteProject, listProjectForTeacher } from "../../../../services/project_service";
+import Structure from "../../../../components/layout/structure";
 import { compareDate } from "../../../../util";
-import { isReport } from "../../../../interfaces/report";
 
 interface IAction
 {
@@ -59,11 +58,11 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState =>
   }
 }
 
-const Projects: React.FC = () =>
+export const TeacherProjects: React.FC = () =>
 {
-  const [projects, setProjects] = useState<IProject[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<IProject[]>([]);
-  const [programs, setPrograms] = useState<IPrograms[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
 
@@ -154,25 +153,25 @@ const Projects: React.FC = () =>
   const handleChange = (event: string) =>
   {
     setFilteredProjects(event !== ""
-      ? projects.filter((p: IProject) => p.programId === event)
+      ? projects.filter((p: Project) => p.program === event)
       : projects);
   };
 
   const columns =
   [{
-    title: "Nome",
-    dataIndex: "name",
     key: "name",
+    title: "Nome",
+    dataIndex: "name"
   },
   {
+    key: "dateStart",
     title: "Data de início",
     dataIndex: "dateStart",
-    key: "dateStart",
     render: (dateStart: string) => new Date(dateStart).toLocaleString("pt-BR")
   },
   {
-    title: "Status",
     key: "status",
+    title: "Status",
     dataIndex: "status",
     render: (status: string) =>
     {
@@ -231,9 +230,9 @@ const Projects: React.FC = () =>
     },
   },
   {
-    title: "Ação",
     key: "action",
-    render: (text: string, project: IProject) =>
+    title: "Ação",
+    render: (text: string, project: Project) =>
     {
       return (
         <Space size="middle">
@@ -245,9 +244,9 @@ const Projects: React.FC = () =>
                 switch (project.status)
                 {
                   case "reproved":
-                    const response = await listFeedbackProject(project._id);
+                    const response = await listFeedbackProject(project._id!);
                     const justification = response.feedback.registers
-                      .filter((r: IRegister) => r.typeFeedback === "user")
+                      .filter((r: Register) => r.typeFeedback === "user")
                       .sort(compareDate)[0].text;
 
                     data =
@@ -310,7 +309,7 @@ const Projects: React.FC = () =>
             </Button>
           }
 
-          {(project.notice as INotice).isActive && (project.status === "pending" || project.status === "reproved") && (
+          {(project.notice as Notice).isActive && (project.status === "pending" || project.status === "reproved") && (
             <>
               <Button>
                 <Link to={{ pathname: "/dashboard/project/create", state: project }}>Editar</Link>
@@ -352,8 +351,8 @@ const Projects: React.FC = () =>
             <Select
               options={
                 [{ label: "Sem filtro", value: "" }].concat(programs
-                  .filter((p: IPrograms) => p._id !== undefined)
-                  .map((p: IPrograms) => ({ label: p.name, value: p._id! })))}
+                  .filter((p: Program) => p._id !== undefined)
+                  .map((p: Program) => ({ label: p.name, value: p._id! })))}
               defaultValue=""
               onChange={handleChange}
               style={{ width: "100%" }}
@@ -361,12 +360,10 @@ const Projects: React.FC = () =>
           </Col>
 
           <Col span={24}>
-              <Table loading={loading} dataSource={filteredProjects} columns={columns}/>
+            <Table loading={loading} dataSource={filteredProjects} columns={columns} />
           </Col>
         </Row>
       </Structure>
     </>
   );
 };
-
-export default Projects;

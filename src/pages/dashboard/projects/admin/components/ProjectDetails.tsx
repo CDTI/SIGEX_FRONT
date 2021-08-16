@@ -1,31 +1,41 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Divider, Steps, Button, Space, Collapse, Typography, Result, Modal, Form, Input, Timeline, Row, Col } from "antd";
-import Structure from "../../../../../components/layout/structure";
-import { IMaterials, IProject, ITransport } from "../../../../../interfaces/project";
-import { compareDate } from "../../../../../util";
-import MyTable from "../../../../../components/layout/table";
-import { ICategory } from "../../../../../interfaces/category";
-import { listPrograms } from "../../../../../services/program_service";
-import { IPrograms } from "../../../../../interfaces/programs";
-import { ReturnResponse, updateProject } from "../../../../../services/project_service";
-import { IFeedback } from "../../../../../interfaces/feedback";
-import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
-import IUser from "../../../../../interfaces/user";
-import { useAuth } from "../../../../../context/auth";
-import { IRole } from "../../../../../interfaces/role";
+import
+{
+  Steps,
+  Button,
+  Space,
+  Collapse,
+  Typography,
+  Result,
+  Modal,
+  Form,
+  Input,
+  Timeline,
+  Row,
+  Col
+} from "antd";
 
-const { Step } = Steps;
-const { Panel } = Collapse;
-const { TextArea } = Input;
+import { Category } from "../../../../../interfaces/category";
+import { Feedback } from "../../../../../interfaces/feedback";
+import { Program } from "../../../../../interfaces/program";
+import { Material, Project, Transport } from "../../../../../interfaces/project";
+import { Role, User } from "../../../../../interfaces/user";
+import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
+import { ReturnResponse, updateProject } from "../../../../../services/project_service";
+
+import MyTable from "../../../../../components/layout/table";
+import { Restricted } from "../../../../../components/Restricted";
+import { useAuth } from "../../../../../context/auth";
+import { compareDate } from "../../../../../util";
 
 interface Props
 {
-  project: IProject;
+  project: Project;
   showResult: boolean;
   onRate(): void;
 }
 
-function currentProject(project: IProject)
+function currentProject(project: Project)
 {
   switch (project.status)
   {
@@ -47,12 +57,16 @@ function currentProject(project: IProject)
   }
 }
 
-const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
+const { Step } = Steps;
+const { Panel } = Collapse;
+const { TextArea } = Input;
+
+export const AdminViewProject: React.FC<Props> = (props) =>
 {
   const [edited, setEdited] = useState<ReturnResponse | null>(null);
-  const [feedback, setFeedback] = useState<IFeedback | null>(null);
-  const [category, setCategory] = useState<ICategory>(project.category as ICategory);
-  const [program, setProgram] = useState<IPrograms | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [category, setCategory] = useState<Category>(props.project.category as Category);
+  const [program, setProgram] = useState<Program | null>(null);
   const [userName, setUserName] = useState("");
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
@@ -71,17 +85,17 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 
   const defineTypeProject = () =>
   {
-    if (project.typeProject === "common")
+    if (props.project.typeProject === "common")
     {
-      setTypeProject(project.category === "5fb8402399032945bc5c1fe2"
+      setTypeProject(props.project.category === "5fb8402399032945bc5c1fe2"
         ? "Extracurricular"
         : "Institucional");
     }
-    else if (project.typeProject === "extraCurricular")
+    else if (props.project.typeProject === "extraCurricular")
     {
       setTypeProject("Extracurricular");
     }
-    else if (project.typeProject === "curricularComponent")
+    else if (props.project.typeProject === "curricularComponent")
     {
       setTypeProject("Componente Curricular");
     }
@@ -91,38 +105,35 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
   {
     (async () =>
     {
-      const programsResponse = await listPrograms();
-      const projectsProgram = programsResponse.programs.find((p: IPrograms) => p._id === project.programId);
-      if (projectsProgram !== undefined)
-        setProgram(projectsProgram);
+      setProgram(props.project.program as Program);
 
-      const feedbacksResponse = await listFeedbackProject(project._id);
+      const feedbacksResponse = await listFeedbackProject(props.project._id!);
       setFeedback(feedbacksResponse.feedback);
 
-      const resources = project.resources;
+      const resources = props.project.resources;
 
       let value = 0;
       if (resources.transport !== null && resources.transport !== undefined)
         value += resources.transport.quantity * parseInt(formatReal(resources.transport.unitaryValue.toString()));
 
-      resources.materials?.forEach((m: IMaterials) =>
+      resources.materials?.forEach((m: Material) =>
         value += m.quantity * parseInt(formatReal(m.unitaryValue.toString())));
 
       setTotal(formatReal(value));
-      setUserName((project.author as IUser)?.name);
+      setUserName((props.project.author as User)?.name);
       defineTypeProject();
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project]);
+  }, [props.project]);
 
   const changeStatus = async (status: "reproved" | "notSelected" | "selected") =>
   {
-    project.status = status;
+    props.project.status = status;
 
-    const update = await updateProject(project);
+    const update = await updateProject(props.project);
     setEdited({ message: update.message, result: update.result, project: update.project });
-    onRate();
+    props.onRate();
   };
 
   const openModal = () => setVisible(true);
@@ -132,7 +143,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
     const submitFeedback = async (values: { text: string }) =>
     {
       setVisible(false);
-      let response = await createFeedbackProject(project._id, values);
+      let response = await createFeedbackProject(props.project._id!, values);
       if (response.status !== "error")
         changeStatus("reproved");
     };
@@ -166,7 +177,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
           </Form.Item>
         </Form>
       </Modal>);
-  }, [form, project._id, visible, changeStatus]);
+  }, [form, props.project._id, visible, changeStatus]);
 
   const columnsMaterials = [
     {
@@ -188,12 +199,12 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
       title: "Valor Unitário",
       dataIndex: "unitaryValue",
       key: "unitaryValue",
-      render: (text: string, transport: ITransport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
+      render: (text: string, transport: Transport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
     },
     {
       title: "Total",
       key: "total",
-      render: (text: string, material: IMaterials) => (
+      render: (text: string, material: Material) => (
         <Typography>{material.quantity * parseInt(formatReal(material.unitaryValue))}</Typography>
       ),
     },
@@ -219,12 +230,12 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
       title: "Valor Unitário",
       dataIndex: "unitaryValue",
       key: "unitaryValue",
-      render: (text: string, transport: ITransport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
+      render: (text: string, transport: Transport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
     },
     {
       title: "Total",
       key: "total",
-      render: (text: string, transport: ITransport) => {
+      render: (text: string, transport: Transport) => {
         if (transport !== undefined && transport !== null) {
           return (
             <Typography>{transport.quantity * parseInt(formatReal(transport.unitaryValue.toString()))}</Typography>
@@ -234,15 +245,15 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
     },
   ];
 
-  const userRoles = user!.roles.map((r: string | IRole) => (r as IRole).description);
+  const userRoles = user!.roles.map((r: string | Role) => (r as Role).description);
 
   return (
     <>
-      {!showResult && (
+      {!props.showResult && (
         <Row justify="center" gutter={[0,32]}>
           <Col span={21}>
-            <Steps direction="horizontal" current={currentProject(project)}>
-              {project.status === "reproved"
+            <Steps direction="horizontal" current={currentProject(props.project)}>
+              {props.project.status === "reproved"
                 ? <Step title="Reprovado" />
                 : <Step title="Em análise" />}
 
@@ -256,51 +267,51 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
             <Collapse accordion>
               <Panel header="Informações básicas" key="1">
                 <Typography><b>Usuário:</b> {userName}</Typography>
-                <Typography><b>Nome:</b> {project.name}</Typography>
-                <Typography><b>Descrição:</b> {project.description}</Typography>
+                <Typography><b>Nome:</b> {props.project.name}</Typography>
+                <Typography><b>Descrição:</b> {props.project.description}</Typography>
                 <Typography><b>Categoria:</b> {category.name}</Typography>
                 <Typography><b>Programa:</b> {program?.name}</Typography>
                 <Typography><b>Tipo:</b> {typeProject}</Typography>
 
-                {project.category !== "5fb8402399032945bc5c1fe2" && (
+                {props.project.category !== "5fb8402399032945bc5c1fe2" && (
                   <>
                     <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
                     <ul style={{ marginLeft: "18px" }}>
-                      {project.firstSemester.map((e) =>
+                      {props.project.firstSemester.map((e) =>
                         <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
                       )}
                     </ul>
 
                     <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
                     <ul style={{ marginLeft: "18px" }}>
-                      {project.secondSemester.map((e) =>
+                      {props.project.secondSemester.map((e) =>
                         <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
                       )}
                     </ul>
 
-                    <Typography><b>CH disponível:</b> {project.totalCH}</Typography>
-                    <Typography><b>Máximo de turmas:</b> {project.maxClasses}</Typography>
+                    <Typography><b>CH disponível:</b> {props.project.totalCH}</Typography>
+                    <Typography><b>Máximo de turmas:</b> {props.project.maxClasses}</Typography>
                   </>
                 )}
 
-                {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "curricularComponent" && (
+                {props.project.category === "5fb8402399032945bc5c1fe2" && props.project.typeProject === "curricularComponent" && (
                   <>
                     <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                    {project.teachers.map((t) =>
+                    {props.project.teachers.map((t) =>
                       <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
                     )}
 
                     <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
-                    {project.disciplines.map((d) =>
+                    {props.project.disciplines.map((d) =>
                       <li>{d.name}</li>
                     )}
                   </>
                 )}
 
-                {project.category === "5fb8402399032945bc5c1fe2" && project.typeProject === "extraCurricular" && (
+                {props.project.category === "5fb8402399032945bc5c1fe2" && props.project.typeProject === "extraCurricular" && (
                   <>
                     <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                    {project.teachers.map((t) =>
+                    {props.project.teachers.map((t) =>
                       <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
                     )}
                   </>
@@ -309,7 +320,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
 
               <Panel header="Parcerias" key="2">
                 <Collapse accordion>
-                  {project.partnership?.map((partner, index) => (
+                  {props.project.partnership?.map((partner, index) => (
                     <Panel header={"Parceria " + (index + 1)} key={index}>
                       <Typography>Sobre: {partner.text}</Typography>
                       {partner.contacts.map((contact, contactInd) => (
@@ -324,14 +335,14 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
               </Panel>
 
               <Panel header="Comunidade" key="3">
-                <Typography>Sobre: {project.specificCommunity.text}</Typography>
-                <Typography>Localização: {project.specificCommunity.location}</Typography>
-                <Typography>Pessoas envolvidas: {project.specificCommunity.peopleInvolved}</Typography>
+                <Typography>Sobre: {props.project.specificCommunity.text}</Typography>
+                <Typography>Localização: {props.project.specificCommunity.location}</Typography>
+                <Typography>Pessoas envolvidas: {props.project.specificCommunity.peopleInvolved}</Typography>
               </Panel>
 
               <Panel header="Planejamento" key="4">
                 <Collapse>
-                  {project.planning?.map((planning, planningIdx) => (
+                  {props.project.planning?.map((planning, planningIdx) => (
                     <Panel header={"Etapas " + (planningIdx + 1)} key={planningIdx}>
                       <Typography>Sobre: {planning.text}</Typography>
                       <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
@@ -347,22 +358,22 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
                 <Row gutter={[0, 24]}>
                   <Col span={24}>
                     <Typography.Title level={3}>Materiais</Typography.Title>
-                    {project.resources.materials !== undefined && (
+                    {props.project.resources.materials !== undefined && (
                       <MyTable
                         columns={columnsMaterials}
                         pagination={false}
-                        data={project.resources.materials}
+                        data={props.project.resources.materials}
                       />
                     )}
                   </Col>
 
                   <Col span={24}>
                     <Typography.Title level={3}>Transportes</Typography.Title>
-                    {project.resources.transport !== null && project.resources.transport !== undefined && (
+                    {props.project.resources.transport !== null && props.project.resources.transport !== undefined && (
                       <MyTable
                         columns={columnsTransport}
                         pagination={false}
-                        data={[project.resources.transport]}
+                        data={[props.project.resources.transport]}
                       />
                     )}
                   </Col>
@@ -383,31 +394,33 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
             </Collapse>
           </Col>
 
-          {userRoles.includes("Administrador") && project.status !== "finished" && (
-            <Col span={21}>
-              <Space>
-                <Button
-                  style={{ backgroundColor: "#acc5cf", color: "#fff" }}
-                  onClick={openModal}
-                >
-                  Não aprovado
-                </Button>
+          {props.project.status !== "finished" && (
+            <Restricted allowedRoles={["Administrador"]}>
+              <Col span={21}>
+                <Space>
+                  <Button
+                    style={{ backgroundColor: "#acc5cf", color: "#fff" }}
+                    onClick={openModal}
+                  >
+                    Não aprovado
+                  </Button>
 
-                <Button
-                  style={{ backgroundColor: "#b3afc8", color: "#fff" }}
-                  onClick={() => changeStatus("notSelected")}
-                >
-                  Aprovado e não selecionado
-                </Button>
+                  <Button
+                    style={{ backgroundColor: "#b3afc8", color: "#fff" }}
+                    onClick={() => changeStatus("notSelected")}
+                  >
+                    Aprovado e não selecionado
+                  </Button>
 
-                <Button
-                  style={{ backgroundColor: "#8dc898", color: "#fff" }}
-                  onClick={() => changeStatus("selected")}
-                >
-                  Selecionado
-                </Button>
-              </Space>
-            </Col>
+                  <Button
+                    style={{ backgroundColor: "#8dc898", color: "#fff" }}
+                    onClick={() => changeStatus("selected")}
+                  >
+                    Selecionado
+                  </Button>
+                </Space>
+              </Col>
+            </Restricted>
           )}
 
           <Col span={21}>
@@ -420,7 +433,7 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
         </Row>
       )}
 
-      {showResult && (
+      {props.showResult && (
         <Row justify="center">
           <Col span={16}>
             {edited !== null && (
@@ -438,5 +451,3 @@ const AdminViewProject: React.FC<Props> = ({ project, showResult, onRate }) =>
     </>
   );
 };
-
-export default AdminViewProject;

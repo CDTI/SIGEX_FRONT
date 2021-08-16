@@ -1,29 +1,28 @@
 import React, { useEffect } from "react";
-
 import { Col, Form, Input, InputNumber, Row } from "antd";
 import { FormInstance } from "antd/lib/form";
 
-import { IReport } from "../../../../../../interfaces/report";
+import { Report } from "../../../../../../interfaces/project";
 
 interface Props
 {
   formController: FormInstance;
-  initialValues?: IReport;
+  initialValues?: Report;
 }
 
-const Results: React.FC<Props> = ({ formController, initialValues }) =>
+export const ResultsForm: React.FC<Props> = (props) =>
 {
   useEffect(() =>
   {
-    if (initialValues !== undefined)
-      formController.setFieldsValue(initialValues);
-  }, [initialValues]);
+    if (props.initialValues !== undefined)
+      props.formController.setFieldsValue(props.initialValues);
+  }, [props.initialValues]);
 
   return (
     <Form
       name="results"
       layout="vertical"
-      form={formController}
+      form={props.formController}
     >
       <Row>
         <Col span={24}>
@@ -95,5 +94,3 @@ const Results: React.FC<Props> = ({ formController, initialValues }) =>
     </Form>
   );
 };
-
-export default Results;

@@ -11,7 +11,7 @@ import
 import { EditOutlined } from "@ant-design/icons";
 
 import Structure from "../../../components/layout/structure";
-import { INotice } from "../../../interfaces/notice";
+import { Notice } from "../../../interfaces/notice";
 
 import
 {
@@ -19,9 +19,9 @@ import
   changeNoticeStatus
 } from "../../../services/notice_service";
 
-const Notices: React.FC = () =>
+export const Notices: React.FC = () =>
 {
-  const [periods, setPeriods] = useState<INotice[]>([]);
+  const [periods, setPeriods] = useState<Notice[]>([]);
   const [initialState, setInitialState] = useState(0);
 
   useEffect(() =>
@@ -55,7 +55,11 @@ const Notices: React.FC = () =>
           (<List.Item
             actions={
             [
-              <Switch onChange={() => changeStatus(item._id ?? "")} defaultChecked={item.isActive} />,
+              <Switch
+                defaultChecked={item.isActive}
+                onChange={() => changeStatus(item._id!)}
+              />,
+
               <Link to={`/dashboard/notices/edit/${item._id}`}>
                 <Button style={{ color: "#333" }}>
                   Editar <EditOutlined />
@@ -69,5 +73,3 @@ const Notices: React.FC = () =>
     </Structure>
   );
 };
-
-export default Notices;

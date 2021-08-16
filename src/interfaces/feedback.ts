@@ -1,10 +1,15 @@
-export interface IRegister {
-    text: string,
-    date: Date,
-    typeFeedback: 'system' | 'user'
+import { Project } from "./project";
+
+export interface Register
+{
+  date: Date;
+  text: string;
+  typeFeedback: "system" | "user";
 }
 
-export interface IFeedback{
-    projectId: string,
-    registers: IRegister[]
+export interface Feedback
+{
+  _id?: string;
+  project: string | Project;
+  registers: Register[];
 }

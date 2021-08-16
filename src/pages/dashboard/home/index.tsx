@@ -1,39 +1,46 @@
-import React, { useEffect, useState } from 'react'
-import { Card, Col, Row, Select } from 'antd';
-import Structure from '../../../components/layout/structure';
-import { IPrograms } from '../../../interfaces/programs';
-import { listPrograms } from '../../../services/program_service';
-import { listAllProject } from '../../../services/project_service';
-import { IProject } from '../../../interfaces/project';
+import React, { useEffect, useState } from "react";
+import { Card, Col, Row, Select } from "antd";
+
+import { Program, isProgram } from "../../../interfaces/program";
+import { Project } from "../../../interfaces/project";
+import { listPrograms } from "../../../services/program_service";
+import { listAllProject } from "../../../services/project_service";
+import Structure from "../../../components/layout/structure";
 
 const { Option } = Select;
 
-const HomeDashboard: React.FC = () => {
-  const [projects, setProject] = useState<IProject[]>([])
-  const [filteredProjects, setFilteredProject] = useState<IProject[]>([])
-  const [programs, setPrograms] = useState<IPrograms[]>([])
+export const HomeDashboard: React.FC = () =>
+{
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
 
-  useEffect(() => {
-    listPrograms().then(data => {
-      setPrograms(data.programs)
-      listAllProject().then(allProjects => {
-        setProject(allProjects)
-        setFilteredProject(allProjects)
-      })
-    })
-  }, [])
+  useEffect(() =>
+  {
+    (async () =>
+    {
+      const response = await listPrograms();
+      setPrograms(response.programs);
 
-  const handleChange = (event: any) => {
-    console.log(event)
-    const filterProjects = projects.filter(e => e.programId === event) as IProject[]
-    console.log(filterProjects)
-    setFilteredProject(filterProjects)
+      const projects = await listAllProject();
+      setProjects(projects);
+      setFilteredProjects(projects);
+    })();
+  }, []);
+
+  const handleChange = (event: any) =>
+  {
+    setFilteredProjects(projects.filter((p: Project) => isProgram(p.program) ? p.program._id : p.program === event));
   }
 
   return (
     <Structure title="dashboard">
       <div>
-        <Select defaultValue="Selecione" style={{ width: 200, margin: '8px 0' }} onChange={handleChange}>
+        <Select
+          defaultValue="Selecione"
+          style={{ width: 200, margin: "8px 0" }}
+          onChange={handleChange}
+        >
           {programs.map(e => {
             if (e._id !== undefined) {
               return (
@@ -41,43 +48,42 @@ const HomeDashboard: React.FC = () => {
               )
             }
           })}
-        </Select>,
-    </div>
+        </Select>
+      </div>
+
       <div className="site-card-wrapper">
         <Row gutter={16}>
-          <Col span={8} style={{margin: '8px 0'}}>
+          <Col span={8} style={{margin: "8px 0"}}>
             <Card title="Total de projetos" bordered={false}>
               {filteredProjects.length}
             </Card>
           </Col>
 
-          <Col span={8} style={{margin: '8px 0'}}>
+          <Col span={8} style={{margin: "8px 0"}}>
             <Card title="Projetos Pendentes" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'pending').length}
+              {filteredProjects.filter(e => e.status === "pending").length}
             </Card>
           </Col>
 
-          <Col span={8} style={{margin: '8px 0'}}>
+          <Col span={8} style={{margin: "8px 0"}}>
             <Card title="Projetos Reprovados" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'reproved').length}
+              {filteredProjects.filter(e => e.status === "reproved").length}
             </Card>
           </Col>
 
-          <Col span={8} style={{margin: '8px 0'}}>
+          <Col span={8} style={{margin: "8px 0"}}>
             <Card title="Projetos Aprovados" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'notSelected').length}
+              {filteredProjects.filter(e => e.status === "notSelected").length}
             </Card>
           </Col>
 
-          <Col span={8} style={{margin: '8px 0'}}>
+          <Col span={8} style={{margin: "8px 0"}}>
             <Card title="Projetos Selecionados" bordered={false}>
-              {filteredProjects.filter(e => e.status === 'selected').length}
+              {filteredProjects.filter(e => e.status === "selected").length}
             </Card>
           </Col>
         </Row>
       </div>
     </Structure>
   )
-}
-
-export default HomeDashboard
+};

@@ -1,11 +1,15 @@
-export interface ICategory
+export interface Category
 {
-  _id: string;
-  name: string;
+  _id?: string;
+  createdAt: Date;
   isActive: boolean;
+  name: string;
 };
 
-export function isCategory(c: string | ICategory): c is ICategory
+export function isCategory(c: any): c is Category
 {
-  return (c as ICategory)._id !== undefined;
+  return c
+    && "createdAt" in c
+    && "isActive" in c
+    && "name" in c;
 }

@@ -1,10 +1,10 @@
+import React, { useEffect, useReducer } from "react";
 import { Button, Col, Input, Select } from "antd";
 import { DownloadOutlined } from "@ant-design/icons"
-import React, { useEffect, useReducer } from "react";
 
-import { ICategory } from "../../../../../interfaces/category";
-import { INotice } from "../../../../../interfaces/notice";
-import { IPrograms } from "../../../../../interfaces/programs";
+import { Category } from "../../../../../interfaces/category";
+import { Notice } from "../../../../../interfaces/notice";
+import { Program } from "../../../../../interfaces/program";
 import { getAllCategories } from "../../../../../services/category_service";
 import { getAllNotices } from "../../../../../services/notice_service";
 import { listPrograms } from "../../../../../services/program_service";
@@ -25,7 +25,7 @@ interface Props
   onFilterBy(action: { type: Filters, payload?: string }): void;
 }
 
-const Filters: React.FC<Props> = (props) =>
+export const Filters: React.FC<Props> = (props) =>
 {
   const [programsDropDownState, dispatchProgramsDropDownState] = useReducer(
     dropDownStateReducer,
@@ -62,7 +62,7 @@ const Filters: React.FC<Props> = (props) =>
            [{
               label: "Selecione um programa",
               value: ""
-            }].concat(programsDropDownState.data.map((p: IPrograms) =>
+            }].concat(programsDropDownState.data.map((p: Program) =>
             ({
               label: p.name,
               value: p._id!
@@ -84,10 +84,10 @@ const Filters: React.FC<Props> = (props) =>
               [{
                 label: "Selecione uma categoria",
                 value: ""
-              }].concat(categoriesDropDownState.data.map((c: ICategory) =>
+              }].concat(categoriesDropDownState.data.map((c: Category) =>
               ({
                 label: c.name,
-                value: c._id
+                value: c._id!
               })))}
               defaultValue=""
               style={{ width: "100%" }}
@@ -106,7 +106,7 @@ const Filters: React.FC<Props> = (props) =>
               [{
                 label: "Selecione um edital",
                 value: ""
-              }].concat(noticesDropDownState.data.map((n: INotice) =>
+              }].concat(noticesDropDownState.data.map((n: Notice) =>
               ({
                 label: n.name,
                 value: n._id!
@@ -191,5 +191,3 @@ const Filters: React.FC<Props> = (props) =>
     </>
   );
 };
-
-export default Filters;

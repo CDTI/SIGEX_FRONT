@@ -1,66 +1,41 @@
 import React, { useEffect, useState } from "react";
-import Structure from "../../../../../components/layout/structure";
-import { Button, Result, Space, Steps } from "antd";
-
-// Steps
-import BasicInfo from "./step_1";
-import Partner from "./step_2";
-import SpecificCommunity from "./step_3";
-import Planning from "./step_4";
-import Resource from "./step_5";
-// import Attachment from './step_6'
-import {
-  IDiscipline,
-  IMaterials,
-  IPartnership,
-  IPlanning,
-  IProject,
-  ITeacher,
-  ICommunity
-} from "../../../../../interfaces/project";
-import { newProject } from "../../../../../mocks/mockDefaultValue";
 import { Link, RouteProps } from "react-router-dom";
-import { useAuth } from "../../../../../context/auth";
-import { createProject, updateProject } from "../../../../../services/project_service";
-import Modal from "antd/lib/modal/Modal";
+import { Button, Modal, Result, Space, Steps } from "antd";
+
+import { BasicInfoForm, IBasicInfo } from "./components/BasicInfoForm";
+import { PartnershipForm } from "./components/PartnershipForm";
+import { CommunityForm } from "./components/CommunityForm";
+import { PlanningForm } from "./components/PlanningForm";
+import { ResourcesForm } from "./components/ResourcesForm";
+import { defaultValue } from "./helpers/defaultValue";
+
+import { Category, isCategory } from "../../../../../interfaces/category";
+import { Notice, Schedule, isNotice } from "../../../../../interfaces/notice";
+import { Material, Planning, Project, Community, Resource, Partnership } from "../../../../../interfaces/project";
+import { User, isUser } from "../../../../../interfaces/user";
 import { getActiveNoticesForUser } from "../../../../../services/notice_service";
-import { INotice, ISchedule, isNotice } from "../../../../../interfaces/notice";
-import IUser, { isUser } from "../../../../../interfaces/user";
-import { ICategory, isCategory } from "../../../../../interfaces/category";
+import { createProject, updateProject } from "../../../../../services/project_service";
+import Structure from "../../../../../components/layout/structure";
+import { useAuth } from "../../../../../context/auth";
 
-const { Step } = Steps;
-
-export interface IBasicInfo {
-  name: string;
-  description: string;
-  firstSemester: ISchedule[];
-  secondSemester: ISchedule[];
-  totalCH: number;
-  programId: string;
-  category: string;
-  notice: string;
-  typeProject: "common" | "extraCurricular" | "curricularComponent";
-  disciplines: IDiscipline[];
-  teachers: ITeacher[];
-  maxClasses: number;
-}
-
-interface Props {
-  // Quando for editar um projeto o projeto a ser editado vem no location do RoutePros
+interface Props
+{
   location?: RouteProps["location"];
 }
 
-const CreateProject: React.FC<Props> = ({ location }) => {
-  // Verifica se existe um projeto no location.state
-  const editProject = location?.state as IProject | undefined;
+const { Step } = Steps;
+
+export const CreateProject: React.FC<Props> = (props) =>
+{
+  const editProject = props.location?.state as Project | undefined;
   const [current, setCurrent] = useState(0);
-  const [project, setProject] = useState<IProject>(newProject);
+  const [project, setProject] = useState<Project>(defaultValue);
   const [finish, setFinish] = useState(false);
   const [visible, setVisible] = useState(false);
   const [primary, setPrimary] = useState(true);
   const [title, setTitle] = useState("Criar projeto");
   const [edited, setEdited] = useState(false);
-  const [selectedNotice, setSelectedNotice] = useState<INotice>();
+  const [selectedNotice, setSelectedNotice] = useState<Notice>();
   const [anyActiveNotice, setAnyActiveNotice] = useState(false);
   const { user } = useAuth();
 
@@ -74,18 +49,18 @@ const CreateProject: React.FC<Props> = ({ location }) => {
         setTitle("Editar projeto");
 
         if (isUser(editProject.author))
-          editProject.author = (editProject.author as IUser)._id;
+          editProject.author = (editProject.author as User)._id!;
 
         if (isCategory(editProject.category))
-          editProject.category = (editProject.category as ICategory)._id;
+          editProject.category = (editProject.category as Category)._id!;
 
         if (isNotice(editProject.notice))
         {
-          if (!notices.some((n: INotice) => n._id === (editProject.notice as INotice)._id))
+          if (!notices.some((n: Notice) => n._id === (editProject.notice as Notice)._id!))
             notices.push(editProject.notice);
 
           setSelectedNotice(editProject.notice);
-          editProject.notice = (editProject.notice as INotice)._id!;
+          editProject.notice = (editProject.notice as Notice)._id!;
         }
 
         setProject(editProject);
@@ -115,221 +90,286 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project]);
 
-  const changeLoadProject = (option: string) => {
-    const loadProject = localStorage.getItem("registerProject");
+  const changeLoadProject = (option: "yes" | "no") =>
+  {
     setPrimary(false);
-    if (loadProject !== null && option === "yes") {
-      const loaded = JSON.parse(loadProject) as IProject;
+
+    const loadProject = localStorage.getItem("registerProject");
+    if (loadProject !== null && option === "yes")
+    {
+      const loaded = JSON.parse(loadProject) as Project;
       setProject(loaded);
-      setVisible(false);
-    } else if (option === "no") {
+    }
+    else
+    {
       localStorage.removeItem("registerProject");
-      setVisible(false);
     }
+
+    setVisible(false);
   };
 
-  // Recebe as informções da 1° Etapa do cadastro e mando para o estado "project"
-  const changeBasicInfo = (values: IBasicInfo, firstSemester: ISchedule[], secondSemester: ISchedule[]) => {
+  const previous = () => setCurrent(current - 1);
+
+  const next = () => setCurrent(current + 1);
+
+  const changeBasicInfo = (values: IBasicInfo, firstSemester: Schedule[], secondSemester: Schedule[]) =>
+  {
     const date = new Date();
-    if (user !== null) {
-      setProject({
-        ...project,
-        maxClasses: values.maxClasses,
-        teachers: values.teachers,
-        disciplines: values.disciplines,
-        name: values.name,
-        description: values.description,
-        firstSemester: firstSemester,
-        secondSemester: secondSemester,
-        programId: values.programId,
-        dateStart: date,
-        dateFinal: date,
-        status: "pending",
-        category: values.category,
-        author: user._id,
-        totalCH: values.totalCH,
-        typeProject: values.typeProject,
-        notice: values.notice,
-      });
-    } else {
-      setProject({
-        ...project,
-        maxClasses: values.maxClasses,
-        teachers: values.teachers,
-        disciplines: values.disciplines,
-        name: values.name,
-        description: values.description,
-        firstSemester: firstSemester,
-        secondSemester: secondSemester,
-        programId: values.programId,
-        dateStart: date,
-        dateFinal: date,
-        status: "pending",
-        category: values.category,
-        totalCH: values.totalCH,
-        typeProject: values.typeProject,
-        notice: values.notice,
-      });
-    }
-    setCurrent(current + 1);
+    setProject((prevState) => (
+    {
+      ...prevState,
+      maxClasses: values.maxClasses,
+      teachers: values.teachers,
+      disciplines: values.disciplines,
+      name: values.name,
+      description: values.description,
+      firstSemester: firstSemester,
+      secondSemester: secondSemester,
+      program: values.program,
+      dateStart: date,
+      dateFinal: date,
+      status: "pending",
+      category: values.category,
+      author: user!._id!,
+      totalCH: values.totalCH,
+      typeProject: values.typeProject,
+      notice: values.notice,
+    }));
+
+    next();
   };
 
-  const changeSpecificCommunity = (specificCommunity: ICommunity) => {
-    setProject({ ...project, specificCommunity: specificCommunity });
-    setCurrent(current + 1);
+  const changeSpecificCommunity = (specificCommunity: Community) =>
+  {
+    setProject((prevState) => (
+    {
+      ...prevState,
+      specificCommunity:
+      {
+        location: specificCommunity.location,
+        peopleInvolved: specificCommunity.peopleInvolved,
+        text: specificCommunity.text
+      }
+    }));
+
+    next();
   };
 
-  const changePlanning = (plannings: IPlanning[]) => {
-    setProject({ ...project, planning: project.planning.concat(plannings) });
-    setCurrent(current + 1);
+  const changePlanning = (plannings: Planning[]) =>
+  {
+    setProject((prevState) => (
+    {
+      ...prevState,
+      planning: plannings
+    }));
+
+    next();
   };
 
-  const changeResource = async (transport: any, materials: IMaterials[]) => {
-    if (transport !== undefined) {
-      project.resources.transport = transport;
-    }
+  const changeResource = async (transport: any, materials: Material[]) =>
+  {
+    setProject((prevState) =>
+    {
+      const resources: Resource = { materials };
+      if (transport !== undefined)
+        resources.transport = transport;
 
-    if (materials !== undefined) {
-      project.resources.materials = materials;
-    }
-    setProject({ ...project, resources: project.resources });
-    // setCurrent(current + 1)
-    console.log(project._id);
-    // console.log(project)
+      return { ...prevState, resources };
+    });
 
-    if (!edited) {
-      await createProject(project);
-    } else {
-      await updateProject(project);
-    }
-    project.resources.materials = undefined;
-    project.resources.transport = null;
-    project.planning = [];
+    await (!edited
+      ? createProject(project)
+      : updateProject(project));
+
     localStorage.removeItem("registerProject");
+
     setFinish(true);
   };
 
-  const removeLocal = (index: number, name: "firstSemester" | "secondSemester") => {
-    const remove = project[name].splice(index, 1);
-    console.log(remove);
-    if (name === "firstSemester") setProject({ ...project, firstSemester: project.firstSemester });
-
-    if (name === "secondSemester") setProject({ ...project, secondSemester: project.secondSemester });
+  const removeLocal = (index: number, name: "firstSemester" | "secondSemester") =>
+  {
+    setProject((prevState) => name === "firstSemester"
+      ? (
+      {
+        ...prevState,
+        firstSemester: prevState.firstSemester.splice(index, 1)
+      })
+      : (
+      {
+        ...prevState,
+        secondSemester: prevState.secondSemester.splice(index, 1)
+      }));
   };
 
   // Função para remover o transporte do projeto
-  const removeTransport = () => {
-    project.resources.transport = null;
-    setProject({ ...project, resources: project.resources });
+  const removeTransport = () =>
+  {
+    setProject((prevState) =>
+    {
+      const resources = prevState.resources;
+      delete resources.transport;
+
+      return { ...prevState, resources };
+    });
   };
 
   // Função para remover 1 etapa do planejamento
-  const removeStep = (index: number) => {
-    project.planning.splice(index, 1);
-
-    setProject({ ...project, planning: project.planning });
+  const removeStep = (index: number) =>
+  {
+    setProject((prevState) => (
+    {
+      ...prevState,
+      planning: prevState.planning.splice(index, 1)
+    }));
   };
 
   // Função para remover 1 material dos recursos
-  const removeMaterials = (index: number) => {
-    project.resources.materials?.splice(index, 1);
-    setProject({ ...project, resources: project.resources });
+  const removeMaterials = (index: number) =>
+  {
+    setProject((prevState) => (
+    {
+      ...prevState,
+      resources:
+      {
+        ...prevState.resources,
+        materials: prevState.resources.materials.splice(index, 1)
+      }
+    }));
   };
 
-  /**
-   *
-   * @param event
-   * @param index
-   * @description Funcções relacionadas a parceria
-   */
-
   // Adicionar um array de parceiros se ele for diferente de undefined
-  const changePartner = (partner: IPartnership[] | undefined) => {
-    if (partner !== undefined)
+  const changePartner = (partners: Partnership[]) =>
+  {
+    setProject((prevState) =>
     {
-      for (const p of partner)
-        if (p.contacts === undefined)
-          p.contacts = [];
+      const partnersWithContacts = partners.filter((p: Partnership) =>
+        p.contacts !== undefined);
 
-      const partners = project.partnership?.concat(partner);
-      setProject({ ...project, partnership: partners });
-    }
+      const partnersWithoutContacts = partners
+        .filter((p: Partnership) => p.contacts === undefined)
+        .map((p: Partnership) => ({ ...p, contacts: [] }));
+
+      return (
+      {
+        ...prevState,
+        partnership:
+        [
+          ...prevState.partnership,
+          ...partnersWithContacts,
+          ...partnersWithoutContacts
+        ]
+      });
+    });
+
     next();
   };
 
   // Editar um parceiro
-  const changeEditPartner = (event: any, index: number) => {
-    if (project.partnership !== undefined) project.partnership[index].text = event.target.value;
-    setProject({ ...project, partnership: project.partnership });
+  const changeEditPartner = (ev: any, index: number) =>
+  {
+    setProject((prevState) =>
+    {
+      const partner =
+      {
+        ...prevState.partnership[index],
+        text: ev.target.value
+      };
+
+      return (
+      {
+        ...prevState,
+        partnership: prevState.partnership.splice(index, 1).concat([partner])
+      });
+    });
   };
 
   // Remover um parceiro
-  const removePartner = (index: number) => {
-    if (project.partnership !== undefined) project.partnership.splice(index, 1);
-    setProject({ ...project, partnership: project.partnership });
+  const removePartner = (index: number) =>
+  {
+    setProject((prevState) => (
+    {
+      ...prevState,
+      partnership: prevState.partnership.splice(index, 1)
+    }));
   };
 
   // Remover um contato dos parceiros
-  const removeContact = (indexPartner: number, indexContact: number) => {
-    const partner = project.partnership?.find((p, index) => index === indexPartner);
-    project.partnership?.splice(indexPartner, 1);
-    if (partner !== undefined) {
-      partner.contacts.splice(indexContact, 1);
+  const removeContact = (partnerIndex: number, contactIndex: number) =>
+  {
+    setProject((prevState) =>
+    {
+      const partner =
+      {
+        ...prevState.partnership[partnerIndex],
+        contacts: prevState.partnership[partnerIndex].contacts.splice(contactIndex, 1)
+      };
 
-      project.partnership?.push(partner);
-
-      setProject({ ...project, partnership: project.partnership });
-    }
+      return (
+      {
+        ...prevState,
+        partnership: prevState.partnership.splice(partnerIndex, 1).concat([partner])
+      });
+    });
   };
 
   // Adicionar um contato ao parceiro
-  const addContact = (index: number) => {
-    if (project.partnership !== undefined) project.partnership[index].contacts.push({ name: "", phone: "" });
-    setProject({ ...project, partnership: project.partnership });
-  };
+  const addContact = (index: number) =>
+  {
+    setProject((prevState) =>
+    {
+      const partner =
+      {
+        ...prevState.partnership[index],
+        contacts: prevState.partnership[index].contacts.concat([{ name: "", phone: "" }])
+      }
 
-  /**
-   * @description Funções relaciondas as etapas
-   */
+      return (
+      {
+        ...prevState,
+        partnership: prevState.partnership.splice(index, 1).concat(partner)
+      });
+    });
+  };
 
   // Edita um campo da etapa[index] do planejamento
   // O Campo a ser editado é enviado como parametro "name" para a função
   // O valor a ser adicionado é enviado como parametro "value" para a função
-  const changeStep = (
-    index: number,
-    name: "developmentSite" | "developmentMode" | "startDate" | "finalDate" | "text",
-    value: string
-  ) => {
-    project.planning[index][name] = value;
+  type PlanningField = "developmentSite" | "developmentMode" | "startDate" | "finalDate" | "text";
+  const changeStep = (index: number, field: PlanningField, value: string) =>
+  {
+    setProject((prevState) =>
+    {
+      const plan =
+      {
+        ...prevState.planning[index],
+        [field]: value
+      };
+
+      return (
+      {
+        ...prevState,
+        planning: prevState.planning.splice(index, 1).concat([plan])
+      });
+    });
   };
 
-  // Chama a etapa anterior
-  const previous = () => {
-    setCurrent(current - 1);
-  };
-
-  // Chama a próxima etapa
-  const next = () => {
-    setCurrent(current + 1);
-  };
-
-  // Aqui estão os componentes de todas as etapas
-  const steps = [
+  const steps =
+  [
     {
       title: "Informações Básicas",
       content: (
-        <BasicInfo
+        <BasicInfoForm
           changeBasicInfo={changeBasicInfo}
           project={project}
           preSelectedNotice={selectedNotice}
           removeLocal={removeLocal}
         />
-      ),
+      )
     },
     {
       title: "Parcerias",
       content: (
-        <Partner
+        <PartnershipForm
           changePartner={changePartner}
           previous={previous}
           changeEditPartner={changeEditPartner}
@@ -338,31 +378,34 @@ const CreateProject: React.FC<Props> = ({ location }) => {
           project={project}
           addContact={addContact}
         />
-      ),
+      )
     },
     {
       title: "Comunidade",
       content: (
-        <SpecificCommunity previous={previous} changeCommunitySpecific={changeSpecificCommunity} project={project} />
-      ),
+        <CommunityForm
+          previous={previous}
+          changeCommunitySpecific={changeSpecificCommunity}
+          project={project}
+        />
+      )
     },
     {
       title: "Planejamento",
       content: (
-        <Planning
+        <PlanningForm
           changeStep={changeStep}
           previous={previous}
           removeStep={removeStep}
-          next={next}
           changePlanning={changePlanning}
           project={project}
         />
-      ),
+      )
     },
     {
       title: "Recursos",
       content: (
-        <Resource
+        <ResourcesForm
           removeMaterials={removeMaterials}
           edited={edited}
           previous={previous}
@@ -370,11 +413,17 @@ const CreateProject: React.FC<Props> = ({ location }) => {
           removeTransport={removeTransport}
           project={project}
         />
-      ),
-    },
+      )
+    }
     // {
-    //   title: 'Anexos',
-    //   content: <Attachment changeAttachement={changeAttachment} previous={previous} project={project} />
+    //   title: "Anexos",
+    //   content: (
+    //     <AttachementsForm
+    //       changeAttachement={changeAttachment}
+    //       previous={previous}
+    //       project={project}
+    //     />
+    //   )
     // }
   ];
 
@@ -382,13 +431,25 @@ const CreateProject: React.FC<Props> = ({ location }) => {
     <>
       {anyActiveNotice && (
         <>
-          <Modal visible={visible} title="Existe um cadastro em andamento, deseja carregar?" footer={[]}>
+          <Modal
+            visible={visible}
+            title="Existe um cadastro em andamento, deseja carregar?"
+            footer={[]}
+          >
             <Space>
-              <Button type="primary" style={{ backgroundColor: "#a31621" }} onClick={() => changeLoadProject("no")}>
+              <Button
+                type="primary"
+                style={{ backgroundColor: "#a31621" }}
+                onClick={() => changeLoadProject("no")}
+              >
                 Não
               </Button>
 
-              <Button type="primary" style={{ backgroundColor: "#439A86" }} onClick={() => changeLoadProject("yes")}>
+              <Button
+                type="primary"
+                style={{ backgroundColor: "#439A86" }}
+                onClick={() => changeLoadProject("yes")}
+              >
                 Sim
               </Button>
             </Space>
@@ -401,6 +462,7 @@ const CreateProject: React.FC<Props> = ({ location }) => {
                   <Step key={item.title} title={item.title} />
                 ))}
               </Steps>
+
               <div className="steps-content">{steps[current].content}</div>
             </Structure>
           )}
@@ -438,6 +500,5 @@ const CreateProject: React.FC<Props> = ({ location }) => {
   );
 };
 
-export default CreateProject;
-
-// TODO: alterar lógica para permitir edição do projeto por um administrador mesmo sem editais ativos
+// TODO: Remover tela 403
+// TODO: Adicionar status de carregando

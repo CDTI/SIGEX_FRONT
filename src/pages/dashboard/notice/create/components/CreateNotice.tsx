@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Button, Col, DatePicker, Form, Input, InputNumber, Row, Select } from "antd";
 import moment from "moment";
 
-import { IRole } from "../../../../../interfaces/role";
-import { INotice } from "../../../../../interfaces/notice";
+import { Role } from "../../../../../interfaces/user";
+import { Notice } from "../../../../../interfaces/notice";
 import { getRoles } from "../../../../../services/role_service";
 
 interface Props
 {
   onBack(): void;
-  onSubmit(notice: INotice): void;
-  notice?: INotice;
+  onSubmit(notice: Notice): void;
+  notice?: Notice;
 }
 
 function disableDateRange(currentDate: moment.Moment)
@@ -19,9 +19,9 @@ function disableDateRange(currentDate: moment.Moment)
     || currentDate > moment().endOf("day").add(4, "years");
 }
 
-const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
+export const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
 {
-  const [roles, setRoles] = useState<IRole[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [form] = Form.useForm();
 
   useEffect(() =>
@@ -44,7 +44,7 @@ const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
     <Form
       form={form}
       layout="vertical"
-      onFinish={(values: INotice) => onSubmit(values)}
+      onFinish={(values: Notice) => onSubmit(values)}
     >
       <Row justify="center">
         <Form.Item name="_id">
@@ -70,7 +70,7 @@ const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
             rules={[{ required: true, message: "Campo obrigatório" }]}
           >
             <Select
-              options={roles.map((r: IRole) => ({ label: r.description, value: r._id }))}
+              options={roles.map((r: Role) => ({ label: r.description, value: r._id! }))}
               placeholder="Selecione funções de usuário"
               mode="multiple"
               allowClear
@@ -136,5 +136,3 @@ const CreateNotice: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
     </Form>
   );
 };
-
-export default CreateNotice;

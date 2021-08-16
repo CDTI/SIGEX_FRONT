@@ -4,18 +4,17 @@ import { Link } from "react-router-dom";
 import { Button, Col, Space, Table, Tag } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 
-import { IProject } from "../../../../../interfaces/project";
-import { IReport } from "../../../../../interfaces/report";
+import { Project, Report } from "../../../../../interfaces/project";
 
 interface Props
 {
-  data: IProject[];
+  data: Project[];
   isLoading: boolean;
-  onShowProjectDetails(record: IProject): void;
-  onShowReportDetails(record: IReport): void;
+  onShowProjectDetails(record: Project): void;
+  onShowReportDetails(record: Report): void;
 }
 
-const ProjectsTable: React.FC<Props> = (props) =>
+export const ProjectsTable: React.FC<Props> = (props) =>
 {
   const columns =
   [{
@@ -26,13 +25,13 @@ const ProjectsTable: React.FC<Props> = (props) =>
   {
     key: "dateStart",
     title: "Data de início",
-    render: (text: string, record: IProject) =>
+    render: (text: string, record: Project) =>
       record.dateStart.toLocaleString("pt-BR")
   },
   {
     key: "status",
     title: "Status",
-    render: (text: string, record: IProject) =>
+    render: (text: string, record: Project) =>
     {
       switch (record.status)
       {
@@ -56,7 +55,7 @@ const ProjectsTable: React.FC<Props> = (props) =>
   {
     key: "action",
     title: "Ação",
-    render: (text: string, record: IProject) => (
+    render: (text: string, record: Project) => (
       <Space size="middle">
         <Button>
           <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
@@ -70,7 +69,7 @@ const ProjectsTable: React.FC<Props> = (props) =>
 
         {record.report !== undefined && (
           <Button
-            onClick={() => props.onShowReportDetails(record.report as IReport)}
+            onClick={() => props.onShowReportDetails(record.report as Report)}
           >
             <EyeOutlined /> Relatório
           </Button>
@@ -85,5 +84,3 @@ const ProjectsTable: React.FC<Props> = (props) =>
     </Col>
   );
 };
-
-export default ProjectsTable;

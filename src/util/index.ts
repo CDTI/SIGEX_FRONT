@@ -1,11 +1,14 @@
 import { useLocation } from "react-router";
-import { IRegister } from "../interfaces/feedback";
 
-export const compareDate = (a: IRegister, b: IRegister) => {
+import { Register } from "../interfaces/feedback";
+
+export const compareDate = (a: Register, b: Register) =>
+{
     return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
 }
 
-export const typeUser = async (role: string[]) => {
+export const typeUser = async (role: string[]) =>
+{
     let type = []
 
     if (role.includes('teacher'))

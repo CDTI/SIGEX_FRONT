@@ -1,68 +1,68 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Select, Space, notification, Switch } from "antd";
 import InputMask from "antd-mask-input";
-import { createUser, updateUser, requestPasswordChange } from "../../../services/user_service";
-import IUser from "../../../interfaces/user";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import { IRole } from "../../../interfaces/role";
+
+import { User, Role } from "../../../interfaces/user";
+import { createUser, updateUser, requestPasswordChange } from "../../../services/user_service";
 import { getRoles } from "../../../services/role_service";
 
 interface Props
 {
   title: string;
-  user?: IUser;
+  user?: User;
   closeModal(): void;
   loadUser(): void;
 }
 
-const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
+export const CreateUser: React.FC<Props> = (props) =>
 {
-  const [form] = Form.useForm();
   const [passwordRequired, setPasswordRequired] = useState(false);
-  const [roles, setRoles] = useState<IRole[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [form] = Form.useForm();
 
   useEffect(() =>
   {
     (async () =>
     {
-      setPasswordRequired(user === undefined);
+      setPasswordRequired(props.user === undefined);
       setRoles(await getRoles());
-      form.setFieldsValue(user);
+      form.setFieldsValue(props.user);
     })();
-  }, [form, user]);
+  }, [form, props.user]);
 
   const submitUser = async (userSubmit: any) =>
   {
-    const response = await (user === undefined
+    const response = await (props.user === undefined
       ? createUser(userSubmit)
       : updateUser(userSubmit));
 
     notification.open({ message: response.message });
 
     form.resetFields();
-    loadUser();
-    closeModal();
+    props.loadUser();
+    props.closeModal();
   };
 
-  const reset = async (userSubmit: IUser) =>
+  const reset = async (userSubmit: User) =>
   {
-    if (user !== undefined)
-      notification.open({ message: await requestPasswordChange(user.cpf) });
+    if (props.user !== undefined)
+      notification.open({ message: await requestPasswordChange(props.user.cpf) });
 
     form.resetFields();
-    loadUser();
-    closeModal();
+    props.loadUser();
+    props.closeModal();
   };
 
   const cancel = () =>
   {
     form.resetFields();
-    closeModal();
+    props.closeModal();
   };
 
   return (
     <>
-      <h1 style={{ textAlign: "center" }}>{title}</h1>
+      <h1 style={{ textAlign: "center" }}>{props.title}</h1>
 
       <Form form={form} layout="vertical" onFinish={submitUser}>
         <Form.Item name="name" label="Nome" rules={[{ required: true, message: "Campo Obrigatório" }]}>
@@ -81,7 +81,7 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
           <Input addonBefore="https://cnpq.lattes/" placeholder="Digite o código lattes" />
         </Form.Item>
 
-        {user === undefined && (
+        {props.user === undefined && (
           <Form.Item
             name="password"
             label="Senha"
@@ -93,7 +93,7 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
 
         <Form.Item name="roles" label="Tipo de usuário" rules={[{ required: true, message: "Campo Obrigatório" }]}>
           <Select
-            options={roles.map((r: IRole) => ({ label: r.description, value: r._id }))}
+            options={roles.map((r: Role) => ({ label: r.description, value: r._id! }))}
             placeholder="Selecione o tipo de usuário"
             mode="multiple"
             allowClear />
@@ -101,7 +101,7 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
 
         <Form.Item label="Usuário ativo" name="isActive" valuePropName="isActive">
           <Switch
-            defaultChecked={user?.isActive}
+            defaultChecked={props.user?.isActive}
             checkedChildren={<CheckOutlined />}
             unCheckedChildren={<CloseOutlined />}
           />
@@ -114,11 +114,11 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
             </Button>
 
             <Button htmlType="submit" style={{ backgroundColor: "#439A86" }} type="primary">
-              {user === undefined ? "Cadastrar" : "Atualizar"}
+              {props.user === undefined ? "Cadastrar" : "Atualizar"}
             </Button>
 
-            {user !== undefined && (
-              <Button htmlType="submit" style={{ backgroundColor: "#BB6B00" }} type="primary" onClick={() => reset(user)}>
+            {props.user !== undefined && (
+              <Button htmlType="submit" style={{ backgroundColor: "#BB6B00" }} type="primary" onClick={() => reset(props.user!)}>
                 {"Resetar senha"}
               </Button>
             )}
@@ -128,5 +128,3 @@ const CreateUser: React.FC<Props> = ({ closeModal, loadUser, user, title }) =>
     </>
   );
 };
-
-export default CreateUser;

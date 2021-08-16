@@ -1,7 +1,8 @@
-import { ICategory } from "../../../../../interfaces/category";
-import { INotice } from "../../../../../interfaces/notice";
-import { IProject } from "../../../../../interfaces/project";
-import IUser from "../../../../../interfaces/user";
+import { Category } from "../../../../../interfaces/category";
+import { Notice } from "../../../../../interfaces/notice";
+import { Program } from "../../../../../interfaces/program";
+import { Project } from "../../../../../interfaces/project";
+import { User } from "../../../../../interfaces/user";
 
 type Action =
   | { type: "FILTER"                                    }
@@ -16,9 +17,9 @@ type Action =
 
 interface DataFilteringState
 {
-  data: IProject[];
+  data: Project[];
   isLoading: boolean;
-  result: IProject[];
+  result: Project[];
   authorName?: string;
   categoryId?:string;
   noticeId?: string;
@@ -61,21 +62,21 @@ export function dataFilteringStateReducer(
       return (
       {
         ...state,
-        result: state.data.filter((p: IProject) =>
+        result: state.data.filter((p: Project) =>
         {
           let shouldKeep = true;
           if (state.authorName !== undefined)
-            shouldKeep = shouldKeep && (p.author as IUser)?.name.toLocaleUpperCase().includes(
+            shouldKeep = shouldKeep && (p.author as User)?.name.toLocaleUpperCase().includes(
               state.authorName.toLocaleUpperCase());
 
           if (state.categoryId !== undefined)
-            shouldKeep = shouldKeep && (p.category as ICategory)._id === state.categoryId;
+            shouldKeep = shouldKeep && (p.category as Category)._id === state.categoryId;
 
           if (state.noticeId !== undefined)
-            shouldKeep = shouldKeep && (p.notice as INotice)._id === state.noticeId;
+            shouldKeep = shouldKeep && (p.notice as Notice)._id === state.noticeId;
 
           if (state.programId !== undefined)
-            shouldKeep = shouldKeep && p.programId === state.programId;
+            shouldKeep = shouldKeep && (p.program as Program)._id === state.programId;
 
           if (state.projectName !== undefined)
             shouldKeep = shouldKeep && p.name.toLocaleUpperCase().includes(

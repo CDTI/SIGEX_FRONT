@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Divider, Form, Input, Row, Select, Space, Typography } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { ICategory } from "../../../../../interfaces/category";
+
+import { Category } from "../../../../../interfaces/category";
+import { Notice, Timetable } from "../../../../../interfaces/notice";
 import { getActiveCategories } from "../../../../../services/category_service";
-import { INotice, ITimetable } from "../../../../../interfaces/notice";
 
 interface Props
 {
   onBack(): void;
-  onSubmit(notice: INotice): void;
-  notice?: INotice;
+  onSubmit(notice: Notice): void;
+  notice?: Notice;
 }
 
 const { Option } = Select;
 
-const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
+export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
 {
   const [shouldDisableButton, setShouldDisableButton] = useState(true);
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [form] = Form.useForm();
 
@@ -31,12 +32,12 @@ const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
     })();
   }, [form, notice]);
 
-  const handleOnFinish = async (values: INotice) => onSubmit(values);
+  const handleOnFinish = async (values: Notice) => onSubmit(values);
 
   const handleAddCategory = (add: (v?: any, i?: number | undefined) => void) =>
   {
     let categoryId: string = form.getFieldValue("categorySelector");
-    if (!form.getFieldValue("timetables")?.find((tt: ITimetable)=> tt.category === categoryId))
+    if (!form.getFieldValue("timetables")?.find((tt: Timetable)=> tt.category === categoryId))
       add(
       {
         category: categoryId,
@@ -84,7 +85,7 @@ const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
             })]}
           >
             <Select
-              options={categories.map((c) => ({ label: c.name, value: c._id }))}
+              options={categories.map((c) => ({ label: c.name, value: c._id! }))}
               onChange={() => setShouldDisableButton(false)}
               style={{ width: "100%" }}
             />
@@ -253,5 +254,3 @@ const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
     </Form>
   );
 };
-
-export default AddCategories;

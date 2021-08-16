@@ -1,44 +1,52 @@
-import IUser from "../../interfaces/user";
 import api from "../api";
 
-interface ResponseUsers {
+import { User } from "../../interfaces/user";
+
+interface ResponseUsers
+{
   status: "error" | "success";
-  user: IUser[];
+  user: User[];
   message: string;
 }
 
-interface ResponseUser {
+interface ResponseUser
+{
   status: "error" | "success";
-  user: IUser;
+  user: User;
   message: string;
   created: boolean;
 }
 
-export const getUsers = async (): Promise<ResponseUsers> => {
+export const getUsers = async (): Promise<ResponseUsers> =>
+{
   const response = await api.get("/user");
 
   return response.data;
 };
 
-export const createUser = async (user: any): Promise<ResponseUser> => {
+export const createUser = async (user: any): Promise<ResponseUser> =>
+{
   const response = await api.post("/user", user);
 
   return response.data;
 };
 
-export const updateUser = async (user: any): Promise<ResponseUser> => {
+export const updateUser = async (user: any): Promise<ResponseUser> =>
+{
   const response = await api.put("/user", user);
 
   return response.data;
 };
 
-export const checkUser = async (user: any): Promise<boolean> => {
+export const checkUser = async (user: any): Promise<boolean> =>
+{
   const response = await api.post("/checkUser", user);
 
   return response.data;
 };
 
-export const resetPassword = async (user: any): Promise<ResponseUser> => {
+export const resetPassword = async (user: any): Promise<ResponseUser> =>
+{
   const response = await api.put(`/resetPassword/${user.cpf}`);
 
   return response.data;
