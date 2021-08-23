@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import { Category } from "./category";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
@@ -69,7 +71,7 @@ export interface Teacher
   name: string;
   phone: string;
   registration: string;
-  totalCH: number;
+  totalCH?: number;
 }
 
 export interface Report
@@ -92,7 +94,6 @@ export interface Report
 export interface Project
 {
   _id?: string;
-  attachments: string[];
   author: string | User;
   category: string | Category;
   dateFinal: Date;
@@ -101,20 +102,19 @@ export interface Project
   disciplines: Discipline[];
   firstSemester: Schedule[];
   key?: string;
-  maxClasses: number;
+  maxClasses?: number;
   name: string;
   notice: string | Notice;
   partnership: Partnership[];
   planning: Planning[];
   program: string | Program;
   report?: Report;
-  resources: Resource;
-  results: string;
+  resources?: Resource;
   secondSemester: Schedule[];
   specificCommunity: Community;
   status: "pending" | "reproved" | "notSelected" | "selected" | "finished";
   teachers : Teacher[];
-  totalCH: number;
+  totalCH?: number;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
 }
 

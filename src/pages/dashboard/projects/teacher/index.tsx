@@ -9,7 +9,7 @@ import { Program } from "../../../../interfaces/program";
 import { Project, isReport } from "../../../../interfaces/project";
 import { listFeedbackProject } from "../../../../services/feedback_service";
 import { listPrograms } from "../../../../services/program_service";
-import { deleteProject, listProjectForTeacher } from "../../../../services/project_service";
+import { deleteProject, listAllTeacherProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
 import { compareDate } from "../../../../util";
 
@@ -90,7 +90,7 @@ export const TeacherProjects: React.FC = () =>
     if (shouldReload)
       setShouldReload(false);
 
-    listProjectForTeacher().then((data) =>
+    listAllTeacherProjects(true).then((data) =>
     {
       setProjects(data);
       setFilteredProjects(data);
@@ -232,112 +232,111 @@ export const TeacherProjects: React.FC = () =>
   {
     key: "action",
     title: "Ação",
-    render: (text: string, project: Project) =>
-    {
-      return (
-        <Space size="middle">
-          {project.status !== "pending" && project.status !== "finished" && (
-            <Button
-              onClick={async () =>
+    render: (text: string, record: Project) => (
+      <Space size="middle">
+        {record.status !== "pending" && record.status !== "finished" && (
+          <Button
+            onClick={async () =>
+            {
+              let data;
+              switch (record.status)
               {
-                let data;
-                switch (project.status)
-                {
-                  case "reproved":
-                    const response = await listFeedbackProject(project._id!);
-                    const justification = response.feedback.registers
-                      .filter((r: Register) => r.typeFeedback === "user")
-                      .sort(compareDate)[0].text;
+                case "reproved":
+                  const response = await listFeedbackProject(record._id!);
+                  const justification = response.feedback.registers
+                    .filter((r: Register) => r.typeFeedback === "user")
+                    .sort(compareDate)[0].text;
 
-                    data =
-                    {
-                      title: "Não aprovado",
-                      content: justification
-                    };
-
-                    break;
-
-                  case "notSelected":
-                    data =
-                    {
-                      title: "Não selecionado",
-                      content:
-                        "Professor, seu projeto atende os requisitos da extensão, " +
-                        "entretanto não foi possível alocá-lo nas turmas disponíveis."
-                    };
-
-                    break;
-
-                  case "selected":
-                    data =
-                    {
-                      title: "Selecionado",
-                      content:
-                        "Parabéns, seu projeto foi selecionado. " +
-                        "Por favor, confira as turmas para as quais " +
-                        "foi alocado no edital de resultados."
-                    };
-
-                    break;
-                }
-
-                dispatchInfoDialogState({ type: "SET_CONTENT", data });
-                dispatchInfoDialogState({ type: "SHOW_DIALOG" });
-              }}
-            >
-              Informações
-            </Button>
-          )}
-
-          {project.status === "selected" &&
-            <Button>
-              {project.report === undefined
-                ? <Link to={`/dashboard/project/report/create?project=${project._id}`}>Relatório</Link>
-                : (<Link
-                    to={
-                    {
-                      pathname:
-                        `/dashboard/project/report/edit/` +
-                        `${isReport(project.report) ? project.report._id : project.report}` +
-                        `?project=${project._id}`,
-
-                      state: project.report
-                    }}
-                  >
-                    Relatório
-                  </Link>)}
-            </Button>
-          }
-
-          {(project.notice as Notice).isActive && (project.status === "pending" || project.status === "reproved") && (
-            <>
-              <Button>
-                <Link to={{ pathname: "/dashboard/project/create", state: project }}>Editar</Link>
-              </Button>
-
-              <Button
-                onClick={() =>
-                {
-                  dispatchActionDialogState(
+                  data =
                   {
-                    type: "SET_CONTENT",
-                    data:
-                    {
-                      title: "Remover projeto",
-                      content: `Tem certeza que deseja remover o projeto ${project.name}?`,
-                      targetId: project._id
-                    }
-                  })
+                    title: "Não aprovado",
+                    content: justification
+                  };
 
-                  dispatchActionDialogState({ type: "SHOW_DIALOG" });
+                  break;
+
+                case "notSelected":
+                  data =
+                  {
+                    title: "Não selecionado",
+                    content:
+                      "Professor, seu projeto atende os requisitos da extensão, " +
+                      "entretanto não foi possível alocá-lo nas turmas disponíveis."
+                  };
+
+                  break;
+
+                case "selected":
+                  data =
+                  {
+                    title: "Selecionado",
+                    content:
+                      "Parabéns, seu projeto foi selecionado. " +
+                      "Por favor, confira as turmas para as quais " +
+                      "foi alocado no edital de resultados."
+                  };
+
+                  break;
+              }
+
+              dispatchInfoDialogState({ type: "SET_CONTENT", data });
+              dispatchInfoDialogState({ type: "SHOW_DIALOG" });
+            }}
+          >
+            Informações
+          </Button>
+        )}
+
+        {record.status === "selected" &&
+          <Button>
+            {record.report == null
+              ? <Link to={`/dashboard/project/report/create?project=${record._id}`}>Relatório</Link>
+              : (<Link
+                  to={
+                  {
+                    pathname: `/dashboard/project/report/edit/${record.report._id}?project=${record._id}`,
+                    state: record.report
+                  }}
+                >
+                  Relatório
+                </Link>)}
+          </Button>
+        }
+        {(record.notice as Notice).isActive && (record.status === "pending" || record.status === "reproved") && (
+          <>
+            <Button>
+              <Link
+                to={
+                {
+                  pathname: `/dashboard/project/edit/${record._id}`,
+                  state: record
                 }}
               >
-                Deletar
-              </Button>
-            </>
-          )}
-        </Space>
-    )},
+                Editar
+              </Link>
+            </Button>
+            <Button
+              onClick={() =>
+              {
+                dispatchActionDialogState(
+                {
+                  type: "SET_CONTENT",
+                  data:
+                  {
+                    title: "Remover projeto",
+                    content: `Tem certeza que deseja remover o projeto ${record.name}?`,
+                    targetId: record._id
+                  }
+                })
+                dispatchActionDialogState({ type: "SHOW_DIALOG" });
+              }}
+            >
+              Deletar
+            </Button>
+          </>
+        )}
+      </Space>
+    )
   }];
 
   return (

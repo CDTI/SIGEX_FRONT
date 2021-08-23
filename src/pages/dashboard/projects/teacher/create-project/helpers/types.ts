@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 
-export interface ContentMap
+export interface FormsMap
 {
   [key: string]:
   {
-    content: ReactNode,
-    title?: string
+    form: ReactNode,
+    label?: string
   };
 }
 

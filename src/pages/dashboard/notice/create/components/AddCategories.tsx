@@ -118,7 +118,6 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                         {...categoryField}
                         name={[categoryField.name, "category"]}
                         fieldKey={[categoryField.fieldKey, "category"]}
-                        style={{ display: "none" }}
                       >
                         <Input type="hidden" />
                       </Form.Item>

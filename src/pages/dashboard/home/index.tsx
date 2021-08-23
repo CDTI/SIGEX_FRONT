@@ -4,7 +4,7 @@ import { Card, Col, Row, Select } from "antd";
 import { Program, isProgram } from "../../../interfaces/program";
 import { Project } from "../../../interfaces/project";
 import { listPrograms } from "../../../services/program_service";
-import { listAllProject } from "../../../services/project_service";
+import { listAllProjects } from "../../../services/project_service";
 import Structure from "../../../components/layout/structure";
 
 const { Option } = Select;
@@ -22,7 +22,7 @@ export const HomeDashboard: React.FC = () =>
       const response = await listPrograms();
       setPrograms(response.programs);
 
-      const projects = await listAllProject();
+      const projects = await listAllProjects();
       setProjects(projects);
       setFilteredProjects(projects);
     })();

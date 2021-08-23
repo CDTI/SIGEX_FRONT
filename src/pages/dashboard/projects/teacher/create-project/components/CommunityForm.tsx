@@ -1,65 +1,60 @@
-import React from "react";
-import { Form, Input, Button, InputNumber, Space } from "antd";
+import React, { useEffect } from "react";
+import { Form, Input, InputNumber, Row, Col } from "antd";
+import { FormInstance } from "antd/lib/form";
 
-import { Project, Community } from "../../../../../../interfaces/project";
-import { ContainerFlex } from "../../../../../../global/styles";
-
+import { Community } from "../../../../../../interfaces/project";
 
 interface Props
 {
-  changeCommunitySpecific(specificCommunity: Community): void;
-  previous(): void;
-  project: Project;
+  formContoller: FormInstance;
+  initialValues?: Community;
 }
-
-const { TextArea } = Input;
 
 export const CommunityForm: React.FC<Props> = (props) =>
 {
+  useEffect(() =>
+  {
+    if (props.initialValues != null)
+      props.formContoller.setFieldsValue({ ...props.initialValues });
+  }, [props.initialValues]);
+
   return (
-    <ContainerFlex>
-      <Form
-        layout="vertical"
-        initialValues={props.project.specificCommunity}
-        style={{ width: "100%", maxWidth: "500px" }}
-        onFinish={props.changeCommunitySpecific}
-      >
-        <Form.Item
-          name="text"
-          label="Sobre"
-          rules={[{ required: true, message: "Campo Obrigatório" }]}
-        >
-          <TextArea placeholder="Digite sobre a comunidade" />
-        </Form.Item>
+    <Form
+      name="community"
+      layout="vertical"
+      form={props.formContoller}
+    >
+      <Row>
+        <Col span={24}>
+          <Form.Item
+            name="text"
+            label="Sobre"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
+            <Input.TextArea autoSize={{ minRows: 3, maxRows: 5 }} style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
 
-        <Form.Item
-          name="location"
-          label="Localização"
-          rules={[{ required: true, message: "Campo Obrigatório" }]}
-        >
-          <Input />
-        </Form.Item>
+        <Col span={24}>
+          <Form.Item
+            name="location"
+            label="Localização"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
+            <Input style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
 
-        <Form.Item
-          name="peopleInvolved"
-          label="N° de pessoas envolvidas"
-          rules={[{ required: true, message: "Campo Obrigatório" }]}
-        >
-          <InputNumber
-            placeholder="Ex: 120"
-            defaultValue={0}
-            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            parser={value => `${value}`.replace(/\$\s?|(,*)/g, "")}
-          />
-        </Form.Item>
-
-        <Form.Item>
-          <Space style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button type="primary" onClick={props.previous}>Anterior</Button>
-            <Button type="primary" htmlType="submit">Próximo</Button>
-          </Space>
-        </Form.Item>
-      </Form>
-    </ContainerFlex>
+        <Col span={24}>
+          <Form.Item
+            name="peopleInvolved"
+            label="Número de pessoas envolvidas"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
+            <InputNumber min={1} style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
+      </Row>
+    </Form>
   );
 };

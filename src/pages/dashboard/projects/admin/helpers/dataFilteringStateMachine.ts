@@ -76,7 +76,7 @@ export function dataFilteringStateReducer(
             shouldKeep = shouldKeep && (p.notice as Notice)._id === state.noticeId;
 
           if (state.programId !== undefined)
-            shouldKeep = shouldKeep && (p.program as Program)._id === state.programId;
+            shouldKeep = shouldKeep && p.program === state.programId;
 
           if (state.projectName !== undefined)
             shouldKeep = shouldKeep && p.name.toLocaleUpperCase().includes(

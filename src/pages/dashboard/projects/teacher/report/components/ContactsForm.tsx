@@ -31,7 +31,7 @@ export const ContactsForm: React.FC<Props> = (props) =>
           <Form.List name="communityContacts">
             {(communityContactsFields, { add, remove }) => (
               <>
-                <Row gutter={[8,8]}>
+                <Row gutter={[0, 8]}>
                   {communityContactsFields.map((communityContactsField) => (
                     <>
                       <Col xs={24} md={4} xl={2}>

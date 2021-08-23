@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
 import { Button, Modal, Row, Col } from "antd";
 
@@ -8,11 +8,10 @@ import { Filters } from "./components/Filters";
 import { ReportDetails } from "./components/ReportDetails";
 import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
 import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
-import { reportDetailsDialogStateReducer } from "./helpers/reportDetailsDialogStateMachine";
 
-import { Project, Report } from "../../../../interfaces/project";
+import { Project } from "../../../../interfaces/project";
 import { base_url } from "../../../../services/api";
-import { listAllProject } from "../../../../services/project_service";
+import { listAllProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
 
 export const AllProjects: React.FC = () =>
@@ -21,13 +20,10 @@ export const AllProjects: React.FC = () =>
     dataFilteringStateReducer,
     { isLoading: true, data: [], result: [] });
 
+  const [showProject, setShowProject] = useState(true);
   const [projectDetailsDialogState, dispatchProjectDetailsDialog] = useReducer(
     projectDetailsDialogStateReducer,
     { isVisible: false, isRated: false });
-
-  const [reportDetailsDialogState, dispatchReportDetailsDialog] = useReducer(
-    reportDetailsDialogStateReducer,
-    { isVisible: false });
 
   useEffect(() =>
   {
@@ -35,7 +31,7 @@ export const AllProjects: React.FC = () =>
     {
       dispatchDataFiltering({ type: "LOADING" });
 
-      const projects = await listAllProject();
+      const projects = await listAllProjects(true);
       dispatchDataFiltering(
       {
         type: "SET_DATA",
@@ -52,67 +48,60 @@ export const AllProjects: React.FC = () =>
     dispatchDataFiltering({ type: "FILTER" });
   }, [programId, categoryId, noticeId, projectName, authorName, data]);
 
-  const closeProjectDetails = useCallback(() =>
+  const getInfoDialogTitle = useCallback(() =>
+  {
+    if (projectDetailsDialogState.data == null)
+      return "Nenhum projeto carregado!";
+
+    return showProject
+      ? projectDetailsDialogState.data!.name
+      : projectDetailsDialogState.data!.report!.projectTitle;
+  }, [showProject, projectDetailsDialogState.data]);
+
+  const getInfo = useCallback((): ReactNode =>
+  {
+    if (projectDetailsDialogState.data == null)
+      return null;
+
+    return !showProject
+      ? <ReportDetails project={projectDetailsDialogState.data!} />
+      : <AdminViewProject
+          project={projectDetailsDialogState.data!}
+          showResult={projectDetailsDialogState.isRated}
+          onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
+        />
+  }, [showProject, projectDetailsDialogState.data]);
+
+  const closeInfoDialog = useCallback(() =>
   {
     dispatchProjectDetailsDialog({ type: "HIDE_DIALOG" });
     dispatchProjectDetailsDialog({ type: "NOT_RATED" });
   }, []);
 
-  const projectDetails = (
+  const infoDialog = useMemo(() => (
     <Modal
       visible={projectDetailsDialogState.isVisible}
       centered={true}
+      closable={false}
       width="85%"
-      title="Detalhes do projeto"
-      footer={<Button onClick={closeProjectDetails} type="primary">OK</Button>}
-      onCancel={closeProjectDetails}
+      title={getInfoDialogTitle()}
+      footer={<Button onClick={closeInfoDialog} type="primary">OK</Button>}
     >
       <Row>
         <Col span={24}>
-          {projectDetailsDialogState.data !== undefined
-            ? <AdminViewProject
-                project={projectDetailsDialogState.data}
-                showResult={projectDetailsDialogState.isRated}
-                onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
-              />
-            : "Nenhum conteúdo carregado!"}
+          {getInfo()}
         </Col>
       </Row>
     </Modal>
-  );
+  ), [projectDetailsDialogState, getInfoDialogTitle, getInfo]);
 
-  const closeReportDetails = useCallback(() =>
-  {
-    dispatchReportDetailsDialog({ type: "HIDE_DIALOG" })
-  }, []);
-
-  const reportDetails = (
-    <Modal
-      visible={reportDetailsDialogState.isVisible}
-      centered={true}
-      width="85%"
-      title="Detalhes do relatório"
-      footer={<Button onClick={closeReportDetails} type="primary">OK</Button>}
-      onCancel={closeReportDetails}
-    >
-      <Row>
-        <Col span={24}>
-          {reportDetailsDialogState.data !== undefined
-            ? <ReportDetails report={reportDetailsDialogState.data} />
-            : "Nenhum conteúdo carregado!"}
-        </Col>
-      </Row>
-    </Modal>
-  );
-
-  let projectsCsvPath = `${base_url}/extensao/downloadCsv/${programId ?? ""}`;
-  let scheduleCsvPath = `${base_url}/extensao/downloadCsvHours/${programId ?? ""}`;
-  let reportsCsvPath = `${base_url}/extensao/project/report/download/${programId ?? ""}`;
+  let projectsCsvPath = `${base_url}/api/downloadCsv/${programId ?? ""}`;
+  let scheduleCsvPath = `${base_url}/api/downloadCsvHours/${programId ?? ""}`;
+  let reportsCsvPath = `${base_url}/api/project/report/download/${programId ?? ""}`;
 
   return (
     <>
-      {ReactDOM.createPortal(projectDetails, document.getElementById("dialog-overlay")!)}
-      {ReactDOM.createPortal(reportDetails, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(infoDialog, document.getElementById("dialog-overlay")!)}
 
       <Structure title="todas as propostas">
         <Row gutter={[8, 8]}>
@@ -127,11 +116,15 @@ export const AllProjects: React.FC = () =>
             isLoading={dataFilteringState.isLoading}
             data={dataFilteringState.result}
             onShowProjectDetails={(record: Project) =>
+            {
+              setShowProject(true);
+              dispatchProjectDetailsDialog({ type: "SHOW_DIALOG", payload: record });
+            }}
+            onShowReportDetails={(record: Project) =>
+            {
+              setShowProject(false);
               dispatchProjectDetailsDialog({ type: "SHOW_DIALOG", payload: record })
-            }
-            onShowReportDetails={(record: Report) =>
-              dispatchReportDetailsDialog({ type: "SHOW_DIALOG", payload: record })
-            }
+            }}
           />
         </Row>
       </Structure>

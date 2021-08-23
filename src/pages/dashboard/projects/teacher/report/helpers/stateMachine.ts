@@ -10,11 +10,11 @@ type FormStep =
 
 type Action =
   | { type: "RESTORE",  payload: { step: FormStep, data: any }  }
-  | { type: "SET_DATA", payload: Report                        }
+  | { type: "SET_DATA", payload: Report                         }
   | { type: "PREVIOUS"                                          }
   | { type: "NEXT",     payload: any                            };
 
-type FormStepDefinition =
+interface FormStepDefinition
 {
   [key: string]:
   {
@@ -22,7 +22,7 @@ type FormStepDefinition =
     previous?: FormStep,
     next?: FormStep
   }
-};
+}
 
 interface ReportFormState
 {
@@ -32,12 +32,12 @@ interface ReportFormState
 
 export const FormSteps: FormStepDefinition =
 {
-  introduction: { order: 0,  next: "methodology"                          },
-  methodology:  { order: 1,  previous: "introduction", next: "results"    },
-  results:      { order: 2,  previous: "methodology",  next: "discussion" },
-  discussion:   { order: 3,  previous: "results",      next: "community"  },
-  community:    { order: 4,  previous: "discussion",   next: "completed"  },
-  completed:    { order: 5                                                }
+  introduction: { order: 0, next: "methodology"                           },
+  methodology:  { order: 1, previous: "introduction", next: "results"     },
+  results:      { order: 2, previous: "methodology",  next: "discussion"  },
+  discussion:   { order: 3, previous: "results",      next: "community"   },
+  community:    { order: 4, previous: "discussion",   next: "completed"   },
+  completed:    { order: 5, previous: "community"                         }
 } as const;
 
 export function reportFormStateReducer(

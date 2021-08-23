@@ -5,7 +5,7 @@ import { HomeDashboard } from "../pages/dashboard/home";
 import { Dashboard } from "../pages/dashboard";
 import { Programs } from "../pages/dashboard/programs";
 import { CreateProgram } from "../pages/dashboard/programs/create";
-import { CreateProject } from "../pages/dashboard/projects/teacher/create-project";
+import { ProposalForm } from "../pages/dashboard/projects/teacher/create-project";
 import { TeacherProjects } from "../pages/dashboard/projects/teacher";
 import { AllProjects } from "../pages/dashboard/projects/admin";
 import { AdminViewProject } from "../pages/dashboard/projects/admin/components/ProjectDetails";
@@ -41,7 +41,8 @@ export const OtherRoutes: React.FC = () =>
 
           {/* Rotas acessadas apenas por professore e ou predidentes do NDE */
             <Restricted allowedRoles={["Professor", "Presidente do NDE"]}>
-              <Route path="/dashboard/project/create" component={CreateProject} />
+              <Route path="/dashboard/project/create" component={ProposalForm} />
+              <Route path="/dashboard/project/edit/:id" component={ProposalForm} />
               <Route path="/dashboard/project/report/create" component={ReportForm} />
               <Route path="/dashboard/project/report/edit/:id" component={ReportForm} />
               <Route path="/dashboard/myProjects" component={TeacherProjects} />

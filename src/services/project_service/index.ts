@@ -15,32 +15,40 @@ export interface GetResponse
   projects: Project[]
 }
 
-export const listAllProject = async (): Promise<Project[]> =>
+export async function listAllProjects(withPopulatedRefs: boolean = false): Promise<Project[]>
 {
-    const response = await api.get("/project")
+  let uri = "/projects";
+  if (withPopulatedRefs)
+    uri += "?withPopulatedRefs=true";
 
-    return response.data.projects
+  const response = await api.get(uri);
+
+  return response.data;
 }
 
-export const listProjectForTeacher = async (): Promise<Project[]> =>
+export async function listAllTeacherProjects(withPopulatedRefs: boolean = false): Promise<Project[]>
 {
-    const response = await api.get("/projectForTeacher")
+  let uri = "/projects/forTeacher";
+  if (withPopulatedRefs)
+    uri += "?withPopulatedRefs=true";
 
-    return response.data.projects
+  const response = await api.get(uri);
+
+  return response.data;
 }
 
-export const createProject = async (project: Project): Promise<Project> =>
+export async function createProject(data: Project): Promise<string>
 {
-    const response = await api.post("/project", project)
+  const response = await api.post("/project", data);
 
-    return response.data
+  return response.data;
 }
 
-export const updateProject = async (project: Project): Promise<ReturnResponse> =>
+export async function updateProject(id: string, data: Project): Promise<string>
 {
-    const response = await api.put("/project", project)
+  const response = await api.put(`/project/${id}`, data);
 
-    return response.data
+  return response.data;
 }
 
 export const listApprovedProjects = async(): Promise<GetResponse> =>

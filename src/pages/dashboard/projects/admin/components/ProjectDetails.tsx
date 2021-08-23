@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import ReactDOM from "react-dom";
 import
 {
   Steps,
@@ -19,14 +20,31 @@ import { Category } from "../../../../../interfaces/category";
 import { Feedback } from "../../../../../interfaces/feedback";
 import { Program } from "../../../../../interfaces/program";
 import { Material, Project, Transport } from "../../../../../interfaces/project";
-import { Role, User } from "../../../../../interfaces/user";
+import { User } from "../../../../../interfaces/user";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
 import { ReturnResponse, updateProject } from "../../../../../services/project_service";
 
 import MyTable from "../../../../../components/layout/table";
 import { Restricted } from "../../../../../components/Restricted";
-import { useAuth } from "../../../../../context/auth";
 import { compareDate } from "../../../../../util";
+
+const dateFormatterOptions =
+{
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "America/Sao_Paulo"
+} as const;
+
+const projectTypes: { [k: string]: string } =
+{
+  common: "Comum",
+  curricularComponent: "Componente curricular",
+  extraCurricular: "Extra curricular"
+} as const;
 
 interface Props
 {
@@ -57,6 +75,20 @@ function currentProject(project: Project)
   }
 }
 
+function formatTimelineMessage(date: Date, type: "system" | "user"): string
+{
+  const formattedDate = new Intl
+    .DateTimeFormat("pt-BR", dateFormatterOptions)
+    .format(date)
+    .split(" ");
+
+  const parsedType = type === "system"
+    ? "sistema"
+    : "usuário"
+
+  return `${formattedDate[0]} às ${formattedDate[1]} por ${parsedType}`;
+}
+
 const { Step } = Steps;
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -65,63 +97,35 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 {
   const [edited, setEdited] = useState<ReturnResponse | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [category, setCategory] = useState<Category>(props.project.category as Category);
-  const [program, setProgram] = useState<Program | null>(null);
+  const [category] = useState<Category>(props.project.category as Category);
+  const [program] = useState<Program>(props.project.program as Program);
   const [userName, setUserName] = useState("");
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
   const [total, setTotal] = useState("");
-  const [typeProject, setTypeProject] = useState("");
-  const { user } = useAuth();
-
-  const formatReal = (value: any) =>
-  {
-    let tmp = `${value} `.replace(/([0-9]{2})$/g, ",$1");
-    if (tmp.length > 6)
-      tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$),([-])/g, ".$1,$2");
-
-    return tmp;
-  };
-
-  const defineTypeProject = () =>
-  {
-    if (props.project.typeProject === "common")
-    {
-      setTypeProject(props.project.category === "5fb8402399032945bc5c1fe2"
-        ? "Extracurricular"
-        : "Institucional");
-    }
-    else if (props.project.typeProject === "extraCurricular")
-    {
-      setTypeProject("Extracurricular");
-    }
-    else if (props.project.typeProject === "curricularComponent")
-    {
-      setTypeProject("Componente Curricular");
-    }
-  };
+  const [typeProject] = useState(props.project.typeProject);
 
   useEffect(() =>
   {
     (async () =>
     {
-      setProgram(props.project.program as Program);
-
       const feedbacksResponse = await listFeedbackProject(props.project._id!);
       setFeedback(feedbacksResponse.feedback);
 
       const resources = props.project.resources;
+      if (resources)
+      {
+        let value = 0;
+        if (resources.transport)
+          value += resources.transport.quantity * resources.transport.unitaryValue;
 
-      let value = 0;
-      if (resources.transport !== null && resources.transport !== undefined)
-        value += resources.transport.quantity * parseInt(formatReal(resources.transport.unitaryValue.toString()));
+        resources.materials.forEach((m: Material) =>
+          value += m.quantity * m.unitaryValue);
 
-      resources.materials?.forEach((m: Material) =>
-        value += m.quantity * parseInt(formatReal(m.unitaryValue.toString())));
+        setTotal(`R$ ${value.toFixed(2).replace(/\./, ",")}`);
+      }
 
-      setTotal(formatReal(value));
       setUserName((props.project.author as User)?.name);
-      defineTypeProject();
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,10 +133,24 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
   const changeStatus = async (status: "reproved" | "notSelected" | "selected") =>
   {
-    props.project.status = status;
+    const project = { ...props.project, status };
 
-    const update = await updateProject(props.project);
-    setEdited({ message: update.message, result: update.result, project: update.project });
+    try
+    {
+      const update = await updateProject(project._id!, project);
+      setEdited({ message: "Projeto atualizado com sucesso", result: "success", project });
+    }
+    catch (error)
+    {
+      let message = "";
+      if (error.response)
+        message = error.response.data;
+      else if (error.request)
+        message = "Não houve resposta do servidor!";
+
+      setEdited({ message, result: "error", project: props.project });
+    }
+
     props.onRate();
   };
 
@@ -199,13 +217,15 @@ export const AdminViewProject: React.FC<Props> = (props) =>
       title: "Valor Unitário",
       dataIndex: "unitaryValue",
       key: "unitaryValue",
-      render: (text: string, transport: Transport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
+      render: (text: string, record: Material) => (
+        <Typography>{`R$ ${record.unitaryValue.toFixed(2).replace(/\./, ",")}`}</Typography>
+      )
     },
     {
       title: "Total",
       key: "total",
-      render: (text: string, material: Material) => (
-        <Typography>{material.quantity * parseInt(formatReal(material.unitaryValue))}</Typography>
+      render: (text: string, record: Material) => (
+        <Typography>{`R$ ${(record.quantity * record.unitaryValue).toFixed(2).replace(/\./, ",")}`}</Typography>
       ),
     },
   ];
@@ -230,224 +250,225 @@ export const AdminViewProject: React.FC<Props> = (props) =>
       title: "Valor Unitário",
       dataIndex: "unitaryValue",
       key: "unitaryValue",
-      render: (text: string, transport: Transport) => <Typography>{formatReal(transport.unitaryValue)}</Typography>,
+      render: (text: string, record: Transport) => (
+        <Typography>{`R$ ${record.unitaryValue.toFixed(2).replace(/\./, ",")}`}</Typography>
+      )
     },
     {
       title: "Total",
       key: "total",
-      render: (text: string, transport: Transport) => {
-        if (transport !== undefined && transport !== null) {
+      render: (text: string, record: Transport) =>
+      {
+        if (record != null)
           return (
-            <Typography>{transport.quantity * parseInt(formatReal(transport.unitaryValue.toString()))}</Typography>
+            <Typography>{`R$ ${(record.quantity * record.unitaryValue).toFixed(2).replace(/\./, ",")}`}</Typography>
           );
-        }
       },
     },
   ];
 
-  const userRoles = user!.roles.map((r: string | Role) => (r as Role).description);
+  if (props.showResult)
+    return (
+      <Row justify="center">
+        <Col span={16}>
+          {edited !== null && (
+            <Result
+              status={edited.result}
+              title={edited.message}
+              subTitle={"Projeto editado: " + edited.project.name}
+            />
+          )}
+        </Col>
+      </Row>
+    );
 
   return (
     <>
-      {!props.showResult && (
-        <Row justify="center" gutter={[0,32]}>
-          <Col span={21}>
-            <Steps direction="horizontal" current={currentProject(props.project)}>
-              {props.project.status === "reproved"
-                ? <Step title="Reprovado" />
-                : <Step title="Em análise" />}
+      {ReactDOM.createPortal(modalFeedback, document.getElementById("dialog-overlay")!)}
 
-              <Step title="Aprovado" />
-              <Step title="Em andamento" />
-              <Step title="Finalizado" />
-            </Steps>
-          </Col>
+      <Row justify="center" gutter={[0, 32]}>
+        <Col span={21}>
+          <Steps direction="horizontal" current={currentProject(props.project)}>
+            {props.project.status === "reproved"
+              ? <Step title="Reprovado" />
+              : <Step title="Em análise" />
+            }
 
-          <Col span={21}>
-            <Collapse accordion>
-              <Panel header="Informações básicas" key="1">
-                <Typography><b>Usuário:</b> {userName}</Typography>
-                <Typography><b>Nome:</b> {props.project.name}</Typography>
-                <Typography><b>Descrição:</b> {props.project.description}</Typography>
-                <Typography><b>Categoria:</b> {category.name}</Typography>
-                <Typography><b>Programa:</b> {program?.name}</Typography>
-                <Typography><b>Tipo:</b> {typeProject}</Typography>
+            <Step title="Aprovado" />
+            <Step title="Em andamento" />
+            <Step title="Finalizado" />
+          </Steps>
+        </Col>
 
-                {props.project.category !== "5fb8402399032945bc5c1fe2" && (
-                  <>
-                    <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
-                    <ul style={{ marginLeft: "18px" }}>
-                      {props.project.firstSemester.map((e) =>
-                        <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
-                      )}
-                    </ul>
+        <Col span={21}>
+          <Collapse accordion>
+            <Panel header="Informações básicas" key="1">
+              <Typography><b>Usuário:</b> {userName}</Typography>
+              <Typography><b>Descrição:</b> {props.project.description}</Typography>
+              <Typography><b>Categoria:</b> {category.name}</Typography>
+              <Typography><b>Programa:</b> {program.name}</Typography>
+              <Typography><b>Tipo:</b> {projectTypes[typeProject]}</Typography>
 
-                    <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
-                    <ul style={{ marginLeft: "18px" }}>
-                      {props.project.secondSemester.map((e) =>
-                        <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
-                      )}
-                    </ul>
-
-                    <Typography><b>CH disponível:</b> {props.project.totalCH}</Typography>
-                    <Typography><b>Máximo de turmas:</b> {props.project.maxClasses}</Typography>
-                  </>
-                )}
-
-                {props.project.category === "5fb8402399032945bc5c1fe2" && props.project.typeProject === "curricularComponent" && (
-                  <>
-                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                    {props.project.teachers.map((t) =>
-                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
+              {category.name !== "Extensão específica do curso" && (
+                <>
+                  <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
+                  <ul style={{ marginLeft: "18px" }}>
+                    {props.project.firstSemester.map((e) =>
+                      <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
                     )}
+                  </ul>
 
-                    <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
-                    {props.project.disciplines.map((d) =>
-                      <li>{d.name}</li>
+                  <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
+                  <ul style={{ marginLeft: "18px" }}>
+                    {props.project.secondSemester.map((e) =>
+                      <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
                     )}
-                  </>
-                )}
+                  </ul>
 
-                {props.project.category === "5fb8402399032945bc5c1fe2" && props.project.typeProject === "extraCurricular" && (
-                  <>
-                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                    {props.project.teachers.map((t) =>
-                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
-                    )}
-                  </>
-                )}
-              </Panel>
-
-              <Panel header="Parcerias" key="2">
-                <Collapse accordion>
-                  {props.project.partnership?.map((partner, index) => (
-                    <Panel header={"Parceria " + (index + 1)} key={index}>
-                      <Typography>Sobre: {partner.text}</Typography>
-                      {partner.contacts.map((contact, contactInd) => (
-                        <div key={contactInd}>
-                          <Typography>{contact.name}</Typography>
-                          <Typography>{contact.phone}</Typography>
-                        </div>
-                      ))}
-                    </Panel>
-                  ))}
-                </Collapse>
-              </Panel>
-
-              <Panel header="Comunidade" key="3">
-                <Typography>Sobre: {props.project.specificCommunity.text}</Typography>
-                <Typography>Localização: {props.project.specificCommunity.location}</Typography>
-                <Typography>Pessoas envolvidas: {props.project.specificCommunity.peopleInvolved}</Typography>
-              </Panel>
-
-              <Panel header="Planejamento" key="4">
-                <Collapse>
-                  {props.project.planning?.map((planning, planningIdx) => (
-                    <Panel header={"Etapas " + (planningIdx + 1)} key={planningIdx}>
-                      <Typography>Sobre: {planning.text}</Typography>
-                      <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
-                      <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
-                      <Typography>Inicio: {planning.startDate}</Typography>
-                      <Typography>Final: {planning.finalDate}</Typography>
-                    </Panel>
-                  ))}
-                </Collapse>
-              </Panel>
-
-              <Panel header="Recursos" key="5">
-                <Row gutter={[0, 24]}>
-                  <Col span={24}>
-                    <Typography.Title level={3}>Materiais</Typography.Title>
-                    {props.project.resources.materials !== undefined && (
-                      <MyTable
-                        columns={columnsMaterials}
-                        pagination={false}
-                        data={props.project.resources.materials}
-                      />
-                    )}
-                  </Col>
-
-                  <Col span={24}>
-                    <Typography.Title level={3}>Transportes</Typography.Title>
-                    {props.project.resources.transport !== null && props.project.resources.transport !== undefined && (
-                      <MyTable
-                        columns={columnsTransport}
-                        pagination={false}
-                        data={[props.project.resources.transport]}
-                      />
-                    )}
-                  </Col>
-
-                  <Col span={24}>
-                    <Row justify="space-between">
-                      <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
-                        Valor total do projeto
-                      </Typography.Text>
-
-                      <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
-                        {total}
-                      </Typography.Text>
-                    </Row>
-                  </Col>
-                </Row>
-              </Panel>
-            </Collapse>
-          </Col>
-
-          {props.project.status !== "finished" && (
-            <Restricted allowedRoles={["Administrador"]}>
-              <Col span={21}>
-                <Space>
-                  <Button
-                    style={{ backgroundColor: "#acc5cf", color: "#fff" }}
-                    onClick={openModal}
-                  >
-                    Não aprovado
-                  </Button>
-
-                  <Button
-                    style={{ backgroundColor: "#b3afc8", color: "#fff" }}
-                    onClick={() => changeStatus("notSelected")}
-                  >
-                    Aprovado e não selecionado
-                  </Button>
-
-                  <Button
-                    style={{ backgroundColor: "#8dc898", color: "#fff" }}
-                    onClick={() => changeStatus("selected")}
-                  >
-                    Selecionado
-                  </Button>
-                </Space>
-              </Col>
-            </Restricted>
-          )}
-
-          <Col span={21}>
-            <Timeline>
-              {feedback?.registers.sort(compareDate).map((e) =>
-                <Timeline.Item>{e.text} - {e.date} - {e.typeFeedback}</Timeline.Item>
+                  <Typography><b>CH disponível:</b> {props.project.totalCH}</Typography>
+                  <Typography><b>Máximo de turmas:</b> {props.project.maxClasses}</Typography>
+                </>
               )}
-            </Timeline>
-          </Col>
-        </Row>
-      )}
 
-      {props.showResult && (
-        <Row justify="center">
-          <Col span={16}>
-            {edited !== null && (
-              <Result
-                status={edited.result}
-                title={edited.message}
-                subTitle={"Projeto editado: " + edited.project.name}
-              />
+              {category.name === "Extensão específica do curso" && typeProject === "curricularComponent" && (
+                <>
+                  <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                  {props.project.teachers.map((t) =>
+                    <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
+                  )}
+
+                  <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
+                  {props.project.disciplines.map((d) =>
+                    <li>{d.name}</li>
+                  )}
+                </>
+              )}
+
+              {category.name === "Extensão específica do curso" && typeProject === "extraCurricular" && (
+                <>
+                  <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                  {props.project.teachers.map((t) =>
+                    <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
+                  )}
+                </>
+              )}
+            </Panel>
+
+            <Panel header="Parcerias" key="2">
+              <Collapse accordion>
+                {props.project.partnership.map((partner, index) => (
+                  <Panel header={"Parceria " + (index + 1)} key={index}>
+                    <Typography>Sobre: {partner.text}</Typography>
+                    {partner.contacts.map((contact, contactInd) => (
+                      <div key={contactInd}>
+                        <Typography>{contact.name}</Typography>
+                        <Typography>{contact.phone}</Typography>
+                      </div>
+                    ))}
+                  </Panel>
+                ))}
+              </Collapse>
+            </Panel>
+
+            <Panel header="Comunidade" key="3">
+              <Typography>Sobre: {props.project.specificCommunity.text}</Typography>
+              <Typography>Localização: {props.project.specificCommunity.location}</Typography>
+              <Typography>Pessoas envolvidas: {props.project.specificCommunity.peopleInvolved}</Typography>
+            </Panel>
+
+            <Panel header="Planejamento" key="4">
+              <Collapse>
+                {props.project.planning?.map((planning, planningIdx) => (
+                  <Panel header={"Etapas " + (planningIdx + 1)} key={planningIdx}>
+                    <Typography>Sobre: {planning.text}</Typography>
+                    <Typography>Modo de desenvolvimento: {planning.developmentMode}</Typography>
+                    <Typography>Lugar de desenvolvimento: {planning.developmentSite}</Typography>
+                    <Typography>Inicio: {planning.startDate}</Typography>
+                    <Typography>Final: {planning.finalDate}</Typography>
+                  </Panel>
+                ))}
+              </Collapse>
+            </Panel>
+
+            <Panel header="Recursos" key="5">
+              <Row gutter={[0, 24]}>
+                <Col span={24}>
+                  <Typography.Title level={3}>Materiais</Typography.Title>
+                  {props.project.resources && (
+                    <MyTable
+                      columns={columnsMaterials}
+                      pagination={false}
+                      data={props.project.resources.materials}
+                    />
+                  )}
+                </Col>
+
+                <Col span={24}>
+                  <Typography.Title level={3}>Transportes</Typography.Title>
+                  {props.project.resources && props.project.resources.transport && (
+                    <MyTable
+                      columns={columnsTransport}
+                      pagination={false}
+                      data={[props.project.resources.transport]}
+                    />
+                  )}
+                </Col>
+
+                <Col span={24}>
+                  <Row justify="space-between">
+                    <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
+                      Valor total do projeto
+                    </Typography.Text>
+
+                    <Typography.Text strong style={{ fontSize: "16pt", color: "#b80c09" }}>
+                      {total}
+                    </Typography.Text>
+                  </Row>
+                </Col>
+              </Row>
+            </Panel>
+          </Collapse>
+        </Col>
+
+        {props.project.status !== "finished" && (
+          <Restricted allowedRoles={["Administrador"]}>
+            <Col span={21}>
+              <Space>
+                <Button
+                  style={{ backgroundColor: "#acc5cf", color: "#fff" }}
+                  onClick={openModal}
+                >
+                  Não aprovado
+                </Button>
+
+                <Button
+                  style={{ backgroundColor: "#b3afc8", color: "#fff" }}
+                  onClick={() => changeStatus("notSelected")}
+                >
+                  Aprovado e não selecionado
+                </Button>
+
+                <Button
+                  style={{ backgroundColor: "#8dc898", color: "#fff" }}
+                  onClick={() => changeStatus("selected")}
+                >
+                  Selecionado
+                </Button>
+              </Space>
+            </Col>
+          </Restricted>
+        )}
+
+        <Col span={21}>
+          <Timeline mode="left">
+            {feedback?.registers.sort(compareDate).map((e) =>
+              <Timeline.Item label={formatTimelineMessage(new Date(e.date), e.typeFeedback)}>
+                {e.text}
+              </Timeline.Item>
             )}
-          </Col>
-        </Row>
-      )}
-
-      {modalFeedback}
+          </Timeline>
+        </Col>
+      </Row>
     </>
   );
 };

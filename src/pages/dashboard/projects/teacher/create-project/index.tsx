@@ -1,498 +1,396 @@
-import React, { useEffect, useState } from "react";
-import { Link, RouteProps } from "react-router-dom";
-import { Button, Modal, Result, Space, Steps } from "antd";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import ReactDOM from "react-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
+import { Button, Col, Form, Modal, Result, Row, Spin, Steps, Typography } from "antd";
+import { Store } from "antd/lib/form/interface";
+import { StopOutlined } from "@ant-design/icons";
 
-import { BasicInfoForm, IBasicInfo } from "./components/BasicInfoForm";
-import { PartnershipForm } from "./components/PartnershipForm";
+import { MainDataForm } from "./components/MainDataForm";
+import { AssociatesForm } from "./components/AssociatesForm";
 import { CommunityForm } from "./components/CommunityForm";
-import { PlanningForm } from "./components/PlanningForm";
+import { ArrangementForm } from "./components/ArrangementForm";
 import { ResourcesForm } from "./components/ResourcesForm";
-import { defaultValue } from "./helpers/defaultValue";
+import { FormSteps, projectFormStateReducer } from "./helpers/stateMachine";
+import { FormsMap, UrlParams } from "./helpers/types";
 
-import { Category, isCategory } from "../../../../../interfaces/category";
-import { Notice, Schedule, isNotice } from "../../../../../interfaces/notice";
-import { Material, Planning, Project, Community, Resource, Partnership } from "../../../../../interfaces/project";
-import { User, isUser } from "../../../../../interfaces/user";
-import { getActiveNoticesForUser } from "../../../../../services/notice_service";
+import { Schedule } from "../../../../../interfaces/notice";
+import { Planning, Project, Community, Resource, Partnership } from "../../../../../interfaces/project";
+import { hasActiveNoticesForUser } from "../../../../../services/notice_service";
 import { createProject, updateProject } from "../../../../../services/project_service";
-import Structure from "../../../../../components/layout/structure";
 import { useAuth } from "../../../../../context/auth";
+import Structure from "../../../../../components/layout/structure";
 
-interface Props
+const savedStateKey = "project";
+export const noticesKey = "notices";
+export const programsKey = "programs";
+
+export const ProposalForm: React.FC = () =>
 {
-  location?: RouteProps["location"];
-}
-
-const { Step } = Steps;
-
-export const CreateProject: React.FC<Props> = (props) =>
-{
-  const editProject = props.location?.state as Project | undefined;
-  const [current, setCurrent] = useState(0);
-  const [project, setProject] = useState<Project>(defaultValue);
-  const [finish, setFinish] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const [primary, setPrimary] = useState(true);
-  const [title, setTitle] = useState("Criar projeto");
-  const [edited, setEdited] = useState(false);
-  const [selectedNotice, setSelectedNotice] = useState<Notice>();
-  const [anyActiveNotice, setAnyActiveNotice] = useState(false);
   const { user } = useAuth();
+
+  const { id } = useParams<UrlParams>();
+  const location = useLocation();
+  const history = useHistory();
+
+  const [isFirstExeution, setIsFirstExecution] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasAnyActiveNotice, setHasAnyActiveNotice] = useState(true);
+
+  const [projectFormController] = Form.useForm();
+  const [submitHasFailed, setSubmitHasFailed] = useState(false);
+  const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
+  const [projectFormState, dispatchProjectFormState] = useReducer(
+    projectFormStateReducer,
+    { step: "mainData" });
+
+  const [loadSavedStateDialogIsVisible, setLoadSavedStateModalIsVisible] = useState(false);
 
   useEffect(() =>
   {
     (async () =>
     {
-      const notices = await getActiveNoticesForUser(user!._id);
-      if (editProject !== undefined)
+      setIsLoading(true);
+
+      const hasAnyActiveNotice = await hasActiveNoticesForUser(user!._id!);
+      setHasAnyActiveNotice(hasAnyActiveNotice);
+
+      const project = location.state;
+      if (project != null)
       {
-        setTitle("Editar projeto");
-
-        editProject.author = (editProject.author as User)._id!;
-        editProject.category = (editProject.category as Category)._id!;
-        if (!notices.some((n: Notice) => n._id === (editProject.notice as Notice)._id!))
-          notices.push(editProject.notice as Notice);
-
-        setSelectedNotice(editProject.notice as Notice);
-        editProject.notice = (editProject.notice as Notice)._id!;
-
-        setProject(editProject);
-        setEdited(true);
-        setPrimary(false);
+        dispatchProjectFormState({ type: "SET_DATA", payload: project as Project });
       }
-      else if (primary)
+      else if (localStorage.getItem(savedStateKey) != null)
       {
-        const loadProject = localStorage.getItem("registerProject");
-        if (loadProject !== null)
-          setVisible(true);
+        if (hasAnyActiveNotice)
+          setLoadSavedStateModalIsVisible(true);
         else
-          setPrimary(false);
+          localStorage.removeItem(savedStateKey);
       }
 
-      setAnyActiveNotice(selectedNotice !== undefined || notices.length !== 0);
+      setIsLoading(false);
+      setIsFirstExecution(false);
     })();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [primary]);
+    return () =>
+    {
+      localStorage.removeItem(noticesKey);
+      localStorage.removeItem(programsKey);
+    }
+  }, []);
 
   useEffect(() =>
   {
-    if (!primary && title === "Criar projeto" && !edited)
-      localStorage.setItem("registerProject", JSON.stringify(project));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project]);
-
-  const changeLoadProject = (option: "yes" | "no") =>
-  {
-    setPrimary(false);
-
-    const loadProject = localStorage.getItem("registerProject");
-    if (loadProject !== null && option === "yes")
+    if (!isFirstExeution)
     {
-      const loaded = JSON.parse(loadProject) as Project;
-      setProject(loaded);
-    }
-    else
-    {
-      localStorage.removeItem("registerProject");
-    }
-
-    setVisible(false);
-  };
-
-  const previous = () => setCurrent(current - 1);
-
-  const next = () => setCurrent(current + 1);
-
-  const changeBasicInfo = (values: IBasicInfo, firstSemester: Schedule[], secondSemester: Schedule[]) =>
-  {
-    const date = new Date();
-    setProject((prevState) => (
-    {
-      ...prevState,
-      maxClasses: values.maxClasses,
-      teachers: values.teachers,
-      disciplines: values.disciplines,
-      name: values.name,
-      description: values.description,
-      firstSemester: firstSemester,
-      secondSemester: secondSemester,
-      program: values.program,
-      dateStart: date,
-      dateFinal: date,
-      status: "pending",
-      category: values.category,
-      author: user!._id!,
-      totalCH: values.totalCH,
-      typeProject: values.typeProject,
-      notice: values.notice,
-    }));
-
-    next();
-  };
-
-  const changeSpecificCommunity = (specificCommunity: Community) =>
-  {
-    setProject((prevState) => (
-    {
-      ...prevState,
-      specificCommunity:
+      if (projectFormState.step !== "completed")
       {
-        location: specificCommunity.location,
-        peopleInvolved: specificCommunity.peopleInvolved,
-        text: specificCommunity.text
-      }
-    }));
-
-    next();
-  };
-
-  const changePlanning = (plannings: Planning[]) =>
-  {
-    setProject((prevState) => (
-    {
-      ...prevState,
-      planning: plannings
-    }));
-
-    next();
-  };
-
-  const changeResource = async (transport: any, materials: Material[]) =>
-  {
-    setProject((prevState) =>
-    {
-      const resources: Resource = { materials };
-      if (transport !== undefined)
-        resources.transport = transport;
-
-      return { ...prevState, resources };
-    });
-
-    await (!edited
-      ? createProject(project)
-      : updateProject(project));
-
-    localStorage.removeItem("registerProject");
-
-    setFinish(true);
-  };
-
-  const removeLocal = (index: number, name: "firstSemester" | "secondSemester") =>
-  {
-    setProject((prevState) => name === "firstSemester"
-      ? (
-      {
-        ...prevState,
-        firstSemester: prevState.firstSemester.splice(index, 1)
-      })
-      : (
-      {
-        ...prevState,
-        secondSemester: prevState.secondSemester.splice(index, 1)
-      }));
-  };
-
-  // Função para remover o transporte do projeto
-  const removeTransport = () =>
-  {
-    setProject((prevState) =>
-    {
-      const resources = prevState.resources;
-      delete resources.transport;
-
-      return { ...prevState, resources };
-    });
-  };
-
-  // Função para remover 1 etapa do planejamento
-  const removeStep = (index: number) =>
-  {
-    setProject((prevState) => (
-    {
-      ...prevState,
-      planning: prevState.planning.splice(index, 1)
-    }));
-  };
-
-  // Função para remover 1 material dos recursos
-  const removeMaterials = (index: number) =>
-  {
-    setProject((prevState) => (
-    {
-      ...prevState,
-      resources:
-      {
-        ...prevState.resources,
-        materials: prevState.resources.materials.splice(index, 1)
-      }
-    }));
-  };
-
-  // Adicionar um array de parceiros se ele for diferente de undefined
-  const changePartner = (partners?: Partnership[]) =>
-  {
-    if (partners !== undefined)
-      setProject((prevState) =>
-      {
-        const partnersWithContacts = partners.filter((p: Partnership) =>
-          p.contacts !== undefined);
-
-        const partnersWithoutContacts = partners
-          .filter((p: Partnership) => p.contacts === undefined)
-          .map((p: Partnership) => ({ ...p, contacts: [] }));
-
-        return (
+        localStorage.setItem(savedStateKey, JSON.stringify(
         {
-          ...prevState,
-          partnership:
-          [
-            ...prevState.partnership,
-            ...partnersWithContacts,
-            ...partnersWithoutContacts
-          ]
-        });
-      });
+          ...projectFormState,
+          step: projectFormState.step !== "pending"
+            ? projectFormState.step
+            : "resources"
+        }));
 
-    next();
-  };
+        if (projectFormState.step === "pending")
+        {
+          (async () =>
+          {
+            try
+            {
+              await (id == null
+                ? createProject(projectFormState.data!)
+                : updateProject(id, projectFormState.data!));
+            }
+            catch (error)
+            {
+              setSubmitHasFailed(true);
 
-  // Editar um parceiro
-  const changeEditPartner = (ev: any, index: number) =>
-  {
-    setProject((prevState) =>
-    {
-      const partner =
-      {
-        ...prevState.partnership[index],
-        text: ev.target.value
-      };
+              let message = "";
+              if (error.response)
+                message = error.response.data;
+              else if (error.request)
+                message = "Não houve resposta do servidor!";
 
-      return (
-      {
-        ...prevState,
-        partnership: prevState.partnership.splice(index, 1).concat([partner])
-      });
-    });
-  };
-
-  // Remover um parceiro
-  const removePartner = (index: number) =>
-  {
-    setProject((prevState) => (
-    {
-      ...prevState,
-      partnership: prevState.partnership.splice(index, 1)
-    }));
-  };
-
-  // Remover um contato dos parceiros
-  const removeContact = (partnerIndex: number, contactIndex: number) =>
-  {
-    setProject((prevState) =>
-    {
-      const partner =
-      {
-        ...prevState.partnership[partnerIndex],
-        contacts: prevState.partnership[partnerIndex].contacts.splice(contactIndex, 1)
-      };
-
-      return (
-      {
-        ...prevState,
-        partnership: prevState.partnership.splice(partnerIndex, 1).concat([partner])
-      });
-    });
-  };
-
-  // Adicionar um contato ao parceiro
-  const addContact = (index: number) =>
-  {
-    setProject((prevState) =>
-    {
-      const partner =
-      {
-        ...prevState.partnership[index],
-        contacts: prevState.partnership[index].contacts.concat([{ name: "", phone: "" }])
+              setFailedSubmitMessage(message);
+            }
+            finally
+            {
+              dispatchProjectFormState({ type: "NEXT", payload: null });
+            }
+          })();
+        }
       }
-
-      return (
+      else if (!submitHasFailed)
       {
-        ...prevState,
-        partnership: prevState.partnership.splice(index, 1).concat(partner)
-      });
-    });
-  };
+        localStorage.removeItem(savedStateKey);
+      }
+    }
+  }, [projectFormState.step]);
 
-  // Edita um campo da etapa[index] do planejamento
-  // O Campo a ser editado é enviado como parametro "name" para a função
-  // O valor a ser adicionado é enviado como parametro "value" para a função
-  type PlanningField = "developmentSite" | "developmentMode" | "startDate" | "finalDate" | "text";
-  const changeStep = (index: number, field: PlanningField, value: string) =>
+  const loadSavedState = useCallback((loadLocal: boolean = true) =>
   {
-    setProject((prevState) =>
+    if (loadLocal)
     {
-      const plan =
-      {
-        ...prevState.planning[index],
-        [field]: value
-      };
+      const savedState = localStorage.getItem(savedStateKey);
+      if (savedState != null)
+        dispatchProjectFormState({ type: "RESTORE", payload: JSON.parse(savedState) });
+    }
 
-      return (
-      {
-        ...prevState,
-        planning: prevState.planning.splice(index, 1).concat([plan])
-      });
-    });
-  };
+    localStorage.removeItem(savedStateKey);
 
-  const steps =
-  [
+    setLoadSavedStateModalIsVisible(false);
+  }, [savedStateKey]);
+
+  const handleOnFormFinish = useCallback((formName: string, values: Store) =>
+  {
+    switch (formName)
     {
-      title: "Informações Básicas",
-      content: (
-        <BasicInfoForm
-          changeBasicInfo={changeBasicInfo}
-          project={project}
-          preSelectedNotice={selectedNotice}
-          removeLocal={removeLocal}
+      case "mainData":
+        const schedule = values.secondSemester?.map((s: string) =>
+          JSON.parse(s) as Schedule) ?? [];
+
+        dispatchProjectFormState(
+        {
+          type: "NEXT",
+          payload:
+          {
+            ...values,
+            author: user!._id!,
+            firstSemester: schedule,
+            secondSemester: schedule
+          }
+        });
+
+        break;
+
+      case "associates":
+        dispatchProjectFormState(
+        {
+          type: "NEXT",
+          payload: values.partnership as Partnership[]
+        });
+
+        break;
+
+      case "community":
+        dispatchProjectFormState(
+        {
+          type: "NEXT",
+          payload: values as Community
+        });
+
+        break;
+
+      case "arrangement":
+        dispatchProjectFormState(
+        {
+          type: "NEXT",
+          payload: values.planning as Planning[]
+        });
+
+        break;
+
+      case "resources":
+        dispatchProjectFormState(
+        {
+          type: "NEXT",
+          payload: values as Resource
+        });
+
+        break;
+
+      default:
+        throw new Error("Invalid form name");
+    }
+  }, [user]);
+
+  const goBack = useCallback(() =>
+  {
+    if (projectFormState.step === "mainData")
+      history.goBack();
+    else
+      dispatchProjectFormState({ type: "PREVIOUS" });
+  }, [projectFormState.step, history]);
+
+  const loadSavedStateDialog = useMemo(() => (
+    <Modal
+      visible={loadSavedStateDialogIsVisible}
+      centered={true}
+      closable={false}
+      okText="Continuar"
+      cancelText="Descartar"
+      onOk={() => loadSavedState()}
+      onCancel={() => loadSavedState(false)}
+    >
+      <Typography.Paragraph>
+        Existe uma proposta com o cadastro em andamento, deseja continuar de onde parou?
+      </Typography.Paragraph>
+    </Modal>
+  ), [loadSavedStateDialogIsVisible, loadSavedState]);
+
+  const forms: FormsMap = useMemo(() => (
+  {
+    mainData:
+    {
+      label: "Informações Básicas",
+      form: (
+        <MainDataForm
+          formController={projectFormController}
+          initialValues={projectFormState.data}
         />
       )
     },
+
+    associates:
     {
-      title: "Parcerias",
-      content: (
-        <PartnershipForm
-          changePartner={changePartner}
-          previous={previous}
-          changeEditPartner={changeEditPartner}
-          removeContact={removeContact}
-          removePartner={removePartner}
-          project={project}
-          addContact={addContact}
+      label: "Parcerias",
+      form: (
+        <AssociatesForm
+          formController={projectFormController}
+          initialValues={projectFormState.data?.partnership}
         />
       )
     },
+
+    community:
     {
-      title: "Comunidade",
-      content: (
+      label: "Comunidade",
+      form: (
         <CommunityForm
-          previous={previous}
-          changeCommunitySpecific={changeSpecificCommunity}
-          project={project}
+          formContoller={projectFormController}
+          initialValues={projectFormState.data?.specificCommunity}
         />
       )
     },
+
+    arrangement:
     {
-      title: "Planejamento",
-      content: (
-        <PlanningForm
-          changeStep={changeStep}
-          previous={previous}
-          removeStep={removeStep}
-          changePlanning={changePlanning}
-          project={project}
+      label: "Planejamento",
+      form: (
+        <ArrangementForm
+          formController={projectFormController}
+          initialValues={projectFormState.data?.planning}
         />
       )
     },
+
+    resources:
     {
-      title: "Recursos",
-      content: (
+      label: "Recursos",
+      form: (
         <ResourcesForm
-          removeMaterials={removeMaterials}
-          edited={edited}
-          previous={previous}
-          changeResources={changeResource}
-          removeTransport={removeTransport}
-          project={project}
+          formController={projectFormController}
+          initialValues={projectFormState.data?.resources}
         />
       )
     }
-    // {
-    //   title: "Anexos",
-    //   content: (
-    //     <AttachementsForm
-    //       changeAttachement={changeAttachment}
-    //       previous={previous}
-    //       project={project}
-    //     />
-    //   )
-    // }
-  ];
+  }), [projectFormState.data]);
+
+  if (!hasAnyActiveNotice)
+    return (
+      <Result
+        status="error"
+        icon={<StopOutlined />}
+        title="Nenhum edital está ativo no momento!"
+        subTitle="Tente novamente mais tarde, ou contate um administrador ou responsável."
+        extra={
+        [
+          <Button
+            type="primary"
+            onClick={() => history.push("/dashboard/myProjects")}
+          >
+            Continuar
+          </Button>
+        ]}
+      />
+    );
+
+  if (projectFormState.step === "completed")
+  {
+    if (submitHasFailed)
+      return (
+        <Result
+          status="error"
+          title="Ops! Algo deu errado!"
+          subTitle={failedSubmitMessage}
+          extra={
+          [
+            <Button
+              type="primary"
+              onClick={() => goBack()}
+            >
+              Voltar
+            </Button>
+          ]}
+        />
+      );
+
+    return (
+      <Result
+        status="success"
+        title="Proposta salva com sucesso!"
+        extra={
+        [
+          <Button
+            type="primary"
+            onClick={() => history.push("/dashboard/myProjects")}
+          >
+            Continuar
+          </Button>
+        ]}
+      />
+    );
+  }
 
   return (
     <>
-      {anyActiveNotice && (
-        <>
-          <Modal
-            visible={visible}
-            title="Existe um cadastro em andamento, deseja carregar?"
-            footer={[]}
-          >
-            <Space>
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#a31621" }}
-                onClick={() => changeLoadProject("no")}
-              >
-                Não
-              </Button>
+      {ReactDOM.createPortal(loadSavedStateDialog, document.getElementById("dialog-overlay")!)}
 
-              <Button
-                type="primary"
-                style={{ backgroundColor: "#439A86" }}
-                onClick={() => changeLoadProject("yes")}
-              >
-                Sim
-              </Button>
-            </Space>
-          </Modal>
+      <Spin spinning={isLoading}>
+        <Structure title={`${id == null ? "Cadastrar" : "Alterar"} proposta`}>
+          <Form.Provider onFormFinish={(name, { values }) => handleOnFormFinish(name, values)}>
+            <Row justify="center" gutter={[0, 24]}>
+              <Col xs={24} xl={21} xxl={18}>
+                <Steps current={FormSteps[projectFormState.step].order}>
+                  {Object.keys(FormSteps)
+                    .filter((k: string) => k !== "pending" && k !== "completed")
+                    .map((k: string) => <Steps.Step key={k} title={forms[k].label} />
+                  )}
+                </Steps>
+              </Col>
 
-          {!finish && !primary && (
-            <Structure title={title}>
-              <Steps current={current}>
-                {steps.map((item) => (
-                  <Step key={item.title} title={item.title} />
-                ))}
-              </Steps>
+              <Col xs={24} xl={21} xxl={18}>
+                {forms[projectFormState.step !== "pending" ? projectFormState.step : "resources"].form}
+              </Col>
 
-              <div className="steps-content">{steps[current].content}</div>
-            </Structure>
-          )}
+              <Col xs={24} xl={21} xxl={18}>
+                <Row justify="space-between">
+                  <Button
+                    type="default"
+                    disabled={projectFormState.step === "pending"}
+                    onClick={() => goBack()}
+                  >
+                    Voltar
+                  </Button>
 
-          {finish && (
-            <Result
-              status="success"
-              title="Seu projeto foi registrado com sucesso"
-              subTitle="Você pode acompanhar os seus projetos no menu 'Meus Projetos'."
-              extra={
-                <Button type="primary" key="console">
-                  <Link to="/dashboard">Voltar</Link>
-                </Button>
-              }
-            />
-          )}
-        </>
-      )}
-
-      {!anyActiveNotice && (
-        <Result
-          status="403"
-          title="403"
-          subTitle="Desculpe, parece que o periodo de cadastro não esta ativo!"
-          extra={
-            <Button type="primary">
-              <Link to="/dashboard" key="/dashboard">
-                Voltar
-              </Link>
-            </Button>
-          }
-        />
-      )}
+                  <Button
+                    type="primary"
+                    loading={projectFormState.step === "pending"}
+                    onClick={() => projectFormController.submit()}
+                  >
+                    {projectFormState.step === "resources" || projectFormState.step === "pending"
+                      ? "Salvar"
+                      : "Próximo"}
+                  </Button>
+                </Row>
+              </Col>
+            </Row>
+          </Form.Provider>
+        </Structure>
+      </Spin>
     </>
   );
 };
 
-// TODO: Remover tela 403
-// TODO: Adicionar status de carregando
+// TODO: melhorar MaskedInput para telefones

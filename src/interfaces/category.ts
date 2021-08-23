@@ -8,5 +8,19 @@ export interface Category
 
 export function isCategory(c: any): c is Category
 {
-  return c;
+  return c != null && typeof c === "object" && !Array.isArray(c)
+    && "name" in c
+    && "isActive" in c
+    && "createdAt" in c;
+}
+
+export function getCategoryId(c: any): string | null
+{
+  if (typeof c === "string")
+    return c;
+
+  if (isCategory(c) && c._id != null)
+    return c._id;
+
+  return null;
 }

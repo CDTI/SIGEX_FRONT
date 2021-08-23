@@ -9,9 +9,20 @@ export const getAllNotices = async (): Promise<Notice[]> =>
   return response.data;
 };
 
-export const getActiveNoticesForUser = async (id?: string): Promise<Notice[]> =>
+export async function hasActiveNoticesForUser(id: string): Promise<boolean>
 {
-  const response = await api.get(`/notices/activeForUser/${id}`);
+  const response = await api.get(`/notices/hasActiveForUser/${id}`);
+
+  return response.data;
+}
+
+export async function getActiveNoticesForUser(id: string, withPopulatedRefs: boolean = false): Promise<Notice[]>
+{
+  let uri = `/notices/activeForUser/${id}`;
+  if (withPopulatedRefs)
+    uri += "?withPopulatedRefs=true";
+
+  const response = await api.get(uri);
 
   return response.data;
 };

@@ -4,14 +4,14 @@ import { Link } from "react-router-dom";
 import { Button, Col, Space, Table, Tag } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 
-import { Project, Report } from "../../../../../interfaces/project";
+import { Project } from "../../../../../interfaces/project";
 
 interface Props
 {
   data: Project[];
   isLoading: boolean;
   onShowProjectDetails(record: Project): void;
-  onShowReportDetails(record: Report): void;
+  onShowReportDetails(record: Project): void;
 }
 
 export const ProjectsTable: React.FC<Props> = (props) =>
@@ -58,7 +58,15 @@ export const ProjectsTable: React.FC<Props> = (props) =>
     render: (text: string, record: Project) => (
       <Space size="middle">
         <Button>
-          <Link to={{ pathname: "/dashboard/project/create", state: record }}>Editar</Link>
+          <Link
+            to={
+            {
+              pathname: `/dashboard/project/edit/${record._id}`,
+              state: record
+            }}
+          >
+            Editar
+          </Link>
         </Button>
 
         <Button
@@ -69,7 +77,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
 
         {record.report !== undefined && (
           <Button
-            onClick={() => props.onShowReportDetails(record.report as Report)}
+            onClick={() => props.onShowReportDetails(record)}
           >
             <EyeOutlined /> Relatório
           </Button>

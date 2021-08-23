@@ -33,7 +33,7 @@ export const IntroductionForm: React.FC<Props> = (props) =>
             rules={
             [
               { required: true, message: "Campo obrigatório!" },
-              { type: "string", max: 500, message: "O número máximo de caracteres foi extrapolado!" }
+              { type: "string", max: 160, message: "O número máximo de caracteres foi extrapolado!" }
             ]}
           >
             <Input style={{ width: "100%" }} />

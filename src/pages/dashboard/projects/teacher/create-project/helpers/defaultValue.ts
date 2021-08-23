@@ -4,7 +4,6 @@ const now = new Date();
 export const defaultValue: Project =
 {
   _id: "",
-  attachments: [],
   author: "",
   category: "",
   dateFinal: now,
@@ -23,7 +22,6 @@ export const defaultValue: Project =
     materials: []
   },
 
-  results: "",
   secondSemester: [],
   specificCommunity:
   {
