@@ -1,17 +1,17 @@
 export interface Category
 {
   _id?: string;
-  createdAt: Date;
+  createdAt?: Date;
   isActive: boolean;
   name: string;
+  updatedAt?: Date;
 };
 
 export function isCategory(c: any): c is Category
 {
   return c != null && typeof c === "object" && !Array.isArray(c)
     && "name" in c
-    && "isActive" in c
-    && "createdAt" in c;
+    && "isActive" in c;
 }
 
 export function getCategoryId(c: any): string | null

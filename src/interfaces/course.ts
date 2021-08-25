@@ -14,13 +14,13 @@ export interface Course
 
 export function isCampus(c: any): c is Campus
 {
-  return c
+  return c != null && typeof c === "object" && !Array.isArray(c)
     && "name" in c;
 }
 
 export function isCourse(c: any): c is Course
 {
-  return c
+  return c != null && typeof c === "object" && !Array.isArray(c)
     && "name" in c
     && "campus" in c;
 }

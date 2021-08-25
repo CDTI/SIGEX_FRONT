@@ -16,6 +16,8 @@ import
   Col
 } from "antd";
 
+import { dateFormatterOptions } from "../helpers/constants";
+
 import { Category } from "../../../../../interfaces/category";
 import { Feedback } from "../../../../../interfaces/feedback";
 import { Program } from "../../../../../interfaces/program";
@@ -27,17 +29,6 @@ import { ReturnResponse, updateProject } from "../../../../../services/project_s
 import MyTable from "../../../../../components/layout/table";
 import { Restricted } from "../../../../../components/Restricted";
 import { compareDate } from "../../../../../util";
-
-const dateFormatterOptions =
-{
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-  timeZone: "America/Sao_Paulo"
-} as const;
 
 const projectTypes: { [k: string]: string } =
 {

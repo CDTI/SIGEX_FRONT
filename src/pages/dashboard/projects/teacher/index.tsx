@@ -90,7 +90,7 @@ export const TeacherProjects: React.FC = () =>
     if (shouldReload)
       setShouldReload(false);
 
-    listAllTeacherProjects(true).then((data) =>
+    listAllTeacherProjects({ withPopulatedRefs: true }).then((data) =>
     {
       setProjects(data);
       setFilteredProjects(data);

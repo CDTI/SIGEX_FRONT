@@ -38,19 +38,15 @@ export interface Material
   description: string;
   item: string;
   quantity: number;
-  totalPrice: number;
   unitaryValue: number;
-  unity: string;
 }
 
 export interface Transport
 {
   description: string;
   quantity: number;
-  totalPrice: number;
   typeTransport: string;
   unitaryValue: number;
-  unity: string;
 }
 
 export interface Resource
@@ -80,7 +76,7 @@ export interface Report
   affectedPeople: number;
   communityContacts: Contact[];
   communityPeople: number;
-  createdAt: Date;
+  createdAt?: Date;
   discussion: string;
   introduction: string;
   isLate: boolean;
@@ -89,6 +85,7 @@ export interface Report
   results: string;
   students: number;
   teams: number;
+  updatedAt?: Date;
 }
 
 export interface Project
@@ -96,6 +93,7 @@ export interface Project
   _id?: string;
   author: string | User;
   category: string | Category;
+  createdAt?: Date;
   dateFinal: Date;
   dateStart: Date;
   description: string;
@@ -109,21 +107,51 @@ export interface Project
   planning: Planning[];
   program: string | Program;
   report?: Report;
-  resources?: Resource;
+  resources: Resource;
   secondSemester: Schedule[];
   specificCommunity: Community;
   status: "pending" | "reproved" | "notSelected" | "selected" | "finished";
   teachers : Teacher[];
   totalCH?: number;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
+  updatedAt?: Date;
 }
 
 export function isProject(p: any): p is Project
 {
-  return p && (p as Project)._id !== undefined;
+  return p != null && typeof p === "object" && !Array.isArray(p)
+    && "author" in p
+    && "category" in p
+    && "dateFinal" in p
+    && "dateStart" in p
+    && "description" in p
+    && "disciplines" in p
+    && "firstSemester" in p
+    && "name" in p
+    && "notice" in p
+    && "partnership" in p
+    && "planning" in p
+    && "program" in p
+    && "resources" in p
+    && "secondSemester" in p
+    && "specificCommunity" in p
+    && "status" in p
+    && "teachers " in p
+    && "typeProject" in p;
 }
 
 export function isReport(r: any): r is Report
 {
-  return r && (r as Report)._id !== undefined;
+  return r != null && typeof r === "object" && !Array.isArray(r)
+    && "affectedPeople" in r
+    && "communityContacts" in r
+    && "communityPeople" in r
+    && "discussion" in r
+    && "introduction" in r
+    && "isLate" in r
+    && "methodology" in r
+    && "projectTitle" in r
+    && "results" in r
+    && "students" in r
+    && "teams" in r;
 }

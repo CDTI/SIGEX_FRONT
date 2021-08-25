@@ -10,7 +10,7 @@ import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
 import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
 
 import { Project } from "../../../../interfaces/project";
-import { base_url } from "../../../../services/api";
+import { baseUrl } from "../../../../services/api";
 import { listAllProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
 
@@ -31,7 +31,7 @@ export const AllProjects: React.FC = () =>
     {
       dispatchDataFiltering({ type: "LOADING" });
 
-      const projects = await listAllProjects(true);
+      const projects = await listAllProjects({ withPopulatedRefs: true });
       dispatchDataFiltering(
       {
         type: "SET_DATA",
@@ -95,9 +95,9 @@ export const AllProjects: React.FC = () =>
     </Modal>
   ), [projectDetailsDialogState, getInfoDialogTitle, getInfo]);
 
-  let projectsCsvPath = `${base_url}/api/downloadCsv/${programId ?? ""}`;
-  let scheduleCsvPath = `${base_url}/api/downloadCsvHours/${programId ?? ""}`;
-  let reportsCsvPath = `${base_url}/api/project/report/download/${programId ?? ""}`;
+  let projectsCsvPath = `${baseUrl}/downloadCsv/${programId ?? ""}`;
+  let scheduleCsvPath = `${baseUrl}/downloadCsvHours/${programId ?? ""}`;
+  let reportsCsvPath = `${baseUrl}/project/report/download/${programId ?? ""}`;
 
   return (
     <>

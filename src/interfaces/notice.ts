@@ -18,6 +18,7 @@ export interface Notice
 {
   _id?: string;
   canAccess: (string | Role)[];
+  createdAt?: Date;
   effectiveDate: Date;
   expirationDate: Date;
   isActive: boolean;
@@ -26,6 +27,7 @@ export interface Notice
   reportDeadline: Date;
   timetables: Timetable[];
   type: "common" | "specific";
+  updatedAt?: Date;
 };
 
 export function isNotice(n: any): n is Notice

@@ -1,4 +1,6 @@
-import api from "../api";
+import { AxiosRequestConfig } from "axios";
+
+import api, { RequestOptions } from "../api";
 
 import { Project, Report } from "../../interfaces/project";
 
@@ -15,38 +17,69 @@ export interface GetResponse
   projects: Project[]
 }
 
-export async function listAllProjects(withPopulatedRefs: boolean = false): Promise<Project[]>
+export async function listAllProjects(
+  options?: RequestOptions)
+  : Promise<Project[]>
 {
-  let uri = "/projects";
-  if (withPopulatedRefs)
-    uri += "?withPopulatedRefs=true";
+  const config: AxiosRequestConfig = {};
+  if (options != null)
+  {
+    if (options.withPopulatedRefs != null && options.withPopulatedRefs)
+      config.params = { ...config.params, withPopulatedRefs: true }
 
-  const response = await api.get(uri);
+    if (options.cancellationToken != null)
+      config.cancelToken = options.cancellationToken;
+  }
+
+  const response = await api.get("/projects", config);
 
   return response.data;
 }
 
-export async function listAllTeacherProjects(withPopulatedRefs: boolean = false): Promise<Project[]>
+export async function listAllTeacherProjects(
+  options?: RequestOptions)
+  : Promise<Project[]>
 {
-  let uri = "/projects/forTeacher";
-  if (withPopulatedRefs)
-    uri += "?withPopulatedRefs=true";
+  const config: AxiosRequestConfig = {};
+  if (options != null)
+  {
+    if (options.withPopulatedRefs != null && options.withPopulatedRefs)
+      config.params = { ...config.params, withPopulatedRefs: true }
 
-  const response = await api.get(uri);
+    if (options.cancellationToken != null)
+      config.cancelToken = options.cancellationToken;
+  }
+
+  const response = await api.get("/projects/forTeacher");
 
   return response.data;
 }
 
-export async function createProject(data: Project): Promise<string>
+export async function createProject(
+  project: Project,
+  options?: RequestOptions)
+  : Promise<string>
 {
-  const response = await api.post("/project", data);
+  const config: AxiosRequestConfig = {};
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
+
+  const response = await api.post("/project", project, config);
 
   return response.data;
 }
 
-export async function updateProject(id: string, data: Project): Promise<string>
+export async function updateProject(
+  id: string,
+  project: Project,
+  options?: RequestOptions)
+  : Promise<string>
 {
-  const response = await api.put(`/project/${id}`, data);
+  const config: AxiosRequestConfig = {};
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
+
+  const response = await api.put(`/project/${id}`, project, config);
 
   return response.data;
 }

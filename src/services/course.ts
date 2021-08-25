@@ -1,14 +1,14 @@
-import Axios, { AxiosRequestConfig, CancelTokenSource } from "axios";
+import { AxiosRequestConfig } from "axios";
 
 import { Campus, Course } from "../interfaces/course";
 
-import api from "./api";
+import api, { RequestOptions } from "./api";
 
-export async function getAllCampi(cancellationToken?: CancelTokenSource): Promise<Campus[]>
+export async function getAllCampi(options?: RequestOptions): Promise<Campus[]>
 {
   const config: AxiosRequestConfig = {};
-  if (cancellationToken !== undefined)
-    config.cancelToken = cancellationToken.token;
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
 
   const { data } = await api.get("/campi", config);
 
@@ -16,12 +16,18 @@ export async function getAllCampi(cancellationToken?: CancelTokenSource): Promis
 }
 
 export async function getAllCourses(
-  cancellationToken?: CancelTokenSource)
+  options?: RequestOptions)
   : Promise<Course[]>
 {
   const config: AxiosRequestConfig = {};
-  if (cancellationToken !== undefined)
-    config.cancelToken = cancellationToken.token;
+  if (options != null)
+  {
+    if (options.withPopulatedRefs != null && options.withPopulatedRefs)
+      config.params = { ...config.params, withPopulatedRefs: true }
+
+    if (options.cancellationToken != null)
+      config.cancelToken = options.cancellationToken;
+  }
 
   const { data } = await api.get("/courses", config);
 
@@ -30,12 +36,12 @@ export async function getAllCourses(
 
 export async function createCourse(
   course: Course,
-  cancellationToken?: CancelTokenSource)
+  options?: RequestOptions)
   : Promise<string>
 {
   const config: AxiosRequestConfig = {};
-  if (cancellationToken !== undefined)
-    config.cancelToken = cancellationToken.token;
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
 
   const { data } = await api.post("/course", course, config);
 
@@ -45,14 +51,26 @@ export async function createCourse(
 export async function updateCourse(
   id: string,
   course: Course,
-  cancellationToken?: CancelTokenSource)
+  options?: RequestOptions)
   : Promise<string>
 {
   const config: AxiosRequestConfig = {};
-  if (cancellationToken !== undefined)
-    config.cancelToken = cancellationToken.token;
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
 
   const { data } = await api.put(`/course/${id}`, course, config);
 
   return data;
+}
+
+export async function deleteCourse(
+  id: string,
+  options?: RequestOptions)
+  : Promise<void>
+{
+  const config: AxiosRequestConfig = {};
+  if (options != null && options.cancellationToken != null)
+    config.cancelToken = options.cancellationToken;
+
+  await api.delete(`/course/${id}`, config);
 }

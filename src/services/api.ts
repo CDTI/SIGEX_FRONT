@@ -1,8 +1,14 @@
-import axios from "axios";
+import Axios, { CancelToken } from "axios";
 
-export const base_url = process.env.REACT_APP_BASE_URL;
+export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
 
-const axiosInstance = axios.create({ baseURL: `${base_url}/api` });
+export interface RequestOptions
+{
+  cancellationToken?: CancelToken;
+  withPopulatedRefs?: boolean;
+}
+
+const axiosInstance = Axios.create({ baseURL: baseUrl });
 axiosInstance.interceptors.request.use(
   (config) =>
   {

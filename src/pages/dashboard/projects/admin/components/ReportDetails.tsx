@@ -5,6 +5,7 @@ import { Contact, Project } from "../../../../../interfaces/project";
 import { User } from "../../../../../interfaces/user";
 import { Category } from "../../../../../interfaces/category";
 import { Program } from "../../../../../interfaces/program";
+import { dateFormatterOptions } from "../helpers/constants";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -15,11 +16,12 @@ interface Props
 
 function formatDate(date: Date): string
 {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear().toString().padStart(4, '0');
+  const formattedDate = new Intl
+    .DateTimeFormat("pt-BR", dateFormatterOptions)
+    .format(date)
+    .split(" ");
 
-  return `${day}/${month}/${year}`;
+  return `${formattedDate[0]} às ${formattedDate[1]}`;
 }
 
 export const ReportDetails: React.FC<Props> = (props) =>
@@ -93,7 +95,7 @@ export const ReportDetails: React.FC<Props> = (props) =>
         <Col span={21}>
           <Alert
             type="warning"
-            message={`Relatório entregue dia ${formatDate(new Date(props.project.report!.createdAt))}, com atraso`}
+            message={`Relatório entregue dia ${formatDate(new Date(props.project.report!.createdAt!))}, com atraso`}
             showIcon />
         </Col>
       )}
