@@ -74,6 +74,7 @@ export interface Report
 {
   _id?: string;
   affectedPeople: number;
+  communityName: string;
   communityContacts: Contact[];
   communityPeople: number;
   createdAt?: Date;

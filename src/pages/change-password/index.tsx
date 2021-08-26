@@ -5,13 +5,13 @@ import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from "./sty
 
 import logo from "../../sigex.png";
 import { changePassword } from "../../services/user_service";
-import { useUrlQuery } from "../../util";
+import { useUrlQueryParams } from "../../hooks/useUrlQueryParams";
 
 export const ChangePasswordPage: React.FC = () =>
 {
-  const urlQuery = useUrlQuery();
-  const userId = urlQuery.get("userId");
-  const token = urlQuery.get("token");
+  const urlQueryParams = useUrlQueryParams();
+  const userId = urlQueryParams.get("userId");
+  const token = urlQueryParams.get("token");
   const [form] = Form.useForm();
 
   const handleChangePassword = async (value: any) =>

@@ -25,7 +25,7 @@ import { ContentMap, UrlParams } from "./helpers/types";
 import { Report } from "../../../../../interfaces/project";
 import { createReport, updateReport } from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
-import { useUrlQuery } from "../../../../../util";
+import { useUrlQueryParams } from "../../../../../hooks/useUrlQueryParams";
 
 export const ReportForm: React.FC = () =>
 {
@@ -38,11 +38,11 @@ export const ReportForm: React.FC = () =>
     { step: "introduction" });
 
   const { id } = useParams<UrlParams>();
-  const urlQuery = useUrlQuery();
   const location = useLocation();
+  const urlQueryParams = useUrlQueryParams();
   const history = useHistory();
 
-  const projectId = urlQuery.get("project");
+  const projectId = urlQueryParams.get("project");
   const savedStateKey = useMemo(() => `reportFormState_${projectId}`, []);
 
   useEffect(() =>

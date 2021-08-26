@@ -120,7 +120,8 @@ export function reportFormStateReducer(
             data:
             {
               ...state.data!,
-              communityContacts: action.payload.communityContacts
+              communityContacts: action.payload.communityContacts,
+              communityName: action.payload.communityName
             }
           });
 

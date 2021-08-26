@@ -28,11 +28,21 @@ export const ContactsForm: React.FC<Props> = (props) =>
     >
       <Row>
         <Col span={24}>
+          <Form.Item
+            name="communityName"
+            label="Nome da comunidade"
+            rules={[{ required: true, message: "Campo obrigatório" }]}
+          >
+            <Input style={{ width: "100%" }} />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
           <Form.List name="communityContacts">
-            {(communityContactsFields, { add, remove }) => (
+            {(communityContactFields, { add, remove }) => (
               <>
-                <Row gutter={[0, 8]}>
-                  {communityContactsFields.map((communityContactsField) => (
+                <Row gutter={[8, 0]}>
+                  {communityContactFields.map((communityContactField) => (
                     <>
                       <Col xs={24} md={4} xl={2}>
                         <Form.Item label={<label></label>}>
@@ -41,17 +51,17 @@ export const ContactsForm: React.FC<Props> = (props) =>
                             block
                             type="primary"
                             icon={<MinusCircleOutlined />}
-                            onClick={() => remove(communityContactsField.name)}
+                            onClick={() => remove(communityContactField.name)}
                           />
                         </Form.Item>
                       </Col>
 
                       <Col xs={24} md={10} xl={11}>
                         <Form.Item
-                          {...communityContactsField}
-                          label="Nome da comunidade"
-                          name={[communityContactsField.name, "name"]}
-                          fieldKey={[communityContactsField.fieldKey, "name"]}
+                          {...communityContactField}
+                          label="Informações de contato da comunidade"
+                          name={[communityContactField.name, "name"]}
+                          fieldKey={[communityContactField.fieldKey, "name"]}
                           rules={
                           [
                             { required: true, message: "Campo obrigatório" },
@@ -64,10 +74,10 @@ export const ContactsForm: React.FC<Props> = (props) =>
 
                       <Col xs={24} md={10} xl={11}>
                         <Form.Item
-                          {...communityContactsField}
-                          label="Contato da comunidade"
-                          name={[communityContactsField.name, "phone"]}
-                          fieldKey={[communityContactsField.fieldKey, "phone"]}
+                          {...communityContactField}
+                          label="Telefone"
+                          name={[communityContactField.name, "phone"]}
+                          fieldKey={[communityContactField.fieldKey, "phone"]}
                           rules={
                           [
                             { required: true, message: "Campo obrigatório" },

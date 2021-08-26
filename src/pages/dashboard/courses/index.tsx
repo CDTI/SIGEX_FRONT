@@ -3,18 +3,36 @@ import ReactDOM from "react-dom";
 import { Button, Col, Form, Input, Modal, notification, Row, Select, Space, Table, Typography } from "antd";
 
 import { Campus, Course } from "../../../interfaces/course";
-import { createCourse, deleteCourse, getAllCampi, getAllCourses, updateCourse } from "../../../services/course";
+import { createCourse, deleteCourse, updateCourse } from "../../../services/course";
 import Structure from "../../../components/layout/structure";
+import { HALT, useHttpRequest } from "../../../hooks/useHttpRequest";
+import { getAllCampiEndpoint, getAllCoursesEndpoint } from "../../../services/endpoints/course";
+
+function getValueOrDefaultArray(c?: any)
+{
+  if (c == null || typeof c !== "object" || !Array.isArray(c))
+    return [];
+
+  return c;
+}
+
+const campiGetRequestParams =
+{
+  method: "GET",
+  url: getAllCampiEndpoint,
+  cancellable: true
+} as const;
+
+const coursesGetRequestParams =
+{
+  method: "GET",
+  url: getAllCoursesEndpoint,
+  queryParams: { withPopulatedRefs: true },
+  cancellable: true
+} as const;
 
 export const Courses: React.FC = () =>
 {
-  const [shouldReloadCourses, setShouldReloadCourses] = useState(true);
-  const [coursesAreLoading, setCoursesAreLoading] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
-
-  const [campiAreLoading, setCampiAreLoading] = useState(false);
-  const [campi, setCampi] = useState<Campus[]>([]);
-
   const [saveOrUpdateDialogIsVisible, setSaveOrUpdateDialogIsVisible] = useState(false);
   const [saveOrUpdateDialogIsWorking, setSaveOrUpdateDialogIsWorking] = useState(false);
   const [saveOrUpdateForm] = Form.useForm();
@@ -23,45 +41,69 @@ export const Courses: React.FC = () =>
   const [removeDialogIsWorking, setRemoveDialogIsWorking] = useState(false);
   const [removeData, setRemoveData] = useState<Course>();
 
+  const
+  {
+    isWorking: campiRequestInProgress,
+    data: campiResponseData,
+    hasThrownError: campiRequestHasFailed,
+    errorMessage: campiRequestFailedMessage,
+    send: sendCampiRequest,
+    cancel: cancelCampiRequests
+  } = useHttpRequest<Campus[]>();
+
+  const [shouldLoadCourses, setShouldLoadCourses] = useState(true);
+  const
+  {
+    isWorking: coursesRequestInProgress,
+    data: coursesResponseData,
+    hasThrownError: coursesRequestHasFailed,
+    errorMessage: coursesRequestFailedMessage,
+    send: sendCoursesRequest,
+    cancel: cancelCoursesRequests,
+    clearState: clearCoursesState
+  } = useHttpRequest<string | Course[]>();
+
   useEffect(() =>
   {
-    (async () =>
+    sendCampiRequest(campiGetRequestParams);
+
+    return () =>
     {
-      setCampiAreLoading(true);
-
-      const campi = await getAllCampi();
-      setCampi(campi);
-
-      setCampiAreLoading(false);
-    })();
+      cancelCampiRequests(HALT);
+      cancelCoursesRequests(HALT);
+    }
   }, []);
 
   useEffect(() =>
   {
-    if (shouldReloadCourses)
+    if (shouldLoadCourses)
     {
-      (async () =>
+      if (coursesRequestInProgress)
       {
-        try
-        {
-          setCoursesAreLoading(true);
+        cancelCoursesRequests();
+        clearCoursesState();
+      }
 
-          const courses = await getAllCourses();
-          setCourses(courses.map((c: Course) => ({ ...c, key: c._id! })));
+      sendCoursesRequest(coursesGetRequestParams);
 
-          setShouldReloadCourses(false);
-          setCoursesAreLoading(false);
-        }
-        catch (error)
-        {
-          if (error.response)
-            notification.error({ message: error.response.data });
-          else if (error.request)
-            notification.error({ message: "Nenhuma resposta do servidor!" });
-        }
-      })();
+      setShouldLoadCourses(false);
     }
-  }, [shouldReloadCourses]);
+  }, [shouldLoadCourses]);
+
+  useEffect(() =>
+  {
+    if (campiRequestHasFailed && campiRequestFailedMessage !== "")
+      notification.error({ message: campiRequestFailedMessage });
+
+    if (coursesRequestHasFailed && coursesRequestFailedMessage !== "")
+      notification.error({ message: coursesRequestFailedMessage });
+  },
+  [
+    campiRequestHasFailed,
+    campiRequestFailedMessage,
+    coursesRequestHasFailed,
+    coursesRequestFailedMessage
+  ]);
 
   const closeSaveOrUpdateDialog = useCallback(() =>
   {
@@ -82,7 +124,7 @@ export const Courses: React.FC = () =>
 
       notification.success({ message: "Curso salvo com sucesso!" });
 
-      setShouldReloadCourses(true);
+      setShouldLoadCourses(true);
     }
     catch (error)
     {
@@ -138,8 +180,8 @@ export const Courses: React.FC = () =>
               rules={[{ required: true, message: "Campo obrigatório" }]}
             >
               <Select
-                loading={campiAreLoading}
-                options={campi.map((c: Campus) => ({ label: c.name, value: c._id! }))}
+                loading={campiRequestInProgress}
+                options={campiResponseData?.map((c: Campus) => ({ label: c.name, value: c._id! })) ?? []}
                 style={{ width: "100%" }}
               />
             </Form.Item>
@@ -172,7 +214,7 @@ export const Courses: React.FC = () =>
 
       notification.success({ message: "Curso removido com sucesso!" });
 
-      setShouldReloadCourses(true);
+      setShouldLoadCourses(true);
     }
     catch (error)
     {
@@ -276,8 +318,8 @@ export const Courses: React.FC = () =>
 
           <Col span={24}>
             <Table
-              loading={coursesAreLoading}
-              dataSource={courses}
+              loading={coursesRequestInProgress}
+              dataSource={getValueOrDefaultArray(coursesResponseData)}
               columns={tableColumns}
               />
           </Col>

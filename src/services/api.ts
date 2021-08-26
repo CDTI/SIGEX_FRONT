@@ -12,7 +12,7 @@ const axiosInstance = Axios.create({ baseURL: baseUrl });
 axiosInstance.interceptors.request.use(
   (config) =>
   {
-    if (config.baseURL !== undefined)
+    if (config.baseURL != null)
       config.baseURL = config.baseURL.replace(/([^:]\/)\/+/g, "$1");
 
     return config;
