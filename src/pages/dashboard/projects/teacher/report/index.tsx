@@ -43,7 +43,7 @@ export const ReportForm: React.FC = () =>
   const history = useHistory();
 
   const projectId = urlQueryParams.get("project");
-  const savedStateKey = useMemo(() => `reportFormState_${projectId}`, []);
+  const savedStateKey = useMemo(() => `reportFormState_${projectId}`, [projectId]);
 
   useEffect(() =>
   {
@@ -54,7 +54,7 @@ export const ReportForm: React.FC = () =>
       setShowDialog(true);
 
     setFirstExecution(false);
-  }, []);
+  }, [location.state, savedStateKey]);
 
   useEffect(() =>
   {

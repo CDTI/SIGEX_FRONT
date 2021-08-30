@@ -10,6 +10,7 @@ export interface Course
   key?: string;
   name: string;
   campus: string | Campus;
+  isActive: boolean;
 }
 
 export function isCampus(c: any): c is Campus
@@ -22,5 +23,6 @@ export function isCourse(c: any): c is Course
 {
   return c != null && typeof c === "object" && !Array.isArray(c)
     && "name" in c
-    && "campus" in c;
+    && "campus" in c
+    && "isActive" in c;
 }

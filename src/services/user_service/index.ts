@@ -1,4 +1,4 @@
-import api from "../api";
+import { httpClient } from "../httpClient";
 
 import { User } from "../../interfaces/user";
 
@@ -19,56 +19,56 @@ interface ResponseUser
 
 export const getUsers = async (): Promise<ResponseUsers> =>
 {
-  const response = await api.get("/user");
+  const response = await httpClient.get("/user");
 
   return response.data;
 };
 
 export const createUser = async (user: any): Promise<ResponseUser> =>
 {
-  const response = await api.post("/user", user);
+  const response = await httpClient.post("/user", user);
 
   return response.data;
 };
 
 export const updateUser = async (user: any): Promise<ResponseUser> =>
 {
-  const response = await api.put("/user", user);
+  const response = await httpClient.put("/user", user);
 
   return response.data;
 };
 
 export const checkUser = async (user: any): Promise<boolean> =>
 {
-  const response = await api.post("/checkUser", user);
+  const response = await httpClient.post("/checkUser", user);
 
   return response.data;
 };
 
 export const resetPassword = async (user: any): Promise<ResponseUser> =>
 {
-  const response = await api.put(`/resetPassword/${user.cpf}`);
+  const response = await httpClient.put(`/resetPassword/${user.cpf}`);
 
   return response.data;
 };
 
 export const requestPasswordChange = async (cpf: string): Promise<boolean> =>
 {
-  const response = await api.post("/requestPasswordChange", { cpf });
+  const response = await httpClient.post("/requestPasswordChange", { cpf });
 
   return response.data;
 };
 
 export const changePassword = async (value: any): Promise<boolean> =>
 {
-  const response = await api.put("/changePassword", value);
+  const response = await httpClient.put("/changePassword", value);
 
   return response.data;
 };
 
 export const getUserName = async (cpf: string): Promise<string> =>
 {
-  const response = await api.get(`/user/name/${cpf}`);
+  const response = await httpClient.get(`/user/name/${cpf}`);
 
   return response.data;
 };
@@ -76,7 +76,7 @@ export const getUserName = async (cpf: string): Promise<string> =>
 
 export const hasPasswordChangeToken = async (cpf: string): Promise<string> =>
 {
-  const response = await api.get(`/user/passwordChangeRequest/exists/${cpf}`);
+  const response = await httpClient.get(`/user/passwordChangeRequest/exists/${cpf}`);
 
   return response.data;
 };

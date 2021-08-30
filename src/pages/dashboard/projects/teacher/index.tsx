@@ -6,7 +6,7 @@ import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from
 import { Register } from "../../../../interfaces/feedback";
 import { Notice } from "../../../../interfaces/notice";
 import { Program } from "../../../../interfaces/program";
-import { Project, isReport } from "../../../../interfaces/project";
+import { Project } from "../../../../interfaces/project";
 import { listFeedbackProject } from "../../../../services/feedback_service";
 import { listPrograms } from "../../../../services/program_service";
 import { deleteProject, listAllTeacherProjects } from "../../../../services/project_service";

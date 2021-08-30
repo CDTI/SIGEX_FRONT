@@ -1,4 +1,4 @@
-import api from "../api";
+import { httpClient } from "../httpClient";
 
 import { Program } from "../../interfaces/program";
 
@@ -20,14 +20,14 @@ interface ReturnResponseGet
 
 export const createProgram = async (program: Program): Promise<ReturnResponsePost> =>
 {
-    const response = await api.post("/program", program)
+    const response = await httpClient.post("/program", program)
 
     return response.data
 }
 
 export const listPrograms = async (): Promise<ReturnResponseGet> =>
 {
-    const response = await api.get("/program")
+    const response = await httpClient.get("/program")
 
     return response.data
 }

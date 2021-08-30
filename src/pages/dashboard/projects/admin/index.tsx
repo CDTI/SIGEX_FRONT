@@ -10,7 +10,7 @@ import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
 import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
 
 import { Project } from "../../../../interfaces/project";
-import { baseUrl } from "../../../../services/api";
+import { baseUrl } from "../../../../services/httpClient";
 import { listAllProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
 

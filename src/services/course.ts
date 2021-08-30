@@ -1,76 +1,29 @@
-import { AxiosRequestConfig } from "axios";
-
-import { Campus, Course } from "../interfaces/course";
-
-import api, { RequestOptions } from "./api";
-
-export async function getAllCampi(options?: RequestOptions): Promise<Campus[]>
+export function getAllCampiEndpoint(): string
 {
-  const config: AxiosRequestConfig = {};
-  if (options != null && options.cancellationToken != null)
-    config.cancelToken = options.cancellationToken;
-
-  const { data } = await api.get("/campi", config);
-
-  return data;
+  return "/campi";
 }
 
-export async function getAllCourses(
-  options?: RequestOptions)
-  : Promise<Course[]>
+export function getAllCoursesEndpoint(): string
 {
-  const config: AxiosRequestConfig = {};
-  if (options != null)
-  {
-    if (options.withPopulatedRefs != null && options.withPopulatedRefs)
-      config.params = { ...config.params, withPopulatedRefs: true }
-
-    if (options.cancellationToken != null)
-      config.cancelToken = options.cancellationToken;
-  }
-
-  const { data } = await api.get("/courses", config);
-
-  return data;
+  return "/courses";
 }
 
-export async function createCourse(
-  course: Course,
-  options?: RequestOptions)
-  : Promise<string>
+export function createCourseEndpoint(): string
 {
-  const config: AxiosRequestConfig = {};
-  if (options != null && options.cancellationToken != null)
-    config.cancelToken = options.cancellationToken;
-
-  const { data } = await api.post("/course", course, config);
-
-  return data;
+  return "/course";
 }
 
-export async function updateCourse(
-  id: string,
-  course: Course,
-  options?: RequestOptions)
-  : Promise<string>
+export function updateCourseEndpoint(id: string): string
 {
-  const config: AxiosRequestConfig = {};
-  if (options != null && options.cancellationToken != null)
-    config.cancelToken = options.cancellationToken;
-
-  const { data } = await api.put(`/course/${id}`, course, config);
-
-  return data;
+  return `/course/${id}`;
 }
 
-export async function deleteCourse(
-  id: string,
-  options?: RequestOptions)
-  : Promise<void>
+export function deleteCourseEndpoint(id: string): string
 {
-  const config: AxiosRequestConfig = {};
-  if (options != null && options.cancellationToken != null)
-    config.cancelToken = options.cancellationToken;
+  return `/course/${id}`;
+}
 
-  await api.delete(`/course/${id}`, config);
+export function toggleCourseEndpoint(id: string): string
+{
+  return `/course/${id}/isActive`;
 }

@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 
-import api, { RequestOptions } from "../api";
+import { httpClient, RequestOptions } from "../httpClient";
 
 import { Project, Report } from "../../interfaces/project";
 
@@ -31,7 +31,7 @@ export async function listAllProjects(
       config.cancelToken = options.cancellationToken;
   }
 
-  const response = await api.get("/projects", config);
+  const response = await httpClient.get("/projects", config);
 
   return response.data;
 }
@@ -50,7 +50,7 @@ export async function listAllTeacherProjects(
       config.cancelToken = options.cancellationToken;
   }
 
-  const response = await api.get("/projects/forTeacher");
+  const response = await httpClient.get("/projects/forTeacher");
 
   return response.data;
 }
@@ -64,7 +64,7 @@ export async function createProject(
   if (options != null && options.cancellationToken != null)
     config.cancelToken = options.cancellationToken;
 
-  const response = await api.post("/project", project, config);
+  const response = await httpClient.post("/project", project, config);
 
   return response.data;
 }
@@ -79,21 +79,21 @@ export async function updateProject(
   if (options != null && options.cancellationToken != null)
     config.cancelToken = options.cancellationToken;
 
-  const response = await api.put(`/project/${id}`, project, config);
+  const response = await httpClient.put(`/project/${id}`, project, config);
 
   return response.data;
 }
 
 export const listApprovedProjects = async(): Promise<GetResponse> =>
 {
-    const response =  await api.get("/listApprovedProject")
+    const response =  await httpClient.get("/listApprovedProject")
 
     return response.data
 }
 
 export const deleteProject = async(projectId: string): Promise<ReturnResponse> =>
 {
-    const response = await api.delete(`/project/${projectId}`)
+    const response = await httpClient.delete(`/project/${projectId}`)
 
     return response.data
 }
@@ -101,12 +101,12 @@ export const deleteProject = async(projectId: string): Promise<ReturnResponse> =
 export const downloadCSV = async(programId: string): Promise<any> =>
 {
     if(programId !== "null"){
-        const response = await api.get("/downloadCsv/".concat(programId), { responseType: "blob" })
+        const response = await httpClient.get("/downloadCsv/".concat(programId), { responseType: "blob" })
         console.log(response.headers)
         window.open(response.data)
         return response.data
     } else {
-        const response = await api.get("/downloadCsv/")
+        const response = await httpClient.get("/downloadCsv/")
         window.open(response.data)
         return response.data
     }
@@ -114,14 +114,14 @@ export const downloadCSV = async(programId: string): Promise<any> =>
 
 export async function createReport(projectId: string, report: Report): Promise<string>
 {
-  const response = await api.post(`/project/report/${projectId}`, report);
+  const response = await httpClient.post(`/project/report/${projectId}`, report);
 
   return response.data;
 }
 
 export async function updateReport(id: string, report: Report): Promise<string>
 {
-  const response = await api.put(`/project/report/${id}`, report);
+  const response = await httpClient.put(`/project/report/${id}`, report);
 
   return response.data;
 }

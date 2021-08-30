@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { notification } from "antd";
 import { User } from "../interfaces/user";
-import api from "../services/api";
+import { httpClient } from "../services/httpClient";
 import history from "../global/history";
 
 export interface Login
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC = ({ children }) =>
 
         if (storageToken && storageUser) {
             setUser(JSON.parse(storageUser.toString()))
-            api.defaults.headers.Authorization = `Bearer ${storageToken}`
+            httpClient.defaults.headers.Authorization = `Bearer ${storageToken}`
             history.push("/dashboard")
         }
     }, [])
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC = ({ children }) =>
     const login = async (login: Login) => {
         try {
             let status: "success" | "error" = "success"
-            const response = await api.post("/login", {
+            const response = await httpClient.post("/login", {
                 cpf: login.cpf,
                 password: login.password
             })
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC = ({ children }) =>
             if (response.data.token !== null && response.data.status === "success") {
                 notification[status]({ message: response.data.message })
                 setUser(response.data.user)
-                api.defaults.headers.Authorization = `Bearer ${response.data.token}`
+                httpClient.defaults.headers.Authorization = `Bearer ${response.data.token}`
 
                 localStorage.setItem("@pp:user", JSON.stringify(response.data.user))
                 localStorage.setItem("@pp:token", response.data.token)

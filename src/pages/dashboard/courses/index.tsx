@@ -1,278 +1,329 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
-import { Button, Col, Form, Input, Modal, notification, Row, Select, Space, Table, Typography } from "antd";
+import
+{
+  Button,
+  Col,
+  Form,
+  Input,
+  Modal,
+  notification,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Typography
+} from "antd";
+
+import { useHttpClient } from "../../../hooks/useHttpClient";
+import Structure from "../../../components/layout/structure";
 
 import { Campus, Course } from "../../../interfaces/course";
-import { createCourse, deleteCourse, updateCourse } from "../../../services/course";
-import Structure from "../../../components/layout/structure";
-import { HALT, useHttpRequest } from "../../../hooks/useHttpRequest";
-import { getAllCampiEndpoint, getAllCoursesEndpoint } from "../../../services/endpoints/course";
-
-function getValueOrDefaultArray(c?: any)
+import
 {
-  if (c == null || typeof c !== "object" || !Array.isArray(c))
-    return [];
-
-  return c;
-}
-
-const campiGetRequestParams =
-{
-  method: "GET",
-  url: getAllCampiEndpoint,
-  cancellable: true
-} as const;
-
-const coursesGetRequestParams =
-{
-  method: "GET",
-  url: getAllCoursesEndpoint,
-  queryParams: { withPopulatedRefs: true },
-  cancellable: true
-} as const;
+  createCourseEndpoint,
+  deleteCourseEndpoint,
+  getAllCampiEndpoint,
+  getAllCoursesEndpoint,
+  toggleCourseEndpoint,
+  updateCourseEndpoint
+} from "../../../services/course";
 
 export const Courses: React.FC = () =>
 {
-  const [saveOrUpdateDialogIsVisible, setSaveOrUpdateDialogIsVisible] = useState(false);
-  const [saveOrUpdateDialogIsWorking, setSaveOrUpdateDialogIsWorking] = useState(false);
-  const [saveOrUpdateForm] = Form.useForm();
+  const [campi, setCampi] = useState<Campus[]>([]);
+  const dropDownListCampiRequester = useHttpClient();
 
-  const [removeDialogIsVisible, setRemoveDialogIsVisible] = useState(false);
-  const [removeDialogIsWorking, setRemoveDialogIsWorking] = useState(false);
-  const [removeData, setRemoveData] = useState<Course>();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [shouldReloadCourses, setShouldReloadCourses] = useState(true);
+  const tableCoursesRequester = useHttpClient();
+  const switchCourseRequester = useHttpClient();
 
-  const
-  {
-    isWorking: campiRequestInProgress,
-    data: campiResponseData,
-    hasThrownError: campiRequestHasFailed,
-    errorMessage: campiRequestFailedMessage,
-    send: sendCampiRequest,
-    cancel: cancelCampiRequests
-  } = useHttpRequest<Campus[]>();
+  const [saveModalIsVisible, setSaveModalIsVisible] = useState(false);
+  const [saveModalForm] = Form.useForm();
+  const saveModalCourseRequester = useHttpClient();
 
-  const [shouldLoadCourses, setShouldLoadCourses] = useState(true);
-  const
-  {
-    isWorking: coursesRequestInProgress,
-    data: coursesResponseData,
-    hasThrownError: coursesRequestHasFailed,
-    errorMessage: coursesRequestFailedMessage,
-    send: sendCoursesRequest,
-    cancel: cancelCoursesRequests,
-    clearState: clearCoursesState
-  } = useHttpRequest<string | Course[]>();
+  const [removeModalIsVisible, setRemoveModalIsVisible] = useState(false);
+  const [course, setCourse] = useState<Course>();
+  const removeModalCourseRequester = useHttpClient();
 
   useEffect(() =>
   {
-    sendCampiRequest(campiGetRequestParams);
+    (async () =>
+    {
+      const campi = await dropDownListCampiRequester.send<Campus[]>(
+      {
+        method: "GET",
+        url: getAllCampiEndpoint(),
+        cancellable: true
+      });
+
+      setCampi(campi ?? []);
+    })();
 
     return () =>
     {
-      cancelCampiRequests(HALT);
-      cancelCoursesRequests(HALT);
+      dropDownListCampiRequester.halt();
+      tableCoursesRequester.halt();
+      saveModalCourseRequester.halt();
     }
   }, []);
 
   useEffect(() =>
   {
-    if (shouldLoadCourses)
+    if (shouldReloadCourses)
     {
-      if (coursesRequestInProgress)
+      (async () =>
       {
-        cancelCoursesRequests();
-        clearCoursesState();
-      }
+        try
+        {
+          const courses = await tableCoursesRequester.send(
+          {
+            method: "GET",
+            url: getAllCoursesEndpoint(),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            cancellable: true
+          });
 
-      sendCoursesRequest(coursesGetRequestParams);
+          setCourses(courses?.map((c: Course) => ({ ...c, key: c._id! })) ?? []);
 
-      setShouldLoadCourses(false);
+          setShouldReloadCourses(false);
+        }
+        catch (error)
+        {
+          if (error.message !== "")
+            notification.error({ message: error.message });
+        }
+      })();
     }
-  }, [shouldLoadCourses]);
+  }, [shouldReloadCourses]);
 
-  useEffect(() =>
-  {
-    if (campiRequestHasFailed && campiRequestFailedMessage !== "")
-      notification.error({ message: campiRequestFailedMessage });
-
-    if (coursesRequestHasFailed && coursesRequestFailedMessage !== "")
-      notification.error({ message: coursesRequestFailedMessage });
-  },
-  [
-    campiRequestHasFailed,
-    campiRequestFailedMessage,
-    coursesRequestHasFailed,
-    coursesRequestFailedMessage
-  ]);
-
-  const closeSaveOrUpdateDialog = useCallback(() =>
-  {
-    setSaveOrUpdateDialogIsWorking(false);
-    setSaveOrUpdateDialogIsVisible(false);
-    saveOrUpdateForm.resetFields();
-  }, [saveOrUpdateForm]);
-
-  const saveOrUpdate = useCallback(async (course: Course) =>
-  {
-    try
-    {
-      setSaveOrUpdateDialogIsWorking(true);
-
-      await (course._id == null
-        ? createCourse(course)
-        : updateCourse(course._id, course));
-
-      notification.success({ message: "Curso salvo com sucesso!" });
-
-      setShouldLoadCourses(true);
-    }
-    catch (error)
-    {
-      let message = "Houve um erro inesperado durante a requisição ao servidor!";
-      if (error.response)
-        message = error.response.data;
-      else if (error.request)
-        message = "Nenhuma resposta do servidor!"
-
-      notification.error({ message });
-    }
-    finally
-    {
-      closeSaveOrUpdateDialog();
-    }
-  }, [closeSaveOrUpdateDialog]);
-
-  const saveOrUpdateDialog = useMemo(() => (
-    <Modal
-      visible={saveOrUpdateDialogIsVisible}
-      centered={true}
-      confirmLoading={saveOrUpdateDialogIsWorking}
-      title={`${saveOrUpdateForm.getFieldValue("_id") == null ? "Cadastrar" : "Alterar"} curso`}
-      okText="Salvar"
-      cancelText="Cancelar"
-      onOk={() => saveOrUpdateForm.submit()}
-      onCancel={() => closeSaveOrUpdateDialog()}
-    >
-      <Form
-        layout="vertical"
-        form={saveOrUpdateForm}
-        onFinish={saveOrUpdate}
-      >
-        <Row gutter={[0, 8]}>
-          <Form.Item name="_id">
-            <Input type="hidden" />
-          </Form.Item>
-
-          <Col span={24}>
-            <Form.Item
-              name="name"
-              label="Nome"
-              rules={[{ required: true, message: "Campo obrigatório" }]}
-            >
-              <Input style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-
-          <Col span={24}>
-            <Form.Item
-              name="campus"
-              label="Campus"
-              rules={[{ required: true, message: "Campo obrigatório" }]}
-            >
-              <Select
-                loading={campiRequestInProgress}
-                options={campiResponseData?.map((c: Campus) => ({ label: c.name, value: c._id! })) ?? []}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
-    </Modal>
-  ),
-  [
-    saveOrUpdateDialogIsVisible,
-    saveOrUpdateDialogIsWorking,
-    saveOrUpdateForm,
-    closeSaveOrUpdateDialog,
-    saveOrUpdate
-  ]);
-
-  const closeRemoveDialog = useCallback(() =>
-  {
-    setRemoveDialogIsWorking(false);
-    setRemoveDialogIsVisible(false);
-  }, []);
-
-  const remove = useCallback(async (id: string) =>
-  {
-    try
-    {
-      setRemoveDialogIsWorking(true);
-
-      await deleteCourse(id);
-
-      notification.success({ message: "Curso removido com sucesso!" });
-
-      setShouldLoadCourses(true);
-    }
-    catch (error)
-    {
-      let message = "Houve um erro inesperado durante a requisição ao servidor!";
-      if (error.response)
-        message = error.response.data;
-      else if (error.request)
-        message = "Nenhuma resposta do servidor!"
-
-      notification.error({ message });
-    }
-    finally
-    {
-      closeRemoveDialog();
-    }
-  }, [closeRemoveDialog]);
-
-  const removeDialog = useMemo(() => (
-    <Modal
-      visible={removeDialogIsVisible}
-      centered={true}
-      confirmLoading={removeDialogIsWorking}
-      title="Remover curso"
-      okText="Remover"
-      cancelText="Cancelar"
-      onOk={() => remove(removeData!._id!)}
-      onCancel={() => closeRemoveDialog()}
-    >
-      <Typography.Paragraph>
-        {`Tem certeza que deseja remover o curso ${removeData?.name}?`}
-      </Typography.Paragraph>
-    </Modal>
-  ),
-  [
-    removeDialogIsVisible,
-    removeDialogIsWorking,
-    removeData,
-    remove,
-    closeRemoveDialog
-  ]);
-
-  const openSaveOrUpdateDialog = useCallback((course?: Course) =>
+  const openSaveModal = useCallback((course?: Course) =>
   {
     if (course != null)
-      saveOrUpdateForm.setFieldsValue(
+      saveModalForm.setFieldsValue(
       {
         ...course,
         campus: (course.campus as Campus)._id!
       });
 
-    setSaveOrUpdateDialogIsVisible(true);
-  }, [saveOrUpdateForm]);
+    setSaveModalIsVisible(true);
+  }, [saveModalForm]);
 
-  const openRemoveDialog = useCallback((course: Course) =>
+  const closeSaveModal = useCallback(() =>
   {
-    setRemoveData(course);
-    setRemoveDialogIsVisible(true);
+    setSaveModalIsVisible(false);
+
+    if (saveModalCourseRequester.inProgress)
+      saveModalCourseRequester.cancel();
+
+    saveModalForm.resetFields();
+  },
+  [
+    saveModalCourseRequester.inProgress,
+    saveModalCourseRequester.cancel,
+    saveModalForm.resetFields
+  ]);
+
+  const saveCourse = useCallback(async (course: Course) =>
+  {
+    try
+    {
+      await saveModalCourseRequester.send(course._id == null
+        ? {
+          method: "POST",
+          url: createCourseEndpoint(),
+          body: course,
+          cancellable: true
+        }
+        : {
+          method: "PUT",
+          url: updateCourseEndpoint(course._id!),
+          body: course,
+          cancellable: true
+        });
+
+      notification.success({ message: "Curso salvo com sucesso!" });
+
+      setShouldReloadCourses(true);
+    }
+    catch (error)
+    {
+      if (error.message !== "")
+        notification.error({ message: error.message });
+    }
+    finally
+    {
+      closeSaveModal();
+    }
+  },
+  [
+    saveModalCourseRequester.send,
+    closeSaveModal
+  ]);
+
+  const saveModal = useMemo(() =>
+  {
+    const operation = saveModalForm.getFieldValue("_id") == null
+      ? "Cadastrar"
+      : "Alterar";
+
+    return (
+      <Modal
+        visible={saveModalIsVisible}
+        centered={true}
+        confirmLoading={saveModalCourseRequester.inProgress}
+        title={`${operation} curso`}
+        okText="Salvar"
+        cancelText="Cancelar"
+        onOk={() => saveModalForm.submit()}
+        onCancel={() => closeSaveModal()}
+      >
+        <Form
+          layout="vertical"
+          form={saveModalForm}
+          onFinish={saveCourse}
+        >
+          <Row gutter={[0, 8]}>
+            <Form.Item name="_id">
+              <Input type="hidden" />
+            </Form.Item>
+
+            <Col span={24}>
+              <Form.Item
+                name="name"
+                label="Nome"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Input style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                name="campus"
+                label="Campus"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Select
+                  loading={dropDownListCampiRequester.inProgress}
+                  options={campi.map((c: Campus) => ({ label: c.name, value: c._id! }))}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
+    );
+  },
+  [
+    campi,
+    saveModalForm,
+    saveModalIsVisible,
+    dropDownListCampiRequester.inProgress,
+    saveModalCourseRequester.inProgress,
+    closeSaveModal,
+    saveCourse
+  ]);
+
+  const openRemoveModal = useCallback((course: Course) =>
+  {
+    setCourse(course);
+    setRemoveModalIsVisible(true);
   }, []);
+
+  const closeRemoveModal = useCallback(() =>
+  {
+    setRemoveModalIsVisible(false);
+  }, []);
+
+  const removeCourse = useCallback(async (id: string) =>
+  {
+    try
+    {
+      await removeModalCourseRequester.send(
+      {
+        method: "DELETE",
+        url: deleteCourseEndpoint(id),
+        cancellable: true
+      });
+
+      notification.success({ message: "Curso removido com sucesso!" });
+
+      setShouldReloadCourses(true);
+    }
+    catch (error)
+    {
+      if (error.message !== "")
+        notification.error({ message: error.message });
+    }
+    finally
+    {
+      closeRemoveModal();
+    }
+  },
+  [
+    removeModalCourseRequester.send,
+    closeRemoveModal
+  ]);
+
+  const removeModal = useMemo(() => (
+    <Modal
+      visible={removeModalIsVisible}
+      centered={true}
+      confirmLoading={removeModalCourseRequester.inProgress}
+      title="Remover curso"
+      okText="Remover"
+      cancelText="Cancelar"
+      onOk={() => removeCourse(course!._id!)}
+      onCancel={() => closeRemoveModal()}
+    >
+      <Typography.Paragraph>
+        {`Tem certeza que deseja remover o curso ${course?.name}?`}
+      </Typography.Paragraph>
+    </Modal>
+  ),
+  [
+    course,
+    removeModalIsVisible,
+    removeModalCourseRequester.inProgress,
+    closeRemoveModal,
+    removeCourse
+  ]);
+
+  const toggleCourseStatus = useCallback(async (id: string, isActive: boolean) =>
+  {
+    try
+    {
+      await switchCourseRequester.send(
+      {
+        method: "PUT",
+        url: toggleCourseEndpoint(id),
+        cancellable: true
+      });
+
+      setCourses((prevState) =>
+      {
+        const index = prevState.findIndex((c: Course) => c._id === id)!;
+        return (
+        [
+          ...prevState.slice(0, index),
+          { ...prevState[index], isActive },
+          ...prevState.slice(index + 1)
+        ]);
+      });
+
+      const status = isActive ? "habilitado" : "desabilitado";
+      notification.success({ message: `O curso foi ${status} com sucesso!` });
+    }
+    catch (error)
+    {
+      if (error.message !== "")
+        notification.error({ message: error.message });
+    }
+  }, [switchCourseRequester.send]);
 
   const tableColumns = useMemo(() =>
   [{
@@ -288,38 +339,56 @@ export const Courses: React.FC = () =>
       (record.campus as Campus).name
   },
   {
+    key: "isActive",
+    title: "Ativo?",
+    dataIndex: "isActive",
+    render: (text: string, record: Course) => (
+      <Switch
+        checked={record.isActive}
+        loading={switchCourseRequester.inProgress}
+        onChange={(isChecked: boolean) => toggleCourseStatus(record._id!, isChecked)}
+      />
+    )
+  },
+  {
     key: "actions",
     title: "Ações",
     render: (text: string, record: Course) => (
       <Space size="middle">
-        <Button onClick={() => openSaveOrUpdateDialog(record)}>
+        <Button onClick={() => openSaveModal(record)}>
           Editar
         </Button>
 
-        <Button onClick={() => openRemoveDialog(record)}>
+        <Button onClick={() => openRemoveModal(record)}>
           Remover
         </Button>
       </Space>
     )
-  }], []);
+  }],
+  [
+    switchCourseRequester.inProgress,
+    openRemoveModal,
+    openSaveModal,
+    toggleCourseStatus
+  ]);
 
   return (
     <>
-      {ReactDOM.createPortal(saveOrUpdateDialog, document.getElementById("dialog-overlay")!)}
-      {ReactDOM.createPortal(removeDialog, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(saveModal, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(removeModal, document.getElementById("dialog-overlay")!)}
 
       <Structure title="Cursos">
         <Row gutter={[0, 8]} justify="center">
           <Col span={24}>
-            <Button onClick={() => openSaveOrUpdateDialog()}>
+            <Button onClick={() => openSaveModal()}>
               Adicionar
             </Button>
           </Col>
 
           <Col span={24}>
             <Table
-              loading={coursesRequestInProgress}
-              dataSource={getValueOrDefaultArray(coursesResponseData)}
+              loading={tableCoursesRequester.inProgress}
+              dataSource={courses}
               columns={tableColumns}
               />
           </Col>

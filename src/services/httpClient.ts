@@ -1,15 +1,15 @@
 import Axios, { CancelToken } from "axios";
 
-export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
-
 export interface RequestOptions
 {
   cancellationToken?: CancelToken;
   withPopulatedRefs?: boolean;
 }
 
-const axiosInstance = Axios.create({ baseURL: baseUrl });
-axiosInstance.interceptors.request.use(
+export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
+
+export const httpClient = Axios.create({ baseURL: baseUrl });
+httpClient.interceptors.request.use(
   (config) =>
   {
     if (config.baseURL != null)
@@ -17,7 +17,6 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error));
 
-
-export default axiosInstance;
+  (error) =>
+    Promise.reject(error));
