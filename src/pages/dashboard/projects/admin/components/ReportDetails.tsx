@@ -31,6 +31,10 @@ export const ReportDetails: React.FC<Props> = (props) =>
       <Col span={21}>
         <Collapse accordion>
           <Collapse.Panel key="introduction" header="Introdução">
+            <Text strong>Título:</Text>
+            <Paragraph>{props.project.report!.projectTitle}</Paragraph>
+
+            <Text strong>Introdução:</Text>
             <Paragraph>{props.project.report!.introduction}</Paragraph>
 
             <Text strong>Autor: </Text>
@@ -52,6 +56,7 @@ export const ReportDetails: React.FC<Props> = (props) =>
           </Collapse.Panel>
 
           <Collapse.Panel key="results" header="Resultados">
+            <Text strong>Relato da experiência:</Text>
             <Paragraph>{props.project.report!.results}</Paragraph>
 
             <Text strong>Número de alunos: </Text>

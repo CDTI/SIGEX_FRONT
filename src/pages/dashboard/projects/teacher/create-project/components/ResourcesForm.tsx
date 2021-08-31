@@ -16,7 +16,13 @@ function fromCurrency(value?: string): number
   if (value == null)
     return 0;
 
-  return Number(value.replace(/R$ /, "").replace(/\,/, "."));
+  let parsedValue = value;
+  if (parsedValue.indexOf(',') !== -1)
+    parsedValue = value.replace(",", "");
+
+  parsedValue = `${parsedValue.slice(0, -2)},${parsedValue.slice(-2)}`
+
+  return Number(parsedValue.replace(/R\$ */, "").replace(",", "."));
 }
 
 function toCurrency(value?: string | number): string

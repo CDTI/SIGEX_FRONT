@@ -1,6 +1,6 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
-import { Button, Modal, Row, Col } from "antd";
+import { Button, Modal, Row, Col, Typography } from "antd";
 
 import { AdminViewProject } from "./components/ProjectDetails";
 import { ProjectsTable } from "./components/ProjectsTable";
@@ -58,20 +58,6 @@ export const AllProjects: React.FC = () =>
       : projectDetailsDialogState.data!.report!.projectTitle;
   }, [showProject, projectDetailsDialogState.data]);
 
-  const getInfo = useCallback((): ReactNode =>
-  {
-    if (projectDetailsDialogState.data == null)
-      return null;
-
-    return !showProject
-      ? <ReportDetails project={projectDetailsDialogState.data!} />
-      : <AdminViewProject
-          project={projectDetailsDialogState.data!}
-          showResult={projectDetailsDialogState.isRated}
-          onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
-        />
-  }, [showProject, projectDetailsDialogState.data]);
-
   const closeInfoDialog = useCallback(() =>
   {
     dispatchProjectDetailsDialog({ type: "HIDE_DIALOG" });
@@ -84,16 +70,36 @@ export const AllProjects: React.FC = () =>
       centered={true}
       closable={false}
       width="85%"
-      title={getInfoDialogTitle()}
+      title={
+        <Typography.Title level={5} ellipsis>
+          {getInfoDialogTitle()}
+        </Typography.Title>
+      }
       footer={<Button onClick={closeInfoDialog} type="primary">OK</Button>}
     >
       <Row>
         <Col span={24}>
-          {getInfo()}
+          {projectDetailsDialogState.data == null
+            ? null
+            : !showProject
+              ? <ReportDetails project={projectDetailsDialogState.data!} />
+              : <AdminViewProject
+                  project={projectDetailsDialogState.data!}
+                  showResult={projectDetailsDialogState.isRated}
+                  onRate={() => dispatchProjectDetailsDialog({ type: "RATED" })}
+                />
+          }
         </Col>
       </Row>
     </Modal>
-  ), [projectDetailsDialogState, getInfoDialogTitle, getInfo]);
+  ),
+  [
+    projectDetailsDialogState.isVisible,
+    projectDetailsDialogState.data,
+    projectDetailsDialogState.isRated,
+    closeInfoDialog,
+    getInfoDialogTitle
+  ]);
 
   let projectsCsvPath = `${baseUrl}/downloadCsv/${programId ?? ""}`;
   let scheduleCsvPath = `${baseUrl}/downloadCsvHours/${programId ?? ""}`;

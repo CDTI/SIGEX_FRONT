@@ -30,7 +30,20 @@ import MyTable from "../../../../../components/layout/table";
 import { Restricted } from "../../../../../components/Restricted";
 import { compareDate } from "../../../../../util";
 
-const projectTypes: { [k: string]: string } =
+const { Step } = Steps;
+const { Panel } = Collapse;
+const { TextArea } = Input;
+
+const projectStatus =
+{
+  pending: 0,
+  reproved: 0,
+  notSelected: 1,
+  selected: 2,
+  finished: 3
+} as const;
+
+const projectTypes =
 {
   common: "Comum",
   curricularComponent: "Componente curricular",
@@ -42,28 +55,6 @@ interface Props
   project: Project;
   showResult: boolean;
   onRate(): void;
-}
-
-function currentProject(project: Project)
-{
-  switch (project.status)
-  {
-    case "pending":
-    case "reproved":
-      return 0;
-
-    case "notSelected":
-      return 1;
-
-    case "selected":
-      return 2;
-
-    case "finished":
-      return 3;
-
-    default:
-      return -1;
-  }
 }
 
 function formatTimelineMessage(date: Date, type: "system" | "user"): string
@@ -80,21 +71,13 @@ function formatTimelineMessage(date: Date, type: "system" | "user"): string
   return `${formattedDate[0]} às ${formattedDate[1]} por ${parsedType}`;
 }
 
-const { Step } = Steps;
-const { Panel } = Collapse;
-const { TextArea } = Input;
-
 export const AdminViewProject: React.FC<Props> = (props) =>
 {
-  const [edited, setEdited] = useState<ReturnResponse | null>(null);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [category] = useState<Category>(props.project.category as Category);
-  const [program] = useState<Program>(props.project.program as Program);
-  const [userName, setUserName] = useState("");
+  const [edited, setEdited] = useState<ReturnResponse>();
+  const [feedback, setFeedback] = useState<Feedback>();
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
   const [total, setTotal] = useState("");
-  const [typeProject] = useState(props.project.typeProject);
 
   useEffect(() =>
   {
@@ -115,11 +98,9 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
         setTotal(`R$ ${value.toFixed(2).replace(/\./, ",")}`);
       }
-
-      setUserName((props.project.author as User)?.name);
     })();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => console.log("Unmounting...\n%o", props.project);
   }, [props.project]);
 
   const changeStatus = async (status: "reproved" | "notSelected" | "selected") =>
@@ -128,7 +109,7 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
     try
     {
-      const update = await updateProject(project._id!, project);
+      await updateProject(project._id!, project);
       setEdited({ message: "Projeto atualizado com sucesso", result: "success", project });
     }
     catch (error)
@@ -161,7 +142,12 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
     return (
       <Modal title="Justificativa" visible={visible} onCancel={closeModal} footer={[]}>
-        <Form form={form} style={{ maxWidth: "500px", width: "100%" }} layout="vertical" onFinish={submitFeedback}>
+        <Form
+          form={form}
+          layout="vertical"
+          style={{ maxWidth: "500px", width: "100%" }}
+          onFinish={submitFeedback}
+        >
           <Form.Item
             name="text"
             rules={
@@ -262,7 +248,7 @@ export const AdminViewProject: React.FC<Props> = (props) =>
     return (
       <Row justify="center">
         <Col span={16}>
-          {edited !== null && (
+          {edited != null && (
             <Result
               status={edited.result}
               title={edited.message}
@@ -279,7 +265,7 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
       <Row justify="center" gutter={[0, 32]}>
         <Col span={21}>
-          <Steps direction="horizontal" current={currentProject(props.project)}>
+          <Steps direction="horizontal" current={projectStatus[props.project.status]}>
             {props.project.status === "reproved"
               ? <Step title="Reprovado" />
               : <Step title="Em análise" />
@@ -294,13 +280,13 @@ export const AdminViewProject: React.FC<Props> = (props) =>
         <Col span={21}>
           <Collapse accordion>
             <Panel header="Informações básicas" key="1">
-              <Typography><b>Usuário:</b> {userName}</Typography>
+              <Typography><b>Usuário:</b> {(props.project.author as User).name}</Typography>
               <Typography><b>Descrição:</b> {props.project.description}</Typography>
-              <Typography><b>Categoria:</b> {category.name}</Typography>
-              <Typography><b>Programa:</b> {program.name}</Typography>
-              <Typography><b>Tipo:</b> {projectTypes[typeProject]}</Typography>
+              <Typography><b>Categoria:</b> {(props.project.category as Category).name}</Typography>
+              <Typography><b>Programa:</b> {(props.project.program as Program).name}</Typography>
+              <Typography><b>Tipo:</b> {projectTypes[props.project.typeProject]}</Typography>
 
-              {category.name !== "Extensão específica do curso" && (
+              {(props.project.category as Category).name !== "Extensão específica do curso" && (
                 <>
                   <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
                   <ul style={{ marginLeft: "18px" }}>
@@ -321,27 +307,29 @@ export const AdminViewProject: React.FC<Props> = (props) =>
                 </>
               )}
 
-              {category.name === "Extensão específica do curso" && typeProject === "curricularComponent" && (
-                <>
-                  <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                  {props.project.teachers.map((t) =>
-                    <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
-                  )}
+              {(props.project.category as Category).name === "Extensão específica do curso"
+                && props.project.typeProject === "curricularComponent" && (
+                  <>
+                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                    {props.project.teachers.map((t) =>
+                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {t.email}</li>
+                    )}
 
-                  <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
-                  {props.project.disciplines.map((d) =>
-                    <li>{d.name}</li>
-                  )}
-                </>
+                    <Typography>{" "}<b> Disciplinas </b>{" "}</Typography>
+                    {props.project.disciplines.map((d) =>
+                      <li>{d.name}</li>
+                    )}
+                  </>
               )}
 
-              {category.name === "Extensão específica do curso" && typeProject === "extraCurricular" && (
-                <>
-                  <Typography>{" "}<b> Professores </b>{" "}</Typography>
-                  {props.project.teachers.map((t) =>
-                    <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
-                  )}
-                </>
+              {(props.project.category as Category).name === "Extensão específica do curso"
+                && props.project.typeProject === "extraCurricular" && (
+                  <>
+                    <Typography>{" "}<b> Professores </b>{" "}</Typography>
+                    {props.project.teachers.map((t) =>
+                      <li>{t.name} - {t.registration} - {t.cpf} - {t.phone} - {`${t.totalCH} CH`} - {t.email}</li>
+                    )}
+                  </>
               )}
             </Panel>
 
