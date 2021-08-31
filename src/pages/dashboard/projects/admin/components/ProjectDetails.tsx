@@ -16,8 +16,6 @@ import
   Col
 } from "antd";
 
-import { dateFormatterOptions } from "../helpers/constants";
-
 import { Category } from "../../../../../interfaces/category";
 import { Feedback } from "../../../../../interfaces/feedback";
 import { Program } from "../../../../../interfaces/program";
@@ -28,7 +26,8 @@ import { ReturnResponse, updateProject } from "../../../../../services/project_s
 
 import MyTable from "../../../../../components/layout/table";
 import { Restricted } from "../../../../../components/Restricted";
-import { compareDate } from "../../../../../util";
+import { compareDate } from "../../../../../utils";
+import { formatDate } from "../../../../../utils/dateFormatter";
 
 const { Step } = Steps;
 const { Panel } = Collapse;
@@ -59,16 +58,12 @@ interface Props
 
 function formatTimelineMessage(date: Date, type: "system" | "user"): string
 {
-  const formattedDate = new Intl
-    .DateTimeFormat("pt-BR", dateFormatterOptions)
-    .format(date)
-    .split(" ");
-
+  const formattedDate = formatDate(date);
   const parsedType = type === "system"
     ? "sistema"
     : "usuário"
 
-  return `${formattedDate[0]} às ${formattedDate[1]} por ${parsedType}`;
+  return `${formattedDate} por ${parsedType}`;
 }
 
 export const AdminViewProject: React.FC<Props> = (props) =>

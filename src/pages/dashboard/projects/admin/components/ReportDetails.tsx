@@ -5,23 +5,13 @@ import { Contact, Project } from "../../../../../interfaces/project";
 import { User } from "../../../../../interfaces/user";
 import { Category } from "../../../../../interfaces/category";
 import { Program } from "../../../../../interfaces/program";
-import { dateFormatterOptions } from "../helpers/constants";
+import { formatDate } from "../../../../../utils/dateFormatter";
 
 const { Title, Text, Paragraph } = Typography;
 
 interface Props
 {
   project: Project;
-}
-
-function formatDate(date: Date): string
-{
-  const formattedDate = new Intl
-    .DateTimeFormat("pt-BR", dateFormatterOptions)
-    .format(date)
-    .split(" ");
-
-  return `${formattedDate[0]} às ${formattedDate[1]}`;
 }
 
 export const ReportDetails: React.FC<Props> = (props) =>

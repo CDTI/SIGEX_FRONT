@@ -11,7 +11,6 @@ import { listFeedbackProject } from "../../../../services/feedback_service";
 import { listPrograms } from "../../../../services/program_service";
 import { deleteProject, listAllTeacherProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
-import { compareDate } from "../../../../util";
 
 interface IAction
 {
@@ -245,7 +244,7 @@ export const TeacherProjects: React.FC = () =>
                   const response = await listFeedbackProject(record._id!);
                   const justification = response.feedback.registers
                     .filter((r: Register) => r.typeFeedback === "user")
-                    .sort(compareDate)[0].text;
+                    .sort((a: Register, b: Register) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0)[0].text;
 
                   data =
                   {

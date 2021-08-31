@@ -28,7 +28,7 @@ import
   getAllCoursesEndpoint,
   toggleCourseEndpoint,
   updateCourseEndpoint
-} from "../../../services/course";
+} from "../../../services/courses";
 
 export const Courses: React.FC = () =>
 {
@@ -66,7 +66,9 @@ export const Courses: React.FC = () =>
     {
       dropDownListCampiRequester.halt();
       tableCoursesRequester.halt();
+      switchCourseRequester.halt();
       saveModalCourseRequester.halt();
+      removeModalCourseRequester.halt();
     }
   }, []);
 

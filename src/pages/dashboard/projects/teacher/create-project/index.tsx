@@ -19,6 +19,7 @@ import { hasActiveNoticesForUser } from "../../../../../services/notice_service"
 import { createProject, updateProject } from "../../../../../services/project_service";
 import { useAuth } from "../../../../../context/auth";
 import Structure from "../../../../../components/layout/structure";
+import { Role } from "../../../../../interfaces/user";
 
 const savedStateKey = "project";
 export const noticesKey = "notices";
@@ -298,7 +299,15 @@ export const ProposalForm: React.FC = () =>
         [
           <Button
             type="primary"
-            onClick={() => history.push("/dashboard/myProjects")}
+            onClick={() =>
+            {
+              const isAdmin = user?.roles.find((r: string | Role) =>
+                (r as Role).description === "Administrador") != null;
+
+              history.push(isAdmin
+                ? "/dashboard/projects"
+                : "/dashboard/myProjects")
+            }}
           >
             Continuar
           </Button>

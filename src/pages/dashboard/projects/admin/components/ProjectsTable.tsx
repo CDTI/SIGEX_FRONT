@@ -72,7 +72,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
         <Button
           onClick={() => props.onShowProjectDetails(record)}
         >
-          <EyeOutlined /> Revisar
+          <EyeOutlined /> Proposta
         </Button>
 
         {record.report !== undefined && (

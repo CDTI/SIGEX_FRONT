@@ -50,8 +50,19 @@ export const Filters: React.FC<Props> = (props) =>
       const response = await listPrograms();
       dispatchProgramsDropDownState({ type: "SET_DATA", payload: response.programs });
 
-      const notices = await getAllNotices();
-      dispatchNoticesDropDownState({ type: "SET_DATA", payload: notices });
+      let notices = await getAllNotices();
+      dispatchNoticesDropDownState(
+      {
+        type: "SET_DATA",
+        payload: notices
+          .sort((a: Notice, b: Notice) =>
+            a.createdAt! < b.createdAt!
+              ? -1
+              : a.createdAt! > b.createdAt!
+                ? 1
+                : 0)
+          .reverse()
+      });
 
       const categories = await getAllCategories();
       dispatchCategoriesDropDownState({ type: "SET_DATA", payload: categories });
