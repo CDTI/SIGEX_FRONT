@@ -208,7 +208,9 @@ export const ProposalForm: React.FC = () =>
 
   const goBack = useCallback(() =>
   {
-    if (projectFormState.step === "mainData")
+    if (projectFormState.step === "mainData"
+        || (projectFormState.step === "completed" && !submitHasFailed)
+        || !hasAnyActiveNotice)
       history.goBack();
     else
       dispatchProjectFormState({ type: "PREVIOUS" });
@@ -299,15 +301,7 @@ export const ProposalForm: React.FC = () =>
         [
           <Button
             type="primary"
-            onClick={() =>
-            {
-              const isAdmin = user?.roles.find((r: string | Role) =>
-                (r as Role).description === "Administrador") != null;
-
-              history.push(isAdmin
-                ? "/dashboard/projects"
-                : "/dashboard/myProjects")
-            }}
+            onClick={() => goBack()}
           >
             Continuar
           </Button>
@@ -343,7 +337,7 @@ export const ProposalForm: React.FC = () =>
         [
           <Button
             type="primary"
-            onClick={() => history.push("/dashboard/myProjects")}
+            onClick={() => goBack()}
           >
             Continuar
           </Button>

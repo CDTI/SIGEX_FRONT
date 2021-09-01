@@ -391,7 +391,7 @@ export const MainDataForm: React.FC<Props> = (props) =>
                         ))}
                       </Row>
 
-                      <Row gutter={[0, currentProjectType === "curricularComponent" ? 40 : 0]}>
+                      <Row gutter={[0, currentProjectType === "curricularComponent" ? 16 : 0]}>
                         <Col span={24}>
                           <Button
                             block
@@ -410,6 +410,10 @@ export const MainDataForm: React.FC<Props> = (props) =>
 
             {currentProjectType === "curricularComponent" && (
               <Col span={24}>
+                <Row gutter={[0, 16]}>
+                  <Divider />
+                </Row>
+
                 <Form.List name="disciplines">
                   {(disciplineFields, { add, remove }) => (
                     <>

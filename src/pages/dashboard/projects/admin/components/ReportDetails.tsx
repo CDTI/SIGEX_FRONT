@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Col, Collapse, List, Row, Space, Typography } from "antd";
+import { Alert, Col, Collapse, List, Row, Typography } from "antd";
 
 import { Contact, Project } from "../../../../../interfaces/project";
 import { User } from "../../../../../interfaces/user";
@@ -7,7 +7,7 @@ import { Category } from "../../../../../interfaces/category";
 import { Program } from "../../../../../interfaces/program";
 import { formatDate } from "../../../../../utils/dateFormatter";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 interface Props
 {
@@ -21,24 +21,20 @@ export const ReportDetails: React.FC<Props> = (props) =>
       <Col span={21}>
         <Collapse accordion>
           <Collapse.Panel key="introduction" header="Introdução">
-            <Text strong>Título:</Text>
+            <Text strong>Título</Text>
             <Paragraph>{props.project.report!.projectTitle}</Paragraph>
 
-            <Text strong>Introdução:</Text>
+            <Text strong>Introdução</Text>
             <Paragraph>{props.project.report!.introduction}</Paragraph>
 
-            <Text strong>Autor: </Text>
-            <Text>{(props.project.author as User).name}</Text>
+            <Text strong>Autor</Text>
+            <Paragraph>{(props.project.author as User).name}</Paragraph>
 
-            <br/>
+            <Text strong>Categoria</Text>
+            <Paragraph>{(props.project.category as Category).name}</Paragraph>
 
-            <Text strong>Categoria: </Text>
-            <Text>{(props.project.category as Category).name}</Text>
-
-            <br/>
-
-            <Text strong>Programa: </Text>
-            <Text>{(props.project.program as Program).name}</Text>
+            <Text strong>Programa</Text>
+            <Paragraph>{(props.project.program as Program).name}</Paragraph>
           </Collapse.Panel>
 
           <Collapse.Panel key="methodology" header="Procedimentos Metodológicos">
@@ -46,26 +42,20 @@ export const ReportDetails: React.FC<Props> = (props) =>
           </Collapse.Panel>
 
           <Collapse.Panel key="results" header="Resultados">
-            <Text strong>Relato da experiência:</Text>
+            <Text strong>Relato da experiência</Text>
             <Paragraph>{props.project.report!.results}</Paragraph>
 
-            <Text strong>Número de alunos: </Text>
-            <Text>{props.project.report!.students}</Text>
+            <Text strong>Número de alunos</Text>
+            <Paragraph>{props.project.report!.students}</Paragraph>
 
-            <br/>
+            <Text strong>Número de equipes</Text>
+            <Paragraph>{props.project.report!.teams}</Paragraph>
 
-            <Text strong>Número de equipes: </Text>
-            <Text>{props.project.report!.teams}</Text>
+            <Text strong>Número de pessoas da comunidade com interação direta</Text>
+            <Paragraph>{props.project.report!.communityPeople}</Paragraph>
 
-            <br/>
-
-            <Text strong>Número de pessoas da comunidade com interação direta: </Text>
-            <Text>{props.project.report!.communityPeople}</Text>
-
-            <br/>
-
-            <Text strong>Número aproximado de pessoas impactadas: </Text>
-            <Text>{props.project.report!.affectedPeople}</Text>
+            <Text strong>Número aproximado de pessoas impactadas</Text>
+            <Paragraph>{props.project.report!.affectedPeople}</Paragraph>
           </Collapse.Panel>
 
           <Collapse.Panel key="discussion" header="Discussão">
@@ -73,12 +63,34 @@ export const ReportDetails: React.FC<Props> = (props) =>
           </Collapse.Panel>
 
           <Collapse.Panel key="community" header="Comunidades">
+            <Text strong>Nome da comunidade</Text>
+            <Paragraph>{props.project.report!.communityName}</Paragraph>
+
             <List
               dataSource={props.project.report!.communityContacts}
               renderItem={(c: Contact) => (
                 <List.Item>
-                  <Title level={5}>{c.name}</Title>
-                  <Text>{c.phone}</Text>
+                  <Text>
+                    <Row justify="start">
+                      <Text strong>
+                        Informações de contato
+                      </Text>
+                    </Row>
+
+                    {c.name}
+                  </Text>
+
+                  <Text>
+                    <Row justify="end">
+                      <Text strong>
+                        Telefone
+                      </Text>
+                    </Row>
+
+                    {c.phone != null && c.phone !== ""
+                      ? c.phone
+                      : "Nenhum telefone cadastrado!"}
+                  </Text>
                 </List.Item>
               )}
             />

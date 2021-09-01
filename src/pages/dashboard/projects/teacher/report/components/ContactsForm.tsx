@@ -78,11 +78,6 @@ export const ContactsForm: React.FC<Props> = (props) =>
                           label="Telefone"
                           name={[communityContactField.name, "phone"]}
                           fieldKey={[communityContactField.fieldKey, "phone"]}
-                          rules={
-                          [
-                            { required: true, message: "Campo obrigatório" },
-                            { type: "string", max: 200, message: "O número máximo de caracteres foi extrapolado!" }
-                          ]}
                         >
                           <MaskedInput mask="(11)11111-1111" style={{ width: "100%" }} />
                         </Form.Item>

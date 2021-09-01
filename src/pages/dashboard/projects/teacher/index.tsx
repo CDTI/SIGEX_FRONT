@@ -11,6 +11,7 @@ import { listFeedbackProject } from "../../../../services/feedback_service";
 import { listPrograms } from "../../../../services/program_service";
 import { deleteProject, listAllTeacherProjects } from "../../../../services/project_service";
 import Structure from "../../../../components/layout/structure";
+import { formatDate } from "../../../../utils/dateFormatter";
 
 interface IAction
 {
@@ -166,7 +167,8 @@ export const TeacherProjects: React.FC = () =>
     key: "dateStart",
     title: "Data de início",
     dataIndex: "dateStart",
-    render: (dateStart: string) => new Date(dateStart).toLocaleString("pt-BR")
+    render: (dateStart: string) =>
+      formatDate(new Date(dateStart))
   },
   {
     key: "status",

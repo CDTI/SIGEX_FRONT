@@ -1,5 +1,3 @@
-import moment from "moment";
-
 import { Category } from "./category";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
@@ -8,7 +6,7 @@ import { User } from "./user";
 export interface Contact
 {
   name: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface Partnership
