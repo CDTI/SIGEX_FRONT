@@ -19,7 +19,7 @@ function disableDateRange(currentDate: moment.Moment)
     || currentDate > moment().endOf("day").add(4, "years");
 }
 
-export const ArrangementForm: React.FC<Props> = (props) =>
+export const ArrangementsForm: React.FC<Props> = (props) =>
 {
   useEffect(() =>
   {
@@ -29,7 +29,7 @@ export const ArrangementForm: React.FC<Props> = (props) =>
 
   return (
     <Form
-      name="arrangement"
+      name="arrangements"
       layout="vertical"
       form={props.formController}
     >

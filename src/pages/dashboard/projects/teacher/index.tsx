@@ -303,6 +303,7 @@ export const TeacherProjects: React.FC = () =>
                 </Link>)}
           </Button>
         }
+
         {(record.notice as Notice).isActive && (record.status === "pending" || record.status === "reproved") && (
           <>
             <Button>
@@ -316,6 +317,7 @@ export const TeacherProjects: React.FC = () =>
                 Editar
               </Link>
             </Button>
+
             <Button
               onClick={() =>
               {

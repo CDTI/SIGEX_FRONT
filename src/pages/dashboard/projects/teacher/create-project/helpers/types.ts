@@ -1,12 +1,9 @@
 import { ReactNode } from "react";
 
-export interface FormsMap
+export interface FormView
 {
-  [key: string]:
-  {
-    form: ReactNode,
-    label?: string
-  };
+  view: ReactNode;
+  title: string;
 }
 
 export interface UrlParams

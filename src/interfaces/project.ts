@@ -47,7 +47,7 @@ export interface Transport
   unitaryValue: number;
 }
 
-export interface Resource
+export interface Resources
 {
   materials: Material[];
   transport?: Transport;
@@ -106,7 +106,7 @@ export interface Project
   planning: Planning[];
   program: string | Program;
   report?: Report;
-  resources: Resource;
+  resources: Resources;
   secondSemester: Schedule[];
   specificCommunity: Community;
   status: "pending" | "reproved" | "notSelected" | "selected" | "finished";

@@ -1,151 +1,232 @@
-import { Project } from "../../../../../../interfaces/project";
+import { assign, createMachine } from "xstate";
 
-type FormStep =
-  | "mainData"
-  | "associates"
-  | "community"
-  | "arrangement"
-  | "resources"
-  | "pending"
-  | "completed";
-
-type Action =
-  | { type: "RESTORE",  payload: { step: FormStep, data: any }  }
-  | { type: "SET_DATA", payload: Project                        }
-  | { type: "PREVIOUS"                                          }
-  | { type: "NEXT",     payload: any                            };
-
-interface FormStepDefinition
+import
 {
-  [key: string]:
-  {
-    order: number,
-    previous?: FormStep,
-    next?: FormStep
-  }
-}
+  Community,
+  Partnership,
+  Planning,
+  Project,
+  Resources
+} from "../../../../../../interfaces/project";
 
-interface ProjectFormState
+interface FormContext
 {
   data?: Project;
-  step: FormStep;
+  step: number;
 }
 
-export const FormSteps: FormStepDefinition =
-{
-  mainData:     { order: 0,                           next: "associates"  },
-  associates:   { order: 1, previous: "mainData",     next: "community"   },
-  community:    { order: 2, previous: "associates",   next: "arrangement" },
-  arrangement:  { order: 3, previous: "community",    next: "resources"   },
-  resources:    { order: 4, previous: "arrangement",  next: "pending"     },
-  pending:      { order: 5,                           next: "completed"   },
-  completed:    { order: 6, previous: "mainData"                          }
-} as const;
+type FormEvent =
+  | { type: "ERROR"; }
+  | { type: "PREVIOUS"; }
+  | { type: "REVIEW"; }
+  | { type: "SUCCESS"; }
+  | { type: "NEXT"; payload: Project | Partnership[] | Community | Planning[]; }
+  | { type: "RESTORE"; payload: FormContext; }
+  | { type: "SAVE"; payload: Resources; };
 
-export function projectFormStateReducer(
-  prevState: ProjectFormState,
-  action: Action)
-  : ProjectFormState
+type FormTypestate =
+  | { value: "main"; context: FormContext & { step: 0; }; }
+  | { value: "associates"; context: FormContext & { step: 1; data: Project; }; }
+  | { value: "community"; context: FormContext & { step: 2; data: Project; }; }
+  | { value: "arrangements"; context: FormContext & { step: 3; data: Project; }; }
+  | { value: "resources"; context: FormContext & { step: 4; data: Project; }; }
+  | { value: "pending"; context: FormContext & { data: Project; }; }
+  | { value: "succeeded"; context: FormContext; }
+  | { value: "failed"; context: FormContext; };
+
+export const FormSteps =
+[
+  "main",
+  "associates",
+  "community",
+  "arrangements",
+  "resources"
+] as const;
+
+export const formStateMachine = createMachine<FormContext, FormEvent, FormTypestate>(
 {
-  switch (action.type)
+  id: "form",
+  initial: "main",
+  context: { step: 0 },
+  states:
   {
-    case "SET_DATA":
-      return { ...prevState, data: action.payload };
-
-    case "RESTORE":
-      return { step: action.payload.step, data: action.payload.data };
-
-    case "PREVIOUS":
-      return FormSteps[prevState.step].previous
-        ? { ...prevState, step: FormSteps[prevState.step].previous! }
-        : { ...prevState };
-
-    case "NEXT":
-      if (!FormSteps[prevState.step].next)
-        return { ...prevState };
-
-      switch (prevState.step)
+    main:
+    {
+      on:
       {
-        case "mainData":
-          const now = new Date();
-          return (
+        RESTORE:
+        {
+          target: "main",
+          actions: assign(
           {
-            step: FormSteps[prevState.step].next!,
-            data:
+            step: (ctx, ev) => ev.payload.step,
+            data: (ctx, ev) => ({ ...ev.payload.data! })
+          })
+        },
+
+        NEXT:
+        {
+          target: "associates",
+          actions: assign(
+          {
+            step: (ctx) => ctx.step + 1,
+            data: (ctx, ev) =>
             {
-              ...prevState.data!,
-              author: action.payload.author,
-              category: action.payload.category,
-              dateFinal: now,
-              dateStart: now,
-              description: action.payload.description,
-              disciplines: action.payload.disciplines,
-              firstSemester: action.payload.firstSemester,
-              maxClasses: action.payload.maxClasses,
-              name: action.payload.name,
-              notice: action.payload.notice,
-              program: action.payload.program,
-              secondSemester: action.payload.secondSemester,
-              status: "pending",
-              teachers: action.payload.teachers,
-              totalCH: action.payload.totalCH,
-              typeProject: action.payload.typeProject
+              const now = new Date();
+              const payload = ev.payload as Project;
+              return (
+              {
+                ...ctx.data!,
+                author: payload.author,
+                category: payload.category,
+                dateFinal: now,
+                dateStart: now,
+                description: payload.description,
+                disciplines: payload.disciplines,
+                firstSemester: payload.firstSemester,
+                maxClasses: payload.maxClasses,
+                name: payload.name,
+                notice: payload.notice,
+                program: payload.program,
+                secondSemester: payload.secondSemester,
+                status: "pending",
+                teachers: payload.teachers,
+                totalCH: payload.totalCH,
+                typeProject: payload.typeProject
+              });
             }
-          });
-
-        case "associates":
-          return (
-          {
-            step: FormSteps[prevState.step].next!,
-            data:
-            {
-              ...prevState.data!,
-              partnership: action.payload
-            }
-          });
-
-        case "community":
-          return (
-          {
-            step: FormSteps[prevState.step].next!,
-            data:
-            {
-              ...prevState.data!,
-              specificCommunity: action.payload
-            }
-          });
-
-        case "arrangement":
-          return (
-          {
-            step: FormSteps[prevState.step].next!,
-            data:
-            {
-              ...prevState.data!,
-              planning: action.payload
-            }
-          });
-
-        case "resources":
-          return (
-          {
-            step: FormSteps[prevState.step].next!,
-            data:
-            {
-              ...prevState.data!,
-              resources: action.payload
-            }
-          });
-
-        case "pending":
-          return (
-          {
-            step: FormSteps[prevState.step].next!,
-            data: { ...prevState.data! }
-          });
-
-        default:
-          throw new Error("You shoudn't be here, fella! Go back before anyone get hurts!");
+          })
+        }
       }
+    },
+
+    associates:
+    {
+      on:
+      {
+        PREVIOUS:
+        {
+          target: "main",
+          actions: assign({ step: (ctx) => ctx.step - 1 })
+        },
+
+        NEXT:
+        {
+          target: "community",
+          actions: assign(
+          {
+            step: (ctx) => ctx.step + 1,
+            data: (ctx, ev) => (
+            {
+              ...ctx.data!,
+              partnership: ev.payload as Partnership[]
+            })
+          })
+        }
+      }
+    },
+
+    community:
+    {
+      on:
+      {
+        PREVIOUS:
+        {
+          target: "associates",
+          actions: assign({ step: (ctx) => ctx.step - 1 })
+        },
+
+        NEXT:
+        {
+          target: "arrangements",
+          actions: assign(
+          {
+            step: (ctx) => ctx.step + 1,
+            data: (ctx, ev) => (
+            {
+              ...ctx.data!,
+              specificCommunity: ev.payload as Community
+            })
+          })
+        }
+      }
+    },
+
+    arrangements:
+    {
+      on:
+      {
+        PREVIOUS:
+        {
+          target: "community",
+          actions: assign({ step: (ctx) => ctx.step - 1 })
+        },
+
+        NEXT:
+        {
+          target: "resources",
+          actions: assign(
+          {
+            step: (ctx) => ctx.step + 1,
+            data: (ctx, ev) => (
+            {
+              ...ctx.data!,
+              planning: ev.payload as Planning[]
+            })
+          })
+        }
+      }
+    },
+
+    resources:
+    {
+      on:
+      {
+        PREVIOUS:
+        {
+          target: "arrangements",
+          actions: assign({ step: (ctx) => ctx.step - 1 })
+        },
+
+        SAVE:
+        {
+          target: "pending",
+          actions: assign(
+          {
+            data: (ctx, ev) => (
+            {
+              ...ctx.data!,
+              resources: ev.payload
+            })
+          })
+        }
+      }
+    },
+
+    pending:
+    {
+      on:
+      {
+        SUCCESS: "succeeded",
+        ERROR: "failed"
+      }
+    },
+
+    succeeded:
+    {
+      type: "final"
+    },
+
+    failed:
+    {
+      on:
+      {
+        REVIEW:
+        {
+          target: "main",
+          actions: assign({ step: 0 })
+        }
+      }
+    }
   }
-}
+});

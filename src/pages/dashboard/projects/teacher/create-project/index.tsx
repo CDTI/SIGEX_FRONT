@@ -1,25 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { useHistory, useLocation, useParams } from "react-router-dom";
+import { useMachine } from "@xstate/react";
 import { Button, Col, Form, Modal, Result, Row, Spin, Steps, Typography } from "antd";
 import { Store } from "antd/lib/form/interface";
 import { StopOutlined } from "@ant-design/icons";
 
-import { MainDataForm } from "./components/MainDataForm";
+import { FormSteps, formStateMachine } from "./helpers/stateMachine";
+import { FormView, UrlParams } from "./helpers/types";
+import { MainForm } from "./components/MainForm";
 import { AssociatesForm } from "./components/AssociatesForm";
 import { CommunityForm } from "./components/CommunityForm";
-import { ArrangementForm } from "./components/ArrangementForm";
+import { ArrangementsForm } from "./components/ArrangementsForm";
 import { ResourcesForm } from "./components/ResourcesForm";
-import { FormSteps, projectFormStateReducer } from "./helpers/stateMachine";
-import { FormsMap, UrlParams } from "./helpers/types";
+
+import { useAuth } from "../../../../../context/auth";
+import { useHttpClient } from "../../../../../hooks/useHttpClient";
+import Structure from "../../../../../components/layout/structure";
 
 import { Schedule } from "../../../../../interfaces/notice";
-import { Planning, Project, Community, Resource, Partnership } from "../../../../../interfaces/project";
-import { hasActiveNoticesForUser } from "../../../../../services/notice_service";
-import { createProject, updateProject } from "../../../../../services/project_service";
-import { useAuth } from "../../../../../context/auth";
-import Structure from "../../../../../components/layout/structure";
-import { Role } from "../../../../../interfaces/user";
+import { Planning, Project, Community, Resources, Partnership } from "../../../../../interfaces/project";
+import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/projects";
+import { hasActiveNoticesEndpoint } from "../../../../../services/users";
 
 const savedStateKey = "project";
 export const noticesKey = "notices";
@@ -27,48 +29,46 @@ export const programsKey = "programs";
 
 export const ProposalForm: React.FC = () =>
 {
-  const { user } = useAuth();
-
   const { id } = useParams<UrlParams>();
   const location = useLocation();
   const history = useHistory();
+  const { user } = useAuth();
+  const [isFirstExecution, setIsFirstExecution] = useState(true);
 
-  const [isFirstExeution, setIsFirstExecution] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasAnyActiveNotice, setHasAnyActiveNotice] = useState(true);
-
-  const [projectFormController] = Form.useForm();
-  const [submitHasFailed, setSubmitHasFailed] = useState(false);
+  const [formState, sendEvent] = useMachine(formStateMachine);
+  const [formController] = Form.useForm();
   const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
-  const [projectFormState, dispatchProjectFormState] = useReducer(
-    projectFormStateReducer,
-    { step: "mainData" });
+  const formProjectsRequester = useHttpClient();
 
-  const [loadSavedStateDialogIsVisible, setLoadSavedStateModalIsVisible] = useState(false);
+  const [hasActiveNotices, setHasActiveNotices] = useState(true);
+  const validationNoticesRequester = useHttpClient();
+
+  const [loaderModalIsVisible, setLoaderModalIsVisible] = useState(false);
 
   useEffect(() =>
   {
     (async () =>
     {
-      setIsLoading(true);
-
-      const hasAnyActiveNotice = await hasActiveNoticesForUser(user!._id!);
-      setHasAnyActiveNotice(hasAnyActiveNotice);
-
-      const project = location.state;
-      if (project != null)
+      const hasActiveNotices = await validationNoticesRequester.send(
       {
-        dispatchProjectFormState({ type: "SET_DATA", payload: project as Project });
-      }
+        method: "GET",
+        url: hasActiveNoticesEndpoint(),
+        cancellable: true
+      });
+
+      setHasActiveNotices(hasActiveNotices);
+
+      if (location.state != null)
+        sendEvent(
+        {
+          type: "RESTORE",
+          payload: { step: 0, data: location.state as Project }
+        });
       else if (localStorage.getItem(savedStateKey) != null)
-      {
-        if (hasAnyActiveNotice)
-          setLoadSavedStateModalIsVisible(true);
-        else
-          localStorage.removeItem(savedStateKey);
-      }
+        hasActiveNotices
+          ? setLoaderModalIsVisible(true)
+          : localStorage.removeItem(savedStateKey);
 
-      setIsLoading(false);
       setIsFirstExecution(false);
     })();
 
@@ -81,82 +81,81 @@ export const ProposalForm: React.FC = () =>
 
   useEffect(() =>
   {
-    if (!isFirstExeution)
+    if (!isFirstExecution)
     {
-      if (projectFormState.step !== "completed")
+      if (formState.value !== "succeeded" && formState.value !== "failed")
       {
-        localStorage.setItem(savedStateKey, JSON.stringify(
-        {
-          ...projectFormState,
-          step: projectFormState.step !== "pending"
-            ? projectFormState.step
-            : "resources"
-        }));
+        localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
 
-        if (projectFormState.step === "pending")
+        if (formState.value === "pending")
         {
           (async () =>
           {
             try
             {
-              await (id == null
-                ? createProject(projectFormState.data!)
-                : updateProject(id, projectFormState.data!));
+              await formProjectsRequester.send(id == null
+              ? {
+                method: "POST",
+                url: createProjectEndpoint(),
+                body: formState.context.data,
+                cancellable: true
+              }
+              : {
+                method: "PUT",
+                url: updateProjectEndpoint(id),
+                body: formState.context.data,
+                cancellable: true
+              });
+
+              sendEvent({ type: "SUCCESS" });
             }
             catch (error)
             {
-              setSubmitHasFailed(true);
+              if (error.message !== "")
+                setFailedSubmitMessage(error.message);
 
-              let message = "";
-              if (error.response)
-                message = error.response.data;
-              else if (error.request)
-                message = "Não houve resposta do servidor!";
-
-              setFailedSubmitMessage(message);
-            }
-            finally
-            {
-              dispatchProjectFormState({ type: "NEXT", payload: null });
+              sendEvent({ type: "ERROR" });
             }
           })();
         }
       }
-      else if (!submitHasFailed)
+      else if (formState.value === "succeeded")
       {
         localStorage.removeItem(savedStateKey);
       }
     }
-  }, [projectFormState.step]);
+  }, [isFirstExecution, formState.value]);
 
-  const loadSavedState = useCallback((loadLocal: boolean = true) =>
+  const removeSavedState = useCallback(() =>
   {
-    if (loadLocal)
-    {
-      const savedState = localStorage.getItem(savedStateKey);
-      if (savedState != null)
-        dispatchProjectFormState({ type: "RESTORE", payload: JSON.parse(savedState) });
-    }
-
     localStorage.removeItem(savedStateKey);
 
-    setLoadSavedStateModalIsVisible(false);
-  }, [savedStateKey]);
+    setLoaderModalIsVisible(false);
+  }, []);
+
+  const loadSavedState = useCallback(() =>
+  {
+    const savedState = localStorage.getItem(savedStateKey);
+    if (savedState != null)
+      sendEvent({ type: "RESTORE", payload: JSON.parse(savedState) });
+
+    removeSavedState();
+  }, [removeSavedState]);
 
   const handleOnFormFinish = useCallback((formName: string, values: Store) =>
   {
     switch (formName)
     {
-      case "mainData":
+      case "main":
         const schedule = values.secondSemester?.map((s: string) =>
           JSON.parse(s) as Schedule) ?? [];
 
-        dispatchProjectFormState(
+        sendEvent(
         {
           type: "NEXT",
           payload:
           {
-            ...values,
+            ...values as Project,
             author: user!._id!,
             firstSemester: schedule,
             secondSemester: schedule
@@ -166,7 +165,7 @@ export const ProposalForm: React.FC = () =>
         break;
 
       case "associates":
-        dispatchProjectFormState(
+        sendEvent(
         {
           type: "NEXT",
           payload: values.partnership as Partnership[]
@@ -175,7 +174,7 @@ export const ProposalForm: React.FC = () =>
         break;
 
       case "community":
-        dispatchProjectFormState(
+        sendEvent(
         {
           type: "NEXT",
           payload: values as Community
@@ -183,8 +182,8 @@ export const ProposalForm: React.FC = () =>
 
         break;
 
-      case "arrangement":
-        dispatchProjectFormState(
+      case "arrangements":
+        sendEvent(
         {
           type: "NEXT",
           payload: values.planning as Planning[]
@@ -193,104 +192,103 @@ export const ProposalForm: React.FC = () =>
         break;
 
       case "resources":
-        dispatchProjectFormState(
+        sendEvent(
         {
-          type: "NEXT",
-          payload: values as Resource
+          type: "SAVE",
+          payload: values as Resources
         });
 
         break;
-
-      default:
-        throw new Error("Invalid form name");
     }
   }, [user]);
 
   const goBack = useCallback(() =>
   {
-    if (projectFormState.step === "mainData"
-        || (projectFormState.step === "completed" && !submitHasFailed)
-        || !hasAnyActiveNotice)
+    if (!hasActiveNotices
+        || formState.value === "main"
+        || formState.value === "succeeded")
       history.goBack();
     else
-      dispatchProjectFormState({ type: "PREVIOUS" });
-  }, [projectFormState.step, history]);
+      sendEvent(formState.value === "failed"
+        ? { type: "REVIEW" }
+        : { type: "PREVIOUS" });
+  }, [formState.value, history, hasActiveNotices]);
 
   const loadSavedStateDialog = useMemo(() => (
     <Modal
-      visible={loadSavedStateDialogIsVisible}
+      visible={loaderModalIsVisible}
       centered={true}
       closable={false}
       okText="Continuar"
       cancelText="Descartar"
       onOk={() => loadSavedState()}
-      onCancel={() => loadSavedState(false)}
+      onCancel={() => removeSavedState()}
     >
       <Typography.Paragraph>
         Existe uma proposta com o cadastro em andamento, deseja continuar de onde parou?
       </Typography.Paragraph>
     </Modal>
-  ), [loadSavedStateDialogIsVisible, loadSavedState]);
+  ), [loaderModalIsVisible, loadSavedState, removeSavedState]);
 
-  const forms: FormsMap = useMemo(() => (
-  {
-    mainData:
+  const forms = useMemo(() => new Map<string, FormView>(
+  [
+    ["main",
     {
-      label: "Informações Básicas",
-      form: (
-        <MainDataForm
-          formController={projectFormController}
-          initialValues={projectFormState.data}
+      title: "Informações Básicas",
+      view: (
+        <MainForm
+          formController={formController}
+          initialValues={formState.context.data}
         />
       )
-    },
+    }],
 
-    associates:
+    ["associates",
     {
-      label: "Parcerias",
-      form: (
+      title: "Parcerias",
+      view: (
         <AssociatesForm
-          formController={projectFormController}
-          initialValues={projectFormState.data?.partnership}
+          formController={formController}
+          initialValues={formState.context.data?.partnership}
         />
       )
-    },
+    }],
 
-    community:
+    ["community",
     {
-      label: "Comunidade",
-      form: (
+      title: "Comunidade",
+      view: (
         <CommunityForm
-          formContoller={projectFormController}
-          initialValues={projectFormState.data?.specificCommunity}
+          formContoller={formController}
+          initialValues={formState.context.data?.specificCommunity}
         />
       )
-    },
+    }],
 
-    arrangement:
+    ["arrangements",
     {
-      label: "Planejamento",
-      form: (
-        <ArrangementForm
-          formController={projectFormController}
-          initialValues={projectFormState.data?.planning}
+      title: "Planejamento",
+      view: (
+        <ArrangementsForm
+          formController={formController}
+          initialValues={formState.context.data?.planning}
         />
       )
-    },
+    }],
 
-    resources:
+    ["resources",
     {
-      label: "Recursos",
-      form: (
+      title: "Recursos",
+      view: (
         <ResourcesForm
-          formController={projectFormController}
-          initialValues={projectFormState.data?.resources}
+          formController={formController}
+          initialValues={formState.context.data?.resources}
         />
       )
-    }
-  }), [projectFormState.data]);
+    }]
+  ]), [formController, formState.context.data]);
 
-  if (!hasAnyActiveNotice)
+  if (!hasActiveNotices)
     return (
       <Result
         status="error"
@@ -309,19 +307,17 @@ export const ProposalForm: React.FC = () =>
       />
     );
 
-  if (projectFormState.step === "completed")
-  {
-    if (submitHasFailed)
-      return (
-        <Result
-          status="error"
-          title="Ops! Algo deu errado!"
-          subTitle={failedSubmitMessage}
-          extra={
-          [
-            <Button
-              type="primary"
-              onClick={() => goBack()}
+  if (formState.value === "failed")
+    return (
+      <Result
+        status="error"
+        title="Ops! Algo deu errado!"
+        subTitle={failedSubmitMessage}
+        extra={
+        [
+          <Button
+            type="primary"
+            onClick={() => goBack()}
             >
               Voltar
             </Button>
@@ -329,6 +325,7 @@ export const ProposalForm: React.FC = () =>
         />
       );
 
+  if (formState.value === "succeeded")
     return (
       <Result
         status="success"
@@ -344,34 +341,35 @@ export const ProposalForm: React.FC = () =>
         ]}
       />
     );
-  }
 
   return (
     <>
       {ReactDOM.createPortal(loadSavedStateDialog, document.getElementById("dialog-overlay")!)}
 
-      <Spin spinning={isLoading}>
+      <Spin spinning={validationNoticesRequester.inProgress}>
         <Structure title={`${id == null ? "Cadastrar" : "Alterar"} proposta`}>
           <Form.Provider onFormFinish={(name, { values }) => handleOnFormFinish(name, values)}>
             <Row justify="center" gutter={[0, 24]}>
               <Col xs={24} xl={21} xxl={18}>
-                <Steps current={FormSteps[projectFormState.step].order}>
-                  {Object.keys(FormSteps)
-                    .filter((k: string) => k !== "pending" && k !== "completed")
-                    .map((k: string) => <Steps.Step key={k} title={forms[k].label} />
+                <Steps current={formState.context.step}>
+                  {FormSteps.map((k: string) =>
+                  {
+                    console.log(k);
+                    return <Steps.Step key={k} title={forms.get(k)!.title} />;
+                  }
                   )}
                 </Steps>
               </Col>
 
               <Col xs={24} xl={21} xxl={18}>
-                {forms[projectFormState.step !== "pending" ? projectFormState.step : "resources"].form}
+                {forms.get(FormSteps[formState.context.step])!.view}
               </Col>
 
               <Col xs={24} xl={21} xxl={18}>
                 <Row justify="space-between">
                   <Button
                     type="default"
-                    disabled={projectFormState.step === "pending"}
+                    disabled={formProjectsRequester.inProgress}
                     onClick={() => goBack()}
                   >
                     Voltar
@@ -379,12 +377,13 @@ export const ProposalForm: React.FC = () =>
 
                   <Button
                     type="primary"
-                    loading={projectFormState.step === "pending"}
-                    onClick={() => projectFormController.submit()}
+                    loading={formProjectsRequester.inProgress}
+                    onClick={() => formController.submit()}
                   >
-                    {projectFormState.step === "resources" || projectFormState.step === "pending"
+                    {FormSteps[formState.context.step] === "resources"
                       ? "Salvar"
-                      : "Próximo"}
+                      : "Próximo"
+                    }
                   </Button>
                 </Row>
               </Col>

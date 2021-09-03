@@ -11,7 +11,7 @@ type HttpMethod =
   | "PUT"
   | "DELETE";
 
-interface HttpRequestConfiguration
+export interface HttpRequestConfiguration
 {
   method: HttpMethod;
   url: string;

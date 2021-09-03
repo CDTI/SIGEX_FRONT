@@ -3,12 +3,12 @@ import { Form, Input, Button, InputNumber, Row, Col } from "antd";
 import { FormInstance } from "antd/lib/form";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-import { Resource } from "../../../../../../interfaces/project";
+import { Resources } from "../../../../../../interfaces/project";
 
 interface Props
 {
   formController: FormInstance;
-  initialValues?: Resource;
+  initialValues?: Resources;
 }
 
 function fromCurrency(value?: string): number

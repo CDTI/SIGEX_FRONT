@@ -36,7 +36,7 @@ interface Props
   initialValues?: Project;
 }
 
-export const MainDataForm: React.FC<Props> = (props) =>
+export const MainForm: React.FC<Props> = (props) =>
 {
   const { user } = useAuth();
 
@@ -138,7 +138,7 @@ export const MainDataForm: React.FC<Props> = (props) =>
 
   return (
     <Form
-      name="mainData"
+      name="main"
       layout="vertical"
       form={props.formController}
     >

@@ -38,15 +38,15 @@ export const Courses: React.FC = () =>
   const [courses, setCourses] = useState<Course[]>([]);
   const [shouldReloadCourses, setShouldReloadCourses] = useState(true);
   const tableCoursesRequester = useHttpClient();
-  const switchCourseRequester = useHttpClient();
+  const switchCoursesRequester = useHttpClient();
 
-  const [saveModalIsVisible, setSaveModalIsVisible] = useState(false);
-  const [saveModalForm] = Form.useForm();
-  const saveModalCourseRequester = useHttpClient();
+  const [saverModalIsVisible, setSaverModalIsVisible] = useState(false);
+  const [saverModalForm] = Form.useForm();
+  const saverModalCoursesRequester = useHttpClient();
 
-  const [removeModalIsVisible, setRemoveModalIsVisible] = useState(false);
+  const [removerModalIsVisible, setRemoverModalIsVisible] = useState(false);
   const [course, setCourse] = useState<Course>();
-  const removeModalCourseRequester = useHttpClient();
+  const removerModalCoursesRequester = useHttpClient();
 
   useEffect(() =>
   {
@@ -66,9 +66,9 @@ export const Courses: React.FC = () =>
     {
       dropDownListCampiRequester.halt();
       tableCoursesRequester.halt();
-      switchCourseRequester.halt();
-      saveModalCourseRequester.halt();
-      removeModalCourseRequester.halt();
+      switchCoursesRequester.halt();
+      saverModalCoursesRequester.halt();
+      removerModalCoursesRequester.halt();
     }
   }, []);
 
@@ -104,35 +104,35 @@ export const Courses: React.FC = () =>
   const openSaveModal = useCallback((course?: Course) =>
   {
     if (course != null)
-      saveModalForm.setFieldsValue(
+      saverModalForm.setFieldsValue(
       {
         ...course,
         campus: (course.campus as Campus)._id!
       });
 
-    setSaveModalIsVisible(true);
-  }, [saveModalForm]);
+    setSaverModalIsVisible(true);
+  }, [saverModalForm]);
 
   const closeSaveModal = useCallback(() =>
   {
-    setSaveModalIsVisible(false);
+    setSaverModalIsVisible(false);
 
-    if (saveModalCourseRequester.inProgress)
-      saveModalCourseRequester.cancel();
+    if (saverModalCoursesRequester.inProgress)
+      saverModalCoursesRequester.cancel();
 
-    saveModalForm.resetFields();
+    saverModalForm.resetFields();
   },
   [
-    saveModalCourseRequester.inProgress,
-    saveModalCourseRequester.cancel,
-    saveModalForm.resetFields
+    saverModalCoursesRequester.inProgress,
+    saverModalCoursesRequester.cancel,
+    saverModalForm.resetFields
   ]);
 
   const saveCourse = useCallback(async (course: Course) =>
   {
     try
     {
-      await saveModalCourseRequester.send(course._id == null
+      await saverModalCoursesRequester.send(course._id == null
         ? {
           method: "POST",
           url: createCourseEndpoint(),
@@ -161,30 +161,30 @@ export const Courses: React.FC = () =>
     }
   },
   [
-    saveModalCourseRequester.send,
+    saverModalCoursesRequester.send,
     closeSaveModal
   ]);
 
   const saveModal = useMemo(() =>
   {
-    const operation = saveModalForm.getFieldValue("_id") == null
+    const operation = saverModalForm.getFieldValue("_id") == null
       ? "Cadastrar"
       : "Alterar";
 
     return (
       <Modal
-        visible={saveModalIsVisible}
+        visible={saverModalIsVisible}
         centered={true}
-        confirmLoading={saveModalCourseRequester.inProgress}
+        confirmLoading={saverModalCoursesRequester.inProgress}
         title={`${operation} curso`}
         okText="Salvar"
         cancelText="Cancelar"
-        onOk={() => saveModalForm.submit()}
+        onOk={() => saverModalForm.submit()}
         onCancel={() => closeSaveModal()}
       >
         <Form
           layout="vertical"
-          form={saveModalForm}
+          form={saverModalForm}
           onFinish={saveCourse}
         >
           <Row gutter={[0, 8]}>
@@ -222,10 +222,10 @@ export const Courses: React.FC = () =>
   },
   [
     campi,
-    saveModalForm,
-    saveModalIsVisible,
+    saverModalForm,
+    saverModalIsVisible,
     dropDownListCampiRequester.inProgress,
-    saveModalCourseRequester.inProgress,
+    saverModalCoursesRequester.inProgress,
     closeSaveModal,
     saveCourse
   ]);
@@ -233,19 +233,19 @@ export const Courses: React.FC = () =>
   const openRemoveModal = useCallback((course: Course) =>
   {
     setCourse(course);
-    setRemoveModalIsVisible(true);
+    setRemoverModalIsVisible(true);
   }, []);
 
   const closeRemoveModal = useCallback(() =>
   {
-    setRemoveModalIsVisible(false);
+    setRemoverModalIsVisible(false);
   }, []);
 
   const removeCourse = useCallback(async (id: string) =>
   {
     try
     {
-      await removeModalCourseRequester.send(
+      await removerModalCoursesRequester.send(
       {
         method: "DELETE",
         url: deleteCourseEndpoint(id),
@@ -267,15 +267,15 @@ export const Courses: React.FC = () =>
     }
   },
   [
-    removeModalCourseRequester.send,
+    removerModalCoursesRequester.send,
     closeRemoveModal
   ]);
 
   const removeModal = useMemo(() => (
     <Modal
-      visible={removeModalIsVisible}
+      visible={removerModalIsVisible}
       centered={true}
-      confirmLoading={removeModalCourseRequester.inProgress}
+      confirmLoading={removerModalCoursesRequester.inProgress}
       title="Remover curso"
       okText="Remover"
       cancelText="Cancelar"
@@ -289,8 +289,8 @@ export const Courses: React.FC = () =>
   ),
   [
     course,
-    removeModalIsVisible,
-    removeModalCourseRequester.inProgress,
+    removerModalIsVisible,
+    removerModalCoursesRequester.inProgress,
     closeRemoveModal,
     removeCourse
   ]);
@@ -299,7 +299,7 @@ export const Courses: React.FC = () =>
   {
     try
     {
-      await switchCourseRequester.send(
+      await switchCoursesRequester.send(
       {
         method: "PUT",
         url: toggleCourseEndpoint(id),
@@ -325,7 +325,7 @@ export const Courses: React.FC = () =>
       if (error.message !== "")
         notification.error({ message: error.message });
     }
-  }, [switchCourseRequester.send]);
+  }, [switchCoursesRequester.send]);
 
   const tableColumns = useMemo(() =>
   [{
@@ -347,7 +347,7 @@ export const Courses: React.FC = () =>
     render: (text: string, record: Course) => (
       <Switch
         checked={record.isActive}
-        loading={switchCourseRequester.inProgress}
+        loading={switchCoursesRequester.inProgress}
         onChange={(isChecked: boolean) => toggleCourseStatus(record._id!, isChecked)}
       />
     )
@@ -368,7 +368,7 @@ export const Courses: React.FC = () =>
     )
   }],
   [
-    switchCourseRequester.inProgress,
+    switchCoursesRequester.inProgress,
     openRemoveModal,
     openSaveModal,
     toggleCourseStatus

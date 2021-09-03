@@ -50,7 +50,7 @@ export async function listAllTeacherProjects(
       config.cancelToken = options.cancellationToken;
   }
 
-  const response = await httpClient.get("/projects/forTeacher");
+  const response = await httpClient.get("/projects/forTeacher", config);
 
   return response.data;
 }
