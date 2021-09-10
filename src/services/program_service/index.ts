@@ -27,7 +27,7 @@ export const createProgram = async (program: Program): Promise<ReturnResponsePos
 
 export const listPrograms = async (): Promise<ReturnResponseGet> =>
 {
-    const response = await httpClient.get("/program")
+    const response = await httpClient.get("/programs")
 
     return response.data
 }

@@ -28,7 +28,7 @@ import
   getAllCoursesEndpoint,
   toggleCourseEndpoint,
   updateCourseEndpoint
-} from "../../../services/courses";
+} from "../../../services/endpoints/courses";
 
 export const Courses: React.FC = () =>
 {

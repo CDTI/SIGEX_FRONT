@@ -3,6 +3,7 @@ import { Role } from "./user";
 
 export interface Schedule
 {
+  _id?: string;
   day: number;
   location: string;
   period: string;

@@ -16,18 +16,18 @@ import
   Col
 } from "antd";
 
-import { Category } from "../../../../../interfaces/category";
-import { Feedback } from "../../../../../interfaces/feedback";
-import { Program } from "../../../../../interfaces/program";
-import { Material, Project, Transport } from "../../../../../interfaces/project";
-import { User } from "../../../../../interfaces/user";
-import { createFeedbackProject, listFeedbackProject } from "../../../../../services/feedback_service";
-import { ReturnResponse, updateProject } from "../../../../../services/project_service";
+import { Category } from "../../../../../../interfaces/category";
+import { Feedback } from "../../../../../../interfaces/feedback";
+import { Program } from "../../../../../../interfaces/program";
+import { Material, Project, Transport } from "../../../../../../interfaces/project";
+import { User } from "../../../../../../interfaces/user";
+import { createFeedbackProject, listFeedbackProject } from "../../../../../../services/feedback_service";
+import { ReturnResponse, updateProject } from "../../../../../../services/project_service";
 
-import MyTable from "../../../../../components/layout/table";
-import { Restricted } from "../../../../../components/Restricted";
-import { compareDate } from "../../../../../utils";
-import { formatDate } from "../../../../../utils/dateFormatter";
+import MyTable from "../../../../../../components/layout/table";
+import { Restricted } from "../../../../../../components/Restricted";
+import { compareDate } from "../../../../../../utils";
+import { formatDate } from "../../../../../../utils/dateFormatter";
 
 const { Step } = Steps;
 const { Panel } = Collapse;

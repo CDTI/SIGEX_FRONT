@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import
 {
   Form,
@@ -20,33 +20,45 @@ import { RadioChangeEvent } from "antd/lib/radio";
 import { MaskedInput } from "antd-mask-input";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-import { noticesKey, programsKey } from "..";
+import { noticesKey, programsKey, usersKey } from "..";
 
+import { Restricted } from "../../../../../../components/Restricted";
+import { useHttpClient } from "../../../../../../hooks/useHttpClient";
 import { getProgramId, Program } from "../../../../../../interfaces/program";
 import { Category, getCategoryId, isCategory } from "../../../../../../interfaces/category";
 import { getNoticeId, isNotice, Notice, Schedule, Timetable } from "../../../../../../interfaces/notice";
 import { Project } from "../../../../../../interfaces/project";
-import { getActiveNoticesForUser } from "../../../../../../services/notice_service";
-import { listPrograms } from "../../../../../../services/program_service";
-import { useAuth } from "../../../../../../context/auth";
+import { getUserId, User } from "../../../../../../interfaces/user";
+import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/programs";
+import { getActiveNoticesEndpoint, getAllUsersEndpoint } from "../../../../../../services/endpoints/users";
 
 interface Props
 {
+  context: "admin" | "user";
   formController: FormInstance;
   initialValues?: Project;
 }
 
+function scheduleAsValue(s: Schedule)
+{
+  if (s._id != null)
+    delete s._id;
+
+  return JSON.stringify(s);
+}
+
 export const MainForm: React.FC<Props> = (props) =>
 {
-  const { user } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const selectUsersRequester = useHttpClient();
 
-  const [isProgramsLoading, setIsProgramsLoading] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const selectProgramsRequester = useHttpClient();
 
-  const [isNoticesLoading, setIsNoticesLoading] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
+  const selectNoticesRequester = useHttpClient();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [currentProjectType, setCurrentProjectType] = useState<
@@ -58,19 +70,39 @@ export const MainForm: React.FC<Props> = (props) =>
   {
     (async () =>
     {
-      setIsProgramsLoading(true);
+      const users = localStorage.getItem(usersKey) != null
+        ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
+        : (await selectUsersRequester.send(
+          {
+            method: "GET",
+            url: getAllUsersEndpoint(),
+            cancellable: true
+          })).user;
+
+      setUsers(users);
+
       const programs = localStorage.getItem(programsKey) != null
         ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
-        : (await listPrograms()).programs;
-      setPrograms(programs);
-      setIsProgramsLoading(false);
+        : (await selectProgramsRequester.send(
+          {
+            method: "GET",
+            url: getAllProgramsEndpoint(),
+            cancellable: true
+          })).programs;
 
-      setIsNoticesLoading(true);
+      setPrograms(programs);
+
       let notices = localStorage.getItem(noticesKey) != null
         ? JSON.parse(localStorage.getItem(noticesKey)!) as Notice[]
-        : await getActiveNoticesForUser(user!._id!, true);
+        : await selectNoticesRequester.send(
+          {
+            method: "GET",
+            url: getActiveNoticesEndpoint(),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            cancellable: true
+          });
+
       setNotices(notices);
-      setIsNoticesLoading(false);
 
       if (props.initialValues != null)
       {
@@ -80,10 +112,8 @@ export const MainForm: React.FC<Props> = (props) =>
 
         if (!notices.some((n: Notice) => n._id === getNoticeId(projectNotice)))
         {
-          setIsNoticesLoading(true);
           notices = [...notices, projectNotice as Notice];
           setNotices(notices);
-          setIsNoticesLoading(false);
         }
 
         const categories = projectNotice.timetables.map((t: Timetable) => t.category as Category);
@@ -102,13 +132,15 @@ export const MainForm: React.FC<Props> = (props) =>
         props.formController.setFieldsValue(
         {
           ...props.initialValues,
+          author: getUserId(props.initialValues.author),
           category: projectCategory._id!,
           notice: projectNotice._id!,
           program: getProgramId(props.initialValues.program),
-          secondSemester: props.initialValues.secondSemester.map((s: Schedule) => JSON.stringify(s))
+          secondSemester: props.initialValues.secondSemester.map(scheduleAsValue)
         });
       }
 
+      localStorage.setItem(usersKey, JSON.stringify(users));
       localStorage.setItem(noticesKey, JSON.stringify(notices));
       localStorage.setItem(programsKey, JSON.stringify(programs));
     })();
@@ -143,6 +175,23 @@ export const MainForm: React.FC<Props> = (props) =>
       form={props.formController}
     >
       <Row gutter={[8, 0]}>
+        {props.context === "admin" && (
+          <Restricted allowedRoles={["Administrador"]}>
+            <Col span={24}>
+              <Form.Item
+                name="author"
+                label="Autor"
+              >
+                <Select
+                  loading={selectUsersRequester.inProgress}
+                  options={users.map((u: User) => ({ label: u.name, value: u._id! }))}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+          </Restricted>
+        )}
+
         <Col span={24}>
           <Form.Item
             name="name"
@@ -178,7 +227,7 @@ export const MainForm: React.FC<Props> = (props) =>
             rules={[{ required: true, message: "Campo Obrigatório" }]}
           >
             <Select
-              loading={isProgramsLoading}
+              loading={selectProgramsRequester.inProgress}
               options={programs.map((p: Program) => ({ label: p.name, value: p._id! }))}
               style={{ width: "100%" }}
             />
@@ -192,7 +241,7 @@ export const MainForm: React.FC<Props> = (props) =>
             rules={[{ required: true, message: "Campo Obrigatório" }]}
           >
             <Select
-              loading={isNoticesLoading}
+              loading={selectNoticesRequester.inProgress}
               options={notices.map((n: Notice) => ({ label: n.name, value: n._id! }))}
               style={{ width: "100%" }}
               onChange={populateCategories}
@@ -207,7 +256,7 @@ export const MainForm: React.FC<Props> = (props) =>
             rules={[{ required: true, message: "Campo Obrigatório" }]}
           >
             <Select
-              loading={isNoticesLoading}
+              loading={selectNoticesRequester.inProgress}
               placeholder={categories.length === 0 ? "Selecione um edital" : ""}
               options={categories.map((c: Category) => ({ label: c.name, value: c._id! }))}
               disabled={categories.length === 0}
@@ -228,7 +277,9 @@ export const MainForm: React.FC<Props> = (props) =>
                   <Row>
                     {schedule.map((s: Schedule) => (
                       <Col key={`${s.location} - ${s.period} - ${s.day}ª feira`} span={24}>
-                        <Checkbox value={JSON.stringify(s)}>
+                        <Checkbox
+                          value={scheduleAsValue(s)}
+                        >
                           {s.location} - {s.period} - {`${s.day}ª feira`}
                         </Checkbox>
                       </Col>

@@ -19,7 +19,7 @@ interface ResponseUser
 
 export const getUsers = async (): Promise<ResponseUsers> =>
 {
-  const response = await httpClient.get("/user");
+  const response = await httpClient.get("/users");
 
   return response.data;
 };

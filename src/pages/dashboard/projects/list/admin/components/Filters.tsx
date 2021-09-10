@@ -2,12 +2,12 @@ import React, { useEffect, useReducer } from "react";
 import { Button, Col, Input, Select } from "antd";
 import { DownloadOutlined } from "@ant-design/icons"
 
-import { Category } from "../../../../../interfaces/category";
-import { Notice } from "../../../../../interfaces/notice";
-import { Program } from "../../../../../interfaces/program";
-import { getAllCategories } from "../../../../../services/category_service";
-import { getAllNotices } from "../../../../../services/notice_service";
-import { listPrograms } from "../../../../../services/program_service";
+import { Category } from "../../../../../../interfaces/category";
+import { Notice } from "../../../../../../interfaces/notice";
+import { Program } from "../../../../../../interfaces/program";
+import { getAllCategories } from "../../../../../../services/category_service";
+import { getAllNotices } from "../../../../../../services/notice_service";
+import { listPrograms } from "../../../../../../services/program_service";
 import { dropDownStateReducer } from "../helpers/dropDownStateMachine";
 
 type Filters =

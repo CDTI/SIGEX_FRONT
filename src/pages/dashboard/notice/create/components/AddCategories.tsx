@@ -176,6 +176,7 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                                           <Option value="Unidade Santos Andrade">Unidade Santos Andrade</Option>
                                           <Option value="Unidade Praça Osório">Unidade Praça Osório</Option>
                                           <Option value="Faculdade Positivo Londrina">Faculdade Positivo Londrina</Option>
+                                          <Option value="Ponta Grossa">Ponta Grossa</Option>
                                         </Select>
                                       </Form.Item>
                                     </Col>

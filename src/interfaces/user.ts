@@ -35,3 +35,14 @@ export function isUser(u: any): u is User
     && "password" in u
     && "roles" in u;
 }
+
+export function getUserId(u: any): string | null
+{
+  if (typeof u === "string")
+    return u;
+
+  if (isUser(u) && u._id != null)
+    return u._id;
+
+  return null;
+}

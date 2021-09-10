@@ -34,11 +34,9 @@ export function useHttpClient()
     if (config.cancellable != null && config.cancellable)
       clientConfig.cancelToken = cancellationToken.token;
 
-    clientConfig.params = {};
     if (config.queryParams != null)
-      for (const key in config.queryParams)
-        clientConfig.params[key] = config.queryParams.get(key);
-
+      for (const [key, value] of config.queryParams)
+        clientConfig.params = { ...clientConfig.params, [key]: value };
     try
     {
       setInProgress(true);

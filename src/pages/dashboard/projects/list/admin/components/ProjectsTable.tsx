@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button, Col, Space, Table, Tag } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 
-import { Project } from "../../../../../interfaces/project";
+import { Project } from "../../../../../../interfaces/project";
 
 interface Props
 {
@@ -62,7 +62,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
             to={
             {
               pathname: `/dashboard/project/edit/${record._id}`,
-              state: record
+              state: { project: record, context: "admin" }
             }}
           >
             Editar

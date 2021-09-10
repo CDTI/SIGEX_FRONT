@@ -1,8 +1,8 @@
-import { Category } from "../../../../../interfaces/category";
-import { Notice } from "../../../../../interfaces/notice";
-import { Program } from "../../../../../interfaces/program";
-import { Project } from "../../../../../interfaces/project";
-import { User } from "../../../../../interfaces/user";
+import { Category } from "../../../../../../interfaces/category";
+import { Notice } from "../../../../../../interfaces/notice";
+import { Program } from "../../../../../../interfaces/program";
+import { Project } from "../../../../../../interfaces/project";
+import { User } from "../../../../../../interfaces/user";
 
 type Action =
   | { type: "FILTER"                                    }

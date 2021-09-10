@@ -3,15 +3,15 @@ import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
 
-import { Register } from "../../../../interfaces/feedback";
-import { Notice } from "../../../../interfaces/notice";
-import { Program } from "../../../../interfaces/program";
-import { Project } from "../../../../interfaces/project";
-import { listFeedbackProject } from "../../../../services/feedback_service";
-import { listPrograms } from "../../../../services/program_service";
-import { deleteProject, listAllTeacherProjects } from "../../../../services/project_service";
-import Structure from "../../../../components/layout/structure";
-import { formatDate } from "../../../../utils/dateFormatter";
+import { Register } from "../../../../../interfaces/feedback";
+import { Notice } from "../../../../../interfaces/notice";
+import { Program } from "../../../../../interfaces/program";
+import { Project } from "../../../../../interfaces/project";
+import { listFeedbackProject } from "../../../../../services/feedback_service";
+import { listPrograms } from "../../../../../services/program_service";
+import { deleteProject, listAllTeacherProjects } from "../../../../../services/project_service";
+import Structure from "../../../../../components/layout/structure";
+import { formatDate } from "../../../../../utils/dateFormatter";
 
 interface IAction
 {
@@ -311,7 +311,7 @@ export const TeacherProjects: React.FC = () =>
                 to={
                 {
                   pathname: `/dashboard/project/edit/${record._id}`,
-                  state: record
+                  state: { project: record, context: "user" }
                 }}
               >
                 Editar

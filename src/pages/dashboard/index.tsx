@@ -18,9 +18,8 @@ import
 } from "@ant-design/icons";
 
 import { useAuth } from "../../context/auth";
-import logo from "../../sigex.png"
-import { Restricted } from "../../components/Restricted";
 import { Role } from "../../interfaces/user";
+import logo from "../../assets/sigex.png"
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -164,7 +163,13 @@ export const Dashboard: React.FC = (props) =>
                   key="/dashboard/project/create"
                   icon={<FileAddOutlined />}
                 >
-                  <Link to="/dashboard/project/create">
+                  <Link
+                    to={
+                    {
+                      pathname: "/dashboard/project/create",
+                      state: { context: "user" }
+                    }}
+                  >
                     Registrar novo projeto
                   </Link>
                 </Menu.Item>
@@ -193,27 +198,6 @@ export const Dashboard: React.FC = (props) =>
               </Menu.Item>
             </>
           )}
-
-          <SubMenu
-            key="sub1"
-            disabled
-            title="Lattes"
-            icon={<UserOutlined />}
-          >
-            <Menu.Item
-              key="3"
-              icon={<UnorderedListOutlined />}
-            >
-              Listar Curriculos
-            </Menu.Item>
-
-            <Menu.Item
-              key="4"
-              icon={<PieChartOutlined />}
-            >
-              Relatórios
-            </Menu.Item>
-          </SubMenu>
         </Menu>
       </Sider>
 

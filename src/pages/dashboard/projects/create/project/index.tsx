@@ -1,13 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { useHistory, useLocation, useParams } from "react-router-dom";
-import { useMachine } from "@xstate/react";
 import { Button, Col, Form, Modal, Result, Row, Spin, Steps, Typography } from "antd";
 import { Store } from "antd/lib/form/interface";
 import { StopOutlined } from "@ant-design/icons";
 
-import { FormSteps, formStateMachine } from "./helpers/stateMachine";
-import { FormView, UrlParams } from "./helpers/types";
+import { FormSteps, useFormStateMachine } from "./hooks/useFormMachine";
 import { MainForm } from "./components/MainForm";
 import { AssociatesForm } from "./components/AssociatesForm";
 import { CommunityForm } from "./components/CommunityForm";
@@ -20,22 +18,40 @@ import Structure from "../../../../../components/layout/structure";
 
 import { Schedule } from "../../../../../interfaces/notice";
 import { Planning, Project, Community, Resources, Partnership } from "../../../../../interfaces/project";
-import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/projects";
-import { hasActiveNoticesEndpoint } from "../../../../../services/users";
+import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/endpoints/projects";
+import { hasActiveNoticesEndpoint } from "../../../../../services/endpoints/users";
+
+interface LocationState
+{
+  project?: Project;
+  context: "admin" | "user";
+}
+
+interface FormView
+{
+  view: ReactNode;
+  title: string;
+}
+
+interface UrlParams
+{
+  id: string;
+}
 
 const savedStateKey = "project";
+export const usersKey = "users";
 export const noticesKey = "notices";
 export const programsKey = "programs";
 
 export const ProposalForm: React.FC = () =>
 {
-  const { id } = useParams<UrlParams>();
-  const location = useLocation();
+  const params = useParams<UrlParams>();
+  const location = useLocation<LocationState>();
   const history = useHistory();
-  const { user } = useAuth();
+  const authContext = useAuth();
   const [isFirstExecution, setIsFirstExecution] = useState(true);
 
-  const [formState, sendEvent] = useMachine(formStateMachine);
+  const [formState, sendEvent] = useFormStateMachine();
   const [formController] = Form.useForm();
   const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
   const formProjectsRequester = useHttpClient();
@@ -58,11 +74,11 @@ export const ProposalForm: React.FC = () =>
 
       setHasActiveNotices(hasActiveNotices);
 
-      if (location.state != null)
+      if (location.state.project != null)
         sendEvent(
         {
           type: "RESTORE",
-          payload: { step: 0, data: location.state as Project }
+          payload: { step: 0, data: location.state.project }
         });
       else if (localStorage.getItem(savedStateKey) != null)
         hasActiveNotices
@@ -74,6 +90,7 @@ export const ProposalForm: React.FC = () =>
 
     return () =>
     {
+      localStorage.removeItem(usersKey);
       localStorage.removeItem(noticesKey);
       localStorage.removeItem(programsKey);
     }
@@ -85,7 +102,8 @@ export const ProposalForm: React.FC = () =>
     {
       if (formState.value !== "succeeded" && formState.value !== "failed")
       {
-        localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
+        if (!loaderModalIsVisible)
+          localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
 
         if (formState.value === "pending")
         {
@@ -93,7 +111,7 @@ export const ProposalForm: React.FC = () =>
           {
             try
             {
-              await formProjectsRequester.send(id == null
+              await formProjectsRequester.send(params.id == null
               ? {
                 method: "POST",
                 url: createProjectEndpoint(),
@@ -102,7 +120,7 @@ export const ProposalForm: React.FC = () =>
               }
               : {
                 method: "PUT",
-                url: updateProjectEndpoint(id),
+                url: updateProjectEndpoint(params.id),
                 body: formState.context.data,
                 cancellable: true
               });
@@ -124,7 +142,14 @@ export const ProposalForm: React.FC = () =>
         localStorage.removeItem(savedStateKey);
       }
     }
-  }, [isFirstExecution, formState.value]);
+  },
+  [
+    isFirstExecution,
+    formState.value,
+    params.id,
+    sendEvent,
+    formProjectsRequester.send
+  ]);
 
   const removeSavedState = useCallback(() =>
   {
@@ -140,7 +165,7 @@ export const ProposalForm: React.FC = () =>
       sendEvent({ type: "RESTORE", payload: JSON.parse(savedState) });
 
     removeSavedState();
-  }, [removeSavedState]);
+  }, [sendEvent, removeSavedState]);
 
   const handleOnFormFinish = useCallback((formName: string, values: Store) =>
   {
@@ -156,9 +181,10 @@ export const ProposalForm: React.FC = () =>
           payload:
           {
             ...values as Project,
-            author: user!._id!,
+            author: authContext.user!._id!,
             firstSemester: schedule,
-            secondSemester: schedule
+            secondSemester: schedule,
+            status: formState.context.data?.status ?? "pending"
           }
         });
 
@@ -200,7 +226,7 @@ export const ProposalForm: React.FC = () =>
 
         break;
     }
-  }, [user]);
+  }, [authContext.user, formState.context, sendEvent]);
 
   const goBack = useCallback(() =>
   {
@@ -212,7 +238,7 @@ export const ProposalForm: React.FC = () =>
       sendEvent(formState.value === "failed"
         ? { type: "REVIEW" }
         : { type: "PREVIOUS" });
-  }, [formState.value, history, hasActiveNotices]);
+  }, [hasActiveNotices, history, formState.value, sendEvent]);
 
   const loadSavedStateDialog = useMemo(() => (
     <Modal
@@ -237,6 +263,7 @@ export const ProposalForm: React.FC = () =>
       title: "Informações Básicas",
       view: (
         <MainForm
+          context={location.state.context}
           formController={formController}
           initialValues={formState.context.data}
         />
@@ -286,7 +313,7 @@ export const ProposalForm: React.FC = () =>
         />
       )
     }]
-  ]), [formController, formState.context.data]);
+  ]), [formController, formState.context]);
 
   if (!hasActiveNotices)
     return (
@@ -347,16 +374,13 @@ export const ProposalForm: React.FC = () =>
       {ReactDOM.createPortal(loadSavedStateDialog, document.getElementById("dialog-overlay")!)}
 
       <Spin spinning={validationNoticesRequester.inProgress}>
-        <Structure title={`${id == null ? "Cadastrar" : "Alterar"} proposta`}>
+        <Structure title={`${params.id == null ? "Cadastrar" : "Alterar"} proposta`}>
           <Form.Provider onFormFinish={(name, { values }) => handleOnFormFinish(name, values)}>
             <Row justify="center" gutter={[0, 24]}>
               <Col xs={24} xl={21} xxl={18}>
                 <Steps current={formState.context.step}>
                   {FormSteps.map((k: string) =>
-                  {
-                    console.log(k);
-                    return <Steps.Step key={k} title={forms.get(k)!.title} />;
-                  }
+                    <Steps.Step key={k} title={forms.get(k)!.title} />
                   )}
                 </Steps>
               </Col>

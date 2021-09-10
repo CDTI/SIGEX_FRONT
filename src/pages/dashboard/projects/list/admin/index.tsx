@@ -9,10 +9,10 @@ import { ReportDetails } from "./components/ReportDetails";
 import { dataFilteringStateReducer } from "./helpers/dataFilteringStateMachine";
 import { projectDetailsDialogStateReducer } from "./helpers/projectDetailsDialogStateMachine";
 
-import { Project } from "../../../../interfaces/project";
-import { baseUrl } from "../../../../services/httpClient";
-import { listAllProjects } from "../../../../services/project_service";
-import Structure from "../../../../components/layout/structure";
+import { Project } from "../../../../../interfaces/project";
+import { baseUrl } from "../../../../../services/httpClient";
+import { listAllProjects } from "../../../../../services/project_service";
+import Structure from "../../../../../components/layout/structure";
 
 export const AllProjects: React.FC = () =>
 {

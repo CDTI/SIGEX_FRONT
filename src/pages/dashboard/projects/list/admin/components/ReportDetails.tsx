@@ -1,11 +1,11 @@
 import React from "react";
 import { Alert, Col, Collapse, List, Row, Typography } from "antd";
 
-import { Contact, Project } from "../../../../../interfaces/project";
-import { User } from "../../../../../interfaces/user";
-import { Category } from "../../../../../interfaces/category";
-import { Program } from "../../../../../interfaces/program";
-import { formatDate } from "../../../../../utils/dateFormatter";
+import { Contact, Project } from "../../../../../../interfaces/project";
+import { User } from "../../../../../../interfaces/user";
+import { Category } from "../../../../../../interfaces/category";
+import { Program } from "../../../../../../interfaces/program";
+import { formatDate } from "../../../../../../utils/dateFormatter";
 
 const { Text, Paragraph } = Typography;
 

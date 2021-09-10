@@ -3,7 +3,7 @@ import { Form, Input, Button, notification } from "antd";
 
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from "./style";
 
-import logo from "../../sigex.png";
+import logo from "../../assets/sigex.png";
 import { changePassword } from "../../services/user_service";
 import { useUrlQueryParams } from "../../hooks/useUrlQueryParams";
 

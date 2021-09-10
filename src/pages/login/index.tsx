@@ -11,7 +11,7 @@ import { Role } from "../../interfaces/user";
 import { checkUser, createUser, hasPasswordChangeToken } from "../../services/user_service";
 import { getRoles } from "../../services/role_service";
 import { useAuth } from "../../context/auth";
-import logo from "../../sigex.png";
+import logo from "../../assets/sigex.png";
 
 interface ValueLogin
 {

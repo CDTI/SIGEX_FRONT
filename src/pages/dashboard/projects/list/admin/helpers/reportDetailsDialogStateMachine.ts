@@ -1,4 +1,4 @@
-import { Report } from "../../../../../interfaces/project";
+import { Report } from "../../../../../../interfaces/project";
 
 type Action =
   | { type: "HIDE_DIALOG"                     }
