@@ -105,7 +105,7 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                         disabled={shouldDisableButton}
                         onClick={() => handleAddCategory(add)}
                       >
-                        <PlusOutlined /> Adicionar categoria
+                        <PlusOutlined /> Confirmar categoria
                       </Button>
                     </Form.Item>
                   </Col>

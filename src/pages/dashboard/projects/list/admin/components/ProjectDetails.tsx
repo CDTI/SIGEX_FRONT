@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
+import { AxiosError } from "axios";
 import
 {
   Steps,
@@ -110,9 +111,9 @@ export const AdminViewProject: React.FC<Props> = (props) =>
     catch (error)
     {
       let message = "";
-      if (error.response)
-        message = error.response.data;
-      else if (error.request)
+      if ((error as AxiosError).response != null)
+        message = (error as AxiosError).response!.data;
+      else if ((error as AxiosError).request != null)
         message = "Não houve resposta do servidor!";
 
       setEdited({ message, result: "error", project: props.project });
@@ -283,14 +284,7 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
               {(props.project.category as Category).name !== "Extensão específica do curso" && (
                 <>
-                  <Typography><b>Disponibilidades de horários primeiro semestre:</b></Typography>
-                  <ul style={{ marginLeft: "18px" }}>
-                    {props.project.firstSemester.map((e) =>
-                      <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>
-                    )}
-                  </ul>
-
-                  <Typography><b>Disponibilidades de horários segundo semestre:</b></Typography>
+                  <Typography><b>Disponibilidade:</b></Typography>
                   <ul style={{ marginLeft: "18px" }}>
                     {props.project.secondSemester.map((e) =>
                       <li>{e.period} - {`${e.day}ª feira`} - {e.location}</li>

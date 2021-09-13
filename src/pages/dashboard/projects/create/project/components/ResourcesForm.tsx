@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Form, Input, Button, InputNumber, Row, Col } from "antd";
 import { FormInstance } from "antd/lib/form";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
@@ -39,27 +39,15 @@ function toCurrency(value?: string | number): string
 
 export const ResourcesForm: React.FC<Props> = (props) =>
 {
-  const [showTransport, setShowTransport] = useState(false);
-
   useEffect(() =>
   {
     if (props.initialValues != null)
-    {
-      if (props.initialValues.transport != null)
-        setShowTransport(true);
-
       props.formController.setFieldsValue(
       {
         materials: props.initialValues.materials,
         transport: props.initialValues.transport
       });
-    }
   }, [props.initialValues]);
-
-  const toggleTransport = useCallback(() =>
-  {
-    setShowTransport((prevState) => !prevState);
-  }, []);
 
   return (
     <Form
@@ -161,70 +149,95 @@ export const ResourcesForm: React.FC<Props> = (props) =>
         </Col>
 
         <Col span={24}>
-          {showTransport && (
-            <Row gutter={[8, 0]}>
-              <Col xs={24} md={6}>
-                <Form.Item
-                  name={["transport", "typeTransport"]}
-                  label="Tipo de transporte"
-                  rules={[{ required: true, message: "Campo Obrigatório" }]}
-                >
-                  <Input style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
+          <Form.List name="transport">
+            {(transportFields, { add, remove }) => (
+              <>
+                <Row gutter={[8, 0]}>
+                  {transportFields.map((transportField) => (
+                    <>
+                      <Col xs={24} md={4} xl={2}>
+                        <Form.Item label={<label></label>}>
+                          <Button
+                            danger
+                            block
+                            type="primary"
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(transportField.name)}
+                          />
+                        </Form.Item>
+                      </Col>
 
-              <Col xs={24} md={6}>
-                <Form.Item
-                  name={["transport", "description"]}
-                  label="Descrição"
-                  rules={[{ required: true, message: "Campo Obrigatório" }]}
-                >
-                  <Input style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
+                      <Col xs={24} md={6}>
+                        <Form.Item
+                          {...transportField}
+                          fieldKey={[transportField.name, "typeTransport"]}
+                          name={[transportField.name, "typeTransport"]}
+                          label="Tipo de transporte"
+                          rules={[{ required: true, message: "Campo Obrigatório" }]}
+                        >
+                          <Input style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
 
-              <Col xs={24} md={6}>
-                <Form.Item
-                  name={["transport", "quantity"]}
-                  label="Quantidade"
-                  rules={[{ required: true, message: "Campo Obrigatório" }]}
-                >
-                  <InputNumber
-                    step={1}
-                    style={{ width: "100%" }}
-                  />
-                </Form.Item>
-              </Col>
+                      <Col xs={24} md={6}>
+                        <Form.Item
+                          {...transportField}
+                          fieldKey={[transportField.name, "description"]}
+                          name={[transportField.name, "description"]}
+                          label="Descrição"
+                          rules={[{ required: true, message: "Campo Obrigatório" }]}
+                        >
+                          <Input style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
 
-              <Col xs={24} md={6}>
-                <Form.Item
-                  name={["transport", "unitaryValue"]}
-                  label="Preço unitário"
-                  rules={[{ required: true, message: "Campo Obrigatório" }]}
-                >
-                  <InputNumber
-                    min={0.01}
-                    step={0.01}
-                    parser={fromCurrency}
-                    formatter={toCurrency}
-                    style={{ width: "100%" }}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
+                      <Col xs={24} md={5}>
+                        <Form.Item
+                          {...transportField}
+                          fieldKey={[transportField.name, "quantity"]}
+                          name={[transportField.name, "quantity"]}
+                          label="Quantidade"
+                          rules={[{ required: true, message: "Campo Obrigatório" }]}
+                        >
+                          <InputNumber step={1} style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
 
-          <Row>
-            <Col span={24}>
-              <Button
-                block
-                type="dashed"
-                onClick={() => toggleTransport()}
-              >
-                <PlusOutlined /> {`${!showTransport ? "Adicionar" : "Remover"} transporte`}
-              </Button>
-            </Col>
-          </Row>
+                      <Col xs={24} md={5}>
+                        <Form.Item
+                          {...transportField}
+                          fieldKey={[transportField.name, "unitaryValue"]}
+                          name={[transportField.name, "unitaryValue"]}
+                          label="Preço unitário"
+                          rules={[{ required: true, message: "Campo Obrigatório" }]}
+                        >
+                          <InputNumber
+                            min={0.01}
+                            step={0.01}
+                            parser={fromCurrency}
+                            formatter={toCurrency}
+                            style={{ width: "100%" }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </>
+                  ))}
+                </Row>
+
+                <Row gutter={[0, 40]}>
+                  <Col span={24}>
+                    <Button
+                      block
+                      type="dashed"
+                      onClick={() => add()}
+                    >
+                      <PlusOutlined /> Adicionar transporte
+                    </Button>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Form.List>
         </Col>
       </Row>
     </Form>
