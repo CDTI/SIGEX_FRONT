@@ -58,7 +58,7 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState =>
   }
 }
 
-export const TeacherProjects: React.FC = () =>
+export const TeacherProjectsPage: React.FC = () =>
 {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);

@@ -5,26 +5,24 @@ import { HomeDashboard } from "../pages/dashboard/home";
 import { Dashboard } from "../pages/dashboard";
 import { Programs } from "../pages/dashboard/programs";
 import { CreateProgram } from "../pages/dashboard/programs/create";
-import { ProposalForm } from "../pages/dashboard/projects/create/project";
-import { TeacherProjects } from "../pages/dashboard/projects/list/teacher";
+import { CreateProposalPage } from "../pages/dashboard/projects/create/project";
+import { TeacherProjectsPage } from "../pages/dashboard/projects/list/teacher";
 import { AllProjects } from "../pages/dashboard/projects/list/admin";
 import { AdminViewProject } from "../pages/dashboard/projects/list/admin/components/ProjectDetails";
 import { CreateCategory } from "../pages/dashboard/category";
-import { Users } from "../pages/dashboard/users";
+import { UsersPage } from "../pages/dashboard/users";
+import { CreateUserPage } from "../pages/dashboard/users/create";
 import { HomePage } from "../pages/home";
 import { NotFound } from "../pages/404";
 import { Notices } from "../pages/dashboard/notice";
-import { CreateNoticeController } from "../pages/dashboard/notice/create";
-import { ReportForm } from "../pages/dashboard/projects/create/report";
+import { CreateNoticePage } from "../pages/dashboard/notice/create";
+import { CreateReportPage } from "../pages/dashboard/projects/create/report";
+import { CoursesPage } from "../pages/dashboard/courses";
 
-import { useAuth } from "../context/auth";
 import { Restricted } from "../components/Restricted";
-import { Courses } from "../pages/dashboard/courses";
 
 export const OtherRoutes: React.FC = () =>
 {
-  const { user } = useAuth();
-
   return (
     <BrowserRouter>
       <Switch>
@@ -34,50 +32,44 @@ export const OtherRoutes: React.FC = () =>
             <Route path="/dashboard" exact={true} component={HomeDashboard} />
           }
 
-          {
-            <>
-            </>
+          {/* Rotas acessadas pelo comitê de extensão */
+            <Restricted allowedRoles={["Administrador", "Comitê de extensão"]}>
+              <Route exact={true} path="/dashboard/projects" component={AllProjects}/>
+            </Restricted>
           }
 
-          {/* Rotas acessadas apenas por professore e ou predidentes do NDE */
+          {/* Rotas acessadas apenas por professore e ou presidentes do NDE */
             <Restricted allowedRoles={["Professor", "Presidente do NDE"]}>
-              <Route path="/dashboard/project/create" component={ProposalForm} />
-              <Route path="/dashboard/project/edit/:id" component={ProposalForm} />
-              <Route path="/dashboard/project/report/create" component={ReportForm} />
-              <Route path="/dashboard/project/report/edit/:id" component={ReportForm} />
-              <Route path="/dashboard/myProjects" component={TeacherProjects} />
+              <Route path="/dashboard/my-projects" component={TeacherProjectsPage} />
+
+              <Route path="/dashboard/projects/create" component={CreateProposalPage} />
+              <Route path="/dashboard/projects/edit/:id" component={CreateProposalPage} />
+
+              <Route path="/dashboard/projects/report/create" component={CreateReportPage} />
+              <Route path="/dashboard/projects/report/edit/:id" component={CreateReportPage} />
             </Restricted>
+          }
+
+          {/* Rotas de programas */
+            <Route exact={true} path="/dashboard/programs" component={Programs} />
           }
 
           {/* Rotas acessadas apenas por administradores */
             <Restricted allowedRoles={["Administrador"]}>
               <Route exact={true} path="/dashboard/notices" component={Notices} />
-              <Route
-                  exact={true}
-                  path={"/dashboard/notices/create"}
-                  component={CreateNoticeController} />
+              <Route path="/dashboard/notices/create" component={CreateNoticePage} />
+              <Route path="/dashboard/notices/edit/:id" component={CreateNoticePage} />
 
-              <Route
-                  exact={true}
-                  path={"/dashboard/notices/edit/:id"}
-                  component={CreateNoticeController} />
+              <Route exact={true} path="/dashboard/programs/create" component={CreateProgram} />
 
-              <Route path="/dashboard/project/admin-view" component={AdminViewProject} />
-              <Route path="/dashboard/program/create" component={CreateProgram} />
               <Route path="/dashboard/categories" component={CreateCategory} />
-              <Route path="/dashboard/users" component={Users} />
-              <Route path="/dashboard/courses" component={Courses}/>
-            </Restricted>
-          }
 
-          {/* Rotas acessadas pelo comitê de extensão */
-            <Restricted allowedRoles={["Administrador", "Comitê de extensão"]}>
-              <Route path="/dashboard/projects" component={AllProjects}/>
-            </Restricted>
-          }
+              <Route exact={true} path="/dashboard/users" component={UsersPage} />
+              <Route path="/dashboard/users/create" component={CreateUserPage} />
+              <Route path="/dashboard/users/edit/:id" component={CreateUserPage} />
 
-          {/* Rotas de programas */
-            <Route path="/dashboard/programs" component={Programs} />
+              <Route path="/dashboard/courses" component={CoursesPage}/>
+            </Restricted>
           }
         </Dashboard>
 

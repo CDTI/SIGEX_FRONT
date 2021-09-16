@@ -27,7 +27,7 @@ import { createReport, updateReport } from "../../../../../services/project_serv
 import Structure from "../../../../../components/layout/structure";
 import { useUrlQueryParams } from "../../../../../hooks/useUrlQueryParams";
 
-export const ReportForm: React.FC = () =>
+export const CreateReportPage: React.FC = () =>
 {
   const [firstExecution, setFirstExecution] = useState(true);
   const [showDialog, setShowDialog] = useState(false);

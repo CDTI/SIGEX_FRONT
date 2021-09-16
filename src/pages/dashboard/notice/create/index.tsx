@@ -14,7 +14,7 @@ interface UrlParams
   id: string;
 }
 
-export const CreateNoticeController: React.FC = () =>
+export const CreateNoticePage: React.FC = () =>
 {
   const params = useParams<UrlParams>();
   const history = useHistory();
@@ -109,5 +109,3 @@ export const CreateNoticeController: React.FC = () =>
       {contents[content]}
     </Structure>);
 };
-
-export default CreateNoticeController;

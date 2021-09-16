@@ -33,7 +33,7 @@ export const createUser = async (user: any): Promise<ResponseUser> =>
 
 export const updateUser = async (user: any): Promise<ResponseUser> =>
 {
-  const response = await httpClient.put("/user", user);
+  const response = await httpClient.put(`/user/${user._id!}`, user);
 
   return response.data;
 };
@@ -45,16 +45,9 @@ export const checkUser = async (user: any): Promise<boolean> =>
   return response.data;
 };
 
-export const resetPassword = async (user: any): Promise<ResponseUser> =>
-{
-  const response = await httpClient.put(`/resetPassword/${user.cpf}`);
-
-  return response.data;
-};
-
 export const requestPasswordChange = async (cpf: string): Promise<boolean> =>
 {
-  const response = await httpClient.post("/requestPasswordChange", { cpf });
+  const response = await httpClient.post(`/user/${cpf}/password-change-request`);
 
   return response.data;
 };

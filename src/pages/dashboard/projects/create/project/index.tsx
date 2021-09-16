@@ -43,7 +43,7 @@ export const usersKey = "users";
 export const noticesKey = "notices";
 export const programsKey = "programs";
 
-export const ProposalForm: React.FC = () =>
+export const CreateProposalPage: React.FC = () =>
 {
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();
@@ -129,8 +129,8 @@ export const ProposalForm: React.FC = () =>
             }
             catch (error)
             {
-              if (error.message !== "")
-                setFailedSubmitMessage(error.message);
+              if ((error as Error).message !== "")
+                setFailedSubmitMessage((error as Error).message);
 
               sendEvent({ type: "ERROR" });
             }

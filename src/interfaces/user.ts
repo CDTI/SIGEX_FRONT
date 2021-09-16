@@ -1,3 +1,5 @@
+import { Course } from "./course";
+
 export interface Role
 {
   _id?: string;
@@ -7,6 +9,7 @@ export interface Role
 export interface User
 {
   _id?: string;
+  courses: (string | Course)[];
   cpf: string;
   createdAt?: Date;
   email: string;
@@ -27,6 +30,7 @@ export function isRole(r: any): r is Role
 export function isUser(u: any): u is User
 {
   return u != null && typeof u === "object" && !Array.isArray(u)
+    && "courses" in u
     && "cpf" in u
     && "email" in u
     && "isActive" in u
