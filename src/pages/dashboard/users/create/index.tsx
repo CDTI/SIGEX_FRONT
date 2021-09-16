@@ -81,7 +81,7 @@ export const CreateUserPage: React.FC = () =>
 
   useEffect(() =>
   {
-    if (location.state.user != null)
+    if (location.state?.user != null)
     {
       isNdesPresident(location.state.user.roles as string[]);
       formController.setFieldsValue(location.state.user);
