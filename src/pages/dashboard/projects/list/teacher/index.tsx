@@ -291,11 +291,11 @@ export const TeacherProjectsPage: React.FC = () =>
         {record.status === "selected" &&
           <Button>
             {record.report == null
-              ? <Link to={`/dashboard/project/report/create?project=${record._id}`}>Relatório</Link>
+              ? <Link to={`/dashboard/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
               : (<Link
                   to={
                   {
-                    pathname: `/dashboard/project/report/edit/${record.report._id}?project=${record._id}`,
+                    pathname: `/dashboard/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
                     state: record.report
                   }}
                 >
@@ -310,7 +310,7 @@ export const TeacherProjectsPage: React.FC = () =>
               <Link
                 to={
                 {
-                  pathname: `/dashboard/project/edit/${record._id}`,
+                  pathname: `/dashboard/propostas/editar/${record._id}`,
                   state: { project: record, context: "user" }
                 }}
               >

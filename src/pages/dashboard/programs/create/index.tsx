@@ -59,10 +59,10 @@ export const CreateProgram: React.FC = () =>
           [
             <Button
               type="primary"
-              key="/dashboard/programs"
+              key="/dashboard/programas"
               onClick={resetForm}
             >
-              <Link to="/dashboard/programs">Ok</Link>
+              <Link to="/dashboard/programas">Ok</Link>
             </Button>,
           ]}
         />

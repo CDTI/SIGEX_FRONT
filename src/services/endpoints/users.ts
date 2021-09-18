@@ -8,6 +8,11 @@ export function getActiveNoticesEndpoint(): string
   return "/user/me/notices";
 }
 
+export function getAssociatedCoursesEndpoint(): string
+{
+  return "/user/me/courses";
+}
+
 export function getAllUsersEndpoint(): string
 {
   return "/users";

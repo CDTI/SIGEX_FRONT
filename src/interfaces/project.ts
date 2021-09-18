@@ -1,4 +1,5 @@
 import { Category } from "./category";
+import { Course } from "./course";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
 import { User } from "./user";
@@ -93,6 +94,7 @@ export interface Project
   author: string | User;
   category: string | Category;
   createdAt?: Date;
+  course?: string | Course;
   dateFinal: Date;
   dateStart: Date;
   description: string;

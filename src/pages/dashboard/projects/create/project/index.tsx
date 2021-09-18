@@ -39,9 +39,10 @@ interface UrlParams
 }
 
 const savedStateKey = "project";
-export const usersKey = "users";
+export const coursesKey = "courses";
 export const noticesKey = "notices";
 export const programsKey = "programs";
+export const usersKey = "users";
 
 export const CreateProposalPage: React.FC = () =>
 {
@@ -90,6 +91,7 @@ export const CreateProposalPage: React.FC = () =>
 
     return () =>
     {
+      localStorage.removeItem(coursesKey);
       localStorage.removeItem(usersKey);
       localStorage.removeItem(noticesKey);
       localStorage.removeItem(programsKey);

@@ -79,17 +79,17 @@ export const Dashboard: React.FC = (props) =>
 
           {userRoles.includes("Administrador") && (
             <Menu.Item
-              key="/dashboard/courses"
+              key="/dashboard/cursos"
               icon={<BankOutlined />}
             >
-              <Link to="/dashboard/courses">
+              <Link to="/dashboard/cursos">
                 Cursos
               </Link>
             </Menu.Item>
           )}
 
           <SubMenu
-            key="/dashboard/programs"
+            key="/dashboard/programas"
             title="Programas"
             icon={<FileTextOutlined />}
           >
@@ -97,17 +97,17 @@ export const Dashboard: React.FC = (props) =>
               key="3"
               icon={<UnorderedListOutlined />}
             >
-              <Link to="/dashboard/programs">
+              <Link to="/dashboard/programas">
                 Listar Programas
               </Link>
             </Menu.Item>
 
             {userRoles.includes("Administrador") && (
               <Menu.Item
-                key="/dashboard/program/create"
+                key="/dashboard/programas/criar"
                 icon={<DiffOutlined />}
               >
-                <Link to="/dashboard/program/create">
+                <Link to="/dashboard/programas/criar">
                   Criar Programa
                 </Link>
               </Menu.Item>
@@ -117,35 +117,35 @@ export const Dashboard: React.FC = (props) =>
           {userRoles.includes("Administrador") && (
             <>
               <Menu.Item
-                key="/dashboard/users"
+                key="/dashboard/usuarios"
                 icon={<UserOutlined />}
               >
-                <Link to="/dashboard/users">
+                <Link to="/dashboard/usuarios">
                   Usuários
                 </Link>
               </Menu.Item>
 
               <Menu.Item
-                key="/dashboard/categories"
+                key="/dashboard/categorias"
                 icon={<UnorderedListOutlined />}
               >
-                <Link to="/dashboard/categories">
+                <Link to="/dashboard/categorias">
                   Categorias
                 </Link>
               </Menu.Item>
 
               <Menu.Item
-                key="/dashboard/periods"
+                key="/dashboard/editais"
                 icon={<FieldTimeOutlined />}
               >
-                <Link to="/dashboard/notices">Editais</Link>
+                <Link to="/dashboard/editais">Editais</Link>
               </Menu.Item>
 
               <Menu.Item
-                key="/dashboard/projects"
+                key="/dashboard/propostas"
                 icon={<TeamOutlined />}
               >
-                <Link to="/dashboard/projects">
+                <Link to="/dashboard/propostas">
                   Projetos
                 </Link>
               </Menu.Item>
@@ -155,18 +155,18 @@ export const Dashboard: React.FC = (props) =>
           {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE")) && (
             <>
               <SubMenu
-                key="myProjects"
+                key="minhas-propostas"
                 title="Meus projetos"
                 icon={<FileTextOutlined />}
               >
                 <Menu.Item
-                  key="/dashboard/project/create"
+                  key="/dashboard/propostas/criar"
                   icon={<FileAddOutlined />}
                 >
                   <Link
                     to={
                     {
-                      pathname: "/dashboard/project/create",
+                      pathname: "/dashboard/propostas/criar",
                       state: { context: "user" }
                     }}
                   >
@@ -175,10 +175,10 @@ export const Dashboard: React.FC = (props) =>
                 </Menu.Item>
 
                 <Menu.Item
-                  key="/dashboard/myProjects"
+                  key="/dashboard/minhas-propostas"
                   icon={<TeamOutlined />}
                 >
-                  <Link to="/dashboard/myProjects">
+                  <Link to="/dashboard/minhas-propostas">
                     Projetos registrados
                   </Link>
                 </Menu.Item>
@@ -189,10 +189,10 @@ export const Dashboard: React.FC = (props) =>
           {userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador") && (
             <>
               <Menu.Item
-                key="/dashboard/projects"
+                key="/dashboard/propostas"
                 icon={<TeamOutlined />}
               >
-                <Link to="/dashboard/projects">
+                <Link to="/dashboard/propostas">
                   Projetos
                 </Link>
               </Menu.Item>

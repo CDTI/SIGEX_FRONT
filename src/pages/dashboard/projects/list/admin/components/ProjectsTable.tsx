@@ -61,7 +61,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
           <Link
             to={
             {
-              pathname: `/dashboard/project/edit/${record._id}`,
+              pathname: `/dashboard/propostas/editar/${record._id}`,
               state: { project: record, context: "admin" }
             }}
           >

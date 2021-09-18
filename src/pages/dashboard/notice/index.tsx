@@ -45,7 +45,7 @@ export const Notices: React.FC = () =>
 
   return (
     <Structure title="Editais">
-      <Link to="/dashboard/notices/create">Cadastrar edital</Link>
+      <Link to="/dashboard/editais/criar">Cadastrar edital</Link>
 
       <List
         className="demo-loadmore-list"
@@ -60,7 +60,7 @@ export const Notices: React.FC = () =>
                 onChange={() => changeStatus(item._id!)}
               />,
 
-              <Link to={`/dashboard/notices/edit/${item._id}`}>
+              <Link to={`/dashboard/editais/editar/${item._id}`}>
                 <Button style={{ color: "#333" }}>
                   Editar <EditOutlined />
                 </Button>

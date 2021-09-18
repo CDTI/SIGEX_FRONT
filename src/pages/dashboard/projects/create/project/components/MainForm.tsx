@@ -15,22 +15,28 @@ import
   Typography,
 } from "antd";
 import { FormInstance } from "antd/lib/form";
-import { SelectValue } from "antd/lib/select";
 import { RadioChangeEvent } from "antd/lib/radio";
+import { SelectValue } from "antd/lib/select";
 import { MaskedInput } from "antd-mask-input";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-import { noticesKey, programsKey, usersKey } from "..";
+import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
 import { Restricted } from "../../../../../../components/Restricted";
 import { useHttpClient } from "../../../../../../hooks/useHttpClient";
-import { getProgramId, Program } from "../../../../../../interfaces/program";
+import { Campus, Course } from "../../../../../../interfaces/course";
 import { Category, getCategoryId, isCategory } from "../../../../../../interfaces/category";
 import { getNoticeId, isNotice, Notice, Schedule, Timetable } from "../../../../../../interfaces/notice";
+import { getProgramId, Program } from "../../../../../../interfaces/program";
 import { Project } from "../../../../../../interfaces/project";
 import { getUserId, User } from "../../../../../../interfaces/user";
 import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/programs";
-import { getActiveNoticesEndpoint, getAllUsersEndpoint } from "../../../../../../services/endpoints/users";
+import
+{
+  getActiveNoticesEndpoint,
+  getAllUsersEndpoint,
+  getAssociatedCoursesEndpoint
+} from "../../../../../../services/endpoints/users";
 
 interface Props
 {
@@ -49,6 +55,9 @@ function scheduleAsValue(s: Schedule)
 
 export const MainForm: React.FC<Props> = (props) =>
 {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const selectCoursesRequester = useHttpClient();
+
   const [users, setUsers] = useState<User[]>([]);
   const selectUsersRequester = useHttpClient();
 
@@ -70,6 +79,18 @@ export const MainForm: React.FC<Props> = (props) =>
   {
     (async () =>
     {
+      const courses = localStorage.getItem(coursesKey) != null
+        ? JSON.parse(localStorage.getItem(coursesKey)!) as Course[]
+        : await selectCoursesRequester.send(
+          {
+            method: "GET",
+            url: getAssociatedCoursesEndpoint(),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            cancellable: true
+          });
+
+      setCourses(courses ?? []);
+
       const users = localStorage.getItem(usersKey) != null
         ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
         : (await selectUsersRequester.send(
@@ -79,7 +100,7 @@ export const MainForm: React.FC<Props> = (props) =>
             cancellable: true
           })).user;
 
-      setUsers(users);
+      setUsers(users ?? []);
 
       const programs = localStorage.getItem(programsKey) != null
         ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
@@ -90,7 +111,7 @@ export const MainForm: React.FC<Props> = (props) =>
             cancellable: true
           })).programs;
 
-      setPrograms(programs);
+      setPrograms(programs ?? []);
 
       let notices = localStorage.getItem(noticesKey) != null
         ? JSON.parse(localStorage.getItem(noticesKey)!) as Notice[]
@@ -102,7 +123,7 @@ export const MainForm: React.FC<Props> = (props) =>
             cancellable: true
           });
 
-      setNotices(notices);
+      setNotices(notices ?? []);
 
       if (props.initialValues != null)
       {
@@ -140,6 +161,7 @@ export const MainForm: React.FC<Props> = (props) =>
         });
       }
 
+      localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));
       localStorage.setItem(noticesKey, JSON.stringify(notices));
       localStorage.setItem(programsKey, JSON.stringify(programs));
@@ -313,6 +335,24 @@ export const MainForm: React.FC<Props> = (props) =>
 
         {selectedCategory != null && selectedCategory.name === "Extensão específica do curso" && (
           <>
+            <Col span={24}>
+              <Form.Item
+                name="course"
+                label="Curso"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Select
+                  loading={selectCoursesRequester.inProgress}
+                  options={courses.map((c: Course) =>
+                  ({
+                    label: `${c.name} - ${(c.campus as Campus).name}`,
+                    value: c._id!
+                  }))}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+
             <Col span={24}>
               <Form.Item
                 name="typeProject"

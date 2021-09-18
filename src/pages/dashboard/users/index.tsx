@@ -126,7 +126,7 @@ export const UsersPage: React.FC = () =>
           <Link
             to={
             {
-              pathname: `/dashboard/users/edit/${record._id!}`,
+              pathname: `/dashboard/usuarios/editar/${record._id!}`,
               state: { user: record }
             }}
           >
@@ -142,7 +142,7 @@ export const UsersPage: React.FC = () =>
       <Row gutter={[0, 8]} justify="center">
         <Col span={24}>
           <Button>
-            <Link to="/dashboard/users/create">
+            <Link to="/dashboard/usuarios/criar">
               Adicionar
             </Link>
           </Button>
