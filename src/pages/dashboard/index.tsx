@@ -5,7 +5,6 @@ import
 {
   BankOutlined,
   TeamOutlined,
-  PieChartOutlined,
   UserOutlined,
   UnorderedListOutlined,
   FileTextOutlined,
@@ -53,7 +52,7 @@ export const Dashboard: React.FC = (props) =>
 
   const location = window.location.href.slice(21);
   const userRoles = useMemo(() =>
-    context.user!.roles.map((r: string | Role) => (r as Role).description),
+    context.user?.roles?.map((r: string | Role) => (r as Role).description) ?? [],
     [context.user]);
 
   return (
