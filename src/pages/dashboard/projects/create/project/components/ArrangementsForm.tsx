@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, Space, Divider, Row, Col, Typography } from "antd";
-import { MaskedInput } from "antd-mask-input";
 import { FormInstance } from "antd/lib/form";
+import { MaskedInput } from "antd-mask-input";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
-import moment from "moment";
 
 import { Planning } from "../../../../../../interfaces/project";
 
@@ -11,12 +10,6 @@ interface Props
 {
   formController: FormInstance;
   initialValues?: Planning[];
-}
-
-function disableDateRange(currentDate: moment.Moment)
-{
-  return currentDate < moment().startOf("day")
-    || currentDate > moment().endOf("day").add(4, "years");
 }
 
 export const ArrangementsForm: React.FC<Props> = (props) =>

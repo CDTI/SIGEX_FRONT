@@ -21,16 +21,16 @@ import { Planning, Project, Community, Resources, Partnership } from "../../../.
 import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/endpoints/projects";
 import { hasActiveNoticesEndpoint } from "../../../../../services/endpoints/users";
 
-interface LocationState
-{
-  project?: Project;
-  context: "admin" | "user";
-}
-
 interface FormView
 {
   view: ReactNode;
   title: string;
+}
+
+interface LocationState
+{
+  project?: Project;
+  context: "admin" | "user";
 }
 
 interface UrlParams
@@ -46,15 +46,14 @@ export const usersKey = "users";
 
 export const CreateProposalPage: React.FC = () =>
 {
+  const authContext = useAuth();
+  const history = useHistory();
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();
-  const history = useHistory();
-  const authContext = useAuth();
-  const [isFirstExecution, setIsFirstExecution] = useState(true);
 
+  const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
   const [formState, sendEvent] = useFormStateMachine();
   const [formController] = Form.useForm();
-  const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
   const formProjectsRequester = useHttpClient();
 
   const [hasActiveNotices, setHasActiveNotices] = useState(true);
@@ -66,14 +65,14 @@ export const CreateProposalPage: React.FC = () =>
   {
     (async () =>
     {
-      const hasActiveNotices = await validationNoticesRequester.send(
+      const hasActiveNotices = await validationNoticesRequester.send<boolean>(
       {
         method: "GET",
         url: hasActiveNoticesEndpoint(),
         cancellable: true
       });
 
-      setHasActiveNotices(hasActiveNotices);
+      setHasActiveNotices(hasActiveNotices ?? false);
 
       if (location.state.project != null)
         sendEvent(
@@ -85,68 +84,72 @@ export const CreateProposalPage: React.FC = () =>
         hasActiveNotices
           ? setLoaderModalIsVisible(true)
           : localStorage.removeItem(savedStateKey);
-
-      setIsFirstExecution(false);
     })();
 
     return () =>
     {
+      formProjectsRequester.halt();
+      validationNoticesRequester.halt();
+
       localStorage.removeItem(coursesKey);
-      localStorage.removeItem(usersKey);
       localStorage.removeItem(noticesKey);
       localStorage.removeItem(programsKey);
-    }
-  }, []);
-
-  useEffect(() =>
-  {
-    if (!isFirstExecution)
-    {
-      if (formState.value !== "succeeded" && formState.value !== "failed")
-      {
-        if (!loaderModalIsVisible)
-          localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
-
-        if (formState.value === "pending")
-        {
-          (async () =>
-          {
-            try
-            {
-              await formProjectsRequester.send(params.id == null
-              ? {
-                method: "POST",
-                url: createProjectEndpoint(),
-                body: formState.context.data,
-                cancellable: true
-              }
-              : {
-                method: "PUT",
-                url: updateProjectEndpoint(params.id),
-                body: formState.context.data,
-                cancellable: true
-              });
-
-              sendEvent({ type: "SUCCESS" });
-            }
-            catch (error)
-            {
-              if ((error as Error).message !== "")
-                setFailedSubmitMessage((error as Error).message);
-
-              sendEvent({ type: "ERROR" });
-            }
-          })();
-        }
-      }
-      else if (formState.value === "succeeded")
-      {
+      localStorage.removeItem(usersKey);
+      if (location.state.context === "admin")
         localStorage.removeItem(savedStateKey);
-      }
     }
   },
   [
-    isFirstExecution,
+    location.state,
+    sendEvent,
+    formProjectsRequester.halt,
+    validationNoticesRequester.halt,
+    validationNoticesRequester.send
+  ]);
+
+  useEffect(() =>
+  {
+    if (formState.value === "pending")
+    {
+      (async () =>
+      {
+        try
+        {
+          await formProjectsRequester.send(params.id == null
+          ? {
+            method: "POST",
+            url: createProjectEndpoint(),
+            body: formState.context.data,
+            cancellable: true
+          }
+          : {
+            method: "PUT",
+            url: updateProjectEndpoint(params.id),
+            body: formState.context.data,
+            cancellable: true
+          });
+
+          sendEvent({ type: "SUCCESS" });
+        }
+        catch (error)
+        {
+          if ((error as Error).message !== "")
+            setFailedSubmitMessage((error as Error).message);
+
+          sendEvent({ type: "ERROR" });
+        }
+      })();
+    }
+    else
+    {
+      formState.value === "succeeded"
+        ? localStorage.removeItem(savedStateKey)
+        : formState.context.data != null
+          && localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
+    }
+  },
+  [
+    formState.context,
     formState.value,
     params.id,
     sendEvent,
@@ -169,7 +172,7 @@ export const CreateProposalPage: React.FC = () =>
     removeSavedState();
   }, [sendEvent, removeSavedState]);
 
-  const handleOnFormFinish = useCallback((formName: string, values: Store) =>
+  const handleFormFinished = useCallback((formName: string, values: Store) =>
   {
     switch (formName)
     {
@@ -377,7 +380,7 @@ export const CreateProposalPage: React.FC = () =>
 
       <Spin spinning={validationNoticesRequester.inProgress}>
         <Structure title={`${params.id == null ? "Cadastrar" : "Alterar"} proposta`}>
-          <Form.Provider onFormFinish={(name, { values }) => handleOnFormFinish(name, values)}>
+          <Form.Provider onFormFinish={(name, { values }) => handleFormFinished(name, values)}>
             <Row justify="center" gutter={[0, 24]}>
               <Col xs={24} xl={21} xxl={18}>
                 <Steps current={formState.context.step}>

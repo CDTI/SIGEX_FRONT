@@ -50,7 +50,7 @@ export const updateNotice = async (id: string, period: Notice): Promise<string> 
 
 export const changeNoticeStatus = async (id: string): Promise<string> =>
 {
-  const response = await httpClient.put(`/notice/changeStatus/${id}`);
+  const response = await httpClient.put(`/notice/${id}/is-active`);
 
   return response.data;
 };

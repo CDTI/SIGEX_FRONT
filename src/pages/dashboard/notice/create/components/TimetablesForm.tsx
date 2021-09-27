@@ -1,72 +1,88 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Col, Divider, Form, Input, Row, Select, Space, Typography } from "antd";
+import { FormInstance } from "antd/lib/form";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
+import { categoriesKey } from "..";
+
+import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import { Category } from "../../../../../interfaces/category";
-import { Notice, Timetable } from "../../../../../interfaces/notice";
-import { getActiveCategories } from "../../../../../services/category_service";
+import { Timetable } from "../../../../../interfaces/notice";
+import { getActiveCategoriesEndpoint } from "../../../../../services/endpoints/categories";
 
 interface Props
 {
-  onBack(): void;
-  onSubmit(notice: Notice): void;
-  notice?: Notice;
+  formController: FormInstance;
+  initialValues?: Timetable[];
 }
 
 const { Option } = Select;
 
-export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
+export const TimetablesForm: React.FC<Props> = (props) =>
 {
   const [shouldDisableButton, setShouldDisableButton] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-
-  const [form] = Form.useForm();
+  const selectCategoriesRequester = useHttpClient();
 
   useEffect(() =>
   {
     (async () =>
     {
-      setCategories(await getActiveCategories());
-      if (notice !== undefined)
-        form.setFieldsValue(notice);
+      const categories = localStorage.getItem(categoriesKey) != null
+        ? JSON.parse(localStorage.getItem(categoriesKey)!) as Category[]
+        : await selectCategoriesRequester.send<Category[]>(
+          {
+            method: "GET",
+            url: getActiveCategoriesEndpoint(),
+            cancellable: true
+          });
+
+      setCategories(categories ?? []);
+
+      localStorage.setItem(categoriesKey, JSON.stringify(categories));
     })();
-  }, [form, notice]);
 
-  const handleOnFinish = async (values: Notice) => onSubmit(values);
+    return () =>
+    {
+      selectCategoriesRequester.halt();
+    }
+  }, [selectCategoriesRequester.halt, selectCategoriesRequester.send]);
 
-  const handleAddCategory = (add: (v?: any, i?: number | undefined) => void) =>
+  useEffect(() =>
   {
-    let categoryId: string = form.getFieldValue("categorySelector");
-    if (!form.getFieldValue("timetables")?.find((tt: Timetable)=> tt.category === categoryId))
-      add(
+    if (props.initialValues != null)
+      props.formController.setFieldsValue({ timetables: props.initialValues });
+  }, [props.formController, props.initialValues]);
+
+  const addCategory = useCallback((addFn: (v?: any, i?: number | undefined) => void) =>
+  {
+    const categoryId: string = props.formController.getFieldValue("categorySelector");
+    const timetables: Timetable[] = props.formController.getFieldValue("timetables");
+    if (!(timetables?.some((tt: Timetable)=> tt.category === categoryId) ?? false))
+      addFn(
       {
         category: categoryId,
-        schedules:
-        [{
-          location: undefined,
-          period: undefined,
-          day: undefined
-        }]
+        schedules: [{ location: undefined, period: undefined, day: undefined }]
       });
 
-    form.setFieldsValue({ categorySelector: undefined });
+    props.formController.setFieldsValue({ categorySelector: undefined });
     setShouldDisableButton(true);
-  };
+  }, [props.formController]);
 
-  const getCategoryName = (index: number) =>
+  const getCategoryName = useCallback((index: number) =>
   {
-    let categoryId = form.getFieldValue("timetables")[index]?.category;
+    const timetables: Timetable[] = props.formController.getFieldValue("timetables")!;
+    const categoryId = timetables[index]?.category;
     return categories.find((c) => c._id === categoryId)?.name ?? "";
-  };
+  }, [categories, props.formController]);
 
   return (
     <Form
-      form={form}
       layout="vertical"
-      onFinish={handleOnFinish}
+      form={props.formController}
     >
       <Row justify="center">
-        <Col xs={24} xl={21} xxl={18}>
+        <Col span={24}>
           <Form.Item
             name="categorySelector"
             label="Categoria"
@@ -92,7 +108,7 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
           </Form.Item>
         </Col>
 
-        <Col xs={24} xl={21} xxl={18}>
+        <Col span={24}>
           <Form.List name="timetables">
             {(categoryFields, { add, remove }) => (
               <>
@@ -103,7 +119,7 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
                         block
                         type="dashed"
                         disabled={shouldDisableButton}
-                        onClick={() => handleAddCategory(add)}
+                        onClick={() => addCategory(add)}
                       >
                         <PlusOutlined /> Confirmar categoria
                       </Button>
@@ -237,18 +253,6 @@ export const AddCategories: React.FC<Props> = ({ notice, onBack, onSubmit }) =>
               </>
             )}
           </Form.List>
-        </Col>
-
-        <Col xs={24} xl={21} xxl={18}>
-          <Row justify="space-between">
-            <Button type="default" onClick={onBack}>
-              Voltar
-            </Button>
-
-            <Button type="primary" htmlType="submit">
-              Salvar
-            </Button>
-          </Row>
         </Col>
       </Row>
     </Form>

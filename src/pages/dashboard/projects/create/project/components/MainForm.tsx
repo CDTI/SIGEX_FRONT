@@ -91,16 +91,17 @@ export const MainForm: React.FC<Props> = (props) =>
 
       setCourses(courses ?? []);
 
-      const users = localStorage.getItem(usersKey) != null
-        ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
-        : (await selectUsersRequester.send(
+      let notices = localStorage.getItem(noticesKey) != null
+        ? JSON.parse(localStorage.getItem(noticesKey)!) as Notice[]
+        : await selectNoticesRequester.send(
           {
             method: "GET",
-            url: getAllUsersEndpoint(),
+            url: getActiveNoticesEndpoint(),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
             cancellable: true
-          })).user;
+          });
 
-      setUsers(users ?? []);
+      setNotices(notices ?? []);
 
       const programs = localStorage.getItem(programsKey) != null
         ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
@@ -113,17 +114,16 @@ export const MainForm: React.FC<Props> = (props) =>
 
       setPrograms(programs ?? []);
 
-      let notices = localStorage.getItem(noticesKey) != null
-        ? JSON.parse(localStorage.getItem(noticesKey)!) as Notice[]
-        : await selectNoticesRequester.send(
+      const users = localStorage.getItem(usersKey) != null
+        ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
+        : (await selectUsersRequester.send(
           {
             method: "GET",
-            url: getActiveNoticesEndpoint(),
-            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            url: getAllUsersEndpoint(),
             cancellable: true
-          });
+          })).user;
 
-      setNotices(notices ?? []);
+      setUsers(users ?? []);
 
       if (props.initialValues != null)
       {
