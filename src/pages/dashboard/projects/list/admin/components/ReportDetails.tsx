@@ -6,7 +6,6 @@ import { User } from "../../../../../../interfaces/user";
 import { Category } from "../../../../../../interfaces/category";
 import { Program } from "../../../../../../interfaces/program";
 import { formatDate } from "../../../../../../utils/dateFormatter";
-import { Notice } from "../../../../../../interfaces/notice";
 
 interface Props
 {
@@ -14,11 +13,6 @@ interface Props
 }
 
 const { Text, Paragraph } = Typography;
-
-function toSemester(date: Date): string
-{
-  return `${date.getMonth() < 6 ? 1 : 2}º semestre de ${date.getFullYear()}`;
-}
 
 export const ReportDetails: React.FC<Props> = (props) =>
 {
@@ -41,9 +35,6 @@ export const ReportDetails: React.FC<Props> = (props) =>
 
             <Text strong>Programa</Text>
             <Paragraph>{(props.project.program as Program).name}</Paragraph>
-
-            <Text strong>Data do relatório</Text>
-            <Paragraph>{toSemester(new Date((props.project.notice as Notice).effectiveDate))}</Paragraph>
           </Collapse.Panel>
 
           <Collapse.Panel key="methodology" header="Procedimentos Metodológicos">
