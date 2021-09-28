@@ -383,7 +383,7 @@ export const CreateProposalPage: React.FC = () =>
           <Form.Provider onFormFinish={(name, { values }) => handleFormFinished(name, values)}>
             <Row justify="center" gutter={[0, 24]}>
               <Col xs={24} xl={21} xxl={18}>
-                <Steps current={formState.context.step}>
+                <Steps type="navigation" current={formState.context.step}>
                   {FormSteps.map((k: string) =>
                     <Steps.Step key={k} title={forms.get(k)!.title} />
                   )}

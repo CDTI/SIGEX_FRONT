@@ -44,7 +44,7 @@ export const CreateNoticePage: React.FC = () =>
 
   useEffect(() =>
   {
-    if (location.state.notice != null)
+    if (location.state?.notice != null)
       sendEvent(
       {
         type: "RESTORE",
@@ -151,7 +151,7 @@ export const CreateNoticePage: React.FC = () =>
 
     ["timetables",
     {
-      title: "",
+      title: "Categorias e horários",
       view: (
         <TimetablesForm
           formController={formController}
@@ -201,7 +201,7 @@ export const CreateNoticePage: React.FC = () =>
       <Form.Provider onFormFinish={(name, { values }) => handleFormFinished(name, values)}>
         <Row justify="center" gutter={[0, 24]}>
           <Col xs={24} xl={21} xxl={18}>
-            <Steps current={formState.context.step}>
+            <Steps type="navigation" current={formState.context.step}>
               {FormSteps.map((k: string) =>
                 <Steps.Step key={k} title={forms.get(k)!.title} />
               )}

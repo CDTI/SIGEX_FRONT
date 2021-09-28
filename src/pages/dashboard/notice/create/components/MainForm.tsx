@@ -65,6 +65,7 @@ export const MainDataForm: React.FC<Props> = (props) =>
 
   return (
     <Form
+      name="main"
       layout="vertical"
       form={props.formController}
     >

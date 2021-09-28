@@ -149,7 +149,7 @@ export const CreateReportPage: React.FC = () =>
 
     "methodology":
     {
-      title: "Procedimentos metodológicos",
+      title: "Metodologia",
       content: (
         <MethodologyForm
           formController={reportForm}
@@ -218,9 +218,9 @@ export const CreateReportPage: React.FC = () =>
             handleOnFormFinish(values as Report)
           }
         >
-          <Row gutter={[8, 8]} justify="center">
-            <Col xs={24} xl={21} xxl={18}>
-              <Steps current={FormSteps[reportFormState.step].order}>
+          <Row gutter={[0, 24]} justify="center">
+            <Col xs={24} xl={21} xxl={21}>
+              <Steps type="navigation" current={FormSteps[reportFormState.step].order}>
                 {Object.keys(FormSteps)
                   .filter((k: string) => k !== "completed")
                   .map((k: string) => <Steps.Step key={k} title={contents[k].title} />
@@ -228,11 +228,11 @@ export const CreateReportPage: React.FC = () =>
               </Steps>
             </Col>
 
-            <Col xs={24} xl={21} xxl={18}>
+            <Col xs={24} xl={21} xxl={21}>
               {contents[reportFormState.step].content}
             </Col>
 
-            <Col xs={24} xl={21} xxl={18}>
+            <Col xs={24} xl={21} xxl={21}>
               <Row justify="space-between">
                 <Button type="default" onClick={() => handleOnBack()}>
                   Voltar

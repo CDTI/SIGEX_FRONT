@@ -30,7 +30,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
   },
   {
     key: "status",
-    title: "Status",
+    title: "Avaliação",
     render: (text: string, record: Project) =>
     {
       switch (record.status)

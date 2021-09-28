@@ -172,7 +172,7 @@ export const TeacherProjectsPage: React.FC = () =>
   },
   {
     key: "status",
-    title: "Status",
+    title: "Avaliação",
     dataIndex: "status",
     render: (status: string) =>
     {

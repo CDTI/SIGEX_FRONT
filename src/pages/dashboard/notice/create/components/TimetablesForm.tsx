@@ -78,6 +78,7 @@ export const TimetablesForm: React.FC<Props> = (props) =>
 
   return (
     <Form
+      name="timetables"
       layout="vertical"
       form={props.formController}
     >
