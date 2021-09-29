@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Form, Button, Input, Result } from "antd";
+import { Link, useHistory, useLocation } from "react-router-dom";
+import { Form, Button, Input, Result, Row, Col } from "antd";
 
 import { Program } from "../../../../interfaces/program";
 import { createProgram, ReturnResponsePost } from "../../../../services/program_service";
 import Structure from "../../../../components/layout/structure";
-import { ContainerFlex } from "../../../../global/styles";
-
-const tailLayout =
-{
-  wrapperCol: { offset: 8, span: 16 },
-};
 
 interface ProgramForm
 {
@@ -20,6 +14,9 @@ interface ProgramForm
 
 export const CreateProgram: React.FC = () =>
 {
+  const history = useHistory();
+  const location = useLocation();
+
   const [state, setstate] = useState<ReturnResponsePost | null>(null)
   const [form] = Form.useForm()
 
@@ -59,44 +56,52 @@ export const CreateProgram: React.FC = () =>
           [
             <Button
               type="primary"
-              key="/dashboard/programas"
               onClick={resetForm}
             >
-              <Link to="/dashboard/programas">Ok</Link>
+              <Link to={`${location.pathname}/programas`}>Ok</Link>
             </Button>,
           ]}
         />
       )}
 
       {state === null && (
-        <ContainerFlex>
-          <Form
-            form={form}
-            onFinish={onFinish}
-            layout="vertical"
-            style={{ width: "100%", maxWidth: "500px" }}
-          >
-            <Form.Item
-              name="name"
-              label="Nome"
-              rules={[{ required: true, message: "Campo obrigatório" }]}
-            >
-              <Input placeholder="Nome do programa" />
-            </Form.Item>
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout="vertical"
+        >
+          <Row justify="center">
+            <Col xs={24} xl={21} xxl={18}>
+              <Form.Item
+                name="name"
+                label="Nome"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Input placeholder="Nome do programa" style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
 
-            <Form.Item
-              name="description"
-              label="Descrição"
-              rules={[{ required: true, message: "Campo Obrigatório" }]}
-            >
-              <Input placeholder="Descrição do programa" />
-            </Form.Item>
+            <Col xs={24} xl={21} xxl={18}>
+              <Form.Item
+                name="description"
+                label="Descrição"
+                rules={[{ required: true, message: "Campo Obrigatório" }]}
+              >
+                <Input placeholder="Descrição do programa" style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
 
-            <Form.Item {...tailLayout}>
-              <Button htmlType="submit" type="primary">Cadastrar</Button>
-            </Form.Item>
-          </Form>
-        </ContainerFlex>
+            <Col xs={24} xl={21} xxl={18}>
+              <Row justify="space-between">
+                <Button onClick={() => history.goBack()}>
+                  Voltar
+                </Button>
+
+                <Button htmlType="submit" type="primary">Cadastrar</Button>
+              </Row>
+            </Col>
+          </Row>
+        </Form>
       )}
     </Structure >
   );

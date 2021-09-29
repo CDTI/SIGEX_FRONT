@@ -22,7 +22,6 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
-import { Restricted } from "../../../../../../components/Restricted";
 import { useHttpClient } from "../../../../../../hooks/useHttpClient";
 import { Campus, Course } from "../../../../../../interfaces/course";
 import { Category, getCategoryId, isCategory } from "../../../../../../interfaces/category";
@@ -37,6 +36,7 @@ import
   getAllUsersEndpoint,
   getAssociatedCoursesEndpoint
 } from "../../../../../../services/endpoints/users";
+import { Restricted } from "../../../../../../components/Restricted";
 
 interface Props
 {
@@ -198,7 +198,7 @@ export const MainForm: React.FC<Props> = (props) =>
     >
       <Row gutter={[8, 0]}>
         {props.context === "admin" && (
-          <Restricted allowedRoles={["Administrador"]}>
+          <Restricted allow="Administrador">
             <Col span={24}>
               <Form.Item
                 name="author"

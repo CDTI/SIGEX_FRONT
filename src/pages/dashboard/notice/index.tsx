@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import
 {
   Button,
@@ -21,6 +21,8 @@ import
 
 export const Notices: React.FC = () =>
 {
+  const location = useLocation();
+
   const [notices, setNotices] = useState<Notice[]>([]);
   const [shouldReloadNotices, setShouldReloadNotices] = useState(true);
 
@@ -101,7 +103,7 @@ export const Notices: React.FC = () =>
 
   return (
     <Structure title="Editais">
-      <Link to="/dashboard/editais/criar">Cadastrar edital</Link>
+      <Link to={`${location.pathname}/criar`}>Cadastrar edital</Link>
 
       <List
         itemLayout="horizontal"
@@ -120,7 +122,7 @@ export const Notices: React.FC = () =>
                 <Link
                   to={
                   {
-                    pathname: `/dashboard/editais/editar/${item._id}`,
+                    pathname: `${location.pathname}/editar/${item._id}`,
                     state: { notice: item }
                   }}
                 >
@@ -132,7 +134,7 @@ export const Notices: React.FC = () =>
                 <Link
                   to={
                   {
-                    pathname: "/dashboard/editais/criar",
+                    pathname: `${location.pathname}/criar`,
                     state: { notice: item }
                   }}
                 >

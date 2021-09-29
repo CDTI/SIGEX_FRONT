@@ -1,98 +1,76 @@
-import { AxiosError } from "axios";
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { notification } from "antd";
+import React, { createContext, useState, useEffect, useCallback } from "react";
+import { useHistory } from "react-router-dom";
 import { User } from "../interfaces/user";
 import { httpClient } from "../services/httpClient";
-import history from "../global/history";
-
-export interface Login
-{
-  cpf: string;
-  password: string;
-}
 
 interface AuthContextData
 {
-  signed: boolean;
+  isUserLoggedIn: boolean;
   user: User | null;
-  login(login: Login): Promise<void>;
-  logout(): void;
+  login?(token: string, user: User): void;
+  logout?(): void;
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData);
-
-export const AuthProvider: React.FC = ({ children }) =>
+export const AuthContext = createContext<AuthContextData>(
 {
-    // const initialValue = {
-    //     email: "",
-    //     password: "",
-    //     lattes: "",
-    //     cpf: "",
-    //     name: "",
-    //     _id: "",
-    //     role: "",
-    // }
-    const [user, setUser] = useState<User | null>(null)
+  isUserLoggedIn: false,
+  user: null
+});
 
-    useEffect(() => {
-        const storageUser = localStorage.getItem("@pp:user")
-        const storageToken = localStorage.getItem("@pp:token")
+export const AuthProvider: React.FC = (props) =>
+{
+  const history = useHistory();
 
-        if (storageToken && storageUser) {
-            setUser(JSON.parse(storageUser.toString()))
-            httpClient.defaults.headers.Authorization = `Bearer ${storageToken}`
-            history.push("/dashboard")
-        }
-    }, [])
+  const [user, setUser] = useState<User | null>(null);
 
-    const logout = () => {
-        setUser(null)
-
-        localStorage.removeItem("@pp:user")
-        localStorage.removeItem("@pp:token")
+  useEffect(() =>
+  {
+    const storageUser = localStorage.getItem("@pp:user");
+    const storageToken = localStorage.getItem("@pp:token");
+    if (storageToken && storageUser)
+    {
+      authorize(storageToken, JSON.parse(storageUser.toString()));
+      history.replace("/home");
     }
+  }, []);
 
-    const login = async (login: Login) => {
-        try {
-            let status: "success" | "error" = "success"
-            const response = await httpClient.post("/login", {
-                cpf: login.cpf,
-                password: login.password
-            })
-            console.log(response)
-            status = response.data.status
-            if (response.data.token !== null && response.data.status === "success") {
-                notification[status]({ message: response.data.message })
-                setUser(response.data.user)
-                httpClient.defaults.headers.Authorization = `Bearer ${response.data.token}`
+  const authorize = useCallback((token: string, user: User) =>
+  {
+    httpClient.defaults.headers.Authorization = `Bearer ${token}`
+    setUser(user);
+  }, []);
 
-                localStorage.setItem("@pp:user", JSON.stringify(response.data.user))
-                localStorage.setItem("@pp:token", response.data.token)
+  const login = useCallback((token: string, user: User) =>
+  {
+    localStorage.setItem("@pp:token", token);
+    localStorage.setItem("@pp:user", JSON.stringify(user));
 
+    authorize(token, user);
 
-                history.push("/dashboard")
-            } else if (response.data.token === null && response.data.status === "error") {
-                notification[status]({ message: response.data.message })
-            }
-        } catch (err) {
-            if (err && err.reponse) {
-                const axiosError = err as AxiosError;
-                console.log(axiosError);
-                return axiosError.response?.data;
-            }
-            throw err;
-        }
-    }
+    history.replace("/home");
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ signed: Boolean(user), user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+  const logout = useCallback(() =>
+  {
+    setUser(null);
 
-export const useAuth = () => {
-    const context = useContext(AuthContext)
+    localStorage.removeItem("@pp:user");
+    localStorage.removeItem("@pp:token");
 
-    return context
-}
+    history.replace("/login");
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={
+      {
+        isUserLoggedIn: user != null,
+        user,
+        login,
+        logout
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
+  );
+};

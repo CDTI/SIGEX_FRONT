@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Button, Col, Form, Modal, Result, Row, Spin, Steps, Typography } from "antd";
@@ -12,7 +12,6 @@ import { CommunityForm } from "./components/CommunityForm";
 import { ArrangementsForm } from "./components/ArrangementsForm";
 import { ResourcesForm } from "./components/ResourcesForm";
 
-import { useAuth } from "../../../../../context/auth";
 import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import Structure from "../../../../../components/layout/structure";
 
@@ -20,6 +19,7 @@ import { Schedule } from "../../../../../interfaces/notice";
 import { Planning, Project, Community, Resources, Partnership } from "../../../../../interfaces/project";
 import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/endpoints/projects";
 import { hasActiveNoticesEndpoint } from "../../../../../services/endpoints/users";
+import { AuthContext } from "../../../../../context/auth";
 
 interface FormView
 {
@@ -46,7 +46,7 @@ export const usersKey = "users";
 
 export const CreateProposalPage: React.FC = () =>
 {
-  const authContext = useAuth();
+  const authContext = useContext(AuthContext);
   const history = useHistory();
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();

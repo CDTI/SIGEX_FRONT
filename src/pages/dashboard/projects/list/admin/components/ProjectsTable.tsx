@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { Button, Col, Space, Table, Tag } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
@@ -16,6 +16,8 @@ interface Props
 
 export const ProjectsTable: React.FC<Props> = (props) =>
 {
+  const location = useLocation();
+
   const columns =
   [{
     key: "name",
@@ -61,7 +63,7 @@ export const ProjectsTable: React.FC<Props> = (props) =>
           <Link
             to={
             {
-              pathname: `/dashboard/propostas/editar/${record._id}`,
+              pathname: `${location.pathname}/editar/${record._id}`,
               state: { project: record, context: "admin" }
             }}
           >

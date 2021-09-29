@@ -1,6 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { Layout, Menu, Popover, Button, Typography } from "antd";
+import "antd/dist/antd.css";
+import "../../assets/antd-override.css"
+import logo from "../../assets/sigex.png"
+
+import React, { useState, useMemo, useCallback, useContext } from "react";
+import { Link, useHistory, useLocation } from "react-router-dom";
+import { Layout, Menu, Button, Typography, Row, Dropdown } from "antd";
 import
 {
   BankOutlined,
@@ -9,246 +13,248 @@ import
   UnorderedListOutlined,
   FileTextOutlined,
   HomeOutlined,
-  SettingOutlined,
   DiffOutlined,
-  PoweroffOutlined,
   FileAddOutlined,
-  FieldTimeOutlined
+  FieldTimeOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from "@ant-design/icons";
 
-import { useAuth } from "../../context/auth";
 import { Role } from "../../interfaces/user";
-import logo from "../../assets/sigex.png"
+import { AuthContext } from "../../context/auth";
+import { Restricted } from "../../components/Restricted";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
-export const Dashboard: React.FC = (props) =>
+export const AppLayout: React.FC = (props) =>
 {
   const history = useHistory();
+  const authContext = useContext(AuthContext);
   const [collapsed, setcollapsed] = useState(false);
-  const context = useAuth();
 
-  const onCollapse = (collapsed: boolean) => setcollapsed(collapsed);
+  const toggleSideMenu = useCallback(() => setcollapsed((prevState) => !prevState), []);
 
-  const memoizedDate = useMemo(() =>
-  {
-    const date = new Date();
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().padStart(4, "0");
-    return (
-      <Typography style={{ color: "#fff", marginLeft: "9px" }}>
-        {`${day}/${month}/${year}`}
-      </Typography>
-    );
-  }, []);
-
-  const logout = () =>
-  {
-    context.logout();
-    history.push("/");
-  }
-
-  const location = window.location.href.slice(21);
+  const location = useLocation();
   const userRoles = useMemo(() =>
-    context.user?.roles?.map((r: string | Role) => (r as Role).description) ?? [],
-    [context.user]);
+    authContext.user?.roles?.map((r: string | Role) => (r as Role).description) ?? [],
+    [authContext.user]);
+
+  const userMenu = useMemo(() => (
+    <Menu mode="vertical" style={{ padding: 8 }}>
+      <Menu.Item disabled>
+        <Typography.Title level={5} style={{ margin: 0 }}>
+          {`Olá, ${authContext.user?.name.split(" ")[0] ?? "como vai"}!`}
+        </Typography.Title>
+      </Menu.Item>
+
+      <Menu.Divider />
+
+      <Menu.Item>
+        <Link to="/usuario/perfil">
+          Perfil
+        </Link>
+      </Menu.Item>
+
+      <Menu.Item danger onClick={() =>authContext.logout!()}>
+        Sair
+      </Menu.Item>
+    </Menu>
+  ), [authContext.user]);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={onCollapse}
-      >
-        <div className="logo" >
-          <img src={logo} style={{ width: "100%", padding: "15px" }} alt="" />
-        </div>
-
-        <Menu theme="dark" defaultSelectedKeys={[location]}>
-          <Menu.Item
-            key="/dashboard"
-            icon={<HomeOutlined />}
+      <Header className="header" style={{ padding: "0 16px" }}>
+        <Row justify="space-between">
+          <Button
+            ghost
+            size="large"
+            shape="circle"
+            style={{ marginTop: 12 }}
+            onClick={toggleSideMenu}
           >
-            <Link to="/dashboard">
-              Home
-            </Link>
-          </Menu.Item>
+            {collapsed
+              ? <MenuUnfoldOutlined />
+              : <MenuFoldOutlined />
+            }
+          </Button>
 
-          {userRoles.includes("Administrador") && (
-            <Menu.Item
-              key="/dashboard/cursos"
-              icon={<BankOutlined />}
-            >
-              <Link to="/dashboard/cursos">
-                Cursos
-              </Link>
-            </Menu.Item>
-          )}
+          <Link to="/home">
+            <img src={logo} alt="SIGEX logo" height={64} />
+          </Link>
 
-          <SubMenu
-            key="/dashboard/programas"
-            title="Programas"
-            icon={<FileTextOutlined />}
+          <Dropdown arrow overlay={userMenu} placement="bottomRight">
+            <Button
+              ghost
+              size="large"
+              shape="circle"
+              icon={<UserOutlined/>}
+              style={{ marginTop: 12 }}
+            />
+          </Dropdown>
+        </Row>
+      </Header>
+
+      <Layout>
+        <Sider
+          theme="light"
+          width={250}
+          collapsible
+          collapsed={collapsed}
+          collapsedWidth={0}
+          trigger={null}
+          className="site-layout-background"
+        >
+          <Menu
+            mode="inline"
+            theme="light"
+            defaultSelectedKeys={[location.pathname]}
           >
             <Menu.Item
-              key="3"
-              icon={<UnorderedListOutlined />}
+              key="/home"
+              icon={<HomeOutlined />}
             >
-              <Link to="/dashboard/programas">
-                Listar Programas
+              <Link to="/home">
+                Home
               </Link>
             </Menu.Item>
 
             {userRoles.includes("Administrador") && (
               <Menu.Item
-                key="/dashboard/programas/criar"
-                icon={<DiffOutlined />}
+                key="/cursos"
+                icon={<BankOutlined />}
               >
-                <Link to="/dashboard/programas/criar">
-                  Criar Programa
+                <Link to="/cursos">
+                  Cursos
                 </Link>
               </Menu.Item>
             )}
-          </SubMenu>
 
-          {userRoles.includes("Administrador") && (
-            <>
+            <SubMenu
+              key="programas"
+              title="Programas"
+              icon={<FileTextOutlined />}
+            >
               <Menu.Item
-                key="/dashboard/usuarios"
-                icon={<UserOutlined />}
-              >
-                <Link to="/dashboard/usuarios">
-                  Usuários
-                </Link>
-              </Menu.Item>
-
-              <Menu.Item
-                key="/dashboard/categorias"
+                key="/programas"
                 icon={<UnorderedListOutlined />}
               >
-                <Link to="/dashboard/categorias">
-                  Categorias
+                <Link to="/programas">
+                  Listar Programas
                 </Link>
               </Menu.Item>
 
-              <Menu.Item
-                key="/dashboard/editais"
-                icon={<FieldTimeOutlined />}
-              >
-                <Link to="/dashboard/editais">Editais</Link>
-              </Menu.Item>
-
-              <Menu.Item
-                key="/dashboard/propostas"
-                icon={<TeamOutlined />}
-              >
-                <Link to="/dashboard/propostas">
-                  Projetos
-                </Link>
-              </Menu.Item>
-            </>
-          )}
-
-          {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE")) && (
-            <>
-              <SubMenu
-                key="minhas-propostas"
-                title="Meus projetos"
-                icon={<FileTextOutlined />}
-              >
+              {userRoles.includes("Administrador") && (
                 <Menu.Item
-                  key="/dashboard/propostas/criar"
-                  icon={<FileAddOutlined />}
+                  key="/programas/criar"
+                  icon={<DiffOutlined />}
                 >
-                  <Link
-                    to={
-                    {
-                      pathname: "/dashboard/propostas/criar",
-                      state: { context: "user" }
-                    }}
-                  >
-                    Registrar novo projeto
+                  <Link to="/programas/criar">
+                    Criar Programa
+                  </Link>
+                </Menu.Item>
+              )}
+            </SubMenu>
+
+            {userRoles.includes("Administrador") && (
+              <>
+                <Menu.Item
+                  key="/usuarios"
+                  icon={<UserOutlined />}
+                >
+                  <Link to="/usuarios">
+                    Usuários
                   </Link>
                 </Menu.Item>
 
                 <Menu.Item
-                  key="/dashboard/minhas-propostas"
+                  key="/categorias"
+                  icon={<UnorderedListOutlined />}
+                >
+                  <Link to="/categorias">
+                    Categorias
+                  </Link>
+                </Menu.Item>
+
+                <Menu.Item
+                  key="/editais"
+                  icon={<FieldTimeOutlined />}
+                >
+                  <Link to="/editais">Editais</Link>
+                </Menu.Item>
+
+                <Menu.Item
+                  key="/propostas"
                   icon={<TeamOutlined />}
                 >
-                  <Link to="/dashboard/minhas-propostas">
-                    Projetos registrados
+                  <Link to="/propostas">
+                    Projetos
                   </Link>
                 </Menu.Item>
-              </SubMenu>
-            </>
-          )}
+              </>
+            )}
 
-          {userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador") && (
-            <>
-              <Menu.Item
-                key="/dashboard/propostas"
-                icon={<TeamOutlined />}
-              >
-                <Link to="/dashboard/propostas">
-                  Projetos
-                </Link>
-              </Menu.Item>
-            </>
-          )}
-        </Menu>
-      </Sider>
-
-      <Layout className="site-layout">
-        <Header
-          className="site-layout-background"
-          style={
-          {
-            padding: 0,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
-          {memoizedDate}
-
-          <div>
-            <label style={{ color: "#fff", marginRight: "10px" }}>
-              Olá, {context.user?.name}
-            </label>
-
-            <Popover
-              trigger="focus"
-              content={(
-                <Button
-                  onClick={logout}
-                  type="link"
-                  style={{ backgroundColor: "#b23a48", color: "#fff" }}
+            {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE")) && (
+              <>
+                <SubMenu
+                  key="minhas-propostas"
+                  title="Meus projetos"
+                  icon={<FileTextOutlined />}
                 >
-                  <PoweroffOutlined />SAIR
-                </Button>
-              )}
-            >
-              <Button>
-                <SettingOutlined />
-              </Button>
-            </Popover>
-          </div>
-        </Header>
+                  <Menu.Item
+                    key="/propostas/criar"
+                    icon={<FileAddOutlined />}
+                  >
+                    <Link
+                      to={
+                      {
+                        pathname: "/propostas/criar",
+                        state: { context: "user" }
+                      }}
+                    >
+                      Registrar novo projeto
+                    </Link>
+                  </Menu.Item>
 
-        <Content style={{ margin: "0 16px" }}>
-          <div
+                  <Menu.Item
+                    key="/minhas-propostas"
+                    icon={<TeamOutlined />}
+                  >
+                    <Link to="/minhas-propostas">
+                      Projetos registrados
+                    </Link>
+                  </Menu.Item>
+                </SubMenu>
+              </>
+            )}
+
+            {userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador") && (
+              <>
+                <Menu.Item
+                  key="/propostas"
+                  icon={<TeamOutlined />}
+                >
+                  <Link to="/propostas">
+                    Projetos
+                  </Link>
+                </Menu.Item>
+              </>
+            )}
+          </Menu>
+        </Sider>
+
+        <Layout style={{ padding: "24px 24px 0 24px" }}>
+          <Content
+            style={{ padding: 24, margin: 0, backgroundColor: "#fff" }}
             className="site-layout-background"
-            style={{ padding: 24, minHeight: 360 }}
           >
             {props.children}
-          </div>
-        </Content>
+          </Content>
 
-        <Footer style={{ textAlign: "center" }}>
-          <Typography>Sigex ₢2020</Typography>
-        </Footer>
+          <Footer style={{ textAlign: "center" }}>
+            <Typography>SIGEX &nbsp; 2020 - {new Date().getFullYear()}</Typography>
+          </Footer>
+        </Layout>
       </Layout>
     </Layout>
   );

@@ -94,8 +94,7 @@ export const CreateUserPage: React.FC = () =>
     {
       await formUsersRequester.send(params.id == null
       ? {
-        method: "POST",
-        url: createUserEndpoint(),
+        ...createUserEndpoint(),
         body: user,
         cancellable: true
       }

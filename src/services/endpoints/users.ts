@@ -1,3 +1,5 @@
+import { HttpRequestConfiguration } from "../../hooks/useHttpClient";
+
 export function hasActiveNoticesEndpoint(): string
 {
   return "/user/me/notices/is-active";
@@ -18,9 +20,9 @@ export function getAllUsersEndpoint(): string
   return "/users";
 }
 
-export function createUserEndpoint(): string
+export function createUserEndpoint(): HttpRequestConfiguration
 {
-  return "/user";
+  return { method: "POST", url: "/user" };
 }
 
 export function updateUserEndpoint(id: string): string
@@ -36,4 +38,9 @@ export function requestUsersPasswordChangeEndpoint(cpf: string): string
 export function toggleUserEndpoint(id: string): string
 {
   return `/user/${id}/is-active`;
+}
+
+export function loginUserEndpoint(): HttpRequestConfiguration
+{
+  return { method: "POST", url: "/login" };
 }

@@ -25,7 +25,6 @@ import { ContentMap, UrlParams } from "./helpers/types";
 import { Report } from "../../../../../interfaces/project";
 import { createReport, updateReport } from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
-import { useUrlQueryParams } from "../../../../../hooks/useUrlQueryParams";
 
 export const CreateReportPage: React.FC = () =>
 {
@@ -39,7 +38,7 @@ export const CreateReportPage: React.FC = () =>
 
   const { id } = useParams<UrlParams>();
   const location = useLocation();
-  const urlQueryParams = useUrlQueryParams();
+  const urlQueryParams = new URLSearchParams(location.search);
   const history = useHistory();
 
   const projectId = urlQueryParams.get("project");

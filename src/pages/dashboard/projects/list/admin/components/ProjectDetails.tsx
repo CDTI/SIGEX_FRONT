@@ -14,7 +14,8 @@ import
   Input,
   Timeline,
   Row,
-  Col
+  Col,
+  Table
 } from "antd";
 
 import { Category } from "../../../../../../interfaces/category";
@@ -25,7 +26,6 @@ import { User } from "../../../../../../interfaces/user";
 import { createFeedbackProject, listFeedbackProject } from "../../../../../../services/feedback_service";
 import { ReturnResponse, updateProject } from "../../../../../../services/project_service";
 
-import MyTable from "../../../../../../components/layout/table";
 import { Restricted } from "../../../../../../components/Restricted";
 import { compareDate } from "../../../../../../utils";
 import { formatDate } from "../../../../../../utils/dateFormatter";
@@ -363,10 +363,10 @@ export const AdminViewProject: React.FC<Props> = (props) =>
                 <Col span={24}>
                   <Typography.Title level={3}>Materiais</Typography.Title>
                   {props.project.resources && (
-                    <MyTable
+                    <Table
                       columns={columnsMaterials}
                       pagination={false}
-                      data={props.project.resources.materials}
+                      dataSource={props.project.resources.materials}
                     />
                   )}
                 </Col>
@@ -374,10 +374,10 @@ export const AdminViewProject: React.FC<Props> = (props) =>
                 <Col span={24}>
                   <Typography.Title level={3}>Transportes</Typography.Title>
                   {props.project.resources && props.project.resources.transport && (
-                    <MyTable
+                    <Table
                       columns={columnsTransport}
                       pagination={false}
-                      data={[props.project.resources.transport]}
+                      dataSource={[props.project.resources.transport]}
                     />
                   )}
                 </Col>
@@ -399,7 +399,7 @@ export const AdminViewProject: React.FC<Props> = (props) =>
         </Col>
 
         {props.project.status !== "finished" && (
-          <Restricted allowedRoles={["Administrador"]}>
+          <Restricted allow="Administrador">
             <Col span={21}>
               <Space>
                 <Button

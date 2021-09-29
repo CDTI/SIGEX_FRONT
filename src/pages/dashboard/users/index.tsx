@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button, Col, Input, notification, Row, Space, Switch, Table } from "antd";
 
 import Structure from "../../../components/layout/structure";
@@ -10,6 +10,8 @@ import { getAllUsersEndpoint, toggleUserEndpoint } from "../../../services/endpo
 
 export const UsersPage: React.FC = () =>
 {
+  const location = useLocation();
+
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const tableUsersRequester = useHttpClient();
@@ -126,7 +128,7 @@ export const UsersPage: React.FC = () =>
           <Link
             to={
             {
-              pathname: `/dashboard/usuarios/editar/${record._id!}`,
+              pathname: `${location.pathname}/editar/${record._id!}`,
               state: { user: record }
             }}
           >
@@ -142,7 +144,7 @@ export const UsersPage: React.FC = () =>
       <Row gutter={[0, 8]} justify="center">
         <Col span={24}>
           <Button>
-            <Link to="/dashboard/usuarios/criar">
+            <Link to={`${location.pathname}/criar`}>
               Adicionar
             </Link>
           </Button>

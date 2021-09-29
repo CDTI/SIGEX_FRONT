@@ -5,11 +5,12 @@ import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from "./sty
 
 import logo from "../../assets/sigex.png";
 import { changePassword } from "../../services/user_service";
-import { useUrlQueryParams } from "../../hooks/useUrlQueryParams";
+import { useLocation } from "react-router";
 
 export const ChangePasswordPage: React.FC = () =>
 {
-  const urlQueryParams = useUrlQueryParams();
+  const location = useLocation();
+  const urlQueryParams = new URLSearchParams(location.search);
   const userId = urlQueryParams.get("userId");
   const token = urlQueryParams.get("token");
   const [form] = Form.useForm();
