@@ -6,17 +6,6 @@ export interface RequestOptions
   withPopulatedRefs?: boolean;
 }
 
-export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
+export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`.replace(/([^:]\/)\/+/g, "$1");
 
 export const httpClient = Axios.create({ baseURL: baseUrl });
-httpClient.interceptors.request.use(
-  (config) =>
-  {
-    if (config.baseURL != null)
-      config.baseURL = config.baseURL.replace(/([^:]\/)\/+/g, "$1");
-
-    return config;
-  },
-
-  (error) =>
-    Promise.reject(error));
