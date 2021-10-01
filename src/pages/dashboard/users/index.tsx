@@ -129,7 +129,7 @@ export const UsersPage: React.FC = () =>
             to={
             {
               pathname: `${location.pathname}/editar/${record._id!}`,
-              state: { user: record }
+              state: { context: "admin", user: record }
             }}
           >
             Editar
@@ -144,7 +144,12 @@ export const UsersPage: React.FC = () =>
       <Row gutter={[0, 8]} justify="center">
         <Col span={24}>
           <Button>
-            <Link to={`${location.pathname}/criar`}>
+            <Link
+              to={
+              {
+                pathname: `${location.pathname}/criar`,
+                state: { context: "admin" }
+              }}>
               Adicionar
             </Link>
           </Button>

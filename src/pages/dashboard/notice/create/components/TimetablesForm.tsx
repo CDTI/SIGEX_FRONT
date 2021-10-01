@@ -87,8 +87,8 @@ export const TimetablesForm: React.FC<Props> = (props) =>
           <Form.Item
             name="categorySelector"
             label="Categoria"
-            rules={[({ getFieldValue }) =>
-            ({
+            rules={[({ getFieldValue }) => (
+            {
               validator(_, value)
               {
                 if (!getFieldValue("timetables")?.length)

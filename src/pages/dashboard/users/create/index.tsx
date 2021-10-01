@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Button, Col, Form, Input, notification, Result, Row, Select } from "antd";
 import { MaskedInput } from "antd-mask-input";
@@ -14,12 +14,15 @@ import
 {
   createUserEndpoint,
   requestUsersPasswordChangeEndpoint,
-  updateUserEndpoint
+  updateUserEndpoint,
+  updateUserProfileEndpoint
 } from "../../../../services/endpoints/users";
+import { AuthContext } from "../../../../context/auth";
 
 interface LocationState
 {
   user?: User;
+  context: "admin" | "user";
 }
 
 interface UrlParams
@@ -29,6 +32,7 @@ interface UrlParams
 
 export const CreateUserPage: React.FC = () =>
 {
+  const authContext = useContext(AuthContext);
   const history = useHistory();
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();
@@ -45,6 +49,83 @@ export const CreateUserPage: React.FC = () =>
   const [courses, setCourses] = useState<Course[]>([]);
   const [shouldRenderCourses, setShouldRenderCourses] = useState(false);
   const dropDownListCoursesRequester = useHttpClient();
+
+  const saveUser = useCallback(async (values: any) =>
+  {
+    try
+    {
+      delete values.confirmPassword;
+
+      await formUsersRequester.send(
+      {
+        ...(params.id != null
+          ? updateUserEndpoint(params.id)
+          : location.state.context === "admin"
+            ? createUserEndpoint()
+            : updateUserProfileEndpoint()),
+
+        body: values,
+        cancellable: true
+      });
+
+      if (location.state.context === "admin")
+      {
+        setHasFinished(true);
+      }
+      else
+      {
+        const updatedUser = { ...authContext.user, ...values };
+        delete updatedUser.password;
+
+        authContext.update!(updatedUser);
+        formController.resetFields();
+        formController.setFieldsValue(updatedUser);
+
+        notification.success({ message: "Perfil atualizado com sucesso!" });
+      }
+    }
+    catch (error)
+    {
+      if ((error as Error).message !== "")
+        location.state.context === "admin"
+        ? setFailedSubmitMessage((error as Error).message)
+        : notification.error({ message: (error as Error).message });
+    }
+  }, [location.state, formUsersRequester.send]);
+
+  const resetPassword = useCallback(async (cpf: string) =>
+  {
+    try
+    {
+      await passwordUsersRequester.send(
+      {
+        method: "POST",
+        url: requestUsersPasswordChangeEndpoint(cpf),
+        cancellable: true
+      });
+
+      notification.success({ message: "Senha resetada com sucesso!" });
+    }
+    catch (error)
+    {
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
+    }
+  }, []);
+
+  const isNdesPresident = useCallback((values: string[]) =>
+  {
+    const ndesPresidentRoleId = roles.find((r: Role) => r.description === "Presidente do NDE")?._id;
+    setShouldRenderCourses(values.some((id: string) => id === ndesPresidentRoleId) ?? false);
+  }, [roles]);
+
+  const pageTitle = useMemo(() =>
+  {
+    if (location.state.context === "user")
+      return "Perfil de usuário";
+
+    return `${params.id == null ? "Cadastrar" : "Alterar"} usuário`;
+  }, []);
 
   useEffect(() =>
   {
@@ -86,61 +167,9 @@ export const CreateUserPage: React.FC = () =>
       isNdesPresident(location.state.user.roles as string[]);
       formController.setFieldsValue(location.state.user);
     }
-  }, [formController, roles, location.state]);
+  }, [formController, roles, location.state, isNdesPresident]);
 
-  const saveUser = useCallback(async (user: User) =>
-  {
-    try
-    {
-      await formUsersRequester.send(params.id == null
-      ? {
-        ...createUserEndpoint(),
-        body: user,
-        cancellable: true
-      }
-      : {
-        method: "PUT",
-        url: updateUserEndpoint(params.id),
-        body: user,
-        cancellable: true
-      });
-
-      setHasFinished(true);
-    }
-    catch (error)
-    {
-      if ((error as Error).message !== "")
-        setFailedSubmitMessage((error as Error).message);
-    }
-  }, [formUsersRequester.send]);
-
-  const resetPassword = useCallback(async (cpf: string) =>
-  {
-    try
-    {
-      await passwordUsersRequester.send(
-      {
-        method: "POST",
-        url: requestUsersPasswordChangeEndpoint(cpf),
-        cancellable: true
-      });
-
-      notification.success({ message: "Senha resetada com sucesso!" });
-    }
-    catch (error)
-    {
-      if ((error as Error).message !== "")
-        notification.error({ message: (error as Error).message });
-    }
-  }, []);
-
-  const isNdesPresident = useCallback((values: string[]) =>
-  {
-    const ndesPresidentRoleId = roles.find((r: Role) => r.description === "Presidente do NDE")?._id;
-    setShouldRenderCourses(values.some((id: string) => id === ndesPresidentRoleId) ?? false);
-  }, [roles]);
-
-  if (hasFinished)
+  if (location.state.context === "admin" && hasFinished)
   {
     if (failedSubmitMessage !== "")
       return (
@@ -178,7 +207,7 @@ export const CreateUserPage: React.FC = () =>
   }
 
   return (
-    <Structure title={`${params.id == null ? "Cadastrar" : "Alterar"} usuário`}>
+    <Structure title={pageTitle}>
       <Form
         layout="vertical"
         form={formController}
@@ -191,7 +220,10 @@ export const CreateUserPage: React.FC = () =>
               label="Nome"
               rules={[{ required: true, message: "Campo Obrigatório" }]}
             >
-              <Input style={{ width: "100%" }} />
+              <Input
+                disabled={location.state.context === "user"}
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Col>
 
@@ -201,7 +233,11 @@ export const CreateUserPage: React.FC = () =>
               label="CPF"
               rules={[{ required: true, message: "Campo Obrigatório" }]}
             >
-              <MaskedInput mask="111.111.111-11" style={{ width: "100%" }} />
+              <MaskedInput
+                mask="111.111.111-11"
+                disabled={location.state.context === "user"}
+                style={{ width: "100%" }}
+               />
             </Form.Item>
           </Col>
 
@@ -229,10 +265,9 @@ export const CreateUserPage: React.FC = () =>
             <Form.Item
               name="password"
               label="Senha"
-              rules={[{ required: params.id == null, message: "Campo Obrigatório" }]}
             >
-              {params.id == null
-                ? <Input.Password type="password" style={{ width: "100%" }} />
+              {params.id == null || location.state.context === "user"
+                ? <Input.Password style={{ width: "100%" }} />
                 : (
                   <Button
                     block
@@ -247,20 +282,48 @@ export const CreateUserPage: React.FC = () =>
             </Form.Item>
           </Col>
 
-          <Col xs={24} xl={21} xxl={18}>
-            <Form.Item
-              name="roles"
-              label="Tipos de usuário"
-              rules={[{ required: true, message: "Campo Obrigatório" }]}
-            >
-              <Select
-                options={roles.map((r: Role) => ({ label: r.description, value: r._id! }))}
-                mode="multiple"
-                allowClear
-                onChange={isNdesPresident}
-              />
-            </Form.Item>
-          </Col>
+          {(params.id == null || location.state.context === "user") && (
+            <Col xs={24} xl={21} xxl={18}>
+              <Form.Item
+                name="confirmPassword"
+                label="Confirme sua senha"
+                rules={
+                [
+                  ({ getFieldValue }) => (
+                  {
+                    validator(_, value)
+                    {
+                      const password = getFieldValue("password") ?? "";
+                      const passwordConfirmation = value ?? "";
+                      if (password !== passwordConfirmation)
+                        return Promise.reject(new Error("As senhas não coincidem!"));
+
+                      return Promise.resolve();
+                    }
+                  })
+                ]}
+              >
+                <Input.Password style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+          )}
+
+          {location.state.context === "admin" && (
+            <Col xs={24} xl={21} xxl={18}>
+              <Form.Item
+                name="roles"
+                label="Tipos de usuário"
+                rules={[{ required: true, message: "Campo Obrigatório" }]}
+              >
+                <Select
+                  options={roles.map((r: Role) => ({ label: r.description, value: r._id! }))}
+                  mode="multiple"
+                  allowClear
+                  onChange={isNdesPresident}
+                />
+              </Form.Item>
+            </Col>
+          )}
 
           {shouldRenderCourses && (
             <Col xs={24} xl={21} xxl={18}>

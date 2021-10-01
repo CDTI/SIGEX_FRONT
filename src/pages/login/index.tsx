@@ -100,13 +100,13 @@ export const LoginPage: React.FC = () =>
       });
 
       setCpf(user.cpf);
-      setPassword(user.password);
+      setPassword(user.password!);
       setNewUser(false);
       setLoginUser(true);
 
       notification.success({ message: "Usuário cadastrado com sucesso" });
 
-      onFinish({ cpf: user.cpf, password: user.password });
+      onFinish({ cpf: user.cpf, password: user.password! });
     }
     catch (error)
     {

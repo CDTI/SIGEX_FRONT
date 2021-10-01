@@ -9,6 +9,7 @@ interface AuthContextData
   user: User | null;
   login?(token: string, user: User): void;
   logout?(): void;
+  update?(user: User): void;
 }
 
 export const AuthContext = createContext<AuthContextData>(
@@ -23,27 +24,23 @@ export const AuthProvider: React.FC = (props) =>
 
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() =>
+  const update = useCallback((user: User) =>
   {
-    const storageUser = localStorage.getItem("@pp:user");
-    const storageToken = localStorage.getItem("@pp:token");
-    if (storageToken && storageUser)
-    {
-      authorize(storageToken, JSON.parse(storageUser.toString()));
-      history.replace("/home");
-    }
+    delete user.password;
+
+    localStorage.setItem("@pp:user", JSON.stringify(user));
+    setUser(user);
   }, []);
 
   const authorize = useCallback((token: string, user: User) =>
   {
     httpClient.defaults.headers.Authorization = `Bearer ${token}`
-    setUser(user);
+    update(user);
   }, []);
 
   const login = useCallback((token: string, user: User) =>
   {
     localStorage.setItem("@pp:token", token);
-    localStorage.setItem("@pp:user", JSON.stringify(user));
 
     authorize(token, user);
 
@@ -60,6 +57,17 @@ export const AuthProvider: React.FC = (props) =>
     history.replace("/login");
   }, []);
 
+  useEffect(() =>
+  {
+    const savedUser = localStorage.getItem("@pp:user");
+    const savedToken = localStorage.getItem("@pp:token");
+    if (savedToken && savedUser)
+    {
+      authorize(savedToken, JSON.parse(savedUser.toString()));
+      history.replace("/home");
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={
@@ -67,7 +75,8 @@ export const AuthProvider: React.FC = (props) =>
         isUserLoggedIn: user != null,
         user,
         login,
-        logout
+        logout,
+        update
       }}
     >
       {props.children}

@@ -29,7 +29,6 @@ const { SubMenu } = Menu;
 
 export const AppLayout: React.FC = (props) =>
 {
-  const history = useHistory();
   const authContext = useContext(AuthContext);
   const [collapsed, setcollapsed] = useState(false);
 
@@ -51,7 +50,13 @@ export const AppLayout: React.FC = (props) =>
       <Menu.Divider />
 
       <Menu.Item>
-        <Link to="/usuario/perfil">
+        <Link
+          to={
+          {
+            pathname: "/perfil",
+            state: { context: "user", user: authContext.user }
+          }}
+        >
           Perfil
         </Link>
       </Menu.Item>

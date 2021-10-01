@@ -50,6 +50,10 @@ export const Routes: React.FC = () =>
             <Redirect to="/home" />
           </Route>
 
+          <Route path="/perfil">
+            <CreateUserPage />
+          </Route>
+
           <Route path="/home">
             <HomeDashboard />
           </Route>

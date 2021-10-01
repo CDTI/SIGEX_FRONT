@@ -25,9 +25,14 @@ export function createUserEndpoint(): HttpRequestConfiguration
   return { method: "POST", url: "/user" };
 }
 
-export function updateUserEndpoint(id: string): string
+export function updateUserProfileEndpoint(): HttpRequestConfiguration
 {
-  return `/user/${id}`;
+  return { method: "PUT", url: "/user/me" };
+}
+
+export function updateUserEndpoint(id: string): HttpRequestConfiguration
+{
+  return { method: "PUT", url: `/user/${id}` };
 }
 
 export function requestUsersPasswordChangeEndpoint(cpf: string): string

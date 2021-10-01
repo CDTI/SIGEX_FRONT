@@ -16,7 +16,7 @@ export interface User
   isActive: boolean;
   lattes: string;
   name: string;
-  password: string;
+  password?: string;
   roles: (string | Role)[];
   updatedAt?: Date;
 };
