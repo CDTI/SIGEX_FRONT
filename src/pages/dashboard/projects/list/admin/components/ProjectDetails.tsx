@@ -29,6 +29,7 @@ import { ReturnResponse, updateProject } from "../../../../../../services/projec
 import { Restricted } from "../../../../../../components/Restricted";
 import { compareDate } from "../../../../../../utils";
 import { formatDate } from "../../../../../../utils/dateFormatter";
+import { Campus, Course } from "../../../../../../interfaces/course";
 
 const { Step } = Steps;
 const { Panel } = Collapse;
@@ -293,6 +294,16 @@ export const AdminViewProject: React.FC<Props> = (props) =>
 
                   <Typography><b>CH disponível:</b> {props.project.totalCH}</Typography>
                   <Typography><b>Máximo de turmas:</b> {props.project.maxClasses}</Typography>
+                </>
+              )}
+
+              {(props.project.category as Category).name === "Extensão específica do curso" && (
+                <>
+                  <Typography>
+                    <b>Curso: </b>
+                    {(props.project.course as Course).name} -&nbsp;
+                    {((props.project.course as Course).campus as Campus).name}
+                  </Typography>
                 </>
               )}
 

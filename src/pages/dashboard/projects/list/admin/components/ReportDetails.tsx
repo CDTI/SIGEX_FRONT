@@ -6,6 +6,7 @@ import { User } from "../../../../../../interfaces/user";
 import { Category } from "../../../../../../interfaces/category";
 import { Program } from "../../../../../../interfaces/program";
 import { formatDate } from "../../../../../../utils/dateFormatter";
+import { Campus, Course } from "../../../../../../interfaces/course";
 
 interface Props
 {
@@ -35,6 +36,16 @@ export const ReportDetails: React.FC<Props> = (props) =>
 
             <Text strong>Programa</Text>
             <Paragraph>{(props.project.program as Program).name}</Paragraph>
+
+            {(props.project.category as Category).name === "Extensão específica do curso" && (
+              <>
+                <Text strong>Curso</Text>
+                <Paragraph>
+                  {(props.project.course as Course).name} -&nbsp;
+                  {((props.project.course as Course).campus as Campus).name}
+                </Paragraph>
+              </>
+            )}
           </Collapse.Panel>
 
           <Collapse.Panel key="methodology" header="Procedimentos Metodológicos">
