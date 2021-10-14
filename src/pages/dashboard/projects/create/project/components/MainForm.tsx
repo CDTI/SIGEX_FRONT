@@ -107,8 +107,7 @@ export const MainForm: React.FC<Props> = (props) =>
         ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
         : (await selectProgramsRequester.send(
           {
-            method: "GET",
-            url: getAllProgramsEndpoint(),
+            ...getAllProgramsEndpoint(),
             cancellable: true
           })).programs;
 

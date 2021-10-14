@@ -48,8 +48,7 @@ export const Notices: React.FC = () =>
         {
           const notices = await listNoticesRequester.send<Notice[]>(
           {
-            method: "GET",
-            url: getAllNoticesEndpoint(),
+            ...getAllNoticesEndpoint(),
             cancellable: true
           });
 

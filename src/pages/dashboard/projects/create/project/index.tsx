@@ -115,16 +115,12 @@ export const CreateProposalPage: React.FC = () =>
       {
         try
         {
-          await formProjectsRequester.send(params.id == null
-          ? {
-            method: "POST",
-            url: createProjectEndpoint(),
-            body: formState.context.data,
-            cancellable: true
-          }
-          : {
-            method: "PUT",
-            url: updateProjectEndpoint(params.id),
+          await formProjectsRequester.send(
+          {
+            ...(params.id == null
+              ? createProjectEndpoint()
+              : updateProjectEndpoint(params.id)),
+
             body: formState.context.data,
             cancellable: true
           });

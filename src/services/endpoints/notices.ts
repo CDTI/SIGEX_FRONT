@@ -1,6 +1,8 @@
-export function getAllNoticesEndpoint(): string
+import { HttpRequestConfiguration } from "../../hooks/useHttpClient";
+
+export function getAllNoticesEndpoint(): HttpRequestConfiguration
 {
-  return "/notices";
+  return { method: "GET", url: "/notices" };
 }
 
 export function createNoticeEndpoint(): string

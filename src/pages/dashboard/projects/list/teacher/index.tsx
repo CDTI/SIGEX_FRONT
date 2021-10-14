@@ -12,6 +12,7 @@ import { listPrograms } from "../../../../../services/program_service";
 import { deleteProject, listAllTeacherProjects } from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
 import { formatDate } from "../../../../../utils/dateFormatter";
+import { StatusTag } from "../../../../../components/StatusTag";
 
 interface IAction
 {
@@ -174,61 +175,9 @@ export const TeacherProjectsPage: React.FC = () =>
     key: "status",
     title: "Avaliação",
     dataIndex: "status",
-    render: (status: string) =>
-    {
-      switch (status)
-      {
-        case "pending":
-          return (
-            <Tag
-              color="#f9a03f"
-              style={{ color: "#000" }}
-            >
-              Pendente
-            </Tag>
-          );
-
-        case "reproved":
-          return (
-            <Tag
-              color="#acc5cf"
-              style={{ color: "#000" }}
-            >
-              Não aprovado
-            </Tag>
-          );
-
-        case "notSelected":
-          return (
-            <Tag
-              color="#b3afc8"
-              style={{ color: "#000" }}
-            >
-              Aprovado e não selecionado
-            </Tag>
-          );
-
-        case "selected":
-          return (
-            <Tag
-              color="#8dc898"
-              style={{ color: "#000" }}
-            >
-              Selecionado
-            </Tag>
-          );
-
-        case "finished":
-          return (
-            <Tag
-              color="#fff"
-              style={{ color: "#000" }}
-            >
-              Finalizado
-            </Tag>
-          );
-      }
-    },
+    render: (text: string, record: Project) => (
+      <StatusTag status={record.status} />
+    )
   },
   {
     key: "action",
