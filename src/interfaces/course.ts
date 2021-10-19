@@ -26,3 +26,14 @@ export function isCourse(c: any): c is Course
     && "campus" in c
     && "isActive" in c;
 }
+
+export function getCourseId(c: any): string | null
+{
+  if (typeof c === "string")
+    return c;
+
+  if (isCourse(c) && c._id != null)
+    return c._id;
+
+  return null;
+}

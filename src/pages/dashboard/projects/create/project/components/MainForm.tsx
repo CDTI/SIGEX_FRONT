@@ -23,7 +23,7 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
 import { useHttpClient } from "../../../../../../hooks/useHttpClient";
-import { Campus, Course } from "../../../../../../interfaces/course";
+import { Campus, Course, getCourseId } from "../../../../../../interfaces/course";
 import { Category, getCategoryId, isCategory } from "../../../../../../interfaces/category";
 import { getNoticeId, isNotice, Notice, Schedule, Timetable } from "../../../../../../interfaces/notice";
 import { getProgramId, Program } from "../../../../../../interfaces/program";
@@ -153,6 +153,7 @@ export const MainForm: React.FC<Props> = (props) =>
         {
           ...props.initialValues,
           author: getUserId(props.initialValues.author),
+          course: getCourseId(props.initialValues.course),
           category: projectCategory._id!,
           notice: projectNotice._id!,
           program: getProgramId(props.initialValues.program),
@@ -204,6 +205,8 @@ export const MainForm: React.FC<Props> = (props) =>
                 label="Autor"
               >
                 <Select
+                  showSearch
+                  optionFilterProp="label"
                   loading={selectUsersRequester.inProgress}
                   options={users.map((u: User) => ({ label: u.name, value: u._id! }))}
                   style={{ width: "100%" }}

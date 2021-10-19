@@ -182,7 +182,7 @@ export const CreateProposalPage: React.FC = () =>
           payload:
           {
             ...values as Project,
-            author: authContext.user!._id!,
+            author: values.author != null ? values.author : authContext.user!._id!,
             firstSemester: schedule,
             secondSemester: schedule,
             status: formState.context.data?.status ?? "pending"
