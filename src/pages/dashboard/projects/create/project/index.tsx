@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Button, Col, Form, Modal, Result, Row, Spin, Steps, Typography } from "antd";
@@ -12,7 +12,6 @@ import { CommunityForm } from "./components/CommunityForm";
 import { ArrangementsForm } from "./components/ArrangementsForm";
 import { ResourcesForm } from "./components/ResourcesForm";
 
-import { useAuth } from "../../../../../context/auth";
 import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import Structure from "../../../../../components/layout/structure";
 
@@ -20,17 +19,18 @@ import { Schedule } from "../../../../../interfaces/notice";
 import { Planning, Project, Community, Resources, Partnership } from "../../../../../interfaces/project";
 import { createProjectEndpoint, updateProjectEndpoint } from "../../../../../services/endpoints/projects";
 import { hasActiveNoticesEndpoint } from "../../../../../services/endpoints/users";
-
-interface LocationState
-{
-  project?: Project;
-  context: "admin" | "user";
-}
+import { AuthContext } from "../../../../../context/auth";
 
 interface FormView
 {
   view: ReactNode;
   title: string;
+}
+
+interface LocationState
+{
+  project?: Project;
+  context: "admin" | "user";
 }
 
 interface UrlParams
@@ -39,21 +39,21 @@ interface UrlParams
 }
 
 const savedStateKey = "project";
-export const usersKey = "users";
+export const coursesKey = "courses";
 export const noticesKey = "notices";
 export const programsKey = "programs";
+export const usersKey = "users";
 
-export const ProposalForm: React.FC = () =>
+export const CreateProposalPage: React.FC = () =>
 {
+  const authContext = useContext(AuthContext);
+  const history = useHistory();
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();
-  const history = useHistory();
-  const authContext = useAuth();
-  const [isFirstExecution, setIsFirstExecution] = useState(true);
 
+  const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
   const [formState, sendEvent] = useFormStateMachine();
   const [formController] = Form.useForm();
-  const [failedSubmitMessage, setFailedSubmitMessage] = useState("");
   const formProjectsRequester = useHttpClient();
 
   const [hasActiveNotices, setHasActiveNotices] = useState(true);
@@ -65,14 +65,14 @@ export const ProposalForm: React.FC = () =>
   {
     (async () =>
     {
-      const hasActiveNotices = await validationNoticesRequester.send(
+      const hasActiveNotices = await validationNoticesRequester.send<boolean>(
       {
         method: "GET",
         url: hasActiveNoticesEndpoint(),
         cancellable: true
       });
 
-      setHasActiveNotices(hasActiveNotices);
+      setHasActiveNotices(hasActiveNotices ?? false);
 
       if (location.state.project != null)
         sendEvent(
@@ -84,67 +84,68 @@ export const ProposalForm: React.FC = () =>
         hasActiveNotices
           ? setLoaderModalIsVisible(true)
           : localStorage.removeItem(savedStateKey);
-
-      setIsFirstExecution(false);
     })();
 
     return () =>
     {
-      localStorage.removeItem(usersKey);
+      formProjectsRequester.halt();
+      validationNoticesRequester.halt();
+
+      localStorage.removeItem(coursesKey);
       localStorage.removeItem(noticesKey);
       localStorage.removeItem(programsKey);
-    }
-  }, []);
-
-  useEffect(() =>
-  {
-    if (!isFirstExecution)
-    {
-      if (formState.value !== "succeeded" && formState.value !== "failed")
-      {
-        if (!loaderModalIsVisible)
-          localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
-
-        if (formState.value === "pending")
-        {
-          (async () =>
-          {
-            try
-            {
-              await formProjectsRequester.send(params.id == null
-              ? {
-                method: "POST",
-                url: createProjectEndpoint(),
-                body: formState.context.data,
-                cancellable: true
-              }
-              : {
-                method: "PUT",
-                url: updateProjectEndpoint(params.id),
-                body: formState.context.data,
-                cancellable: true
-              });
-
-              sendEvent({ type: "SUCCESS" });
-            }
-            catch (error)
-            {
-              if (error.message !== "")
-                setFailedSubmitMessage(error.message);
-
-              sendEvent({ type: "ERROR" });
-            }
-          })();
-        }
-      }
-      else if (formState.value === "succeeded")
-      {
+      localStorage.removeItem(usersKey);
+      if (location.state.context === "admin")
         localStorage.removeItem(savedStateKey);
-      }
     }
   },
   [
-    isFirstExecution,
+    location.state,
+    sendEvent,
+    formProjectsRequester.halt,
+    validationNoticesRequester.halt,
+    validationNoticesRequester.send
+  ]);
+
+  useEffect(() =>
+  {
+    if (formState.value === "pending")
+    {
+      (async () =>
+      {
+        try
+        {
+          await formProjectsRequester.send(
+          {
+            ...(params.id == null
+              ? createProjectEndpoint()
+              : updateProjectEndpoint(params.id)),
+
+            body: formState.context.data,
+            cancellable: true
+          });
+
+          sendEvent({ type: "SUCCESS" });
+        }
+        catch (error)
+        {
+          if ((error as Error).message !== "")
+            setFailedSubmitMessage((error as Error).message);
+
+          sendEvent({ type: "ERROR" });
+        }
+      })();
+    }
+    else
+    {
+      formState.value === "succeeded"
+        ? localStorage.removeItem(savedStateKey)
+        : formState.context.data != null
+          && localStorage.setItem(savedStateKey, JSON.stringify(formState.context));
+    }
+  },
+  [
+    formState.context,
     formState.value,
     params.id,
     sendEvent,
@@ -167,7 +168,7 @@ export const ProposalForm: React.FC = () =>
     removeSavedState();
   }, [sendEvent, removeSavedState]);
 
-  const handleOnFormFinish = useCallback((formName: string, values: Store) =>
+  const handleFormFinished = useCallback((formName: string, values: Store) =>
   {
     switch (formName)
     {
@@ -181,7 +182,7 @@ export const ProposalForm: React.FC = () =>
           payload:
           {
             ...values as Project,
-            author: authContext.user!._id!,
+            author: values.author != null ? values.author : authContext.user!._id!,
             firstSemester: schedule,
             secondSemester: schedule,
             status: formState.context.data?.status ?? "pending"
@@ -375,10 +376,10 @@ export const ProposalForm: React.FC = () =>
 
       <Spin spinning={validationNoticesRequester.inProgress}>
         <Structure title={`${params.id == null ? "Cadastrar" : "Alterar"} proposta`}>
-          <Form.Provider onFormFinish={(name, { values }) => handleOnFormFinish(name, values)}>
+          <Form.Provider onFormFinish={(name, { values }) => handleFormFinished(name, values)}>
             <Row justify="center" gutter={[0, 24]}>
               <Col xs={24} xl={21} xxl={18}>
-                <Steps current={formState.context.step}>
+                <Steps type="navigation" current={formState.context.step}>
                   {FormSteps.map((k: string) =>
                     <Steps.Step key={k} title={forms.get(k)!.title} />
                   )}

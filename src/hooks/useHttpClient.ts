@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import Axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import Axios, { AxiosError, AxiosPromise, AxiosRequestConfig, AxiosResponse, Cancel } from "axios";
 
 import { httpClient } from "../services/httpClient";
 
@@ -67,13 +67,13 @@ export function useHttpClient()
     {
       let message = "Houve um erro inesperado durante a requisição ao servidor!";
       if (Axios.isCancel(error))
-        error.message === HALT
+        (error as Cancel).message === HALT
           ? shouldHalt = true
-          : message = error.message;
+          : message = (error as Cancel).message;
       else
-        message = error.response != null
-          ? error.response.data
-          : error.request != null && "Nenhuma resposta do servidor!";
+        message = (error as AxiosError).response != null
+          ? (error as AxiosError).response!.data
+          : (error as AxiosError).request != null && "Nenhuma resposta do servidor!";
 
       if (!shouldHalt)
         throw new Error(message);

@@ -25,9 +25,8 @@ import { ContentMap, UrlParams } from "./helpers/types";
 import { Report } from "../../../../../interfaces/project";
 import { createReport, updateReport } from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
-import { useUrlQueryParams } from "../../../../../hooks/useUrlQueryParams";
 
-export const ReportForm: React.FC = () =>
+export const CreateReportPage: React.FC = () =>
 {
   const [firstExecution, setFirstExecution] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -39,7 +38,7 @@ export const ReportForm: React.FC = () =>
 
   const { id } = useParams<UrlParams>();
   const location = useLocation();
-  const urlQueryParams = useUrlQueryParams();
+  const urlQueryParams = new URLSearchParams(location.search);
   const history = useHistory();
 
   const projectId = urlQueryParams.get("project");
@@ -149,7 +148,7 @@ export const ReportForm: React.FC = () =>
 
     "methodology":
     {
-      title: "Procedimentos metodológicos",
+      title: "Metodologia",
       content: (
         <MethodologyForm
           formController={reportForm}
@@ -218,9 +217,9 @@ export const ReportForm: React.FC = () =>
             handleOnFormFinish(values as Report)
           }
         >
-          <Row gutter={[8, 8]} justify="center">
-            <Col xs={24} xl={21} xxl={18}>
-              <Steps current={FormSteps[reportFormState.step].order}>
+          <Row gutter={[0, 24]} justify="center">
+            <Col xs={24} xl={21} xxl={21}>
+              <Steps type="navigation" current={FormSteps[reportFormState.step].order}>
                 {Object.keys(FormSteps)
                   .filter((k: string) => k !== "completed")
                   .map((k: string) => <Steps.Step key={k} title={contents[k].title} />
@@ -228,11 +227,11 @@ export const ReportForm: React.FC = () =>
               </Steps>
             </Col>
 
-            <Col xs={24} xl={21} xxl={18}>
+            <Col xs={24} xl={21} xxl={21}>
               {contents[reportFormState.step].content}
             </Col>
 
-            <Col xs={24} xl={21} xxl={18}>
+            <Col xs={24} xl={21} xxl={21}>
               <Row justify="space-between">
                 <Button type="default" onClick={() => handleOnBack()}>
                   Voltar

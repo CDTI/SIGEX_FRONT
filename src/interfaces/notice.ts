@@ -23,6 +23,7 @@ export interface Notice
   effectiveDate: Date;
   expirationDate: Date;
   isActive: boolean;
+  key?: string;
   name: string;
   number: number;
   reportDeadline: Date;

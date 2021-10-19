@@ -15,22 +15,28 @@ import
   Typography,
 } from "antd";
 import { FormInstance } from "antd/lib/form";
-import { SelectValue } from "antd/lib/select";
 import { RadioChangeEvent } from "antd/lib/radio";
+import { SelectValue } from "antd/lib/select";
 import { MaskedInput } from "antd-mask-input";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-import { noticesKey, programsKey, usersKey } from "..";
+import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
-import { Restricted } from "../../../../../../components/Restricted";
 import { useHttpClient } from "../../../../../../hooks/useHttpClient";
-import { getProgramId, Program } from "../../../../../../interfaces/program";
+import { Campus, Course, getCourseId } from "../../../../../../interfaces/course";
 import { Category, getCategoryId, isCategory } from "../../../../../../interfaces/category";
 import { getNoticeId, isNotice, Notice, Schedule, Timetable } from "../../../../../../interfaces/notice";
+import { getProgramId, Program } from "../../../../../../interfaces/program";
 import { Project } from "../../../../../../interfaces/project";
 import { getUserId, User } from "../../../../../../interfaces/user";
 import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/programs";
-import { getActiveNoticesEndpoint, getAllUsersEndpoint } from "../../../../../../services/endpoints/users";
+import
+{
+  getActiveNoticesEndpoint,
+  getAllUsersEndpoint,
+  getAssociatedCoursesEndpoint
+} from "../../../../../../services/endpoints/users";
+import { Restricted } from "../../../../../../components/Restricted";
 
 interface Props
 {
@@ -49,6 +55,9 @@ function scheduleAsValue(s: Schedule)
 
 export const MainForm: React.FC<Props> = (props) =>
 {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const selectCoursesRequester = useHttpClient();
+
   const [users, setUsers] = useState<User[]>([]);
   const selectUsersRequester = useHttpClient();
 
@@ -70,27 +79,17 @@ export const MainForm: React.FC<Props> = (props) =>
   {
     (async () =>
     {
-      const users = localStorage.getItem(usersKey) != null
-        ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
-        : (await selectUsersRequester.send(
+      const courses = localStorage.getItem(coursesKey) != null
+        ? JSON.parse(localStorage.getItem(coursesKey)!) as Course[]
+        : await selectCoursesRequester.send(
           {
             method: "GET",
-            url: getAllUsersEndpoint(),
+            url: getAssociatedCoursesEndpoint(),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
             cancellable: true
-          })).user;
+          });
 
-      setUsers(users);
-
-      const programs = localStorage.getItem(programsKey) != null
-        ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
-        : (await selectProgramsRequester.send(
-          {
-            method: "GET",
-            url: getAllProgramsEndpoint(),
-            cancellable: true
-          })).programs;
-
-      setPrograms(programs);
+      setCourses(courses ?? []);
 
       let notices = localStorage.getItem(noticesKey) != null
         ? JSON.parse(localStorage.getItem(noticesKey)!) as Notice[]
@@ -102,7 +101,28 @@ export const MainForm: React.FC<Props> = (props) =>
             cancellable: true
           });
 
-      setNotices(notices);
+      setNotices(notices ?? []);
+
+      const programs = localStorage.getItem(programsKey) != null
+        ? JSON.parse(localStorage.getItem(programsKey)!) as Program[]
+        : (await selectProgramsRequester.send(
+          {
+            ...getAllProgramsEndpoint(),
+            cancellable: true
+          })).programs;
+
+      setPrograms(programs ?? []);
+
+      const users = localStorage.getItem(usersKey) != null
+        ? JSON.parse(localStorage.getItem(usersKey)!) as User[]
+        : (await selectUsersRequester.send(
+          {
+            method: "GET",
+            url: getAllUsersEndpoint(),
+            cancellable: true
+          })).user;
+
+      setUsers(users ?? []);
 
       if (props.initialValues != null)
       {
@@ -133,6 +153,7 @@ export const MainForm: React.FC<Props> = (props) =>
         {
           ...props.initialValues,
           author: getUserId(props.initialValues.author),
+          course: getCourseId(props.initialValues.course),
           category: projectCategory._id!,
           notice: projectNotice._id!,
           program: getProgramId(props.initialValues.program),
@@ -140,6 +161,7 @@ export const MainForm: React.FC<Props> = (props) =>
         });
       }
 
+      localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));
       localStorage.setItem(noticesKey, JSON.stringify(notices));
       localStorage.setItem(programsKey, JSON.stringify(programs));
@@ -176,13 +198,15 @@ export const MainForm: React.FC<Props> = (props) =>
     >
       <Row gutter={[8, 0]}>
         {props.context === "admin" && (
-          <Restricted allowedRoles={["Administrador"]}>
+          <Restricted allow="Administrador">
             <Col span={24}>
               <Form.Item
                 name="author"
                 label="Autor"
               >
                 <Select
+                  showSearch
+                  optionFilterProp="label"
                   loading={selectUsersRequester.inProgress}
                   options={users.map((u: User) => ({ label: u.name, value: u._id! }))}
                   style={{ width: "100%" }}
@@ -313,6 +337,24 @@ export const MainForm: React.FC<Props> = (props) =>
 
         {selectedCategory != null && selectedCategory.name === "Extensão específica do curso" && (
           <>
+            <Col span={24}>
+              <Form.Item
+                name="course"
+                label="Curso"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Select
+                  loading={selectCoursesRequester.inProgress}
+                  options={courses.map((c: Course) =>
+                  ({
+                    label: `${c.name} - ${(c.campus as Campus).name}`,
+                    value: c._id!
+                  }))}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+
             <Col span={24}>
               <Form.Item
                 name="typeProject"

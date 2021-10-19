@@ -1,66 +1,90 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import ReactDOM from "react-dom";
-import { Button, Input, Modal, Space, Typography } from "antd";
-import { EditOutlined, UserOutlined } from "@ant-design/icons";
+import { Link, useLocation } from "react-router-dom";
+import { Button, Col, Input, notification, Row, Space, Switch, Table } from "antd";
+
+import Structure from "../../../components/layout/structure";
 
 import { User } from "../../../interfaces/user";
-import { getUsers } from "../../../services/user_service";
-import { CreateUser } from "../../../components/forms/create-user";
-import Structure from "../../../components/layout/structure";
-import MyTable from "../../../components/layout/table";
-import { ContainerFlex } from "../../../global/styles";
+import { useHttpClient } from "../../../hooks/useHttpClient";
+import { getAllUsersEndpoint, toggleUserEndpoint } from "../../../services/endpoints/users";
 
-interface State
+export const UsersPage: React.FC = () =>
 {
-  title: string
-  visible: boolean,
-  user: undefined | User
-}
+  const location = useLocation();
 
-export const Users: React.FC = () =>
-{
-  const [users, setUsers] = useState<User[] | null>(null);
-  const [filteredUser, setFilteredUser] = useState<User[]>([]);
-  const [initialValue, setInitialValue] = useState(0);
-  const [state, setState] = useState<State>(
-  {
-    visible: false,
-    user: undefined,
-    title: ""
-  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const tableUsersRequester = useHttpClient();
+  const switchUsersRequester = useHttpClient();
 
   useEffect(() =>
   {
     (async () =>
     {
-      const response = await getUsers();
-      setUsers(response.user);
-      setFilteredUser(response.user);
+      const response = await tableUsersRequester.send(
+      {
+        method: "GET",
+        url: getAllUsersEndpoint(),
+        cancellable: true
+      });
+
+      setUsers(response.user ?? []);
+      setFilteredUsers(response.user ?? []);
     })();
-  }, [initialValue]);
+  }, [tableUsersRequester.send]);
 
-  const openModal = (title: string, userSelected?: User) =>
+  const filterUsers = (ev: any) =>
   {
-    setState({ visible: true, user: userSelected, title });
-  }
-
-  const searchTable = (search: any) =>
-  {
-    const valueSearch = search.target.value.toLowerCase();
-    if (valueSearch)
-    {
-      const filteredUsers = users?.filter(e => e.name.toLowerCase().match(valueSearch));
-      if (filteredUsers !== undefined)
-        setFilteredUser(filteredUsers);
-    }
-    else if (valueSearch.length === 0)
-    {
-      if (users !== null)
-        setFilteredUser(users);
-    }
+    const searchTerm = ev.target.value.toLocaleLowerCase();
+    setFilteredUsers(ev.target.value !== ""
+      ? users.filter((u: User) => u.name.toLocaleLowerCase().includes(searchTerm))
+      : users);
   };
 
-  const columns =
+  const toggleUserStatus = useCallback(async (id: string, isActive: boolean) =>
+  {
+    try
+    {
+      await switchUsersRequester.send(
+      {
+        method: "PUT",
+        url: toggleUserEndpoint(id),
+        cancellable: true
+      });
+
+      setUsers((prevState) =>
+      {
+        const index = prevState.findIndex((u: User) => u._id === id)!;
+        return (
+        [
+          ...prevState.slice(0, index),
+          { ...prevState[index], isActive },
+          ...prevState.slice(index + 1)
+        ]);
+      });
+
+      setFilteredUsers((prevState) =>
+      {
+        const index = prevState.findIndex((u: User) => u._id === id)!;
+        return (
+        [
+          ...prevState.slice(0, index),
+          { ...prevState[index], isActive },
+          ...prevState.slice(index + 1)
+        ]);
+      });
+
+      const status = isActive ? "habilitado" : "desabilitado";
+      notification.success({ message: `O usuário foi ${status} com sucesso!` });
+    }
+    catch (error)
+    {
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
+    }
+  }, [switchUsersRequester.send]);
+
+  const tableColumns = useMemo(() =>
   [{
     key: "name",
     title: "Nome",
@@ -76,120 +100,76 @@ export const Users: React.FC = () =>
     title: "E-Mail",
     render: (text: any, record: User) => (
       <Button
-        href={`mailto:${record.email}`}
         type="link"
+        href={`mailto:${record.email}`}
       >
-          {record.email}
+        {record.email}
       </Button>
     )
   },
   {
     key: "isActive",
-    title: "Ativo",
-    filters:
-    [{
-      text: "Ativo",
-      value: true,
-    },
-    {
-      text: "Não ativo",
-      value: false,
-    }],
-
-    onFilter: (value: any, record: User) => record.isActive === value,
-    sortDirections: ["descend"],
-    render: (text: any, record: User) => (
-      <div
-        style={
-        {
-          display: "flex",
-          justifyContent: "left",
-          alignItems: "center"
-        }}
-      >
-        <div
-          style={
-          {
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
-            backgroundColor: record.isActive ? "green" : "red"
-          }}
-        />
-
-        <Typography style={{ marginLeft: "2px" }}>
-          {record.isActive ? "Ativo" : "Não Ativo"}
-        </Typography>
-      </div>
+    title: "Ativo?",
+    dataIndex: "isActive",
+    render: (text: string, record: User) => (
+      <Switch
+        checked={record.isActive}
+        loading={switchUsersRequester.inProgress}
+        onChange={(isChecked: boolean) => toggleUserStatus(record._id!, isChecked)}
+      />
     )
   },
   {
-    key: "action",
-    title: "Ação",
+    key: "actions",
+    title: "Ações",
     render: (text: string, record: User) => (
-      <Space>
-        <Button
-          icon={<EditOutlined />}
-          onClick={() => openModal("Editar Usuário", record)}
-        >
-          Editar
+      <Space size="middle">
+        <Button>
+          <Link
+            to={
+            {
+              pathname: `${location.pathname}/editar/${record._id!}`,
+              state: { context: "admin", user: record }
+            }}
+          >
+            Editar
+          </Link>
         </Button>
       </Space>
     )
-  }];
-
-  const loadUser = useCallback(() =>
-    setInitialValue((prevState) => prevState + 1),
-    []);
-
-  const closeModal = useCallback(() =>
-    setState({ visible: false, user: undefined, title: "" }),
-    []);
-
-  const modal = useMemo(() => (
-    <Modal
-      visible={state.visible}
-      onCancel={closeModal}
-      footer={[]}
-    >
-      <CreateUser
-        title={state.title}
-        loadUser={loadUser}
-        user={state.user}
-        closeModal={closeModal}
-      />
-    </Modal>
-  ), [state, initialValue]);
+  }], []);
 
   return (
-    <>
-      {ReactDOM.createPortal(modal, document.getElementById("dialog-overlay")!)}
+    <Structure title="usuários">
+      <Row gutter={[0, 8]} justify="center">
+        <Col span={24}>
+          <Button>
+            <Link
+              to={
+              {
+                pathname: `${location.pathname}/criar`,
+                state: { context: "admin" }
+              }}>
+              Adicionar
+            </Link>
+          </Button>
+        </Col>
+      </Row>
 
-      <Structure title="usuários">
-        <Button
-          type="primary"
-          icon={<UserOutlined />}
-          onClick={() => openModal("Cadastrar Usuário")}
-        >
-          Cadastrar usuário
-        </Button>
+      <Row gutter={[0, 8]}>
+        <Col span={24}>
+          <Input
+            style={{ width: "100%" }}
+            onChange={filterUsers}
+          />
+        </Col>
+      </Row>
 
-        <ContainerFlex>
-          <div>
-            <Input
-              placeholder="Pesquisar por nome..."
-              style={{ maxWidth: "350px", margin: "10px" }}
-              onChange={searchTable}
-            />
-
-            {users !== null && (
-              <MyTable columns={columns} data={filteredUser} />
-            )}
-          </div>
-        </ContainerFlex>
-      </Structure>
-    </>
-  )
-}
-
-export default Users
+      <Table
+        loading={tableUsersRequester.inProgress}
+        columns={tableColumns}
+        dataSource={filteredUsers}
+      />
+    </Structure>
+  );
+};

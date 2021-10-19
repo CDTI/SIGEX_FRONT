@@ -1,7 +1,15 @@
 import { Category } from "./category";
+import { Course } from "./course";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
 import { User } from "./user";
+
+export type ProjectStatus =
+  | "pending"
+  | "reproved"
+  | "notSelected"
+  | "selected"
+  | "finished";
 
 export interface Contact
 {
@@ -50,7 +58,7 @@ export interface Transport
 export interface Resources
 {
   materials: Material[];
-  transport?: Transport;
+  transport: Transport[];
 }
 
 export interface Discipline
@@ -93,6 +101,7 @@ export interface Project
   author: string | User;
   category: string | Category;
   createdAt?: Date;
+  course?: string | Course;
   dateFinal: Date;
   dateStart: Date;
   description: string;
@@ -109,7 +118,7 @@ export interface Project
   resources: Resources;
   secondSemester: Schedule[];
   specificCommunity: Community;
-  status: "pending" | "reproved" | "notSelected" | "selected" | "finished";
+  status: ProjectStatus;
   teachers : Teacher[];
   totalCH?: number;
   typeProject: "common" | "extraCurricular" | "curricularComponent";

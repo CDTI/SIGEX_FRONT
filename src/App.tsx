@@ -5,18 +5,17 @@ import ptBR from "antd/lib/locale/pt_BR";
 
 import { Routes } from "./routes";
 import { AuthProvider } from "./context/auth";
-import GlobalStyled from "./global/global-style";
+import { BrowserRouter } from "react-router-dom";
 
 export function App()
 {
   return (
-    <div className="App">
-      <GlobalStyled />
+    <BrowserRouter>
       <AuthProvider>
         <ConfigProvider locale={ptBR}>
           <Routes />
         </ConfigProvider>
       </AuthProvider>
-    </div>
+    </BrowserRouter>
   );
 };

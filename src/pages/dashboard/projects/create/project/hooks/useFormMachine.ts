@@ -125,6 +125,7 @@ export function useFormStateMachine()
                   ...ctx.data!,
                   author: payload.author,
                   category: payload.category,
+                  course: payload.course,
                   dateFinal: now,
                   dateStart: now,
                   description: payload.description,

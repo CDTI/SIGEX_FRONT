@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import React, { useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Form, Button, Input, Spin, notification } from "antd";
 import InputMask from "antd-mask-input";
@@ -7,27 +7,24 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 
 import { FormDiv, Container, LabelInput, ContainerImage, ImageLogo } from "./style";
 
-import { Role } from "../../interfaces/user";
-import { checkUser, createUser, hasPasswordChangeToken } from "../../services/user_service";
-import { getRoles } from "../../services/role_service";
-import { useAuth } from "../../context/auth";
+import { Role, User } from "../../interfaces/user";
+import { checkUser, hasPasswordChangeToken } from "../../services/user_service";
 import logo from "../../assets/sigex.png";
+import { useHttpClient } from "../../hooks/useHttpClient";
+import { AuthContext } from "../../context/auth";
+import { getAllRolesEndpoint } from "../../services/endpoints/roles";
+import { createUserEndpoint, loginUserEndpoint } from "../../services/endpoints/users";
 
-interface ValueLogin
+interface Credentials
 {
   cpf: string,
   password: string
 }
 
-interface Props
-{
-  user: any
-}
-
-export const LoginPage: React.FC<Props> = () =>
+export const LoginPage: React.FC = () =>
 {
   const history = useHistory();
-  const context = useAuth();
+  const authContext = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [cpf, setCpf] = useState("");
   const [newUser, setNewUser] = useState(false);
@@ -36,11 +33,41 @@ export const LoginPage: React.FC<Props> = () =>
   const [forgotPassword, setForgotPassword] = useState(false);
   const [form] = Form.useForm();
 
-  const onFinish = (values: ValueLogin) =>
+  const formUsersRequester = useHttpClient();
+  const handlerRolesRequester = useHttpClient();
+
+  const onFinish = useCallback(async (values: Credentials) =>
   {
+    try
+    {
+      let status: "success" | "error" = "success";
+      const response = await formUsersRequester.send(
+      {
+        ...loginUserEndpoint(),
+        body: values,
+        cancellable: true
+      });
+
+      status = response.status;
+      if (response.token !== null && response.status === "success")
+      {
+        notification[status]({ message: response.message });
+
+        authContext.login!(response.token, response.user);
+      }
+      else if (response.token === null && response.status === "error")
+      {
+        notification[status]({ message: response.message });
+      }
+    }
+    catch (error)
+    {
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
+    }
+
     setLoading(false);
-    context.login(values);
-  };
+  }, [formUsersRequester.send, authContext]);
 
   const back = () =>
   {
@@ -50,37 +77,42 @@ export const LoginPage: React.FC<Props> = () =>
     setLoginUser(false);
   };
 
-  const handleCreateUser = async (userNew: any) =>
+  const handleCreateUser = useCallback(async (user: User) =>
   {
     try
     {
-      const roles = await getRoles();
-      const cUser =
+      const roles = await handlerRolesRequester.send<Role[]>(
       {
-        cpf: userNew.cpf,
-        email: userNew.email,
-        lattes: userNew.lattes,
-        name: userNew.name,
-        password: userNew.password,
-        roles: roles.filter((r: Role) => r.description === "Professor").map((r: Role) => r._id),
-        isActive: true
-      };
+        method: "GET",
+        url: getAllRolesEndpoint(),
+        cancellable: true
+      });
 
-      setPassword(userNew.password);
-      const newUser = await createUser(cUser);
-      const login = { cpf, password };
-      console.log(newUser);
-      setCpf(userNew.cpf);
+      await formUsersRequester.send(
+      {
+        ...createUserEndpoint(),
+        body:
+        {
+          ...user,
+          roles: roles?.filter((r: Role) => r.description === "Professor").map((r: Role) => r._id) ?? [],
+          isActive: true
+        }
+      });
+
+      setCpf(user.cpf);
+      setPassword(user.password!);
       setNewUser(false);
       setLoginUser(true);
+
       notification.success({ message: "Usuário cadastrado com sucesso" });
-      context.login(login);
+
+      onFinish({ cpf: user.cpf, password: user.password! });
     }
-    catch (err)
+    catch (error)
     {
       notification.error({ message: "Erro ao cadastrar usuário" });
     }
-  };
+  }, []);
 
   const handleCheckUser = async (value: any) =>
   {

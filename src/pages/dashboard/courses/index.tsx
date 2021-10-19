@@ -30,7 +30,7 @@ import
   updateCourseEndpoint
 } from "../../../services/endpoints/courses";
 
-export const Courses: React.FC = () =>
+export const CoursesPage: React.FC = () =>
 {
   const [campi, setCampi] = useState<Campus[]>([]);
   const dropDownListCampiRequester = useHttpClient();
@@ -94,8 +94,8 @@ export const Courses: React.FC = () =>
         }
         catch (error)
         {
-          if (error.message !== "")
-            notification.error({ message: error.message });
+          if ((error as Error).message !== "")
+            notification.error({ message: (error as Error).message });
         }
       })();
     }
@@ -152,8 +152,8 @@ export const Courses: React.FC = () =>
     }
     catch (error)
     {
-      if (error.message !== "")
-        notification.error({ message: error.message });
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
     }
     finally
     {
@@ -258,8 +258,8 @@ export const Courses: React.FC = () =>
     }
     catch (error)
     {
-      if (error.message !== "")
-        notification.error({ message: error.message });
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
     }
     finally
     {
@@ -322,8 +322,8 @@ export const Courses: React.FC = () =>
     }
     catch (error)
     {
-      if (error.message !== "")
-        notification.error({ message: error.message });
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
     }
   }, [switchCoursesRequester.send]);
 

@@ -1,4 +1,6 @@
-export function getAllProgramsEndpoint(): string
+import { HttpRequestConfiguration } from "../../hooks/useHttpClient";
+
+export function getAllProgramsEndpoint(): HttpRequestConfiguration
 {
-  return "/programs";
+  return { method: "GET", url: "/programs" };
 }

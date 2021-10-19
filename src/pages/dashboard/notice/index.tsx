@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import
 {
   Button,
@@ -8,63 +8,138 @@ import
   Switch,
   Typography
 } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { CopyOutlined, EditOutlined } from "@ant-design/icons";
 
+import { useHttpClient } from "../../../hooks/useHttpClient";
 import Structure from "../../../components/layout/structure";
 import { Notice } from "../../../interfaces/notice";
-
 import
 {
-  getAllNotices,
-  changeNoticeStatus
-} from "../../../services/notice_service";
+  changeNoticeStatusEndpoint,
+  getAllNoticesEndpoint
+} from "../../../services/endpoints/notices";
 
 export const Notices: React.FC = () =>
 {
-  const [periods, setPeriods] = useState<Notice[]>([]);
-  const [initialState, setInitialState] = useState(0);
+  const location = useLocation();
+
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [shouldReloadNotices, setShouldReloadNotices] = useState(true);
+
+  const listNoticesRequester = useHttpClient();
+  const switchNoticesRequester = useHttpClient();
 
   useEffect(() =>
   {
-    (async () => setPeriods(await getAllNotices()))();
-  }, [initialState]);
+    return () =>
+    {
+      listNoticesRequester.halt();
+      switchNoticesRequester.halt();
+    }
+  }, []);
 
-  const changeStatus = async (id: string) =>
+  useEffect(() =>
+  {
+    if (shouldReloadNotices)
+    {
+      (async () =>
+      {
+        try
+        {
+          const notices = await listNoticesRequester.send<Notice[]>(
+          {
+            ...getAllNoticesEndpoint(),
+            cancellable: true
+          });
+
+          setNotices(notices?.map((n: Notice) => ({ ...n, key: n._id! })) ?? []);
+
+          setShouldReloadNotices(false);
+        }
+        catch (error)
+        {
+          if ((error as Error).message !== "")
+            notification.error({ message: (error as Error).message });
+        }
+      })();
+    }
+  }, [shouldReloadNotices]);
+
+  const toggleNoticeStatus = useCallback(async (id: string, isActive: boolean) =>
   {
     try
     {
-      const message = await changeNoticeStatus(id);
-      notification.success({ message });
-      setInitialState(initialState + 1);
+      await switchNoticesRequester.send(
+      {
+        method: "PUT",
+        url: changeNoticeStatusEndpoint(id),
+        cancellable: true
+      });
+
+      setNotices((prevState) =>
+      {
+        const index = prevState.findIndex((n: Notice) => n._id === id)!;
+        return (
+        [
+          ...prevState.slice(0, index),
+          { ...prevState[index], isActive },
+          ...prevState.slice(index + 1)
+        ]);
+      });
+
+      const status = isActive ? "habilitado" : "desabilitado";
+
+      notification.success({ message: `O edital foi ${status} com sucesso!` });
+
+      setShouldReloadNotices(true);
     }
-    catch (err)
+    catch (error)
     {
-      notification.error({ message: err.response?.data ?? err.message });
+      if ((error as Error).message !== "")
+        notification.error({ message: (error as Error).message });
     }
-  };
+  }, [switchNoticesRequester.send]);
 
   return (
     <Structure title="Editais">
-      <Link to="/dashboard/notices/create">Cadastrar edital</Link>
+      <Link to={`${location.pathname}/criar`}>Cadastrar edital</Link>
 
       <List
-        className="demo-loadmore-list"
         itemLayout="horizontal"
-        dataSource={periods}
-        renderItem={(item) =>
-          (<List.Item
+        dataSource={notices}
+        renderItem={(item) => (
+          <List.Item
             actions={
             [
               <Switch
-                defaultChecked={item.isActive}
-                onChange={() => changeStatus(item._id!)}
+                checked={item.isActive}
+                loading={switchNoticesRequester.inProgress}
+                onChange={(isChecked: boolean) => toggleNoticeStatus(item._id!, isChecked)}
               />,
 
-              <Link to={`/dashboard/notices/edit/${item._id}`}>
-                <Button style={{ color: "#333" }}>
-                  Editar <EditOutlined />
-                </Button>
-              </Link>,
+              <Button>
+                <Link
+                  to={
+                  {
+                    pathname: `${location.pathname}/editar/${item._id}`,
+                    state: { notice: item }
+                  }}
+                >
+                  <EditOutlined /> Editar
+                </Link>
+              </Button>,
+
+              <Button>
+                <Link
+                  to={
+                  {
+                    pathname: `${location.pathname}/criar`,
+                    state: { notice: item }
+                  }}
+                >
+                  <CopyOutlined /> Duplicar
+                </Link>
+              </Button>
             ]}
           >
             <Typography>{item.name}</Typography>

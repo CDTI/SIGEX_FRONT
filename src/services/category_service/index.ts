@@ -20,7 +20,7 @@ export const getAllCategories = async (): Promise<Category[]> =>
 
 export const getActiveCategories = async (): Promise<Category[]> =>
 {
-  const response = await httpClient.get("/categories/active");
+  const response = await httpClient.get("/categories/is-active");
   return response.data;
 }
 
@@ -39,13 +39,9 @@ export const getCategory = async (id: string): Promise<Category> =>
 
 export const createCategory = async (category: Category): Promise<ReturnRequest> =>
 {
-  try {
-    const response = await httpClient.post("/category", category);
+  const response = await httpClient.post("/category", category);
 
-    return response.data;
-  } catch (e) {
-    return e;
-  }
+  return response.data;
 };
 
 export const updateCategory = async (id: string, category: any): Promise<ReturnRequest> =>

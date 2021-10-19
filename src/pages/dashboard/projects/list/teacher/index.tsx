@@ -12,6 +12,7 @@ import { listPrograms } from "../../../../../services/program_service";
 import { deleteProject, listAllTeacherProjects } from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
 import { formatDate } from "../../../../../utils/dateFormatter";
+import { StatusTag } from "../../../../../components/StatusTag";
 
 interface IAction
 {
@@ -58,7 +59,7 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState =>
   }
 }
 
-export const TeacherProjects: React.FC = () =>
+export const TeacherProjectsPage: React.FC = () =>
 {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
@@ -172,63 +173,11 @@ export const TeacherProjects: React.FC = () =>
   },
   {
     key: "status",
-    title: "Status",
+    title: "Avaliação",
     dataIndex: "status",
-    render: (status: string) =>
-    {
-      switch (status)
-      {
-        case "pending":
-          return (
-            <Tag
-              color="#f9a03f"
-              style={{ color: "#000" }}
-            >
-              Pendente
-            </Tag>
-          );
-
-        case "reproved":
-          return (
-            <Tag
-              color="#acc5cf"
-              style={{ color: "#000" }}
-            >
-              Não aprovado
-            </Tag>
-          );
-
-        case "notSelected":
-          return (
-            <Tag
-              color="#b3afc8"
-              style={{ color: "#000" }}
-            >
-              Aprovado e não selecionado
-            </Tag>
-          );
-
-        case "selected":
-          return (
-            <Tag
-              color="#8dc898"
-              style={{ color: "#000" }}
-            >
-              Selecionado
-            </Tag>
-          );
-
-        case "finished":
-          return (
-            <Tag
-              color="#fff"
-              style={{ color: "#000" }}
-            >
-              Finalizado
-            </Tag>
-          );
-      }
-    },
+    render: (text: string, record: Project) => (
+      <StatusTag status={record.status} />
+    )
   },
   {
     key: "action",
@@ -291,11 +240,11 @@ export const TeacherProjects: React.FC = () =>
         {record.status === "selected" &&
           <Button>
             {record.report == null
-              ? <Link to={`/dashboard/project/report/create?project=${record._id}`}>Relatório</Link>
+              ? <Link to={`/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
               : (<Link
                   to={
                   {
-                    pathname: `/dashboard/project/report/edit/${record.report._id}?project=${record._id}`,
+                    pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
                     state: record.report
                   }}
                 >
@@ -310,7 +259,7 @@ export const TeacherProjects: React.FC = () =>
               <Link
                 to={
                 {
-                  pathname: `/dashboard/project/edit/${record._id}`,
+                  pathname: `/propostas/editar/${record._id}`,
                   state: { project: record, context: "user" }
                 }}
               >
