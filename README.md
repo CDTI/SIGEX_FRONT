@@ -1,44 +1,39 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este projeto utiliza o plugin editorconfig. Instale para manter o style guide de novos arquivos.
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `yarn start`
+A minha ideia inicial era organizar o projeto em uma arquitetura de 3 camadas: app, módulos e infraestrutura. A camada app é responsável por redirecionar as requisições aos módulos adequados, manter configurações do aplicativo, renderizar páginas de erro, como o 404, renderizar os layouts e gerenciar autenticação de usuário e algumas autorizações. Dentro da camada módulos estariam cada uma das funcionalidades do app com suas respoectivas lógicas, páginas, rotas internas e componentes. Por fim, a camada de infraestrutura é responsável por gerenciar os stores e fornecer acesso aos endpoints. Como React não é Angular, uma camada de domínio é um pouco overkill pra esse projeto, mas poderia ser útil para formatar direito os dados que vem do servidor.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+O usuário interage primeiramente com a camada app, onde estão os layouts e as rotas base. A camada app passaria o resto da requisição à um dos módulos, que será resposável por renderizar as páginas. Por exemplo, se eu acesso a página "/", a camada app recebe essa requisição, verifica em suas rotas e me redireciona pro módulo "/home" que irá achar um jeito de renderizar a página.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+Como é possível ver pela estrutura do projeto, não tive tempo de executar essa ideia.
 
-### `yarn test`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `yarn build`
+A autenticação do app funciona com um JWT básico gerado pelo servidor e enviado ao app. No login o servidor responde com um token que não expira e um objeto de usuário. A autorização é feita diretamente no aplicativo, sobre o nome das roles. Recomendo analisar a possibilidade de adotar o padrão OIDC para autenticação e autorização, uma vez que as permissões de acesso poderiam ser armazenadas no servidor e os tokens tem tempo de vida.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+O fluxo para alteração de senha caso o usuário esqueça é o seguinte:
+- usuário pede para administrador rester sua senha
+- administrador acessa a plataforma e marca usuário para alteração de senha
+- usuário clica em esqueci senha e digita informações necessárias
+- usuário digita nova senha
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Esse fluxo não é o ideal. O certo seria mandar um email ao usuário, mas os servidores do positivo bloqueiam emails enviados de aplicativos.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+As requisições são enviadas através do hook useHttpClient(). O uso do cliente do axios diretamente impossibilita requisições canceláveis (muio úteis em formulários dentro de modais canceláveis e necessários para acabar com o aviso de alteração de estado depois que um componente foi desmontado).
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Os endpoints estão dentro da pasta "endpoints" na pasta services. É interessante retornar um objeto contendo o método HTTP e a uri (ex.: { method: "GET", url: "/path/to/resource" }). Como eu cheguei a essa conclusão depois e eu não tive tempo de eliminar todas as ocorrências de requisição ao servidor da forma antiga, o projeto está um pouco bagunçado nesse quesito.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+Recomendo ler bem a documentação do antd, ainda que algumas coisas não sejam bem documentadas. Algumas dicas:
+- para formulários em vários passos, utilize um único controlador em um HoC e o passe aos componentes que irão definir os Forms, mantendo o botão de submit no Form.Provider dentro do HoC. Assim, sempre que um dos Forms emitir um evento, o Form.Provider consegue capturá-lo e tratá-lo.
+- se existirem campos que mapeiam a um objeto aninhado, passe um array na prop name do Form.Item (ex.: para um objeto da forma { a: { b: string }, utilize Form.Item name={["a", "b"]})
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Recomendo também conversar com o Diogo pra entender bem como funciona todo o processo dos projetos de extensão.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+Pra executar o projeto em dev abra um terminal e digite "yarn dev".
