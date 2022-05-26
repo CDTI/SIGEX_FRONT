@@ -138,6 +138,7 @@ export function useFormStateMachine()
                   secondSemester: payload.secondSemester,
                   status: payload.status,
                   teachers: payload.teachers,
+                  ods: payload.ods,
                   totalCH: payload.totalCH,
                   typeProject: payload.typeProject
                 });

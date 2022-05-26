@@ -63,7 +63,7 @@ export const MainForm: React.FC<Props> = (props) =>
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const selectProgramsRequester = useHttpClient();
-
+  const [selectedOds, setSelectedOds] = useState<Array<String>>([])
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
@@ -156,6 +156,7 @@ export const MainForm: React.FC<Props> = (props) =>
           course: getCourseId(props.initialValues.course),
           category: projectCategory._id!,
           notice: projectNotice._id!,
+          ods: selectedOds,
           program: getProgramId(props.initialValues.program),
           secondSemester: props.initialValues.secondSemester.map(scheduleAsValue)
         });
@@ -167,6 +168,10 @@ export const MainForm: React.FC<Props> = (props) =>
       localStorage.setItem(programsKey, JSON.stringify(programs));
     })();
   }, [props.initialValues]);
+
+  const handleOdsSelection = (values: string[]) => {
+    setSelectedOds(values);
+  }
 
   const populateCategories = useCallback((value: SelectValue) =>
   {
@@ -189,8 +194,7 @@ export const MainForm: React.FC<Props> = (props) =>
     const value = ev.target.value;
     setCurrentProjectType(value);
   }, []);
-
-  return (
+  return(
     <Form
       name="main"
       layout="vertical"
@@ -229,6 +233,7 @@ export const MainForm: React.FC<Props> = (props) =>
             <Input style={{ width: "100%" }} />
           </Form.Item>
         </Col>
+
 
         <Col span={24}>
           <Form.Item
@@ -286,6 +291,23 @@ export const MainForm: React.FC<Props> = (props) =>
               disabled={categories.length === 0}
               style={{ width: "100%" }}
               onChange={changeSchedule}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item
+            name="ods"
+            label="Objetivos de Desenvolvimento Sustentável(ODS)"
+            rules={[{ required: true, message: "Campo Obrigatório" }]}
+          >
+            <Select
+              loading={selectNoticesRequester.inProgress}
+              placeholder={categories.length === 0 ? "Selecione pelo menos um ODS" : ""}
+              options={allOds.map((c: string) => ({ value: c }))}
+              mode="multiple"
+              style={{ width: "100%" }}
+              onChange={handleOdsSelection}
             />
           </Form.Item>
         </Col>
@@ -562,3 +584,23 @@ export const MainForm: React.FC<Props> = (props) =>
     </Form>
   );
 };
+
+const allOds = [
+"Erradicação da Pobreza",
+"Fome Zero",
+"Saúde e Bem Estar",
+"Educação de Qualidade",
+"Igualdade de Gênero",
+"Água Potável e Saneamento",
+"Energia Limpa e Acessível",
+"Trabalho Decente e Crescimento Econômico",
+"Industria, Inovação e Infraestrutura",
+"Redução das Desigualdades",
+"Cidades e Comunidades Sustentáveis",
+"Consumo e Produção Responsáveis",
+"Ação Contra a Mudança Global do Clima",
+"Vida na Água",
+"Vida Terrestre",
+"Paz, Justiça e Instituições Eficazes",
+"Parcerias e Meios de Implementação"
+]

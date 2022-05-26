@@ -121,6 +121,7 @@ export interface Project
   status: ProjectStatus;
   teachers : Teacher[];
   totalCH?: number;
+  ods: string[];
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   updatedAt?: Date;
 }
@@ -143,6 +144,7 @@ export function isProject(p: any): p is Project
     && "resources" in p
     && "secondSemester" in p
     && "specificCommunity" in p
+    && "ods" in p
     && "status" in p
     && "teachers " in p
     && "typeProject" in p;

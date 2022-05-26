@@ -37,7 +37,6 @@ export const AllProjects: React.FC = () =>
   const [programFilter, setProgramFilter] = useState<string>();
   const [yearFilter, setYearFilter] = useState<number>();
   const [semesterFilter, setSemesterFilter] = useState<number>();
-
   const [shouldReload, setShouldReload] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
