@@ -139,6 +139,7 @@ export function useFormStateMachine()
                   status: payload.status,
                   teachers: payload.teachers,
                   ods: payload.ods,
+                  midiaLinks: payload.midiaLinks,
                   totalCH: payload.totalCH,
                   typeProject: payload.typeProject
                 });

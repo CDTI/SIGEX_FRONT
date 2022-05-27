@@ -18,7 +18,7 @@ import { FormInstance } from "antd/lib/form";
 import { RadioChangeEvent } from "antd/lib/radio";
 import { SelectValue } from "antd/lib/select";
 import { MaskedInput } from "antd-mask-input";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, PlusOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
 import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
@@ -37,6 +37,9 @@ import
   getAssociatedCoursesEndpoint
 } from "../../../../../../services/endpoints/users";
 import { Restricted } from "../../../../../../components/Restricted";
+import Paragraph from "antd/lib/typography/Paragraph";
+
+const { Link } = Typography;
 
 interface Props
 {
@@ -63,7 +66,9 @@ export const MainForm: React.FC<Props> = (props) =>
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const selectProgramsRequester = useHttpClient();
-  const [selectedOds, setSelectedOds] = useState<Array<String>>([])
+  const [ midiaLink , setMidiaLink ] = useState<string>('');
+  const [ midiaLinks, setMidiaLinks ] = useState<Array<string>>([]);
+  const [selectedOds, setSelectedOds] = useState<Array<string>>([])
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
@@ -148,7 +153,6 @@ export const MainForm: React.FC<Props> = (props) =>
           (t.category as Category)._id === getCategoryId(projectCategory))!.schedules);
 
         setCurrentProjectType(props.initialValues.typeProject);
-
         props.formController.setFieldsValue(
         {
           ...props.initialValues,
@@ -157,11 +161,11 @@ export const MainForm: React.FC<Props> = (props) =>
           category: projectCategory._id!,
           notice: projectNotice._id!,
           ods: selectedOds,
+          midiaLinks: midiaLinks,
           program: getProgramId(props.initialValues.program),
           secondSemester: props.initialValues.secondSemester.map(scheduleAsValue)
         });
       }
-
       localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));
       localStorage.setItem(noticesKey, JSON.stringify(notices));
@@ -194,6 +198,12 @@ export const MainForm: React.FC<Props> = (props) =>
     const value = ev.target.value;
     setCurrentProjectType(value);
   }, []);
+
+  const handleAddMidiaLink = () => {
+    setMidiaLinks([...midiaLinks, midiaLink])
+  }
+  console.log(midiaLinks)
+
   return(
     <Form
       name="main"
@@ -311,6 +321,86 @@ export const MainForm: React.FC<Props> = (props) =>
             />
           </Form.Item>
         </Col>
+
+        <Col span={24}>
+        <Form.List name="midiaLinks">
+          {(fields, { add, remove }) => (
+            <>
+              <Paragraph>Links de divulgação do projeto</Paragraph>
+              {fields.map((field, index) => (
+                <Form.Item
+                  label={index === 0 ? "Links" : ""}
+                  required={false}
+                  key={field.key}
+                >
+                  <Form.Item
+                    {...field}
+                    validateTrigger={["onChange", "onBlur"]}
+                    noStyle
+                  >
+                    <Input
+                      placeholder="Link para o post"
+                      style={{
+                        width: "100%"
+                      }}
+                    />
+                  </Form.Item>
+                  {fields.length > 1 ? (
+                    <MinusCircleOutlined
+                      style={{paddingLeft: '12px'}}
+                      className="dynamic-delete-button"
+                      onClick={() => remove(field.name)}
+                    />
+                  ) : null}
+                </Form.Item>
+              ))}
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  style={{
+                    width: "100%"
+                  }}
+                  icon={<PlusOutlined />}
+                >
+                  Adicionar link de divulgação
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+        </Col>
+
+
+      {/*   <Col span={24}>
+          <Form.Item
+            name="midiaLinks"
+            label="Deseja adicicionar links de mídias onde foram divulgados os projetos?"
+            style={{marginBottom: '0px'}}
+          >
+            <Input
+              value={midiaLinks}
+              style={{ width: "80%", marginRight: '24px' }}
+              onChange={(e) => setMidiaLink(e.target.value)}
+            />
+          </Form.Item>
+          <Button
+            type="link"
+            size="large"
+            onClick={handleAddMidiaLink}
+            icon={<PlusCircleOutlined  style={{fontSize: '24px', paddingTop: '6px'}} />}
+          />
+          <Col style={{marginTop: '24px'}}>
+            {midiaLinks.map((midiaLink, index) => {
+              return (
+                <Paragraph>
+                  Link {index}:
+                  <a style={{paddingLeft: '8px'}} target="_blank" href={midiaLink}>{midiaLink}</a>
+                </Paragraph>
+              )
+            })}
+          </Col>
+        </Col> */}
 
         {selectedCategory != null && selectedCategory.name !== "Extensão específica do curso" && (
           <>

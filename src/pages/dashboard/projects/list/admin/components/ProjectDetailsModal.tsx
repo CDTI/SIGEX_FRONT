@@ -214,6 +214,24 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                     <Paragraph>{projectTypes[props.project?.typeProject ?? "common"]}</Paragraph>
                   </LabeledContent>
                 </Col>
+
+                {props.project != null
+                  && (props.project.midiaLinks.length > 0)
+                  && (
+                      <Col span={24} style={{marginBottom: '1em'}}>
+                        <LabeledContent label="Links de divulgação">
+                          {props.project?.midiaLinks.map((link) => (
+                            <Paragraph style={{marginBottom: '0em'}} >
+                              Link:
+                              <a style={{paddingLeft: '8px'}} href={link} target="_blank">{link}</a>
+                            </Paragraph>
+                          ))}
+                        </LabeledContent>
+                      </Col>
+                    )
+                }
+
+
                 {props.project != null
                   && (props.project.ods.length > 0)
                   && (
