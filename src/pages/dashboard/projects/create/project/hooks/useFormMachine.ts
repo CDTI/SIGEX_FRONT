@@ -138,9 +138,10 @@ export function useFormStateMachine()
                   secondSemester: payload.secondSemester,
                   status: payload.status,
                   teachers: payload.teachers,
-                  ods: payload.ods,
-                  midiaLinks: payload.midiaLinks,
                   totalCH: payload.totalCH,
+                  totalCHManha: payload.totalCHManha,
+                  totalCHTarde: payload.totalCHTarde,
+                  totalCHNoite: payload.totalCHNoite,
                   typeProject: payload.typeProject
                 });
               }

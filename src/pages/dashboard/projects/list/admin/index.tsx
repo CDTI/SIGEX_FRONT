@@ -49,7 +49,7 @@ export const AllProjects: React.FC = () =>
   const [project, setProject] = useState<Project>();
   const modalProjectsRequester = useHttpClient();
 
-  const changeProjectStatus = useCallback(async (status: "reproved" | "notSelected" | "selected") =>
+  const changeProjectStatus = useCallback(async (status: "reproved" | "notSelected" | "selected" | undefined) =>
   {
     if (project != null)
     {
@@ -62,8 +62,7 @@ export const AllProjects: React.FC = () =>
           cancellable: true
         });
 
-        if (status === "reproved")
-          setFeedbackModalIsVisible(false);
+        setFeedbackModalIsVisible(false);
         setProjectModalIsVisible(false);
         setShouldReload(true);
 

@@ -18,7 +18,7 @@ import { FormInstance } from "antd/lib/form";
 import { RadioChangeEvent } from "antd/lib/radio";
 import { SelectValue } from "antd/lib/select";
 import { MaskedInput } from "antd-mask-input";
-import { MinusCircleOutlined, PlusOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 import { coursesKey, noticesKey, programsKey, usersKey } from "..";
 
@@ -37,9 +37,6 @@ import
   getAssociatedCoursesEndpoint
 } from "../../../../../../services/endpoints/users";
 import { Restricted } from "../../../../../../components/Restricted";
-import Paragraph from "antd/lib/typography/Paragraph";
-
-const { Link } = Typography;
 
 interface Props
 {
@@ -66,9 +63,6 @@ export const MainForm: React.FC<Props> = (props) =>
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const selectProgramsRequester = useHttpClient();
-  const [ midiaLink , setMidiaLink ] = useState<string>('');
-  const [ midiaLinks, setMidiaLinks ] = useState<Array<string>>([]);
-  const [selectedOds, setSelectedOds] = useState<Array<string>>([])
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
@@ -160,8 +154,6 @@ export const MainForm: React.FC<Props> = (props) =>
           course: getCourseId(props.initialValues.course),
           category: projectCategory._id!,
           notice: projectNotice._id!,
-          ods: selectedOds,
-          midiaLinks: midiaLinks,
           program: getProgramId(props.initialValues.program),
           secondSemester: props.initialValues.secondSemester.map(scheduleAsValue)
         });
@@ -172,10 +164,6 @@ export const MainForm: React.FC<Props> = (props) =>
       localStorage.setItem(programsKey, JSON.stringify(programs));
     })();
   }, [props.initialValues]);
-
-  const handleOdsSelection = (values: string[]) => {
-    setSelectedOds(values);
-  }
 
   const populateCategories = useCallback((value: SelectValue) =>
   {
@@ -198,11 +186,6 @@ export const MainForm: React.FC<Props> = (props) =>
     const value = ev.target.value;
     setCurrentProjectType(value);
   }, []);
-
-  const handleAddMidiaLink = () => {
-    setMidiaLinks([...midiaLinks, midiaLink])
-  }
-  console.log(midiaLinks)
 
   return(
     <Form
@@ -305,103 +288,6 @@ export const MainForm: React.FC<Props> = (props) =>
           </Form.Item>
         </Col>
 
-        <Col span={24}>
-          <Form.Item
-            name="ods"
-            label="Objetivos de Desenvolvimento Sustentável(ODS)"
-            rules={[{ required: true, message: "Campo Obrigatório" }]}
-          >
-            <Select
-              loading={selectNoticesRequester.inProgress}
-              placeholder={categories.length === 0 ? "Selecione pelo menos um ODS" : ""}
-              options={allOds.map((c: string) => ({ value: c }))}
-              mode="multiple"
-              style={{ width: "100%" }}
-              onChange={handleOdsSelection}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-        <Form.List name="midiaLinks">
-          {(fields, { add, remove }) => (
-            <>
-              <Paragraph>Links de divulgação do projeto</Paragraph>
-              {fields.map((field, index) => (
-                <Form.Item
-                  label={index === 0 ? "Links" : ""}
-                  required={false}
-                  key={field.key}
-                >
-                  <Form.Item
-                    {...field}
-                    validateTrigger={["onChange", "onBlur"]}
-                    noStyle
-                  >
-                    <Input
-                      placeholder="Link para o post"
-                      style={{
-                        width: "100%"
-                      }}
-                    />
-                  </Form.Item>
-                  {fields.length > 1 ? (
-                    <MinusCircleOutlined
-                      style={{paddingLeft: '12px'}}
-                      className="dynamic-delete-button"
-                      onClick={() => remove(field.name)}
-                    />
-                  ) : null}
-                </Form.Item>
-              ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  style={{
-                    width: "100%"
-                  }}
-                  icon={<PlusOutlined />}
-                >
-                  Adicionar link de divulgação
-                </Button>
-              </Form.Item>
-            </>
-          )}
-        </Form.List>
-        </Col>
-
-
-      {/*   <Col span={24}>
-          <Form.Item
-            name="midiaLinks"
-            label="Deseja adicicionar links de mídias onde foram divulgados os projetos?"
-            style={{marginBottom: '0px'}}
-          >
-            <Input
-              value={midiaLinks}
-              style={{ width: "80%", marginRight: '24px' }}
-              onChange={(e) => setMidiaLink(e.target.value)}
-            />
-          </Form.Item>
-          <Button
-            type="link"
-            size="large"
-            onClick={handleAddMidiaLink}
-            icon={<PlusCircleOutlined  style={{fontSize: '24px', paddingTop: '6px'}} />}
-          />
-          <Col style={{marginTop: '24px'}}>
-            {midiaLinks.map((midiaLink, index) => {
-              return (
-                <Paragraph>
-                  Link {index}:
-                  <a style={{paddingLeft: '8px'}} target="_blank" href={midiaLink}>{midiaLink}</a>
-                </Paragraph>
-              )
-            })}
-          </Col>
-        </Col> */}
-
         {selectedCategory != null && selectedCategory.name !== "Extensão específica do curso" && (
           <>
             <Col span={24}>
@@ -429,6 +315,33 @@ export const MainForm: React.FC<Props> = (props) =>
               <Form.Item
                 name="totalCH"
                 label="Carga horária máxima que o professor pode assumir na extensão institucional"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHManha"
+                label="Carga horária máxima que o professor pode assumir no periódo da manhã"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHTarde"
+                label="Carga horária máxima que o professor pode assumir no periódo da tarde"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHNoite"
+                label="Carga horária máxima que o professor pode assumir no periódo da noite"
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <InputNumber min={1} style={{ width: "100%" }} />
@@ -674,23 +587,3 @@ export const MainForm: React.FC<Props> = (props) =>
     </Form>
   );
 };
-
-const allOds = [
-"Erradicação da Pobreza",
-"Fome Zero",
-"Saúde e Bem Estar",
-"Educação de Qualidade",
-"Igualdade de Gênero",
-"Água Potável e Saneamento",
-"Energia Limpa e Acessível",
-"Trabalho Decente e Crescimento Econômico",
-"Industria, Inovação e Infraestrutura",
-"Redução das Desigualdades",
-"Cidades e Comunidades Sustentáveis",
-"Consumo e Produção Responsáveis",
-"Ação Contra a Mudança Global do Clima",
-"Vida na Água",
-"Vida Terrestre",
-"Paz, Justiça e Instituições Eficazes",
-"Parcerias e Meios de Implementação"
-]

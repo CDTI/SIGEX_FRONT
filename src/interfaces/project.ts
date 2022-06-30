@@ -93,6 +93,8 @@ export interface Report
   students: number;
   teams: number;
   updatedAt?: Date;
+  ods: string[];
+  midiaLinks: string[];
 }
 
 export interface Project
@@ -121,8 +123,9 @@ export interface Project
   status: ProjectStatus;
   teachers : Teacher[];
   totalCH?: number;
-  ods: string[];
-  midiaLinks: string[];
+  totalCHManha?: number;
+  totalCHTarde?: number;
+  totalCHNoite?: number;
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   updatedAt?: Date;
 }
