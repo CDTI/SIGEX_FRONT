@@ -170,7 +170,6 @@ export const CreateProposalPage: React.FC = () =>
 
   const handleFormFinished = useCallback((formName: string, values: Store) =>
   {
-    console.log(values);
     switch (formName)
     {
       case "main":

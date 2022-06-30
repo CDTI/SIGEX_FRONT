@@ -38,6 +38,7 @@ export const AllProjects: React.FC = () =>
   const [yearFilter, setYearFilter] = useState<number>();
   const [semesterFilter, setSemesterFilter] = useState<number>();
   const [shouldReload, setShouldReload] = useState(true);
+  const [projectStatus, setProjectStatus ] = useState<"reproved" | "notSelected" | "selected">();
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const tableProjectsRequester = useHttpClient();
@@ -49,7 +50,7 @@ export const AllProjects: React.FC = () =>
   const [project, setProject] = useState<Project>();
   const modalProjectsRequester = useHttpClient();
 
-  const changeProjectStatus = useCallback(async (status: "reproved" | "notSelected" | "selected") =>
+  const changeProjectStatus = useCallback(async (status: "reproved" | "notSelected" | "selected" | undefined) =>
   {
     if (project != null)
     {
@@ -62,8 +63,7 @@ export const AllProjects: React.FC = () =>
           cancellable: true
         });
 
-        if (status === "reproved")
-          setFeedbackModalIsVisible(false);
+        setFeedbackModalIsVisible(false);
         setProjectModalIsVisible(false);
         setShouldReload(true);
 
@@ -79,9 +79,8 @@ export const AllProjects: React.FC = () =>
 
   const handleProjectReview = useCallback(async (verdict: "reproved" | "notSelected" | "selected") =>
   {
-    verdict === "reproved"
-      ? setFeedbackModalIsVisible(true)
-      : changeProjectStatus(verdict);
+    setFeedbackModalIsVisible(true)
+    setProjectStatus(verdict)
   }, [changeProjectStatus]);
 
   const setFilter = useCallback((field: Field, value: string) =>
@@ -268,9 +267,10 @@ export const AllProjects: React.FC = () =>
   return (
     <>
       <ProjectFeedbackModal
+        projectStatus={projectStatus}
         projectRef={project?._id}
         isVisible={feedbackModalIsVisible}
-        onSuccess={() => changeProjectStatus("reproved")}
+        onSuccess={() => changeProjectStatus(projectStatus)}
         onError={(message: string) => notification.error({ message })}
         onCancel={() => setFeedbackModalIsVisible(false)}
       />

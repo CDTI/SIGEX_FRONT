@@ -216,39 +216,6 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                 </Col>
 
                 {props.project != null
-                  && (props.project.midiaLinks.length > 0)
-                  && (
-                      <Col span={24} style={{marginBottom: '1em'}}>
-                        <LabeledContent label="Links de divulgação">
-                          {props.project?.midiaLinks.map((link) => (
-                            <Paragraph style={{marginBottom: '0em'}} >
-                              Link:
-                              <a style={{paddingLeft: '8px'}} href={link} target="_blank">{link}</a>
-                            </Paragraph>
-                          ))}
-                        </LabeledContent>
-                      </Col>
-                    )
-                }
-
-
-                {props.project != null
-                  && (props.project.ods.length > 0)
-                  && (
-                      <Col span={24}>
-                        <LabeledContent label="ODS Selecionados">
-                          <Paragraph>
-                            {props.project?.ods.map((eachOds, index) => {
-                              const isLastElement = props.project?.ods.length === (index+1) ? true : false;
-                              if(isLastElement) return eachOds + '.'
-                              else return eachOds + ', '
-                            })}
-                          </Paragraph>
-                        </LabeledContent>
-                      </Col>
-                    )
-                }
-                {props.project != null
                   && (props.project.category as Category).name !== "Extensão específica do curso"
                   && (
                     <>
@@ -274,14 +241,25 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                       </Col>
 
                       <Col span={24}>
-                        <LabeledContent label="Carga horária disponível">
-                          <Paragraph>{props.project.totalCH}</Paragraph>
-                        </LabeledContent>
+                        {(!props.project.totalCHManha && !props.project.totalCHTarde && !props.project.totalCHNoite)
+                          ? (
+                            <LabeledContent label={`Carga horária disponível`}>
+                              <Paragraph >{props.project.totalCH} horas</Paragraph>
+                            </LabeledContent>
+                          )
+                          : (
+                            <LabeledContent label={`Carga horária disponível(Total: ${props.project.totalCH} horas)`}>
+                              <Paragraph style={{marginBottom: 2, marginTop: 5}}>Manha: {props.project.totalCHManha} horas</Paragraph>
+                              <Paragraph style={{marginBottom: 2}}>Tarde: {props.project.totalCHTarde} horas</Paragraph>
+                              <Paragraph >Noite: {props.project.totalCHNoite} horas</Paragraph>
+                            </LabeledContent>
+                          )
+                        }
                       </Col>
 
                       <Col span={24} style={{ paddingBottom: "0" }}>
                         <LabeledContent label="Máximo de turmas">
-                          <Paragraph>{props.project.totalCH}</Paragraph>
+                          <Paragraph>{props.project.maxClasses}</Paragraph>
                         </LabeledContent>
                       </Col>
                     </>

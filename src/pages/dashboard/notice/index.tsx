@@ -18,6 +18,7 @@ import
   changeNoticeStatusEndpoint,
   getAllNoticesEndpoint
 } from "../../../services/endpoints/notices";
+import Paragraph from "antd/lib/typography/Paragraph";
 
 export const Notices: React.FC = () =>
 {
@@ -99,7 +100,6 @@ export const Notices: React.FC = () =>
         notification.error({ message: (error as Error).message });
     }
   }, [switchNoticesRequester.send]);
-
   return (
     <Structure title="Editais">
       <Link to={`${location.pathname}/criar`}>Cadastrar edital</Link>
@@ -111,12 +111,15 @@ export const Notices: React.FC = () =>
           <List.Item
             actions={
             [
-              <Switch
-                checked={item.isActive}
-                loading={switchNoticesRequester.inProgress}
-                onChange={(isChecked: boolean) => toggleNoticeStatus(item._id!, isChecked)}
-              />,
-
+              <Paragraph>
+                {item.isActive
+                  ? (
+                    `Ativo (${Number(
+                      ((new Date(item.expirationDate).getTime()) - (new Date().getTime()))/ (1000 * 3600 * 24))
+                      .toFixed()} dias restantes)`
+                    )
+                  : 'Encerrado'}
+              </Paragraph>,
               <Button>
                 <Link
                   to={

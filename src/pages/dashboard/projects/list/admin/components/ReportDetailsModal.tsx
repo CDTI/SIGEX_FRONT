@@ -86,14 +86,15 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                     <Paragraph>{(props.project?.program as Program)?.name}</Paragraph>
                   </LabeledContent>
                 </Col>
-                {props.project != null
-                  && (props.project.ods.length > 0)
+
+                {(props.project?.report)
+                  && (props.project?.report?.ods.length > 0)
                   && (
                       <Col span={24}>
                         <LabeledContent label="ODS Selecionados">
                           <Paragraph>
-                            {props.project?.ods.map((eachOds, index) => {
-                              const isLastElement = props.project?.ods.length === (index+1) ? true : false;
+                            {props.project?.report.ods.map((eachOds, index) => {
+                              const isLastElement = props.project?.report?.ods.length === (index+1) ? true : false;
                               if(isLastElement) return eachOds + '.'
                               else return eachOds + ', '
                             })}
@@ -102,6 +103,22 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                       </Col>
                     )
                 }
+               {(props.project?.report)
+                  && (props.project?.report?.midiaLinks.length > 0)
+                  && (
+                      <Col span={24} style={{marginBottom: '1em'}}>
+                        <LabeledContent label="Links de divulgação">
+                          {props.project?.report?.midiaLinks.map((link) => (
+                            <Paragraph style={{marginBottom: '0em'}} >
+                              Link:
+                              <a style={{paddingLeft: '8px'}} href={link} target="_blank">{link}</a>
+                            </Paragraph>
+                          ))}
+                        </LabeledContent>
+                      </Col>
+                    )
+                }
+
                 {props.project != null
                   && (props.project.category as Category).name === "Extensão específica do curso"
                   && (
