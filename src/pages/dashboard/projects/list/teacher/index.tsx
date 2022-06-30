@@ -216,64 +216,81 @@ export const TeacherProjectsPage: React.FC = () =>
     render: (text: string, record: Project) => (
       <Space size="middle">
         {record.status !== "pending" && record.status !== "finished" && (
-          <>
-            <Button
-              onClick={async () =>
+          <Button
+            onClick={async () =>
+            {
+              let data;
+              switch (record.status)
               {
-                let data;
-                const justification = await listFeedbackProject(record._id!).then((response => {
-                  const hasUserJustification = response.feedback.registers.filter((r: Register) => r.typeFeedback === "user").length > 0
-                  if(hasUserJustification) {
-                    return response.feedback.registers
-                      .filter((r: Register) => r.typeFeedback === "user")
-                      .slice(-1)[0].text
-                  }
-                }));
-                switch (record.status)
-                {
-                  case "reproved":
-                    data = { title: "Não aprovado", content: justification};
-                    break;
-                  case "notSelected":
-                    data = { title: "Não selecionado", content: justification !== ''
-                      ? justification
-                      : "Professor, seu projeto atende os requisitos da extensão, " +"entretanto não foi possível alocá-lo nas turmas disponíveis."
-                    };
-                    break;
-                  case "selected":
-                    data = { title: "Selecionado", content: justification  !== ''
-                      ? justification
-                      : "Parabéns, seu projeto foi selecionado. " +
-                       "Por favor, confira as turmas para as quais " +
-                       "foi alocado no edital de resultados."
-                    };
-                    break;
-                }
+                case "reproved":
+                  const response = await listFeedbackProject(record._id!);
+                  const justification = response.feedback.registers
+                    .filter((r: Register) => r.typeFeedback === "user")
+                    .slice(-1)[0].text
 
-                dispatchInfoDialogState({ type: "SET_CONTENT", data });
-                dispatchInfoDialogState({ type: "SHOW_DIALOG" });
-              }}
-            >
-              Informações
-            </Button>
-          </>
+                  data =
+                  {
+                    title: "Não aprovado",
+                    content: justification
+                  };
+
+                  break;
+
+                case "notSelected":
+                  data =
+                  {
+                    title: "Não selecionado",
+                    content:
+                      "Professor, seu projeto atende os requisitos da extensão, " +
+                      "entretanto não foi possível alocá-lo nas turmas disponíveis."
+                  };
+
+                  break;
+
+                case "selected":
+                  data =
+                  {
+                    title: "Selecionado",
+                    content:
+                      "Parabéns, seu projeto foi selecionado. " +
+                      "Por favor, confira as turmas para as quais " +
+                      "foi alocado no edital de resultados."
+                  };
+
+                  break;
+              }
+
+              dispatchInfoDialogState({ type: "SET_CONTENT", data });
+              dispatchInfoDialogState({ type: "SHOW_DIALOG" });
+            }}
+          >
+            Informações
+          </Button>
         )}
 
         {record.status === "selected" &&
+        <>
+         <Button>
+            {record.report == null
+              ? <Link to={`/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
+              : (<Link
+                  to={
+                  {
+                    pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
+                    state: record.report
+                  }}
+                >
+                  Relatório
+                </Link>)}
+          </Button>
+          <Button onClick={() => openDetailsModal("project", record)}>
+            <EyeOutlined /> Proposta
+          </Button>
+        </>
+        }
+
+        {record.status === "notSelected" &&
           <>
-            <Button>
-              {record.report == null
-                ? <Link to={`/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
-                : (<Link
-                    to={
-                    {
-                      pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
-                      state: record.report
-                    }}
-                  >
-                    Relatório
-                  </Link>)}
-            </Button>
             <Button onClick={() => openDetailsModal("project", record)}>
               <EyeOutlined /> Proposta
             </Button>
