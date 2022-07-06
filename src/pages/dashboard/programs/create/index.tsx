@@ -46,7 +46,7 @@ export const CreateProgram: React.FC = () =>
   };
 
   return (
-    <Structure title="Criar campanha">
+    <Structure title="Criar programa">
       {state !== null && (
         <Result
           status={state.result}

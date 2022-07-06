@@ -88,6 +88,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                 </Col>
 
                 {(props.project?.report)
+                  && (props.project?.report.ods)
                   && (props.project?.report?.ods.length > 0)
                   && (
                       <Col span={24}>
@@ -104,6 +105,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                     )
                 }
                {(props.project?.report)
+                  && (props.project?.report.midiaLinks)
                   && (props.project?.report?.midiaLinks.length > 0)
                   && (
                       <Col span={24} style={{marginBottom: '1em'}}>

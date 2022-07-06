@@ -59,7 +59,6 @@ export const CreateCategory: React.FC = () =>
   {
     formModal.setFieldsValue(category);
     setState({ visible: true, category: category });
-    console.log(state.category);
   };
 
   const submitEdit = async (item: any) =>
