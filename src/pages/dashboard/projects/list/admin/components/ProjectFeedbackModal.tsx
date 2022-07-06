@@ -85,7 +85,7 @@ export const ProjectFeedbackModal: React.FC<Props> = (props) =>
       centered={true}
       confirmLoading={formFeedbacksRequester.inProgress}
       okText="Enviar"
-      title="Justificativa"
+      title="Observações/Restrições"
       visible={props.isVisible}
       onCancel={() => cancelSubmition()}
       onOk={() => formController.submit()}
