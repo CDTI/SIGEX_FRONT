@@ -6,6 +6,7 @@ import { formatDate } from "../../../../../../utils/dateFormatter";
 import { Category } from "../../../../../../interfaces/category";
 import { Campus, Course } from "../../../../../../interfaces/course";
 import { Program } from "../../../../../../interfaces/program";
+import { Notice } from "../../../../../../interfaces/notice";
 import { Contact, Project } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
 
@@ -87,6 +88,23 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                   </LabeledContent>
                 </Col>
 
+                {(props.project?.notice)
+                  &&((props.project?.notice as Notice).projectExecutionPeriod && (props.project?.notice as Notice).projectExecutionYear)
+                  && (
+                    <>
+                      <Col span={24}>
+                        <LabeledContent label="Período de execução do projeto">
+                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                        <Col span={24}>
+                          <LabeledContent label="Ano de execução do projeto">
+                            <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                          </LabeledContent>
+                        </Col>
+                      </>
+                  )
+                }
                 {(props.project?.report)
                   && (props.project?.report.ods)
                   && (props.project?.report?.ods.length > 0)

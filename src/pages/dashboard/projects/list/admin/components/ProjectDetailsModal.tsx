@@ -22,6 +22,7 @@ import { Campus, Course } from "../../../../../../interfaces/course";
 import { Feedback, Register } from "../../../../../../interfaces/feedback";
 import { Schedule } from "../../../../../../interfaces/notice";
 import { Program } from "../../../../../../interfaces/program";
+import { Notice } from "../../../../../../interfaces/notice";
 import
 {
   Contact,
@@ -216,6 +217,23 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                 </Col>
 
                 {props.project != null
+                  && ((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
+                  && (
+                    <>
+                      <Col span={24}>
+                        <LabeledContent label="Período de execução do projeto">
+                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                      <Col span={24}>
+                        <LabeledContent label="Ano de execução do projeto">
+                          <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                    </>
+                  )
+                }
+                {props.project != null
                   && (props.project.category as Category).name !== "Extensão específica do curso"
                   && (
                     <>
@@ -262,6 +280,22 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                           <Paragraph>{props.project.maxClasses}</Paragraph>
                         </LabeledContent>
                       </Col>
+
+                        {((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
+                          && (
+                            <>
+                              <Col span={24}>
+                                <LabeledContent label="Período de execução do projeto">
+                                  <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                                </LabeledContent>
+                              </Col>
+                              <Col span={24}>
+                                <LabeledContent label="Ano de execução do projeto">
+                                  <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                                </LabeledContent>
+                              </Col>
+                            </>
+                        )}
                     </>
                   )
                 }

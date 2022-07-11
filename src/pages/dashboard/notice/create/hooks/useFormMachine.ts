@@ -82,7 +82,9 @@ export function useFormStateMachine()
                 expirationDate: ev.payload.expirationDate,
                 reportDeadline: ev.payload.reportDeadline,
                 type: "common",
-                isActive: true
+                isActive: true,
+                projectExecutionPeriod: ev.payload.projectExecutionPeriod,
+                projectExecutionYear: ev.payload.projectExecutionYear
               })
             })
           }
