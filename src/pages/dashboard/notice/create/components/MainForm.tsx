@@ -53,16 +53,19 @@ export const MainDataForm: React.FC<Props> = (props) =>
 
   useEffect(() =>
   {
-    if (props.initialValues != null)
+
+    if (props.initialValues != null) {
+      const noticeSemester = new Date(props.initialValues?.effectiveDate).getMonth() + 1 > 6 ? "2 semestre" : "1 semestre";
       props.formController.setFieldsValue(
       {
         ...props.initialValues,
         effectiveDate: moment(props.initialValues.effectiveDate),
         expirationDate: moment(props.initialValues.expirationDate),
         reportDeadline: moment(props.initialValues.reportDeadline),
-        projectExecutionPeriod: props.initialValues.projectExecutionPeriod,
-        projectExecutionYear: props.initialValues.projectExecutionYear ? moment(props.initialValues.projectExecutionYear) : ''
+        projectExecutionPeriod: props.initialValues.projectExecutionPeriod ? props.initialValues.projectExecutionPeriod : noticeSemester,
+        projectExecutionYear: props.initialValues.projectExecutionYear ? moment(props.initialValues.projectExecutionYear) : moment(props.initialValues.effectiveDate),
       });
+    }
   }, [props.formController, props.initialValues]);
 
   function disabledDate(current: moment.Moment) {

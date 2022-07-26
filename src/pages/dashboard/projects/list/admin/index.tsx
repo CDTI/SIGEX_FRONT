@@ -146,6 +146,16 @@ export const AllProjects: React.FC = () =>
     }
   }, [project, modalProjectsRequester.send]);
 
+  const clearFilters = () => {
+    setAuthorNameFilter(undefined)
+    setCategoryFilter(undefined);
+    setProjectNameFilter(undefined);
+    setNoticeFilter(undefined);
+    setProgramFilter(undefined);
+    setSemesterFilter(undefined);
+    setYearFilter(undefined);
+  }
+
   const columns = useMemo(() =>
   [{
     key: "name",
@@ -294,7 +304,7 @@ export const AllProjects: React.FC = () =>
           <Col span={24}>
             <Collapse bordered={false} expandIconPosition="right">
               <Collapse.Panel key="Filtros" header="Filtros" style={{ borderBottom: "0" }}>
-                <Filters onFilterBy={setFilter} />
+                <Filters clearFilters={clearFilters} onFilterBy={setFilter} />
               </Collapse.Panel>
             </Collapse>
           </Col>
