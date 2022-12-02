@@ -72,7 +72,9 @@ export function reportFormStateReducer(
             {
               ...state.data!,
               projectTitle: action.payload.projectTitle,
-              introduction: action.payload.introduction
+              introduction: action.payload.introduction,
+              ods: action.payload.ods,
+              midiaLinks: action.payload.midiaLinks
             }
           });
 

@@ -22,6 +22,7 @@ import { Campus, Course } from "../../../../../../interfaces/course";
 import { Feedback, Register } from "../../../../../../interfaces/feedback";
 import { Schedule } from "../../../../../../interfaces/notice";
 import { Program } from "../../../../../../interfaces/program";
+import { Notice } from "../../../../../../interfaces/notice";
 import
 {
   Contact,
@@ -216,6 +217,23 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                 </Col>
 
                 {props.project != null
+                  && ((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
+                  && (
+                    <>
+                      <Col span={24}>
+                        <LabeledContent label="Período de execução do projeto">
+                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                      <Col span={24}>
+                        <LabeledContent label="Ano de execução do projeto">
+                          <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                    </>
+                  )
+                }
+                {props.project != null
                   && (props.project.category as Category).name !== "Extensão específica do curso"
                   && (
                     <>
@@ -241,16 +259,43 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                       </Col>
 
                       <Col span={24}>
-                        <LabeledContent label="Carga horária disponível">
-                          <Paragraph>{props.project.totalCH}</Paragraph>
-                        </LabeledContent>
+                        {(!props.project.totalCHManha && !props.project.totalCHTarde && !props.project.totalCHNoite)
+                          ? (
+                            <LabeledContent label={`Carga horária disponível`}>
+                              <Paragraph >{props.project.totalCH} horas</Paragraph>
+                            </LabeledContent>
+                          )
+                          : (
+                            <LabeledContent label={`Carga horária disponível(Total: ${props.project.totalCH} horas)`}>
+                              <Paragraph style={{marginBottom: 2, marginTop: 5}}>Manha: {props.project.totalCHManha} horas</Paragraph>
+                              <Paragraph style={{marginBottom: 2}}>Tarde: {props.project.totalCHTarde} horas</Paragraph>
+                              <Paragraph >Noite: {props.project.totalCHNoite} horas</Paragraph>
+                            </LabeledContent>
+                          )
+                        }
                       </Col>
 
                       <Col span={24} style={{ paddingBottom: "0" }}>
                         <LabeledContent label="Máximo de turmas">
-                          <Paragraph>{props.project.totalCH}</Paragraph>
+                          <Paragraph>{props.project.maxClasses}</Paragraph>
                         </LabeledContent>
                       </Col>
+
+                        {((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
+                          && (
+                            <>
+                              <Col span={24}>
+                                <LabeledContent label="Período de execução do projeto">
+                                  <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                                </LabeledContent>
+                              </Col>
+                              <Col span={24}>
+                                <LabeledContent label="Ano de execução do projeto">
+                                  <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                                </LabeledContent>
+                              </Col>
+                            </>
+                        )}
                     </>
                   )
                 }

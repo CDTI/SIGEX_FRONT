@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
@@ -13,6 +13,11 @@ import { deleteProject, listAllTeacherProjects } from "../../../../../services/p
 import Structure from "../../../../../components/layout/structure";
 import { formatDate } from "../../../../../utils/dateFormatter";
 import { StatusTag } from "../../../../../components/StatusTag";
+import { useHttpClient } from "../../../../../hooks/useHttpClient";
+import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks";
+import { ProjectDetailsModal } from "../admin/components/ProjectDetailsModal";
+import { EyeOutlined } from "@ant-design/icons";
+
 
 interface IAction
 {
@@ -66,6 +71,10 @@ export const TeacherProjectsPage: React.FC = () =>
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
+  const [project, setProject] = useState<Project>();
+  const modalProjectsRequester = useHttpClient();
+  const [projectModalIsVisible, setProjectModalIsVisible] = useState(false);
+
 
   const [infoDialogState, dispatchInfoDialogState] = useReducer(
     dialogReducer,
@@ -119,6 +128,28 @@ export const TeacherProjectsPage: React.FC = () =>
       </Modal>
     );
   }, [infoDialogState]);
+
+  const openDetailsModal = useCallback(async (type: "project" | "report", project: Project) =>
+  {
+    setProject(project);
+    if (type === "project")
+    {
+      try
+      {
+        const log = await modalProjectsRequester.send(
+        {
+          ...getFeedbackEndpoint(project._id!),
+          queryParams: new Map([["withPopulatedRefs", "true"]]),
+          cancellable: true,
+        });
+        setProjectModalIsVisible(true);
+      }
+      catch (error)
+      {
+        notification.error({ message: "Não foi possível carregar o projeto para visualização!" });
+      }
+    }
+  }, [project, modalProjectsRequester.send]);
 
   const actionDialog = useMemo(() =>
   {
@@ -186,46 +217,35 @@ export const TeacherProjectsPage: React.FC = () =>
       <Space size="middle">
         {record.status !== "pending" && record.status !== "finished" && (
           <Button
-            onClick={async () =>
+          onClick={async () =>
             {
               let data;
+              const justification = await listFeedbackProject(record._id!).then((response => {
+                const hasUserJustification = response.feedback.registers.filter((r: Register) => r.typeFeedback === "user").length > 0
+                if(hasUserJustification) {
+                  return response.feedback.registers
+                    .filter((r: Register) => r.typeFeedback === "user")
+                    .slice(-1)[0].text
+                }
+              }));
               switch (record.status)
               {
                 case "reproved":
-                  const response = await listFeedbackProject(record._id!);
-                  const justification = response.feedback.registers
-                    .filter((r: Register) => r.typeFeedback === "user")
-                    .sort((a: Register, b: Register) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0)[0].text;
-
-                  data =
-                  {
-                    title: "Não aprovado",
-                    content: justification
-                  };
-
+                  data = { title: "Não aprovado", content: justification};
                   break;
-
                 case "notSelected":
-                  data =
-                  {
-                    title: "Não selecionado",
-                    content:
-                      "Professor, seu projeto atende os requisitos da extensão, " +
-                      "entretanto não foi possível alocá-lo nas turmas disponíveis."
+                  data = { title: "Não selecionado", content: justification !== ''
+                    ? justification
+                    : "Professor, seu projeto atende os requisitos da extensão, " +"entretanto não foi possível alocá-lo nas turmas disponíveis."
                   };
-
                   break;
-
                 case "selected":
-                  data =
-                  {
-                    title: "Selecionado",
-                    content:
-                      "Parabéns, seu projeto foi selecionado. " +
-                      "Por favor, confira as turmas para as quais " +
-                      "foi alocado no edital de resultados."
+                  data = { title: "Selecionado", content: justification  !== ''
+                    ? justification
+                    : "Parabéns, seu projeto foi selecionado. " +
+                     "Por favor, confira as turmas para as quais " +
+                     "foi alocado no edital de resultados."
                   };
-
                   break;
               }
 
@@ -238,7 +258,8 @@ export const TeacherProjectsPage: React.FC = () =>
         )}
 
         {record.status === "selected" &&
-          <Button>
+        <>
+         <Button>
             {record.report == null
               ? <Link to={`/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
               : (<Link
@@ -251,6 +272,18 @@ export const TeacherProjectsPage: React.FC = () =>
                   Relatório
                 </Link>)}
           </Button>
+          <Button onClick={() => openDetailsModal("project", record)}>
+            <EyeOutlined /> Proposta
+          </Button>
+        </>
+        }
+
+        {record.status === "notSelected" &&
+          <>
+            <Button onClick={() => openDetailsModal("project", record)}>
+              <EyeOutlined /> Proposta
+            </Button>
+          </>
         }
 
         {(record.notice as Notice).isActive && (record.status === "pending" || record.status === "reproved") && (
@@ -295,7 +328,12 @@ export const TeacherProjectsPage: React.FC = () =>
     <>
       {ReactDOM.createPortal(infoDialog, document.getElementById("dialog-overlay")!)}
       {ReactDOM.createPortal(actionDialog, document.getElementById("dialog-overlay")!)}
-
+      <ProjectDetailsModal
+        project={project}
+        isVisible={projectModalIsVisible}
+        onReview={() => {}}
+        onClose={() => setProjectModalIsVisible(false)}
+      />
       <Structure title="Meus Projetos">
         <Row gutter={[8, 8]}>
           <Col xs={24}>

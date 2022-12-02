@@ -146,7 +146,6 @@ export const LoginPage: React.FC = () =>
 
       const token = JSON.stringify({ id, cpf, name: value.name.toUpperCase(), email: value.email.toLowerCase() });
       const encryptedToken = iv.toString("hex") + cipher.update(token).toString("hex");
-
       history.push(`/alterar-senha?userId=${id}&token=${encryptedToken}`);
     }
     catch (err)

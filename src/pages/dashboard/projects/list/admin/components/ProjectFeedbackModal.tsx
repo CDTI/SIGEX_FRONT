@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Form, Input, Modal, Row } from "antd";
 
 import { useHttpClient } from "../../../../../../hooks/useHttpClient";
@@ -8,10 +8,16 @@ import { createFeedbackEndpoint } from "../../../../../../services/endpoints/fee
 interface Props
 {
   isVisible: boolean;
+  projectStatus: "reproved" | "notSelected" | "selected" | undefined;
   projectRef?: string;
   onCancel(): void;
   onError(message: string): void;
   onSuccess(): void;
+}
+
+enum StatusTypes {
+  notSelected = 'Professor, seu projeto atende os requisitos da extensão, entretanto não foi possível alocá-lo nas turmas disponíveis.',
+  selected = 'Parabéns, seu projeto foi selecionado. Por favor, confira as turmas para as quais foi alocado no edital de resultados.',
 }
 
 export const ProjectFeedbackModal: React.FC<Props> = (props) =>
@@ -41,13 +47,22 @@ export const ProjectFeedbackModal: React.FC<Props> = (props) =>
     {
       try
       {
+        if(!values.text) {
+          switch(props.projectStatus) {
+            case "selected":
+              values.text = StatusTypes.selected
+              break;
+            case "notSelected":
+              values.text = StatusTypes.notSelected
+              break;
+            }
+        }
         await formFeedbacksRequester.send(
-        {
-          ...createFeedbackEndpoint(props.projectRef),
-          body: values,
-          cancellable: true
-        });
-
+          {
+            ...createFeedbackEndpoint(props.projectRef),
+            body: values,
+            cancellable: true
+          });
         props.onSuccess();
       }
       catch (error)
@@ -70,7 +85,7 @@ export const ProjectFeedbackModal: React.FC<Props> = (props) =>
       centered={true}
       confirmLoading={formFeedbacksRequester.inProgress}
       okText="Enviar"
-      title="Justificativa"
+      title="Observações/Restrições"
       visible={props.isVisible}
       onCancel={() => cancelSubmition()}
       onOk={() => formController.submit()}
@@ -86,7 +101,7 @@ export const ProjectFeedbackModal: React.FC<Props> = (props) =>
               name="text"
               rules={
               [
-                { required: true, message: "Campo obrigatório" },
+                { required: props.projectStatus === 'reproved' ? true : false, message: "Campo Obrigatório" },
                 { max: 3000, message: "Número máximo de caracteres extrapolado" }
               ]}
             >

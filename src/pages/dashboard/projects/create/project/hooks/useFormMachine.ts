@@ -139,6 +139,9 @@ export function useFormStateMachine()
                   status: payload.status,
                   teachers: payload.teachers,
                   totalCH: payload.totalCH,
+                  totalCHManha: payload.totalCHManha,
+                  totalCHTarde: payload.totalCHTarde,
+                  totalCHNoite: payload.totalCHNoite,
                   typeProject: payload.typeProject
                 });
               }

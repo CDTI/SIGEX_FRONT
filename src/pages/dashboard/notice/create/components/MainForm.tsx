@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Col, DatePicker, Form, Input, InputNumber, Row, Select } from "antd";
 import { FormInstance } from "antd/lib/form";
 import moment from "moment";
-
 import { rolesKey } from "..";
 
 import { useHttpClient } from "../../../../../hooks/useHttpClient";
@@ -25,6 +24,7 @@ function getDisabledDateRange(currentDate: moment.Moment)
 export const MainDataForm: React.FC<Props> = (props) =>
 {
   const [roles, setRoles] = useState<Role[]>([]);
+  const { Option } = Select;
   const selectRolesRequester = useHttpClient();
 
   useEffect(() =>
@@ -53,16 +53,24 @@ export const MainDataForm: React.FC<Props> = (props) =>
 
   useEffect(() =>
   {
-    if (props.initialValues != null)
+
+    if (props.initialValues != null) {
+      const noticeSemester = new Date(props.initialValues?.effectiveDate).getMonth() + 1 > 6 ? "2 semestre" : "1 semestre";
       props.formController.setFieldsValue(
       {
         ...props.initialValues,
         effectiveDate: moment(props.initialValues.effectiveDate),
         expirationDate: moment(props.initialValues.expirationDate),
-        reportDeadline: moment(props.initialValues.reportDeadline)
+        reportDeadline: moment(props.initialValues.reportDeadline),
+        projectExecutionPeriod: props.initialValues.projectExecutionPeriod ? props.initialValues.projectExecutionPeriod : noticeSemester,
+        projectExecutionYear: props.initialValues.projectExecutionYear ? moment(props.initialValues.projectExecutionYear) : moment(props.initialValues.effectiveDate),
       });
+    }
   }, [props.formController, props.initialValues]);
 
+  function disabledDate(current: moment.Moment) {
+    return current && !current.isBetween(moment().year(2020), moment().year(2050));
+  }
   return (
     <Form
       name="main"
@@ -143,6 +151,34 @@ export const MainDataForm: React.FC<Props> = (props) =>
             />
           </Form.Item>
         </Col>
+        <Col span={24}>
+          <Form.Item
+            name="projectExecutionPeriod"
+            label="Período de execução do projeto"
+            rules={[{ required: true, message: "Campo obrigatório" }]}
+          >
+            <Select
+              placeholder={"Período de execução do projeto"}
+              style={{ width: "100%" }}
+            >
+              <Option value="1° Semestre">1° Semestre</Option>
+              <Option value="2° Semestre">2° Semestre</Option>
+            </Select>
+          </Form.Item>
+          </Col>
+          <Col span={24}>
+          <Form.Item
+            name="projectExecutionYear"
+            label="Ano de execução do projeto"
+            rules={[{ required: true, message: "Campo obrigatório" }]}
+          >
+            <DatePicker
+              disabledDate={disabledDate}
+              picker="year"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          </Col>
       </Row>
     </Form>
   );

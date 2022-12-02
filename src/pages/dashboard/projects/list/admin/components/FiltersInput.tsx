@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Col, Input, Row, Select } from "antd";
+import { Button, Col, Form, Input, Row, Select } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
 
 import { Category } from "../../../../../../interfaces/category";
 import { Notice } from "../../../../../../interfaces/notice";
@@ -23,6 +24,7 @@ interface Props
   minYear?: number;
   maxYear?: number;
   onFilterBy(field: Field, value: string): void;
+  clearFilters: () => void;
 }
 
 function enumerateYears(from?: number, to?: number): number[]
@@ -39,6 +41,7 @@ function enumerateYears(from?: number, to?: number): number[]
 
 export const Filters: React.FC<Props> = (props) =>
 {
+  const [ form ] = Form.useForm();
   const [programs, setPrograms] = useState<Program[]>([]);
   const selectProgramsRequester = useHttpClient();
 
@@ -91,94 +94,128 @@ export const Filters: React.FC<Props> = (props) =>
     }
   }, []);
 
+  const clearFilters = () => {
+    form.resetFields();
+    props.clearFilters();
+  }
+
   return (
-    <Row justify="center" gutter={[8, 8]}>
-      <Col xs={24} md={12}>
-        <Input
-          placeholder="Nome do projeto"
-          style={{ width: "100%" }}
-          onChange={(ev) =>
-          {
-            const projectName = ev.target.value;
-            props.onFilterBy("NAME", projectName);
-          }}
-        />
-      </Col>
+    <Form form={form} onFinish={clearFilters}>
+      <Row justify="center" gutter={[8, 8]}>
+        <Col xs={24} md={12}>
+          <Form.Item name="projectName" style={{margin: '0px'}}>
+            <Input
+              placeholder="Nome do projeto"
+              style={{ width: "100%" }}
+              onChange={(ev) =>
+              {
+                const projectName = ev.target.value;
+                props.onFilterBy("NAME", projectName);
+              }}
+            />
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} md={12}>
-        <Input
-          placeholder="Nome do autor"
-          style={{ width: "100%" }}
-          onChange={(ev) =>
-          {
-            const authorName = ev.target.value;
-            props.onFilterBy("AUTHOR", authorName);
-          }}
-        />
-      </Col>
+        <Col xs={24} md={12}>
+          <Form.Item name="authorName" style={{margin: '0px'}}>
+            <Input
+              placeholder="Nome do autor"
+              id="authorName"
+              style={{ width: "100%" }}
+              onChange={(ev) =>
+              {
+                const authorName = ev.target.value;
+                props.onFilterBy("AUTHOR", authorName);
+              }}
+            />
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} xl={8}>
-        <Select
-          loading={selectProgramsRequester.inProgress}
-          options={[{ label: "Selecione um programa", value: "" }].concat(
-            programs.map((p: Program) => ({ label: p.name, value: p._id! })))
-          }
-          defaultValue=""
-          style={{ width: "100%" }}
-          onChange={(programId: string) => props.onFilterBy("PROGRAM", programId)}
-        />
-      </Col>
+        <Col xs={24} xl={8}>
+          <Form.Item name="program" style={{margin: '0px'}}>
+            <Select
+              loading={selectProgramsRequester.inProgress}
+              options={[{ label: "Selecione um programa", value: "" }].concat(
+                programs.map((p: Program) => ({ label: p.name, value: p._id! })))
+              }
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(programId: string) => props.onFilterBy("PROGRAM", programId)}
+            />
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} xl={8}>
-        <Select
-          loading={selectCategoriesRequester.inProgress}
-          options={[{ label: "Selecione uma categoria", value: "" }].concat(
-            categories.map((c: Category) => ({ label: c.name, value: c._id! })))
-          }
-          defaultValue=""
-          style={{ width: "100%" }}
-          onChange={(categoryId: string) => props.onFilterBy("CATEGORY", categoryId)}
-        />
-      </Col>
+        <Col xs={24} xl={8}>
+          <Form.Item name="category" style={{margin: '0px'}}>
+            <Select
+              loading={selectCategoriesRequester.inProgress}
+              options={[{ label: "Selecione uma categoria", value: "" }].concat(
+                categories.map((c: Category) => ({ label: c.name, value: c._id! })))
+              }
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(categoryId: string) => props.onFilterBy("CATEGORY", categoryId)}
+            />
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} xl={8}>
-        <Select
-          loading={selectNoticesRequester.inProgress}
-          options={[{ label: "Selecione um edital", value: "" }].concat(
-            notices.map((n: Notice) => ({ label: n.name, value: n._id! })))
-          }
-          defaultValue=""
-          style={{ width: "100%" }}
-          onChange={(noticeId: string) => props.onFilterBy("NOTICE", noticeId)}
-        />
-      </Col>
+        <Col xs={24} xl={8}>
+          <Form.Item name="notice" style={{margin: '0px'}}>
+            <Select
+              loading={selectNoticesRequester.inProgress}
+              options={[{ label: "Selecione um edital", value: "" }].concat(
+                notices.map((n: Notice) => ({ label: n.name, value: n._id! })))
+              }
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(noticeId: string) => props.onFilterBy("NOTICE", noticeId)}
+            />
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} md={12}>
-        <Select
-          defaultValue=""
-          style={{ width: "100%" }}
-          onChange={(semester: string) => props.onFilterBy("SEMESTER", semester)}
-        >
-          <Select.Option value="">Selecione um semestre</Select.Option>
-          <Select.Option value="1">1º semestre</Select.Option>
-          <Select.Option value="2">2º semestre</Select.Option>
-        </Select>
-      </Col>
+        <Col xs={24} md={12}>
+          <Form.Item name="semester" style={{margin: '0px'}}>
+            <Select
+              defaultValue=""
+              id="semester"
+              style={{ width: "100%" }}
+              onChange={(semester: string) => props.onFilterBy("SEMESTER", semester)}
+            >
+              <Select.Option value="">Selecione um semestre</Select.Option>
+              <Select.Option value="1">1º semestre</Select.Option>
+              <Select.Option value="2">2º semestre</Select.Option>
+            </Select>
+          </Form.Item>
+        </Col>
 
-      <Col xs={24} md={12}>
-        <Select
-          options={[{ label: "Selecione um ano", value: "" }].concat(
-            enumerateYears(props.minYear, props.maxYear).map((year: number) => (
-            {
-              label: year.toString(),
-              value: year.toString()
-            })))
-          }
-          defaultValue=""
-          style={{ width: "100%" }}
-          onChange={(year: string) => props.onFilterBy("YEAR", year)}
-        />
-      </Col>
-    </Row>
+        <Col xs={24} md={12}>
+          <Form.Item name="year" style={{margin: '0px'}}>
+            <Select
+              options={[{ label: "Selecione um ano", value: "" }].concat(
+                enumerateYears(props.minYear, props.maxYear).map((year: number) => (
+                {
+                  label: year.toString(),
+                  value: year.toString()
+                })))
+              }
+              id="year"
+              defaultValue=""
+              style={{ width: "100%" }}
+              onChange={(year: string) => props.onFilterBy("YEAR", year)}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24}>
+          <Button
+            block
+            type="primary"
+            htmlType="submit"
+          >
+            <ClearOutlined /> Limpar filtro
+          </Button>
+        </Col>
+      </Row>
+    </Form>
   );
 };

@@ -63,7 +63,6 @@ export const MainForm: React.FC<Props> = (props) =>
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const selectProgramsRequester = useHttpClient();
-
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
@@ -148,7 +147,6 @@ export const MainForm: React.FC<Props> = (props) =>
           (t.category as Category)._id === getCategoryId(projectCategory))!.schedules);
 
         setCurrentProjectType(props.initialValues.typeProject);
-
         props.formController.setFieldsValue(
         {
           ...props.initialValues,
@@ -160,7 +158,6 @@ export const MainForm: React.FC<Props> = (props) =>
           secondSemester: props.initialValues.secondSemester.map(scheduleAsValue)
         });
       }
-
       localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));
       localStorage.setItem(noticesKey, JSON.stringify(notices));
@@ -190,7 +187,7 @@ export const MainForm: React.FC<Props> = (props) =>
     setCurrentProjectType(value);
   }, []);
 
-  return (
+  return(
     <Form
       name="main"
       layout="vertical"
@@ -229,6 +226,7 @@ export const MainForm: React.FC<Props> = (props) =>
             <Input style={{ width: "100%" }} />
           </Form.Item>
         </Col>
+
 
         <Col span={24}>
           <Form.Item
@@ -317,6 +315,33 @@ export const MainForm: React.FC<Props> = (props) =>
               <Form.Item
                 name="totalCH"
                 label="Carga horária máxima que o professor pode assumir na extensão institucional"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHManha"
+                label="Carga horária máxima que o professor pode assumir no periódo da manhã"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHTarde"
+                label="Carga horária máxima que o professor pode assumir no periódo da tarde"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHNoite"
+                label="Carga horária máxima que o professor pode assumir no periódo da noite"
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <InputNumber min={1} style={{ width: "100%" }} />
@@ -556,6 +581,42 @@ export const MainForm: React.FC<Props> = (props) =>
                 </Form.List>
               </Col>
             )}
+            <Col span={24} style={{marginTop: "20px"}}>
+              <Form.Item
+                name="totalCH"
+                label="Carga horária máxima que o professor pode assumir na extensão institucional"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHManha"
+                label="Carga horária máxima que o professor pode assumir no periódo da manhã"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHTarde"
+                label="Carga horária máxima que o professor pode assumir no periódo da tarde"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHNoite"
+                label="Carga horária máxima que o professor pode assumir no periódo da noite"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
           </>
         )}
       </Row>

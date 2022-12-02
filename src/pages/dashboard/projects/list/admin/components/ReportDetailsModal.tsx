@@ -6,6 +6,7 @@ import { formatDate } from "../../../../../../utils/dateFormatter";
 import { Category } from "../../../../../../interfaces/category";
 import { Campus, Course } from "../../../../../../interfaces/course";
 import { Program } from "../../../../../../interfaces/program";
+import { Notice } from "../../../../../../interfaces/notice";
 import { Contact, Project } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
 
@@ -86,6 +87,57 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                     <Paragraph>{(props.project?.program as Program)?.name}</Paragraph>
                   </LabeledContent>
                 </Col>
+
+                {(props.project?.notice)
+                  &&((props.project?.notice as Notice).projectExecutionPeriod && (props.project?.notice as Notice).projectExecutionYear)
+                  && (
+                    <>
+                      <Col span={24}>
+                        <LabeledContent label="Período de execução do projeto">
+                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                        </LabeledContent>
+                      </Col>
+                        <Col span={24}>
+                          <LabeledContent label="Ano de execução do projeto">
+                            <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                          </LabeledContent>
+                        </Col>
+                      </>
+                  )
+                }
+                {(props.project?.report)
+                  && (props.project?.report.ods)
+                  && (props.project?.report?.ods.length > 0)
+                  && (
+                      <Col span={24}>
+                        <LabeledContent label="ODS Selecionados">
+                          <Paragraph>
+                            {props.project?.report.ods.map((eachOds, index) => {
+                              const isLastElement = props.project?.report?.ods.length === (index+1) ? true : false;
+                              if(isLastElement) return eachOds + '.'
+                              else return eachOds + ', '
+                            })}
+                          </Paragraph>
+                        </LabeledContent>
+                      </Col>
+                    )
+                }
+               {(props.project?.report)
+                  && (props.project?.report.midiaLinks)
+                  && (props.project?.report?.midiaLinks.length > 0)
+                  && (
+                      <Col span={24} style={{marginBottom: '1em'}}>
+                        <LabeledContent label="Links de divulgação">
+                          {props.project?.report?.midiaLinks.map((link) => (
+                            <Paragraph style={{marginBottom: '0em'}} >
+                              Link:
+                              <a style={{paddingLeft: '8px'}} href={link} target="_blank">{link}</a>
+                            </Paragraph>
+                          ))}
+                        </LabeledContent>
+                      </Col>
+                    )
+                }
 
                 {props.project != null
                   && (props.project.category as Category).name === "Extensão específica do curso"

@@ -30,6 +30,8 @@ export interface Notice
   timetables: Timetable[];
   type: "common" | "specific";
   updatedAt?: Date;
+  projectExecutionPeriod: string;
+  projectExecutionYear: Date;
 };
 
 export function isNotice(n: any): n is Notice
