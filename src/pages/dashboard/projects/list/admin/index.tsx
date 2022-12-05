@@ -335,7 +335,7 @@ export const AllProjects: React.FC = () =>
             <Button
               block
               shape="round"
-              href={`${baseUrl}project/report/download/${programFilter ?? ""}`}
+              href={`${baseUrl}/project/report/download/${programFilter ?? ""}`}
             >
               <DownloadOutlined /> Relatórios
             </Button>
