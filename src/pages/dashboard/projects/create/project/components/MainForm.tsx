@@ -366,25 +366,13 @@ export const MainForm: React.FC<Props> = (props) =>
 
         {selectedCategory != null && selectedCategory.name === "Extensão específica do curso" && (
           <>
-
             <Col span={24}>
               <Form.Item
-                name="school"
-                label="Nome da escola"
-                rules={[{ required: true, message: "Campo Obrigatório" }]}
-              >
-                <Input.TextArea autoSize={{ minRows: 1, }} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Form.Item
-                name="courses"
-                label="Cursos"
+                name="course"
+                label="Curso"
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <Select
-                  mode="tags"
                   loading={selectCoursesRequester.inProgress}
                   options={courses.map((c: Course) =>
                   ({
