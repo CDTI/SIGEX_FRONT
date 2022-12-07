@@ -384,7 +384,7 @@ export const MainForm: React.FC<Props> = (props) =>
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <Select
-                  mode="multiple"
+                  mode="tags"
                   loading={selectCoursesRequester.inProgress}
                   options={courses.map((c: Course) =>
                   ({
