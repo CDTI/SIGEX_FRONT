@@ -66,6 +66,8 @@ export const MainForm: React.FC<Props> = (props) =>
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
+  const [ school, setSchool ] = useState<string>('')
+  const [ schoolCourses, setSchoolCourses ] = useState<string>('')
   const selectNoticesRequester = useHttpClient();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -87,7 +89,6 @@ export const MainForm: React.FC<Props> = (props) =>
             queryParams: new Map([["withPopulatedRefs", "true"]]),
             cancellable: true
           });
-
       setCourses(courses ?? []);
 
       let notices = localStorage.getItem(noticesKey) != null
@@ -311,6 +312,8 @@ export const MainForm: React.FC<Props> = (props) =>
               </Form.Item>
             </Col>
 
+
+
             <Col span={24}>
               <Form.Item
                 name="totalCH"
@@ -320,6 +323,7 @@ export const MainForm: React.FC<Props> = (props) =>
                 <InputNumber min={1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
+
             <Col span={24}>
               <Form.Item
                 name="totalCHManha"
@@ -362,13 +366,25 @@ export const MainForm: React.FC<Props> = (props) =>
 
         {selectedCategory != null && selectedCategory.name === "Extensão específica do curso" && (
           <>
+
             <Col span={24}>
               <Form.Item
-                name="course"
-                label="Curso"
+                name="school"
+                label="Nome da escola"
+                rules={[{ required: true, message: "Campo Obrigatório" }]}
+              >
+                <Input.TextArea autoSize={{ minRows: 1, }} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                name="courses"
+                label="Cursos"
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <Select
+                  mode="multiple"
                   loading={selectCoursesRequester.inProgress}
                   options={courses.map((c: Course) =>
                   ({

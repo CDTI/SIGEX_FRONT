@@ -67,6 +67,7 @@ export const AppLayout: React.FC = (props) =>
     </Menu>
   ), [authContext.user]);
 
+  console.log(userRoles)
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header className="header" style={{ padding: "0 16px" }}>
@@ -199,7 +200,7 @@ export const AppLayout: React.FC = (props) =>
               </>
             )}
 
-            {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE")) && (
+            {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE") || userRoles.includes("Coordenador de integração")) && (
               <>
                 <SubMenu
                   key="minhas-propostas"
