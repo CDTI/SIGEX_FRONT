@@ -110,7 +110,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
       setTotalCost(formatCurrency(materialsTotalValue + transportTotalValue));
     }
   }, [props.project]);
-
+  console.log(props.project)
   return (
     <Modal
       centered={true}
