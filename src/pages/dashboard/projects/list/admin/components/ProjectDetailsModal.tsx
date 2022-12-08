@@ -306,10 +306,12 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                     <>
                       <Col span={24} style={{ paddingBottom: "0" }}>
                         <LabeledContent label="Curso">
-                          <Paragraph>
-                            {(props.project.course as Course).name} -
-                            {((props.project.course as Course).campus as Campus).name}
-                          </Paragraph>
+                          {(props.project.course as Course[]).map((course) => (
+                            <Paragraph>
+                              {course.name} -
+                              {(course.campus as Campus).name}
+                            </Paragraph>
+                          ))}
                         </LabeledContent>
                       </Col>
 

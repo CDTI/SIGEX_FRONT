@@ -6,8 +6,8 @@ export interface RequestOptions
   withPopulatedRefs?: boolean;
 }
 
-export const baseUrl = `${process.env.REACT_APP_BASE_URL}api`;
-//export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
+//export const baseUrl = `${process.env.REACT_APP_BASE_URL}api`;
+export const baseUrl = `${process.env.REACT_APP_BASE_URL}/api`;
 
 export const httpClient = Axios.create({ baseURL: baseUrl });
 httpClient.interceptors.request.use(

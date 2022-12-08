@@ -419,5 +419,3 @@ export const CreateProposalPage: React.FC = () =>
     </>
   );
 };
-
-// TODO: melhorar MaskedInput para telefones
