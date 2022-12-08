@@ -103,7 +103,7 @@ export interface Project
   author: string | User;
   category: string | Category;
   createdAt?: Date;
-  course?: string | Course;
+  course?: string | Course[];
   dateFinal: Date;
   courses: string[];
   dateStart: Date;

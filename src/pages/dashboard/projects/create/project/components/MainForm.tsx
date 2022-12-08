@@ -37,6 +37,7 @@ import
   getAssociatedCoursesEndpoint
 } from "../../../../../../services/endpoints/users";
 import { Restricted } from "../../../../../../components/Restricted";
+import { getAllCoursesEndpoint } from "../../../../../../services/endpoints/courses";
 
 interface Props
 {
@@ -80,15 +81,13 @@ export const MainForm: React.FC<Props> = (props) =>
   {
     (async () =>
     {
-      const courses = localStorage.getItem(coursesKey) != null
-        ? JSON.parse(localStorage.getItem(coursesKey)!) as Course[]
-        : await selectCoursesRequester.send(
+      const courses =  await selectCoursesRequester.send(
           {
             method: "GET",
-            url: getAssociatedCoursesEndpoint(),
-            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            url: getAllCoursesEndpoint(),
             cancellable: true
           });
+      console.log(courses)
       setCourses(courses ?? []);
 
       let notices = localStorage.getItem(noticesKey) != null
@@ -373,6 +372,7 @@ export const MainForm: React.FC<Props> = (props) =>
                 rules={[{ required: true, message: "Campo obrigatório" }]}
               >
                 <Select
+                  mode="multiple"
                   loading={selectCoursesRequester.inProgress}
                   options={courses.map((c: Course) =>
                   ({

@@ -143,11 +143,13 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                   && (props.project.category as Category).name === "Extensão específica do curso"
                   && (
                     <Col span={24} style={{ paddingBottom: "0" }}>
-                      <LabeledContent label="Curso">
-                        <Paragraph>
-                          {(props.project.course as Course).name} -&nbsp;
-                          {((props.project.course as Course).campus as Campus).name}
-                        </Paragraph>
+                      <LabeledContent label="Curso(s)">
+                      {(props.project.course as Course[]).map((course) => (
+                            <Paragraph>
+                              {course.name} -
+                              {(course.campus as Campus).name}
+                            </Paragraph>
+                          ))}
                       </LabeledContent>
                     </Col>
                   )
