@@ -323,6 +323,33 @@ export const MainForm: React.FC<Props> = (props) =>
                 <InputNumber min={1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHManha"
+                label="Carga horária máxima que o professor pode assumir no periódo da manhã"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHTarde"
+                label="Carga horária máxima que o professor pode assumir no periódo da tarde"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="totalCHNoite"
+                label="Carga horária máxima que o professor pode assumir no periódo da noite"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
 
             <Col span={24}>
               <Form.Item
