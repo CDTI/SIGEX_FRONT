@@ -105,6 +105,7 @@ export interface Project
   createdAt?: Date;
   course?: string | Course;
   dateFinal: Date;
+  courses: string[];
   dateStart: Date;
   description: string;
   disciplines: Discipline[];
@@ -126,6 +127,8 @@ export interface Project
   totalCHManha?: number;
   totalCHTarde?: number;
   totalCHNoite?: number;
+  school: string;
+  schoolCourses: string[];
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   updatedAt?: Date;
 }

@@ -120,6 +120,7 @@ export function useFormStateMachine()
               {
                 const now = new Date();
                 const payload = ev.payload as Project;
+                console.log(payload)
                 return (
                 {
                   ...ctx.data!,
@@ -142,7 +143,10 @@ export function useFormStateMachine()
                   totalCHManha: payload.totalCHManha,
                   totalCHTarde: payload.totalCHTarde,
                   totalCHNoite: payload.totalCHNoite,
-                  typeProject: payload.typeProject
+                  typeProject: payload.typeProject,
+                  school: payload.school,
+                  courses: payload.courses,
+                  schoolCourses: payload.schoolCourses,
                 });
               }
             })
