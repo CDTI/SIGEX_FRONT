@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button, Row, Col, Space, Table, Collapse, notification } from "antd";
 import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
@@ -20,14 +26,23 @@ import { User } from "../../../../../interfaces/user";
 import { Feedback } from "../../../../../interfaces/feedback";
 import { baseUrl } from "../../../../../services/httpClient";
 import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks";
-import
-{
-  getAllProjectsEndpoint,
-  updateProjectEndpoint
-} from "../../../../../services/endpoints/projects";
+import { updateProjectEndpoint } from "../../../../../services/endpoints/projects";
+import { ProjectsFilterContext } from "../../../../../context/projectsFilter";
 
-export const AllProjects: React.FC = () =>
-{
+export const AllProjects: React.FC = () => {
+  const {
+    projects,
+    filteredProjects,
+    setFilteredProjects,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    totalPages,
+    getPaginatedProjects,
+    loading,
+  } = useContext(ProjectsFilterContext);
+  let { query } = useContext(ProjectsFilterContext);
   const location = useLocation();
 
   const [projectNameFilter, setProjectNameFilter] = useState<string>();
@@ -38,9 +53,9 @@ export const AllProjects: React.FC = () =>
   const [yearFilter, setYearFilter] = useState<number>();
   const [semesterFilter, setSemesterFilter] = useState<number>();
   const [shouldReload, setShouldReload] = useState(true);
-  const [projectStatus, setProjectStatus ] = useState<"reproved" | "notSelected" | "selected">();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [projectStatus, setProjectStatus] = useState<
+    "reproved" | "notSelected" | "selected"
+  >();
   const tableProjectsRequester = useHttpClient();
 
   const [feedbackModalIsVisible, setFeedbackModalIsVisible] = useState(false);
@@ -50,43 +65,40 @@ export const AllProjects: React.FC = () =>
   const [project, setProject] = useState<Project>();
   const modalProjectsRequester = useHttpClient();
 
-  const changeProjectStatus = useCallback(async (status: "reproved" | "notSelected" | "selected" | undefined) =>
-  {
-    if (project != null)
-    {
-      try
-      {
-        await modalProjectsRequester.send(
-        {
-          ...updateProjectEndpoint(project._id!),
-          body: { ...project, status },
-          cancellable: true
-        });
+  const changeProjectStatus = useCallback(
+    async (status: "reproved" | "notSelected" | "selected" | undefined) => {
+      if (project != null) {
+        try {
+          await modalProjectsRequester.send({
+            ...updateProjectEndpoint(project._id!),
+            body: { ...project, status },
+            cancellable: true,
+          });
 
-        setFeedbackModalIsVisible(false);
-        setProjectModalIsVisible(false);
-        setShouldReload(true);
+          setFeedbackModalIsVisible(false);
+          setProjectModalIsVisible(false);
+          setShouldReload(true);
 
-        notification.success({ message: "Avaliação salva com sucesso!" });
+          notification.success({ message: "Avaliação salva com sucesso!" });
+        } catch (error) {
+          if ((error as Error).message !== "")
+            notification.error({ message: (error as Error).message });
+        }
       }
-      catch (error)
-      {
-        if ((error as Error).message !== "")
-          notification.error({ message: (error as Error).message });
-      }
-    }
-  }, [project, modalProjectsRequester.send]);
+    },
+    [project, modalProjectsRequester.send]
+  );
 
-  const handleProjectReview = useCallback(async (verdict: "reproved" | "notSelected" | "selected") =>
-  {
-    setFeedbackModalIsVisible(true)
-    setProjectStatus(verdict)
-  }, [changeProjectStatus]);
+  const handleProjectReview = useCallback(
+    async (verdict: "reproved" | "notSelected" | "selected") => {
+      setFeedbackModalIsVisible(true);
+      setProjectStatus(verdict);
+    },
+    [changeProjectStatus]
+  );
 
-  const setFilter = useCallback((field: Field, value: string) =>
-  {
-    switch (field)
-    {
+  const setFilter = useCallback((field: Field, value: string) => {
+    switch (field) {
       case "AUTHOR":
         setAuthorNameFilter(value !== "" ? value : undefined);
         break;
@@ -117,162 +129,190 @@ export const AllProjects: React.FC = () =>
     }
   }, []);
 
-  const openDetailsModal = useCallback(async (type: "project" | "report", project: Project) =>
-  {
-    setProject(project);
-    if (type === "project")
-    {
-      try
-      {
-        const log = await modalProjectsRequester.send(
-        {
-          ...getFeedbackEndpoint(project._id!),
-          queryParams: new Map([["withPopulatedRefs", "true"]]),
-          cancellable: true,
-        });
+  const openDetailsModal = useCallback(
+    async (type: "project" | "report", project: Project) => {
+      setProject(project);
+      if (type === "project") {
+        try {
+          const log = await modalProjectsRequester.send({
+            ...getFeedbackEndpoint(project._id!),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            cancellable: true,
+          });
 
-        setLog(log?.feedback);
+          setLog(log?.feedback);
 
-        setProjectModalIsVisible(true);
+          setProjectModalIsVisible(true);
+        } catch (error) {
+          notification.error({
+            message: "Não foi possível carregar o projeto para visualização!",
+          });
+        }
+      } else {
+        setReportModalIsVisible(true);
       }
-      catch (error)
-      {
-        notification.error({ message: "Não foi possível carregar o projeto para visualização!" });
-      }
-    }
-    else
-    {
-      setReportModalIsVisible(true);
-    }
-  }, [project, modalProjectsRequester.send]);
+    },
+    [project, modalProjectsRequester.send]
+  );
 
   const clearFilters = () => {
-    setAuthorNameFilter(undefined)
+    setAuthorNameFilter(undefined);
     setCategoryFilter(undefined);
     setProjectNameFilter(undefined);
     setNoticeFilter(undefined);
     setProgramFilter(undefined);
     setSemesterFilter(undefined);
     setYearFilter(undefined);
-  }
+  };
 
-  const columns = useMemo(() =>
-  [{
-    key: "name",
-    title: "Nome",
-    dataIndex: "name",
-  },
-  {
-    key: "dateStart",
-    title: "Data de início",
-    render: (text: string, record: Project) =>
-      formatDate(new Date(record.dateStart))
-  },
-  {
-    key: "status",
-    title: "Avaliação",
-    render: (text: string, record: Project) => (
-      <StatusTag status={record.status} />
-    )
-  },
-  {
-    key: "action",
-    title: "Ação",
-    render: (text: string, record: Project) => (
-      <Space size="middle">
-        <Button>
-          <Link
-            to={
-            {
-              pathname: `${location.pathname}/editar/${record._id}`,
-              state: { project: record, context: "admin" }
-            }}
-          >
-            Editar
-          </Link>
-        </Button>
+  const columns = useMemo(
+    () => [
+      {
+        key: "name",
+        title: "Nome",
+        dataIndex: "name",
+      },
+      {
+        key: "dateStart",
+        title: "Data de início",
+        render: (text: string, record: Project) =>
+          formatDate(new Date(record.dateStart)),
+      },
+      {
+        key: "status",
+        title: "Avaliação",
+        render: (text: string, record: Project) => (
+          <StatusTag status={record.status} />
+        ),
+      },
+      {
+        key: "action",
+        title: "Ação",
+        render: (text: string, record: Project) => (
+          <Space size="middle">
+            <Button>
+              <Link
+                to={{
+                  pathname: `${location.pathname}/editar/${record._id}`,
+                  state: { project: record, context: "admin" },
+                }}
+              >
+                Editar
+              </Link>
+            </Button>
 
-        <Button onClick={() => openDetailsModal("project", record)}>
-          <EyeOutlined /> Proposta
-        </Button>
+            <Button onClick={() => openDetailsModal("project", record)}>
+              <EyeOutlined /> Proposta
+            </Button>
 
-        {record.report != null && (
-          <Button onClick={() => openDetailsModal("report", record)}>
-            <EyeOutlined /> Relatório
-          </Button>
-        )}
-      </Space>
-    )
-  }], [location.pathname, openDetailsModal]);
+            {record.report != null && (
+              <Button onClick={() => openDetailsModal("report", record)}>
+                <EyeOutlined /> Relatório
+              </Button>
+            )}
+          </Space>
+        ),
+      },
+    ],
+    [location.pathname, openDetailsModal]
+  );
 
-  useEffect(() =>
-  {
-    return () =>
-    {
+  useEffect(() => {
+    return () => {
       modalProjectsRequester.halt();
       tableProjectsRequester.halt();
     };
   }, []);
 
-  useEffect(() =>
-  {
-    if (shouldReload)
-    {
-      (async () =>
-      {
-        const projects = await tableProjectsRequester.send<Project[]>(
-        {
-          ...getAllProjectsEndpoint(),
-          queryParams: new Map([["withPopulatedRefs", "true"]]),
-          cancellable: true
-        });
+  // useEffect(() => {
+  //   if (shouldReload) {
+  //     (async () => {
+  //       const projects = await tableProjectsRequester.send({
+  //         // ...getAllProjectsEndpoint(),
+  //         // queryParams: new Map([["withPopulatedRefs", "true"]]),
+  //         ...getAllProjectsPaginatedEndpoint(),
+  //         queryParams: new Map([
+  //           ["page", String(page)],
+  //           ["limit", "10"],
+  //         ]),
+  //         cancellable: true,
+  //       });
+  //       setTotalPages(projects.totalPages);
+  //       setProjects(projects.docs ?? []);
+  //       setShouldReload(false);
+  //     })();
+  //   }
+  // }, [shouldReload, tableProjectsRequester.send, page]);
 
-        setProjects(projects ?? []);
-        setShouldReload(false);
-      })();
-    }
-  }, [shouldReload, tableProjectsRequester.send]);
+  // useEffect(() => {
+  //     getPaginatedProjects(
+  //       [
+  //         ["page", String(page)],
+  //         ["limit", String(limit)],
+  //       ],
+  //       false
+  //     );
+  // }, []);
 
-  useEffect(() =>
-  {
-    setFilteredProjects(projects
-      .map((p: Project) => ({ key: p._id!, ...p }))
-      .filter((p: Project) => authorNameFilter == null
-        || (p.author as User)?.name
-          .toLocaleUpperCase()
-          .includes(authorNameFilter.toLocaleUpperCase()))
+  // useEffect(() => {
+  //   setFilteredProjects(
+  //     projects
+  //       .map((p: Project) => ({ key: p._id!, ...p }))
+  //       .filter(
+  //         (p: Project) =>
+  //           authorNameFilter == null ||
+  //           (p.author as User)?.name
+  //             .toLocaleUpperCase()
+  //             .includes(authorNameFilter.toLocaleUpperCase())
+  //       )
 
-      .filter((p: Project) => categoryFilter == null
-        || (p.category as Category)._id === categoryFilter)
+  //       .filter(
+  //         (p: Project) =>
+  //           categoryFilter == null ||
+  //           (p.category as Category)._id === categoryFilter
+  //       )
 
-      .filter((p: Project) => noticeFilter == null
-        || (p.notice as Notice)._id === noticeFilter)
+  //       .filter(
+  //         (p: Project) =>
+  //           noticeFilter == null || (p.notice as Notice)._id === noticeFilter
+  //       )
 
-      .filter((p: Project) => programFilter == null
-        || (p.program as Program)._id === programFilter)
+  //       .filter(
+  //         (p: Project) =>
+  //           programFilter == null ||
+  //           (p.program as Program)._id === programFilter
+  //       )
 
-      .filter((p: Project) => projectNameFilter == null
-        || p.name
-          .toLocaleUpperCase()
-          .includes(projectNameFilter.toLocaleUpperCase()))
+  //       .filter(
+  //         (p: Project) =>
+  //           projectNameFilter == null ||
+  //           p.name
+  //             .toLocaleUpperCase()
+  //             .includes(projectNameFilter.toLocaleUpperCase())
+  //       )
 
-      .filter((p: Project) => semesterFilter == null
-        || (new Date(p.dateStart).getMonth() < 6 ? 1 : 2) === semesterFilter)
+  //       .filter(
+  //         (p: Project) =>
+  //           semesterFilter == null ||
+  //           (new Date(p.dateStart).getMonth() < 6 ? 1 : 2) === semesterFilter
+  //       )
 
-      .filter((p: Project) => yearFilter == null
-        || new Date(p.dateStart).getFullYear() === yearFilter)
-    );
-  },
-  [
-    authorNameFilter,
-    categoryFilter,
-    noticeFilter,
-    programFilter,
-    projects,
-    projectNameFilter,
-    semesterFilter,
-    yearFilter
-  ]);
+  //       .filter(
+  //         (p: Project) =>
+  //           yearFilter == null ||
+  //           new Date(p.dateStart).getFullYear() === yearFilter
+  //       )
+  //   );
+  // }, [
+  //   authorNameFilter,
+  //   categoryFilter,
+  //   noticeFilter,
+  //   programFilter,
+  //   projects,
+  //   projectNameFilter,
+  //   semesterFilter,
+  //   yearFilter,
+  // ]);
 
   return (
     <>
@@ -303,8 +343,12 @@ export const AllProjects: React.FC = () =>
         <Row gutter={[0, 8]}>
           <Col span={24}>
             <Collapse bordered={false} expandIconPosition="right">
-              <Collapse.Panel key="Filtros" header="Filtros" style={{ borderBottom: "0" }}>
-                <Filters clearFilters={clearFilters} onFilterBy={setFilter} />
+              <Collapse.Panel
+                key="Filtros"
+                header="Filtros"
+                style={{ borderBottom: "0" }}
+              >
+                <Filters onFilterBy={setFilter} />
               </Collapse.Panel>
             </Collapse>
           </Col>
@@ -345,9 +389,22 @@ export const AllProjects: React.FC = () =>
         <Row>
           <Col span={24}>
             <Table
-              loading={tableProjectsRequester.inProgress}
+              loading={loading}
               columns={columns}
-              dataSource={filteredProjects}
+              dataSource={projects}
+              pagination={{
+                current: page,
+                defaultPageSize: 10,
+                defaultCurrent: 1,
+                pageSize: limit,
+                showSizeChanger: true,
+                pageSizeOptions: ["10", "20", "30", "50"],
+                total: totalPages * limit,
+                onChange: (actualPage, actualLimit) => {
+                  setPage(actualPage);
+                  setLimit(actualLimit!);
+                },
+              }}
             />
           </Col>
         </Row>
