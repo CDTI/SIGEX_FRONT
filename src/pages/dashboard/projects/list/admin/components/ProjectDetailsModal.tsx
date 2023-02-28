@@ -82,6 +82,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
   const [totalCost, setTotalCost] = useState("");
 
   useEffect(() => {
+    console.log(props.project?.course);
     if (props.project != null) {
       const materialsTotalValue = props.project.resources.materials
         .map((m: Material) => m.quantity * m.unitaryValue)
@@ -328,15 +329,17 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   (props.project.category as Category).name ===
                     "Extensão específica do curso" && (
                     <>
-                      <Col span={24} style={{ paddingBottom: "0" }}>
-                        <LabeledContent label="Curso">
-                          {(props.project.course as Course[]).map((course) => (
+                      {
+                        <Col span={24} style={{ paddingBottom: "0" }}>
+                          <LabeledContent label="Curso">
                             <Paragraph>
-                              {course.name} -{(course.campus as Campus).name}
+                              {`${props.project.course!.name} - ${
+                                (props.project.course!.campus as Campus).name
+                              }`}
                             </Paragraph>
-                          ))}
-                        </LabeledContent>
-                      </Col>
+                          </LabeledContent>
+                        </Col>
+                      }
 
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>

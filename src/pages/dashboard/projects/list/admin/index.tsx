@@ -254,65 +254,65 @@ export const AllProjects: React.FC = () => {
   //     );
   // }, []);
 
-  // useEffect(() => {
-  //   setFilteredProjects(
-  //     projects
-  //       .map((p: Project) => ({ key: p._id!, ...p }))
-  //       .filter(
-  //         (p: Project) =>
-  //           authorNameFilter == null ||
-  //           (p.author as User)?.name
-  //             .toLocaleUpperCase()
-  //             .includes(authorNameFilter.toLocaleUpperCase())
-  //       )
+  useEffect(() => {
+    setFilteredProjects(
+      projects
+        .map((p: Project) => ({ key: p._id!, ...p }))
+        .filter(
+          (p: Project) =>
+            authorNameFilter == null ||
+            (p.author as User)?.name
+              .toLocaleUpperCase()
+              .includes(authorNameFilter.toLocaleUpperCase())
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           categoryFilter == null ||
-  //           (p.category as Category)._id === categoryFilter
-  //       )
+        .filter(
+          (p: Project) =>
+            categoryFilter == null ||
+            (p.category as Category)._id === categoryFilter
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           noticeFilter == null || (p.notice as Notice)._id === noticeFilter
-  //       )
+        .filter(
+          (p: Project) =>
+            noticeFilter == null || (p.notice as Notice)._id === noticeFilter
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           programFilter == null ||
-  //           (p.program as Program)._id === programFilter
-  //       )
+        .filter(
+          (p: Project) =>
+            programFilter == null ||
+            (p.program as Program)._id === programFilter
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           projectNameFilter == null ||
-  //           p.name
-  //             .toLocaleUpperCase()
-  //             .includes(projectNameFilter.toLocaleUpperCase())
-  //       )
+        .filter(
+          (p: Project) =>
+            projectNameFilter == null ||
+            p.name
+              .toLocaleUpperCase()
+              .includes(projectNameFilter.toLocaleUpperCase())
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           semesterFilter == null ||
-  //           (new Date(p.dateStart).getMonth() < 6 ? 1 : 2) === semesterFilter
-  //       )
+        .filter(
+          (p: Project) =>
+            semesterFilter == null ||
+            (new Date(p.dateStart).getMonth() < 6 ? 1 : 2) === semesterFilter
+        )
 
-  //       .filter(
-  //         (p: Project) =>
-  //           yearFilter == null ||
-  //           new Date(p.dateStart).getFullYear() === yearFilter
-  //       )
-  //   );
-  // }, [
-  //   authorNameFilter,
-  //   categoryFilter,
-  //   noticeFilter,
-  //   programFilter,
-  //   projects,
-  //   projectNameFilter,
-  //   semesterFilter,
-  //   yearFilter,
-  // ]);
+        .filter(
+          (p: Project) =>
+            yearFilter == null ||
+            new Date(p.dateStart).getFullYear() === yearFilter
+        )
+    );
+  }, [
+    authorNameFilter,
+    categoryFilter,
+    noticeFilter,
+    programFilter,
+    projects,
+    projectNameFilter,
+    semesterFilter,
+    yearFilter,
+  ]);
 
   return (
     <>

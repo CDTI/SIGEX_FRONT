@@ -1,36 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Select } from "antd";
 
-import { Program, isProgram } from "../../../interfaces/program";
-import { Project } from "../../../interfaces/project";
+import { Program } from "../../../interfaces/program";
 import { listPrograms } from "../../../services/program_service";
-import { listAllProjects } from "../../../services/project_service";
+import { countProjects } from "../../../services/project_service";
 import Structure from "../../../components/layout/structure";
 
 const { Option } = Select;
 
+interface IProjectsCount {
+  total: number;
+  pendentes: number;
+  reprovados: number;
+  aprovados: number;
+  selecionados: number;
+}
+
 export const HomeDashboard: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [projectsCount, setProjectsCount] = useState<IProjectsCount>();
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [programFilter, setProgramFilter] = useState<string>("");
+
+  async function LoadProjectsCount() {
+    const response = await listPrograms();
+    setPrograms(response.programs);
+
+    const projects = await countProjects(programFilter);
+    setProjectsCount(projects);
+  }
 
   useEffect(() => {
-    (async () => {
-      const response = await listPrograms();
-      setPrograms(response.programs);
-
-      const projects = await listAllProjects();
-      setProjects(projects);
-      setFilteredProjects(projects);
-    })();
-  }, []);
+    try {
+      LoadProjectsCount();
+    } catch (error) {
+      console.log(error);
+    } finally {
+    }
+  }, [programFilter]);
 
   const handleChange = (event: any) => {
-    setFilteredProjects(
-      projects.filter((p: Project) =>
-        isProgram(p.program) ? p.program._id : p.program === event
-      )
-    );
+    setProgramFilter(event);
   };
 
   return (
@@ -41,6 +50,7 @@ export const HomeDashboard: React.FC = () => {
           style={{ width: 200, margin: "8px 0" }}
           onChange={handleChange}
         >
+          <Option value={""}>Selecione</Option>
           {programs.map((e) => {
             if (e._id !== undefined) {
               return (
@@ -52,39 +62,35 @@ export const HomeDashboard: React.FC = () => {
           })}
         </Select>
       </div>
-
       <div className="site-card-wrapper">
         <Row gutter={16}>
           <Col span={8} style={{ margin: "8px 0" }}>
             <Card title="Total de projetos" bordered={false}>
-              {filteredProjects.length}
+              {projectsCount?.total}
             </Card>
           </Col>
 
           <Col span={8} style={{ margin: "8px 0" }}>
             <Card title="Projetos Pendentes" bordered={false}>
-              {filteredProjects.filter((e) => e.status === "pending").length}
+              {projectsCount?.pendentes}
             </Card>
           </Col>
 
           <Col span={8} style={{ margin: "8px 0" }}>
             <Card title="Projetos Reprovados" bordered={false}>
-              {filteredProjects.filter((e) => e.status === "reproved").length}
+              {projectsCount?.reprovados}
             </Card>
           </Col>
 
           <Col span={8} style={{ margin: "8px 0" }}>
             <Card title="Projetos Aprovados" bordered={false}>
-              {
-                filteredProjects.filter((e) => e.status === "notSelected")
-                  .length
-              }
+              {projectsCount?.aprovados}
             </Card>
           </Col>
 
           <Col span={8} style={{ margin: "8px 0" }}>
             <Card title="Projetos Selecionados" bordered={false}>
-              {filteredProjects.filter((e) => e.status === "selected").length}
+              {projectsCount?.selecionados}
             </Card>
           </Col>
         </Row>
