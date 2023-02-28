@@ -9,8 +9,7 @@ import { useHttpClient } from "../../../../../../hooks/useHttpClient";
 import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/programs";
 import { getAllNoticesEndpoint } from "../../../../../../services/endpoints/notices";
 import { getAllCategoriesEndpoint } from "../../../../../../services/endpoints/categories";
-import { ProjectsFilterContext } from "../../../../../../context/projectsFilter";
-import { IQuery } from "../../../../../../context/projectsFilter";
+import { ProjectsFilterContext } from "../../../../../../context/projects";
 
 export type Field =
   | "AUTHOR"
@@ -116,13 +115,7 @@ export const Filters: React.FC<Props> = (props) => {
   };
 
   return (
-    <Form
-      form={form}
-      onFinish={getFilteredProjects}
-      onBlur={() => {
-        console.log(query);
-      }}
-    >
+    <Form form={form} onFinish={getFilteredProjects}>
       <Row justify="center" gutter={[8, 8]}>
         <Col xs={24} md={12}>
           <Form.Item name="projectName" style={{ margin: "0px" }}>

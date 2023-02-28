@@ -21,7 +21,7 @@ import { TeacherProjectsPage } from "../pages/dashboard/projects/list/teacher";
 import { UsersPage } from "../pages/dashboard/users";
 import { CreateUserPage } from "../pages/dashboard/users/create";
 import { LoginPage } from "../pages/login";
-import { ProjectsFilterProvider } from "../context/projectsFilter";
+import { ProjectsFilterProvider } from "../context/projects";
 
 export const Routes: React.FC = () => {
   const authContext = useContext(AuthContext);

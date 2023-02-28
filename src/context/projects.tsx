@@ -11,6 +11,8 @@ interface IProjectsFilter {
   setLimit: React.Dispatch<React.SetStateAction<number>>;
   setTotalPages: React.Dispatch<React.SetStateAction<number>>;
   query: IQuery;
+  queryString: string;
+  setQueryString: React.Dispatch<React.SetStateAction<string>>;
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
   filteredProjects: Project[];
@@ -76,6 +78,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
     status: statusFilter,
   };
 
+  const [queryString, setQueryString] = useState<string>("?");
+
   const tableProjectsRequester = useHttpClient();
 
   const getPaginatedProjects = async (query: IQuery) => {
@@ -113,6 +117,17 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
 
   useEffect(() => {
     getPaginatedProjects(query);
+    let string = "";
+    for (const item in query) {
+      if (
+        item !== "page" &&
+        item !== "limit" &&
+        query[item as keyof IQuery] !== ""
+      ) {
+        string += `${item}=${query[item as keyof IQuery] ?? ""}&`;
+      }
+    }
+    setQueryString(string.slice(0, -1));
   }, [
     page,
     limit,
@@ -131,6 +146,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
         limit,
         totalPages,
         query,
+        queryString,
+        setQueryString,
         projects,
         filteredProjects,
         getPaginatedProjects,

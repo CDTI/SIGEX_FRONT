@@ -27,7 +27,7 @@ import { Feedback } from "../../../../../interfaces/feedback";
 import { baseUrl } from "../../../../../services/httpClient";
 import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks";
 import { updateProjectEndpoint } from "../../../../../services/endpoints/projects";
-import { ProjectsFilterContext } from "../../../../../context/projectsFilter";
+import { ProjectsFilterContext } from "../../../../../context/projects";
 
 export const AllProjects: React.FC = () => {
   const {
@@ -42,7 +42,7 @@ export const AllProjects: React.FC = () => {
     getPaginatedProjects,
     loading,
   } = useContext(ProjectsFilterContext);
-  let { query } = useContext(ProjectsFilterContext);
+  let { query, queryString } = useContext(ProjectsFilterContext);
   const location = useLocation();
 
   const [projectNameFilter, setProjectNameFilter] = useState<string>();
@@ -359,7 +359,8 @@ export const AllProjects: React.FC = () => {
             <Button
               block
               shape="round"
-              href={`${baseUrl}/downloadCsv/${programFilter ?? ""}`}
+              href={`${baseUrl}/downloadCsv/?${queryString}`}
+              target="blank"
             >
               <DownloadOutlined /> Projetos
             </Button>
@@ -369,7 +370,8 @@ export const AllProjects: React.FC = () => {
             <Button
               block
               shape="round"
-              href={`${baseUrl}/downloadCsvHours/${programFilter ?? ""}`}
+              href={`${baseUrl}/downloadCsvHours/?${queryString}`}
+              target="blank"
             >
               <DownloadOutlined /> Horários
             </Button>
@@ -380,6 +382,7 @@ export const AllProjects: React.FC = () => {
               block
               shape="round"
               href={`${baseUrl}/project/report/download/${programFilter ?? ""}`}
+              target="blank"
             >
               <DownloadOutlined /> Relatórios
             </Button>
