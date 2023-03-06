@@ -1,12 +1,11 @@
 import "antd/dist/antd.css";
-import "../../assets/antd-override.css"
-import logo from "../../assets/sigex.png"
+import "../../assets/antd-override.css";
+import logo from "../../assets/sigex.png";
 
 import React, { useState, useMemo, useCallback, useContext } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { Layout, Menu, Button, Typography, Row, Dropdown } from "antd";
-import
-{
+import {
   BankOutlined,
   TeamOutlined,
   UserOutlined,
@@ -17,7 +16,7 @@ import
   FileAddOutlined,
   FieldTimeOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 
 import { Role } from "../../interfaces/user";
@@ -27,47 +26,54 @@ import { Restricted } from "../../components/Restricted";
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
-export const AppLayout: React.FC = (props) =>
-{
+export const AppLayout: React.FC = (props) => {
   const authContext = useContext(AuthContext);
   const [collapsed, setcollapsed] = useState(false);
 
-  const toggleSideMenu = useCallback(() => setcollapsed((prevState) => !prevState), []);
+  const toggleSideMenu = useCallback(
+    () => setcollapsed((prevState) => !prevState),
+    []
+  );
 
   const location = useLocation();
-  const userRoles = useMemo(() =>
-    authContext.user?.roles?.map((r: string | Role) => (r as Role).description) ?? [],
-    [authContext.user]);
+  const userRoles = useMemo(
+    () =>
+      authContext.user?.roles?.map(
+        (r: string | Role) => (r as Role).description
+      ) ?? [],
+    [authContext.user]
+  );
 
-  const userMenu = useMemo(() => (
-    <Menu mode="vertical" style={{ padding: 8 }}>
-      <Menu.Item disabled>
-        <Typography.Title level={5} style={{ margin: 0 }}>
-          {`Olá, ${authContext.user?.name.split(" ")[0] ?? "como vai"}!`}
-        </Typography.Title>
-      </Menu.Item>
+  const userMenu = useMemo(
+    () => (
+      <Menu mode="vertical" style={{ padding: 8 }}>
+        <Menu.Item disabled>
+          <Typography.Title level={5} style={{ margin: 0 }}>
+            {`Olá, ${authContext.user?.name.split(" ")[0] ?? "como vai"}!`}
+          </Typography.Title>
+        </Menu.Item>
 
-      <Menu.Divider />
+        <Menu.Divider />
 
-      <Menu.Item>
-        <Link
-          to={
-          {
-            pathname: "/perfil",
-            state: { context: "user", user: authContext.user }
-          }}
-        >
-          Perfil
-        </Link>
-      </Menu.Item>
+        <Menu.Item>
+          <Link
+            to={{
+              pathname: "/perfil",
+              state: { context: "user", user: authContext.user },
+            }}
+          >
+            Perfil
+          </Link>
+        </Menu.Item>
 
-      <Menu.Item danger onClick={() =>authContext.logout!()}>
-        Sair
-      </Menu.Item>
-    </Menu>
-  ), [authContext.user]);
+        <Menu.Item danger onClick={() => authContext.logout!()}>
+          Sair
+        </Menu.Item>
+      </Menu>
+    ),
+    [authContext.user]
+  );
 
-  console.log(userRoles)
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header className="header" style={{ padding: "0 16px" }}>
@@ -79,10 +85,7 @@ export const AppLayout: React.FC = (props) =>
             style={{ marginTop: 12 }}
             onClick={toggleSideMenu}
           >
-            {collapsed
-              ? <MenuUnfoldOutlined />
-              : <MenuFoldOutlined />
-            }
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </Button>
 
           <Link to="/home">
@@ -94,7 +97,7 @@ export const AppLayout: React.FC = (props) =>
               ghost
               size="large"
               shape="circle"
-              icon={<UserOutlined/>}
+              icon={<UserOutlined />}
               style={{ marginTop: 12 }}
             />
           </Dropdown>
@@ -116,23 +119,13 @@ export const AppLayout: React.FC = (props) =>
             theme="light"
             defaultSelectedKeys={[location.pathname]}
           >
-            <Menu.Item
-              key="/home"
-              icon={<HomeOutlined />}
-            >
-              <Link to="/home">
-                Home
-              </Link>
+            <Menu.Item key="/home" icon={<HomeOutlined />}>
+              <Link to="/home">Home</Link>
             </Menu.Item>
 
             {userRoles.includes("Administrador") && (
-              <Menu.Item
-                key="/cursos"
-                icon={<BankOutlined />}
-              >
-                <Link to="/cursos">
-                  Cursos
-                </Link>
+              <Menu.Item key="/cursos" icon={<BankOutlined />}>
+                <Link to="/cursos">Cursos</Link>
               </Menu.Item>
             )}
 
@@ -141,111 +134,72 @@ export const AppLayout: React.FC = (props) =>
               title="Programas"
               icon={<FileTextOutlined />}
             >
-              <Menu.Item
-                key="/programas"
-                icon={<UnorderedListOutlined />}
-              >
-                <Link to="/programas">
-                  Listar Programas
-                </Link>
+              <Menu.Item key="/programas" icon={<UnorderedListOutlined />}>
+                <Link to="/programas">Listar Programas</Link>
               </Menu.Item>
 
               {userRoles.includes("Administrador") && (
-                <Menu.Item
-                  key="/programas/criar"
-                  icon={<DiffOutlined />}
-                >
-                  <Link to="/programas/criar">
-                    Criar Programa
-                  </Link>
+                <Menu.Item key="/programas/criar" icon={<DiffOutlined />}>
+                  <Link to="/programas/criar">Criar Programa</Link>
                 </Menu.Item>
               )}
             </SubMenu>
 
             {userRoles.includes("Administrador") && (
               <>
-                <Menu.Item
-                  key="/usuarios"
-                  icon={<UserOutlined />}
-                >
-                  <Link to="/usuarios">
-                    Usuários
-                  </Link>
+                <Menu.Item key="/usuarios" icon={<UserOutlined />}>
+                  <Link to="/usuarios">Usuários</Link>
                 </Menu.Item>
 
-                <Menu.Item
-                  key="/categorias"
-                  icon={<UnorderedListOutlined />}
-                >
-                  <Link to="/categorias">
-                    Categorias
-                  </Link>
+                <Menu.Item key="/categorias" icon={<UnorderedListOutlined />}>
+                  <Link to="/categorias">Categorias</Link>
                 </Menu.Item>
 
-                <Menu.Item
-                  key="/editais"
-                  icon={<FieldTimeOutlined />}
-                >
+                <Menu.Item key="/editais" icon={<FieldTimeOutlined />}>
                   <Link to="/editais">Editais</Link>
                 </Menu.Item>
 
-                <Menu.Item
-                  key="/propostas"
-                  icon={<TeamOutlined />}
-                >
-                  <Link to="/propostas">
-                    Projetos
-                  </Link>
+                <Menu.Item key="/propostas" icon={<TeamOutlined />}>
+                  <Link to="/propostas">Projetos</Link>
                 </Menu.Item>
               </>
             )}
 
-            {(userRoles.includes("Professor") || userRoles.includes("Presidente do NDE") || userRoles.includes("Coordenador de integração")) && (
+            {(userRoles.includes("Professor") ||
+              userRoles.includes("Presidente do NDE") ||
+              userRoles.includes("Coordenador de integração")) && (
               <>
                 <SubMenu
                   key="minhas-propostas"
                   title="Meus projetos"
                   icon={<FileTextOutlined />}
                 >
-                  <Menu.Item
-                    key="/propostas/criar"
-                    icon={<FileAddOutlined />}
-                  >
+                  <Menu.Item key="/propostas/criar" icon={<FileAddOutlined />}>
                     <Link
-                      to={
-                      {
+                      to={{
                         pathname: "/propostas/criar",
-                        state: { context: "user" }
+                        state: { context: "user" },
                       }}
                     >
                       Registrar novo projeto
                     </Link>
                   </Menu.Item>
 
-                  <Menu.Item
-                    key="/minhas-propostas"
-                    icon={<TeamOutlined />}
-                  >
-                    <Link to="/minhas-propostas">
-                      Projetos registrados
-                    </Link>
+                  <Menu.Item key="/minhas-propostas" icon={<TeamOutlined />}>
+                    <Link to="/minhas-propostas">Projetos registrados</Link>
                   </Menu.Item>
                 </SubMenu>
               </>
             )}
 
-            {userRoles.includes("Comitê de extensão") && !userRoles.includes("Administrador") && (
-              <>
-                <Menu.Item
-                  key="/propostas"
-                  icon={<TeamOutlined />}
-                >
-                  <Link to="/propostas">
-                    Projetos
-                  </Link>
-                </Menu.Item>
-              </>
-            )}
+            {userRoles.includes("Comitê de extensão") &&
+              !userRoles.includes("Administrador") && (
+                <>
+                  <Menu.Item key="/propostas" icon={<TeamOutlined />}>
+                    <Link to="/propostas">Projetos</Link>
+                  </Menu.Item>
+                </>
+              )}
           </Menu>
         </Sider>
 
@@ -258,7 +212,9 @@ export const AppLayout: React.FC = (props) =>
           </Content>
 
           <Footer style={{ textAlign: "center" }}>
-            <Typography>SIGEX &nbsp; 2020 - {new Date().getFullYear()}</Typography>
+            <Typography>
+              SIGEX &nbsp; 2020 - {new Date().getFullYear()}
+            </Typography>
           </Footer>
         </Layout>
       </Layout>

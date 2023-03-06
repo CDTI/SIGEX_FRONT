@@ -91,7 +91,6 @@ export const MainForm: React.FC<Props> = (props) => {
         url: getAllCoursesEndpoint(),
         cancellable: true,
       });
-      console.log(courses);
       setCourses(courses ?? []);
 
       let notices =

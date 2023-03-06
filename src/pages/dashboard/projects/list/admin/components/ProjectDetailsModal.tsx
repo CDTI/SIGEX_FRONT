@@ -82,7 +82,6 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
   const [totalCost, setTotalCost] = useState("");
 
   useEffect(() => {
-    console.log(props.project?.course);
     if (props.project != null) {
       const materialsTotalValue = props.project.resources.materials
         .map((m: Material) => m.quantity * m.unitaryValue)
