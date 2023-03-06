@@ -85,6 +85,17 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
   const getPaginatedProjects = async (query: IQuery) => {
     setLoading(true);
     try {
+      let string = "";
+      for (const item in query) {
+        if (
+          item !== "page" &&
+          item !== "limit" &&
+          query[item as keyof IQuery] !== ""
+        ) {
+          string += `${item}=${query[item as keyof IQuery] ?? ""}&`;
+        }
+      }
+      setQueryString(string.slice(0, -1));
       const mapedQuery = new Map();
       for (const i in query) {
         if (query[i as keyof IQuery] !== "") {
@@ -117,27 +128,7 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
 
   useEffect(() => {
     getPaginatedProjects(query);
-    let string = "";
-    for (const item in query) {
-      if (
-        item !== "page" &&
-        item !== "limit" &&
-        query[item as keyof IQuery] !== ""
-      ) {
-        string += `${item}=${query[item as keyof IQuery] ?? ""}&`;
-      }
-    }
-    setQueryString(string.slice(0, -1));
-  }, [
-    page,
-    limit,
-    categoryFilter,
-    projectNameFilter,
-    noticeFilter,
-    programFilter,
-    authorNameFilter,
-    statusFilter,
-  ]);
+  }, [page, limit]);
 
   return (
     <ProjectsFilterContext.Provider

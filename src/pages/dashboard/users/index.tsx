@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Button,
   Col,
+  Form,
   Input,
   notification,
   Row,
@@ -10,6 +11,7 @@ import {
   Switch,
   Table,
 } from "antd";
+import { SearchOutlined, ClearOutlined } from "@ant-design/icons";
 
 import Structure from "../../../components/layout/structure";
 
@@ -20,17 +22,18 @@ import {
   getAllUsersPaginatedEndpoint,
   toggleUserEndpoint,
 } from "../../../services/endpoints/users";
+import { useForm } from "antd/lib/form/Form";
 
 export const UsersPage: React.FC = () => {
   const location = useLocation();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [userFilter, setUserFilter] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [form] = useForm();
   const tableUsersRequester = useHttpClient();
   const switchUsersRequester = useHttpClient();
 
@@ -56,28 +59,24 @@ export const UsersPage: React.FC = () => {
       setLoading(false);
     }
   };
-  // useEffect(() => {
-  //   (async () => {
-  //     const response = await tableUsersRequester.send({
-  //       method: "GET",
-  //       url: getAllUsersEndpoint(),
-  //       cancellable: true,
-  //     });
-
-  //     setUsers(response.user ?? []);
-  //     setFilteredUsers(response.user ?? []);
-  //   })();
-  // }, [tableUsersRequester.send]);
 
   useEffect(() => {
     getPaginatedUsers(userFilter);
-  }, [page, limit, userFilter]);
+  }, [page, limit]);
 
   const filterUsers = (ev: any) => {
     setUserFilter(ev.target.value);
     if (page !== 1) {
       setPage(1);
     }
+  };
+
+  const cleanFilter = () => {
+    form.resetFields();
+    if (page !== 1) {
+      setPage(1);
+    }
+    getPaginatedUsers("");
   };
 
   const toggleUserStatus = useCallback(
@@ -98,7 +97,7 @@ export const UsersPage: React.FC = () => {
           ];
         });
 
-        setFilteredUsers((prevState) => {
+        setUsers((prevState) => {
           const index = prevState.findIndex((u: User) => u._id === id)!;
           return [
             ...prevState.slice(0, index),
@@ -180,26 +179,41 @@ export const UsersPage: React.FC = () => {
     <Structure title="usuários">
       <Row gutter={[0, 8]} justify="center">
         <Col span={24}>
-          <Button>
-            <Link
-              to={{
-                pathname: `${location.pathname}/criar`,
-                state: { context: "admin" },
-              }}
+          <Form
+            form={form}
+            onFinish={() => getPaginatedUsers(userFilter)}
+            style={{ display: "flex", marginTop: "5px" }}
+          >
+            <Button>
+              <Link
+                to={{
+                  pathname: `${location.pathname}/criar`,
+                  state: { context: "admin" },
+                }}
+              >
+                Adicionar
+              </Link>
+            </Button>
+            <Form.Item name={"name"} style={{ margin: "0px", width: "100%" }}>
+              <Input
+                style={{ width: "100%", marginLeft: "20px" }}
+                placeholder={"Digite o nome do usuário para filtrar"}
+                onChange={filterUsers}
+              />
+            </Form.Item>
+            <Button icon={<SearchOutlined />} type="primary" htmlType="submit">
+              Pesquisar
+            </Button>
+            <Button
+              icon={<ClearOutlined />}
+              type="primary"
+              htmlType="button"
+              style={{ marginLeft: "10px" }}
+              onClick={cleanFilter}
             >
-              Adicionar
-            </Link>
-          </Button>
-        </Col>
-      </Row>
-
-      <Row gutter={[0, 8]}>
-        <Col span={24}>
-          <Input
-            style={{ width: "100%" }}
-            placeholder={"Digite o nome do usuário para filtrar"}
-            onChange={filterUsers}
-          />
+              Limpar Filtros
+            </Button>
+          </Form>
         </Col>
       </Row>
 

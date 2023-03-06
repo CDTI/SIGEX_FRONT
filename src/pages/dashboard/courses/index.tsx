@@ -15,6 +15,8 @@ import {
   Typography,
 } from "antd";
 
+import { SearchOutlined, ClearOutlined } from "@ant-design/icons";
+
 import { useHttpClient } from "../../../hooks/useHttpClient";
 import Structure from "../../../components/layout/structure";
 
@@ -28,6 +30,7 @@ import {
   toggleCourseEndpoint,
   updateCourseEndpoint,
 } from "../../../services/endpoints/courses";
+import { useForm } from "antd/lib/form/Form";
 
 export const CoursesPage: React.FC = () => {
   const [campi, setCampi] = useState<Campus[]>([]);
@@ -39,6 +42,8 @@ export const CoursesPage: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [form] = useForm();
+  const [courseFilter, setCourseFilter] = useState<string>("");
   const tableCoursesRequester = useHttpClient();
   const switchCoursesRequester = useHttpClient();
 
@@ -50,13 +55,14 @@ export const CoursesPage: React.FC = () => {
   const [course, setCourse] = useState<Course>();
   const removerModalCoursesRequester = useHttpClient();
 
-  const getPaginatedCourses = async () => {
+  const getPaginatedCourses = async (filter: string) => {
     setLoading(true);
     try {
       const courses = await tableCoursesRequester.send({
         method: "GET",
         url: getAllCoursesPaginatedEndpoint(),
         queryParams: new Map([
+          ["name", filter],
           ["page", String(page)],
           ["limit", String(limit)],
         ]),
@@ -72,6 +78,17 @@ export const CoursesPage: React.FC = () => {
     }
   };
 
+  const filterCourse = (event: any) => {
+    setCourseFilter(event.target.value);
+  };
+
+  const cleanFilter = () => {
+    form.resetFields();
+    if (page !== 1) {
+      setPage(1);
+    }
+    getPaginatedCourses("");
+  };
   useEffect(() => {
     (async () => {
       const campi = await dropDownListCampiRequester.send<Campus[]>({
@@ -92,37 +109,8 @@ export const CoursesPage: React.FC = () => {
     };
   }, []);
 
-  // useEffect(() =>
-  // {
-  //   if (shouldReloadCourses)
-  //   {
-  //     (async () =>
-  //     {
-  //       try
-  //       {
-  //         const courses = await tableCoursesRequester.send(
-  //         {
-  //           method: "GET",
-  //           url: getAllCoursesEndpoint(),
-  //           queryParams: new Map([["withPopulatedRefs", "true"]]),
-  //           cancellable: true
-  //         });
-
-  //         setCourses(courses?.map((c: Course) => ({ ...c, key: c._id! })) ?? []);
-
-  //         setShouldReloadCourses(false);
-  //       }
-  //       catch (error)
-  //       {
-  //         if ((error as Error).message !== "")
-  //           notification.error({ message: (error as Error).message });
-  //       }
-  //     })();
-  //   }
-  // }, [shouldReloadCourses]);
-
   useEffect(() => {
-    getPaginatedCourses();
+    getPaginatedCourses(courseFilter);
   }, [page, limit, shouldReloadCourses]);
 
   const openSaveModal = useCallback(
@@ -391,8 +379,40 @@ export const CoursesPage: React.FC = () => {
       <Structure title="Cursos">
         <Row gutter={[0, 8]} justify="center">
           <Col span={24}>
-            <Button onClick={() => openSaveModal()}>Adicionar</Button>
+            <Form
+              form={form}
+              onFinish={() => getPaginatedCourses(courseFilter)}
+              style={{ display: "flex", marginTop: "5px" }}
+            >
+              <Button htmlType="button" onClick={() => openSaveModal()}>
+                Adicionar
+              </Button>
+              <Form.Item name={"name"} style={{ margin: "0px", width: "100%" }}>
+                <Input
+                  style={{ width: "100%", marginLeft: "20px" }}
+                  placeholder={"Digite o nome do curso para filtrar"}
+                  onChange={filterCourse}
+                />
+              </Form.Item>
+              <Button
+                icon={<SearchOutlined />}
+                type="primary"
+                htmlType="submit"
+              >
+                Pesquisar
+              </Button>
+              <Button
+                icon={<ClearOutlined />}
+                type="primary"
+                htmlType="button"
+                style={{ marginLeft: "10px" }}
+                onClick={cleanFilter}
+              >
+                Limpar Filtros
+              </Button>
+            </Form>
           </Col>
+          <Col span={24}></Col>
 
           <Col span={24}>
             <Table

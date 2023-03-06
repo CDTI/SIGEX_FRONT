@@ -39,6 +39,7 @@ function enumerateYears(from?: number, to?: number): number[] {
 export const Filters: React.FC<Props> = (props) => {
   const {
     page,
+    limit,
     getPaginatedProjects,
     setPage,
     cleanFilters,
@@ -104,6 +105,16 @@ export const Filters: React.FC<Props> = (props) => {
   const clearFilters = () => {
     form.resetFields();
     cleanFilters();
+    getPaginatedProjects({
+      page: String(page),
+      limit: String(limit),
+      name: "",
+      author: "",
+      program: "",
+      category: "",
+      notice: "",
+      status: "",
+    });
   };
 
   const getFilteredProjects = () => {
@@ -115,7 +126,7 @@ export const Filters: React.FC<Props> = (props) => {
   };
 
   return (
-    <Form form={form} onFinish={getFilteredProjects}>
+    <Form form={form} onFinish={() => getPaginatedProjects(query)}>
       <Row justify="center" gutter={[8, 8]}>
         <Col xs={24} md={12}>
           <Form.Item name="projectName" style={{ margin: "0px" }}>
@@ -246,14 +257,14 @@ export const Filters: React.FC<Props> = (props) => {
               onChange={(year: string) => props.onFilterBy("YEAR", year)}
             />
           </Form.Item>
-        </Col>
+        </Col> */}
 
-        {/* <Col xs={24}>
+        <Col xs={24}>
           <Button block type="primary" htmlType="submit">
             <SearchOutlined />
             Pesquisar
           </Button>
-        </Col> */}
+        </Col>
         <Col xs={24}>
           <Button block type="primary" htmlType="button" onClick={clearFilters}>
             <ClearOutlined /> Limpar filtros
