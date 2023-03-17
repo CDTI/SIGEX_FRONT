@@ -1,5 +1,14 @@
 import React from "react";
-import { Alert, Button, Col, Collapse, List, Modal, Row, Typography } from "antd";
+import {
+  Alert,
+  Button,
+  Col,
+  Collapse,
+  List,
+  Modal,
+  Row,
+  Typography,
+} from "antd";
 
 import { LabeledContent } from "../../../../../../components/LabeledContent";
 import { formatDate } from "../../../../../../utils/dateFormatter";
@@ -10,8 +19,7 @@ import { Notice } from "../../../../../../interfaces/notice";
 import { Contact, Project } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
 
-interface Props
-{
+interface Props {
   isVisible: boolean;
   project?: Project;
   onClose(): void;
@@ -20,28 +28,27 @@ interface Props
 const { Panel } = Collapse;
 const { Text, Title, Paragraph } = Typography;
 
-function formatLateSubmitMessage(date: Date): string
-{
+function formatLateSubmitMessage(date: Date): string {
   return `Relatório entregue com ataso no dia ${formatDate(date)}.`;
 }
 
-export const ReportDetailsModal: React.FC<Props> = (props) =>
-{
+export const ReportDetailsModal: React.FC<Props> = (props) => {
   return (
     <Modal
       centered={true}
       closable={false}
-      footer={(
+      footer={
         <Row justify="end">
-          <Button
-            type="primary"
-            onClick={() => props.onClose()}
-          >
+          <Button type="primary" onClick={() => props.onClose()}>
             Fechar
           </Button>
         </Row>
-      )}
-      title={<Title level={5} ellipsis>{props.project?.report?.projectTitle}</Title>}
+      }
+      title={
+        <Title level={5} ellipsis>
+          {props.project?.report?.projectTitle}
+        </Title>
+      }
       visible={props.isVisible}
       width="85%"
     >
@@ -64,94 +71,123 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
 
                 <Col span={24}>
                   <LabeledContent label="Autor">
-                    <Paragraph>{(props.project?.author as User)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.author as User)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Categoria">
-                    <Paragraph>{(props.project?.category as Category)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.category as Category)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col
                   span={24}
                   style={
-                    props.project == null
-                    || (props.project.category as Category).name === "Extensão específica do curso"
+                    props.project == null ||
+                    (props.project.category as Category).name ===
+                      "Extensão específica do curso"
                       ? { paddingBottom: "0" }
                       : {}
                   }
                 >
                   <LabeledContent label="Programa">
-                    <Paragraph>{(props.project?.program as Program)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.program as Program)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
-                {(props.project?.notice)
-                  &&((props.project?.notice as Notice).projectExecutionPeriod && (props.project?.notice as Notice).projectExecutionYear)
-                  && (
+                {props.project?.notice &&
+                  (props.project?.notice as Notice).projectExecutionPeriod &&
+                  (props.project?.notice as Notice).projectExecutionYear && (
                     <>
                       <Col span={24}>
                         <LabeledContent label="Período de execução do projeto">
-                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
-                        </LabeledContent>
-                      </Col>
-                        <Col span={24}>
-                          <LabeledContent label="Ano de execução do projeto">
-                            <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
-                          </LabeledContent>
-                        </Col>
-                      </>
-                  )
-                }
-                {(props.project?.report)
-                  && (props.project?.report.ods)
-                  && (props.project?.report?.ods.length > 0)
-                  && (
-                      <Col span={24}>
-                        <LabeledContent label="ODS Selecionados">
                           <Paragraph>
-                            {props.project?.report.ods.map((eachOds, index) => {
-                              const isLastElement = props.project?.report?.ods.length === (index+1) ? true : false;
-                              if(isLastElement) return eachOds + '.'
-                              else return eachOds + ', '
-                            })}
+                            {
+                              (props.project?.notice as Notice)
+                                ?.projectExecutionPeriod
+                            }
                           </Paragraph>
                         </LabeledContent>
                       </Col>
-                    )
-                }
-               {(props.project?.report)
-                  && (props.project?.report.midiaLinks)
-                  && (props.project?.report?.midiaLinks.length > 0)
-                  && (
-                      <Col span={24} style={{marginBottom: '1em'}}>
-                        <LabeledContent label="Links de divulgação">
-                          {props.project?.report?.midiaLinks.map((link) => (
-                            <Paragraph style={{marginBottom: '0em'}} >
-                              Link:
-                              <a style={{paddingLeft: '8px'}} href={link} target="_blank">{link}</a>
-                            </Paragraph>
-                          ))}
+                      <Col span={24}>
+                        <LabeledContent label="Ano de execução do projeto">
+                          <Paragraph>
+                            {new Date(
+                              (
+                                props.project?.notice as Notice
+                              )?.projectExecutionYear
+                            ).getFullYear()}
+                          </Paragraph>
                         </LabeledContent>
                       </Col>
-                    )
-                }
-
-                {props.project != null
-                  && (props.project.category as Category).name === "Extensão específica do curso"
-                  && (
-                    <Col span={24} style={{ paddingBottom: "0" }}>
-                      <LabeledContent label="Curso">
+                    </>
+                  )}
+                {props.project?.report &&
+                  props.project?.report.ods &&
+                  props.project?.report?.ods.length > 0 && (
+                    <Col span={24}>
+                      <LabeledContent label="ODS Selecionados">
                         <Paragraph>
-                          {(props.project.course as Course).name} -&nbsp;
-                          {((props.project.course as Course).campus as Campus).name}
+                          {props.project?.report.ods.map((eachOds, index) => {
+                            const isLastElement =
+                              props.project?.report?.ods.length === index + 1
+                                ? true
+                                : false;
+                            if (isLastElement) return eachOds + ".";
+                            else return eachOds + ", ";
+                          })}
                         </Paragraph>
                       </LabeledContent>
                     </Col>
-                  )
-                }
+                  )}
+                {props.project?.report &&
+                  props.project?.report.midiaLinks &&
+                  props.project?.report?.midiaLinks.length > 0 && (
+                    <Col span={24} style={{ marginBottom: "1em" }}>
+                      <LabeledContent label="Links de divulgação">
+                        {props.project?.report?.midiaLinks.map((link) => (
+                          <Paragraph style={{ marginBottom: "0em" }}>
+                            Link:
+                            <a
+                              style={{ paddingLeft: "8px" }}
+                              href={link}
+                              target="_blank"
+                            >
+                              {link}
+                            </a>
+                          </Paragraph>
+                        ))}
+                      </LabeledContent>
+                    </Col>
+                  )}
+
+                {props.project != null &&
+                  (props.project.category as Category).name ===
+                    "Extensão específica do curso" && (
+                    <Col span={24} style={{ paddingBottom: "0" }}>
+                      <LabeledContent label="Curso">
+                        <Paragraph>
+                          {props.project.course
+                            ? (props.project.course as Course).name
+                            : ""}{" "}
+                          -
+                          {props.project.course
+                            ? (
+                                (props.project.course as Course)
+                                  .campus as Campus
+                              ).name
+                            : ""}
+                        </Paragraph>
+                      </LabeledContent>
+                    </Col>
+                  )}
               </Row>
             </Panel>
 
@@ -167,11 +203,11 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
                   </LabeledContent>
                 </Col>
 
-               <Col span={24}>
-                 <LabeledContent label="Número de alunos">
-                   <Paragraph>{props.project?.report?.students}</Paragraph>
-                 </LabeledContent>
-               </Col>
+                <Col span={24}>
+                  <LabeledContent label="Número de alunos">
+                    <Paragraph>{props.project?.report?.students}</Paragraph>
+                  </LabeledContent>
+                </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Número de equipes">
@@ -181,13 +217,17 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
 
                 <Col span={24}>
                   <LabeledContent label="Número de pessoas da comunidade com interação direta">
-                    <Paragraph>{props.project?.report?.communityPeople}</Paragraph>
+                    <Paragraph>
+                      {props.project?.report?.communityPeople}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24} style={{ paddingBottom: "0" }}>
                   <LabeledContent label="Número aproximado de pessoas impactadas">
-                    <Paragraph>{props.project?.report?.affectedPeople}</Paragraph>
+                    <Paragraph>
+                      {props.project?.report?.affectedPeople}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
               </Row>
@@ -201,21 +241,23 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
               <Row gutter={[0, 8]}>
                 <Col span={24}>
                   <LabeledContent label="Nome da comunidade">
-                    <Paragraph>{props.project?.report?.communityName}</Paragraph>
+                    <Paragraph>
+                      {props.project?.report?.communityName}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Contatos">
                     <List
-                      dataSource={props.project?.report?.communityContacts ?? []}
+                      dataSource={
+                        props.project?.report?.communityContacts ?? []
+                      }
                       renderItem={(c: Contact) => (
                         <List.Item>
                           <Text>
                             <Row justify="start">
-                              <Text strong>
-                                Informações
-                              </Text>
+                              <Text strong>Informações</Text>
                             </Row>
 
                             {c.name}
@@ -223,9 +265,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
 
                           <Text>
                             <Row justify="end">
-                              <Text strong>
-                                Telefone
-                              </Text>
+                              <Text strong>Telefone</Text>
                             </Row>
 
                             {c.phone != null && c.phone !== ""
@@ -242,19 +282,19 @@ export const ReportDetailsModal: React.FC<Props> = (props) =>
           </Collapse>
         </Col>
 
-        {props.project != null
-          && props.project.report != null
-          && props.project.report.isLate
-          && (
+        {props.project != null &&
+          props.project.report != null &&
+          props.project.report.isLate && (
             <Col span={21}>
               <Alert
-                message={formatLateSubmitMessage(new Date(props.project.report.createdAt!))}
+                message={formatLateSubmitMessage(
+                  new Date(props.project.report.createdAt!)
+                )}
                 showIcon
                 type="warning"
               />
             </Col>
-          )
-        }
+          )}
       </Row>
     </Modal>
   );
