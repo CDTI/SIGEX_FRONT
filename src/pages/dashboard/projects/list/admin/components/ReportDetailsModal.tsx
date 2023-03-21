@@ -174,9 +174,16 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                     <Col span={24} style={{ paddingBottom: "0" }}>
                       <LabeledContent label="Curso(s)">
                         <Paragraph>
-                          {`${props.project.course!.name} - ${
-                            (props.project.course!.campus as Campus).name
-                          }`}
+                          {props.project.course
+                            ? (props.project.course as Course).name
+                            : ""}{" "}
+                          -
+                          {props.project.course
+                            ? (
+                                (props.project.course as Course)
+                                  .campus as Campus
+                              ).name
+                            : ""}
                         </Paragraph>
                       </LabeledContent>
                     </Col>
