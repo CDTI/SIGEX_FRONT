@@ -172,7 +172,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                   (props.project.category as Category).name ===
                     "Extensão específica do curso" && (
                     <Col span={24} style={{ paddingBottom: "0" }}>
-                      <LabeledContent label="Curso">
+                      <LabeledContent label="Curso(s)">
                         <Paragraph>
                           {props.project.course
                             ? (props.project.course as Course).name
