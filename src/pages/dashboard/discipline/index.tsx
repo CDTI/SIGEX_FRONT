@@ -151,6 +151,7 @@ export const CreateDiscipline: React.FC = () => {
         onFinish={submitDiscipline}
       >
         <Form.Item>
+          <Typography>Selecione uma categoria</Typography>
           <Select
             options={categories.map((c) => ({
               value: c._id!,
