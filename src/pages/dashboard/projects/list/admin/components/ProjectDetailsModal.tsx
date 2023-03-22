@@ -24,13 +24,13 @@ import { Program } from "../../../../../../interfaces/program";
 import { Notice } from "../../../../../../interfaces/notice";
 import {
   Contact,
-  Discipline,
   Material,
   Project,
   Teacher,
   Transport,
 } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
+import { Discipline } from "../../../../../../interfaces/discipline";
 
 interface Props {
   isVisible: boolean;

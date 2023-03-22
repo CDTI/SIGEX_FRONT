@@ -1,11 +1,20 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
-import { Form, Input, Button, List, Typography, notification, Modal, Space, Switch } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  List,
+  Typography,
+  notification,
+  Modal,
+  Space,
+  Switch,
+} from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
 import { Category } from "../../../interfaces/category";
-import
-{
+import {
   createCategory,
   changeCategoryStatus,
   updateCategory,
@@ -13,34 +22,29 @@ import
 } from "../../../services/category_service";
 import Structure from "../../../components/layout/structure";
 
-interface State
-{
+interface State {
   visible: boolean;
   category?: Category;
 }
 
-export const CreateCategory: React.FC = () =>
-{
+export const CreateCategory: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [initialState, setInitialState] = useState(0);
   const [form] = Form.useForm();
   const formModal = Form.useForm()[0];
-  const [state, setState] = useState<State>(
-  {
+  const [state, setState] = useState<State>({
     visible: false,
     category: undefined,
   });
 
-  useEffect(() =>
-  {
-    (async () =>
-    {
-      setCategories(await getAllCategories());
+  useEffect(() => {
+    (async () => {
+      const categories = await getAllCategories();
+      setCategories(categories.slice(0, 5));
     })();
   }, [initialState]);
 
-  const submitCategory = async (category: Category) =>
-  {
+  const submitCategory = async (category: Category) => {
     category.isActive = false;
     const newCategory = await createCategory(category);
     notification.open({ message: newCategory.message });
@@ -48,21 +52,18 @@ export const CreateCategory: React.FC = () =>
     setInitialState(initialState + 1);
   };
 
-  const changeStatus = async (id: string) =>
-  {
+  const changeStatus = async (id: string) => {
     const category = await changeCategoryStatus(id);
     notification.open({ message: category.message });
     setInitialState(initialState + 1);
   };
 
-  const changeEdit = (category: Category) =>
-  {
+  const changeEdit = (category: Category) => {
     formModal.setFieldsValue(category);
     setState({ visible: true, category: category });
   };
 
-  const submitEdit = async (item: any) =>
-  {
+  const submitEdit = async (item: any) => {
     const categoryEdit = await updateCategory(item._id, item);
     formModal.resetFields();
     notification[categoryEdit.status]({ message: categoryEdit.message });
@@ -70,44 +71,46 @@ export const CreateCategory: React.FC = () =>
     setInitialState(initialState + 1);
   };
 
-  const onCancel = () =>
-  {
+  const onCancel = () => {
     formModal.resetFields();
     setState({ visible: false, category: undefined });
   };
 
-  const modal = useMemo(() => (
-    <Modal
-      visible={state.visible}
-      title="Editar categoria"
-      footer={[]}
-      onCancel={onCancel}
-    >
-      <Form onFinish={submitEdit} form={formModal}>
-        <Form.Item name="_id">
-          <Input style={{ display: "none" }} />
-        </Form.Item>
+  const modal = useMemo(
+    () => (
+      <Modal
+        visible={state.visible}
+        title="Editar categoria"
+        footer={[]}
+        onCancel={onCancel}
+      >
+        <Form onFinish={submitEdit} form={formModal}>
+          <Form.Item name="_id">
+            <Input style={{ display: "none" }} />
+          </Form.Item>
 
-        <Form.Item name="name" label="Nome">
-          <Input />
-        </Form.Item>
+          <Form.Item name="name" label="Nome">
+            <Input />
+          </Form.Item>
 
-        <Form.Item>
-          <Space>
-            <Button type="primary" onClick={onCancel}>
-              Cancelar
-            </Button>
+          <Form.Item>
+            <Space>
+              <Button type="primary" onClick={onCancel}>
+                Cancelar
+              </Button>
 
-            <Button htmlType="submit" type="primary">
-              Atualizar
-            </Button>
-          </Space>
-        </Form.Item>
-      </Form>
-    </Modal>
+              <Button htmlType="submit" type="primary">
+                Atualizar
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [state, formModal, onCancel, submitEdit]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    ),
+    [state, formModal, onCancel, submitEdit]
+  );
 
   return (
     <Structure title="Categoria">
@@ -140,8 +143,7 @@ export const CreateCategory: React.FC = () =>
         dataSource={categories}
         renderItem={(item) => (
           <List.Item
-            actions={
-            [
+            actions={[
               <Switch
                 defaultChecked={item.isActive}
                 onChange={(event) => changeStatus(item._id!)}

@@ -1,5 +1,6 @@
 import { Category } from "./category";
 import { Course } from "./course";
+import { Discipline } from "./discipline";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
 import { User } from "./user";
@@ -52,10 +53,6 @@ export interface Transport {
 export interface Resources {
   materials: Material[];
   transport: Transport[];
-}
-
-export interface Discipline {
-  name: string;
 }
 
 export interface Teacher {
