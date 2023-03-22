@@ -8,6 +8,7 @@ import { NotFound } from "../pages/404";
 import { ChangePasswordPage } from "../pages/change-password";
 import { AppLayout } from "../pages/dashboard";
 import { CreateCategory } from "../pages/dashboard/category";
+import { CreateDiscipline } from "../pages/dashboard/discipline";
 import { CoursesPage } from "../pages/dashboard/courses";
 import { HomeDashboard } from "../pages/dashboard/home";
 import { Notices } from "../pages/dashboard/notice";
@@ -72,6 +73,10 @@ export const Routes: React.FC = () => {
 
         <ProtectedRoute allow="Administrador" path="/categorias">
           <CreateCategory />
+        </ProtectedRoute>
+
+        <ProtectedRoute allow="Administrador" path="/disciplines">
+          <CreateDiscipline />
         </ProtectedRoute>
 
         <ProtectedRoute allow="Administrador" path="/editais" exact>

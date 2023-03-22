@@ -155,6 +155,10 @@ export const AppLayout: React.FC = (props) => {
                   <Link to="/categorias">Categorias</Link>
                 </Menu.Item>
 
+                <Menu.Item key="/disciplines" icon={<UnorderedListOutlined />}>
+                  <Link to="/disciplines">Disciplinas</Link>
+                </Menu.Item>
+
                 <Menu.Item key="/editais" icon={<FieldTimeOutlined />}>
                   <Link to="/editais">Editais</Link>
                 </Menu.Item>
