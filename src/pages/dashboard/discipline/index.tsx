@@ -104,13 +104,11 @@ export const CreateDiscipline: React.FC = () => {
   };
 
   const submitEdit = async (item: any) => {
-    console.log(item);
     const disciplineEdit = await updateDiscipline(item._id, item);
     formModal.resetFields();
     notification[disciplineEdit.status]({ message: disciplineEdit.message });
     setState({ visible: false, discipline: undefined });
     setInitialState(initialState + 1);
-    console.log(disciplineEdit);
   };
 
   const getCategory = (id: string) => {
@@ -148,7 +146,7 @@ export const CreateDiscipline: React.FC = () => {
               options={courses.map((course: Course) => ({
                 key: course._id!,
                 value: course._id!,
-                label: course.name,
+                label: `${course.name} - ${course.campus.name}`,
               }))}
             ></Select>
           </Form.Item>
@@ -208,7 +206,7 @@ export const CreateDiscipline: React.FC = () => {
                   options={courses.map((course: Course) => ({
                     key: course._id!,
                     value: course._id!,
-                    label: course.name,
+                    label: `${course.name} - ${course.campus.name}`,
                   }))}
                 ></Select>
               </Form.Item>
