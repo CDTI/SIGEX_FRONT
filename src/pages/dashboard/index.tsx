@@ -171,7 +171,7 @@ export const AppLayout: React.FC = (props) => {
 
             {(userRoles.includes("Professor") ||
               userRoles.includes("Presidente do NDE") ||
-              userRoles.includes("Coordenador de integração")) && (
+              userRoles.includes("Coordenador de escola")) && (
               <>
                 <SubMenu
                   key="minhas-propostas"

@@ -112,14 +112,14 @@ export const Routes: React.FC = () => {
         </ProtectedRoute>
 
         <ProtectedRoute
-          allow={["Professor", "Presidente do NDE"]}
+          allow={["Professor", "Presidente do NDE", "Coordenador de escola"]}
           path={["/propostas/criar", "/propostas/editar/:id"]}
         >
           <CreateProposalPage />
         </ProtectedRoute>
 
         <ProtectedRoute
-          allow={["Professor", "Presidente do NDE"]}
+          allow={["Professor", "Presidente do NDE", "Coordenador de escola"]}
           path={[
             "/propostas/relatorio/criar",
             "/propostas/relatorio/editar/:id",
@@ -129,7 +129,7 @@ export const Routes: React.FC = () => {
         </ProtectedRoute>
 
         <ProtectedRoute
-          allow={["Professor", "Presidente do NDE"]}
+          allow={["Professor", "Presidente do NDE", "Coordenador de escola"]}
           path="/minhas-propostas"
         >
           <TeacherProjectsPage />
