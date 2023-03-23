@@ -17,12 +17,9 @@ import { EditOutlined } from "@ant-design/icons";
 import { Category } from "../../../interfaces/category";
 import { Discipline } from "../../../interfaces/discipline";
 
-import {
-  createCategory,
-  changeCategoryStatus,
-  updateCategory,
-  getAllCategories,
-} from "../../../services/category_service";
+import { getAllCategories } from "../../../services/category_service";
+
+import { getAllCoursesEndpoint } from "../../../services/endpoints/courses";
 
 import {
   createDiscipline,
@@ -31,6 +28,8 @@ import {
   getDisciplinesByCategory,
 } from "../../../services/discipline_service";
 import Structure from "../../../components/layout/structure";
+import { useHttpClient } from "../../../hooks/useHttpClient";
+import { Course } from "../../../interfaces/course";
 
 interface State {
   visible: boolean;
@@ -39,8 +38,9 @@ interface State {
 
 export const CreateDiscipline: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [initialState, setInitialState] = useState(0);
   const [form] = Form.useForm();
   const formModal = Form.useForm()[0];
@@ -48,35 +48,48 @@ export const CreateDiscipline: React.FC = () => {
     visible: false,
     discipline: undefined,
   });
+  const getCoursesRequester = useHttpClient();
 
   useEffect(() => {
     (async () => {
       const foundCategories = await getAllCategories();
       setCategories(foundCategories.slice(-3));
+      const courses = await getCoursesRequester.send({
+        method: "GET",
+        url: getAllCoursesEndpoint(),
+        cancellable: true,
+      });
+      setCourses(courses);
     })();
     if (selectedCategory) {
-      getDisciplines(selectedCategory);
+      getDisciplinesCategory(selectedCategory);
     }
   }, [initialState]);
 
   const submitDiscipline = async (discipline: Discipline) => {
     console.log(discipline);
-    discipline.category = selectedCategory;
-    try {
-      const newDiscipline = await createDiscipline(discipline);
-      notification.open({ message: "Disciplina criada com sucesso!" });
-      form.resetFields();
-      setInitialState(initialState + 1);
-    } catch (error) {
-      console.log(error);
-      notification.error({
-        message: "Algo deu errado, tente novamente mais tarde!",
+    discipline.category = selectedCategory?._id!;
+    const newDiscipline = await createDiscipline(discipline)
+      .then((res) => {
+        notification.open({ message: "Disciplina criada com sucesso!" });
+        form.resetFields();
+        setInitialState(initialState + 1);
+      })
+      .catch((error) => {
+        console.log(error);
+        notification.error({
+          message: "Algo deu errado, tente novamente mais tarde!",
+        });
       });
-    }
   };
 
-  const getDisciplines = async (category: string) => {
+  const getDisciplinesById = async (category: string) => {
     const foundDisciplines = await getDisciplinesByCategory(category);
+    setDisciplines(foundDisciplines);
+  };
+
+  const getDisciplinesCategory = async (category: Category) => {
+    const foundDisciplines = await getDisciplinesByCategory(category._id!);
     setDisciplines(foundDisciplines);
   };
 
@@ -97,6 +110,11 @@ export const CreateDiscipline: React.FC = () => {
     notification[disciplineEdit.status]({ message: disciplineEdit.message });
     setState({ visible: false, discipline: undefined });
     setInitialState(initialState + 1);
+  };
+
+  const getCategory = (id: string) => {
+    const category = categories.find((c: Category) => c._id === id);
+    return category;
   };
 
   const onCancel = () => {
@@ -154,17 +172,37 @@ export const CreateDiscipline: React.FC = () => {
           <Typography>Selecione uma categoria</Typography>
           <Select
             options={categories.map((c) => ({
+              key: c._id!,
               value: c._id!,
               label: c.name,
             }))}
             onSelect={(e) => {
-              setSelectedCategory(String(e));
-              getDisciplines(String(e));
+              setSelectedCategory(getCategory(String(e))!);
+              getDisciplinesById(String(e));
             }}
           ></Select>
         </Form.Item>
         {selectedCategory && (
           <>
+            {selectedCategory.name === "Curricular específica de curso" && (
+              <Form.Item name="courses" label="Cursos">
+                <Select
+                  mode="multiple"
+                  allowClear
+                  placeholder="Selecione os cursos"
+                  onChange={(e) => {
+                    console.log(e);
+                  }}
+                  style={{ width: "100%" }}
+                  options={courses.map((course: Course) => ({
+                    key: course._id!,
+                    value: course._id!,
+                    label: course.name,
+                  }))}
+                ></Select>
+              </Form.Item>
+            )}
+
             <Form.Item
               name="name"
               label="Nome da disciplina"
