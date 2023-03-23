@@ -67,7 +67,6 @@ export const CreateDiscipline: React.FC = () => {
   }, [initialState]);
 
   const submitDiscipline = async (discipline: Discipline) => {
-    console.log(discipline);
     discipline.category = selectedCategory?._id!;
     const newDiscipline = await createDiscipline(discipline)
       .then((res) => {
@@ -105,11 +104,13 @@ export const CreateDiscipline: React.FC = () => {
   };
 
   const submitEdit = async (item: any) => {
+    console.log(item);
     const disciplineEdit = await updateDiscipline(item._id, item);
     formModal.resetFields();
     notification[disciplineEdit.status]({ message: disciplineEdit.message });
     setState({ visible: false, discipline: undefined });
     setInitialState(initialState + 1);
+    console.log(disciplineEdit);
   };
 
   const getCategory = (id: string) => {
@@ -137,6 +138,19 @@ export const CreateDiscipline: React.FC = () => {
 
           <Form.Item name="name" label="Nome">
             <Input />
+          </Form.Item>
+
+          <Form.Item name="courses" label="Cursos">
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder="Selecione os cursos"
+              options={courses.map((course: Course) => ({
+                key: course._id!,
+                value: course._id!,
+                label: course.name,
+              }))}
+            ></Select>
           </Form.Item>
 
           <Form.Item>
@@ -190,9 +204,6 @@ export const CreateDiscipline: React.FC = () => {
                   mode="multiple"
                   allowClear
                   placeholder="Selecione os cursos"
-                  onChange={(e) => {
-                    console.log(e);
-                  }}
                   style={{ width: "100%" }}
                   options={courses.map((course: Course) => ({
                     key: course._id!,
