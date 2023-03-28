@@ -46,6 +46,7 @@ import {
 } from "../../../../../../services/discipline_service";
 import { AuthContext } from "../../../../../../context/auth";
 import { DefaultLoading } from "../../../../../../components/defaultLoading";
+import { getUserCourses } from "../../../../../../services/user_service";
 
 interface Props {
   context: "admin" | "user";
@@ -86,15 +87,16 @@ export const MainForm: React.FC<Props> = (props) => {
 
   useEffect(() => {
     (async () => {
-      console.log(user);
       const courses = await selectCoursesRequester.send({
         method: "GET",
         url: getAllCoursesEndpoint(),
         cancellable: true,
       });
       setCourses(courses ?? []);
+      const foundUserCourses = await getUserCourses(user?._id!);
+      console.log(foundUserCourses);
       const userCourses = courses.filter((course: Course) => {
-        return user?.courses.some((c) => course._id === c);
+        return foundUserCourses.some((c) => course._id === c);
       });
       console.log(userCourses);
       setUserCourses(userCourses);
@@ -532,6 +534,12 @@ export const MainForm: React.FC<Props> = (props) => {
                     }}
                   />
                 </Form.Item>
+                {userCourses.length === 0 && (
+                  <Typography style={{ color: "#ff4d4f" }}>
+                    Nenhum curso para listar. Tente fazer o login novamente ou
+                    contate um administrador!
+                  </Typography>
+                )}
               </Col>
 
               {courseDisciplines.length > 0 && (

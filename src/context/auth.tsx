@@ -3,8 +3,7 @@ import { useHistory } from "react-router-dom";
 import { User } from "../interfaces/user";
 import { httpClient } from "../services/httpClient";
 
-interface AuthContextData
-{
+interface AuthContextData {
   isUserLoggedIn: boolean;
   user: User | null;
   login?(token: string, user: User): void;
@@ -12,34 +11,29 @@ interface AuthContextData
   update?(user: User): void;
 }
 
-export const AuthContext = createContext<AuthContextData>(
-{
+export const AuthContext = createContext<AuthContextData>({
   isUserLoggedIn: false,
-  user: null
+  user: null,
 });
 
-export const AuthProvider: React.FC = (props) =>
-{
+export const AuthProvider: React.FC = (props) => {
   const history = useHistory();
 
   const [user, setUser] = useState<User | null>(null);
 
-  const update = useCallback((user: User) =>
-  {
+  const update = useCallback((user: User) => {
     delete user.password;
 
     localStorage.setItem("@pp:user", JSON.stringify(user));
     setUser(user);
   }, []);
 
-  const authorize = useCallback((token: string, user: User) =>
-  {
-    httpClient.defaults.headers.Authorization = `Bearer ${token}`
+  const authorize = useCallback((token: string, user: User) => {
+    httpClient.defaults.headers.Authorization = `Bearer ${token}`;
     update(user);
   }, []);
 
-  const login = useCallback((token: string, user: User) =>
-  {
+  const login = useCallback((token: string, user: User) => {
     localStorage.setItem("@pp:token", token);
 
     authorize(token, user);
@@ -47,8 +41,7 @@ export const AuthProvider: React.FC = (props) =>
     history.replace("/home");
   }, []);
 
-  const logout = useCallback(() =>
-  {
+  const logout = useCallback(() => {
     setUser(null);
 
     localStorage.removeItem("@pp:user");
@@ -57,12 +50,10 @@ export const AuthProvider: React.FC = (props) =>
     history.replace("/login");
   }, []);
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     const savedUser = localStorage.getItem("@pp:user");
     const savedToken = localStorage.getItem("@pp:token");
-    if (savedToken && savedUser)
-    {
+    if (savedToken && savedUser) {
       authorize(savedToken, JSON.parse(savedUser.toString()));
       history.replace("/home");
     }
@@ -70,13 +61,12 @@ export const AuthProvider: React.FC = (props) =>
 
   return (
     <AuthContext.Provider
-      value={
-      {
+      value={{
         isUserLoggedIn: user != null,
         user,
         login,
         logout,
-        update
+        update,
       }}
     >
       {props.children}
