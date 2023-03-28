@@ -1,4 +1,10 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Button, Col, Form, Result, Row, Steps } from "antd";
 import { Store } from "antd/lib/form/interface";
 import { useHistory, useLocation, useParams } from "react-router-dom";
@@ -10,29 +16,28 @@ import { TimetablesForm } from "./components/TimetablesForm";
 import { useHttpClient } from "../../../../hooks/useHttpClient";
 import Structure from "../../../../components/layout/structure";
 import { Notice, Timetable } from "../../../../interfaces/notice";
-import { createNoticeEndpoint, updateNoticeEndpoint } from "../../../../services/endpoints/notices";
+import {
+  createNoticeEndpoint,
+  updateNoticeEndpoint,
+} from "../../../../services/endpoints/notices";
 
-interface FormView
-{
+interface FormView {
   title: string;
   view: ReactNode;
 }
 
-interface LocationState
-{
+interface LocationState {
   notice?: Notice;
 }
 
-interface UrlParams
-{
+interface UrlParams {
   id: string;
 }
 
 export const categoriesKey = "categories";
 export const rolesKey = "roles";
 
-export const CreateNoticePage: React.FC = () =>
-{
+export const CreateNoticePage: React.FC = () => {
   const history = useHistory();
   const params = useParams<UrlParams>();
   const location = useLocation<LocationState>();
@@ -42,17 +47,14 @@ export const CreateNoticePage: React.FC = () =>
   const [formController] = Form.useForm();
   const formNoticesRequester = useHttpClient();
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     if (location.state?.notice != null)
-      sendEvent(
-      {
+      sendEvent({
         type: "RESTORE",
-        payload: { step: 0, data: location.state.notice }
+        payload: { step: 0, data: location.state.notice },
       });
 
-    return () =>
-    {
+    return () => {
       formNoticesRequester.halt();
 
       localStorage.removeItem(categoriesKey);
@@ -60,32 +62,29 @@ export const CreateNoticePage: React.FC = () =>
     };
   }, [location.state, sendEvent, formNoticesRequester.halt]);
 
-  useEffect(() =>
-  {
-    if (formState.value === "pending")
-    {
-      (async () =>
-      {
-        try
-        {
-          await formNoticesRequester.send(params.id == null
-          ? {
-            method: "POST",
-            url: createNoticeEndpoint(),
-            body: formState.context.data,
-            cancellable: true
-          }
-          : {
-            method: "PUT",
-            url: updateNoticeEndpoint(params.id),
-            body: formState.context.data,
-            cancellable: true
-          });
+  useEffect(() => {
+    if (formState.value === "pending") {
+      (async () => {
+        console.log(formState.context.data);
+        try {
+          await formNoticesRequester.send(
+            params.id == null
+              ? {
+                  method: "POST",
+                  url: createNoticeEndpoint(),
+                  body: formState.context.data,
+                  cancellable: true,
+                }
+              : {
+                  method: "PUT",
+                  url: updateNoticeEndpoint(params.id),
+                  body: formState.context.data,
+                  cancellable: true,
+                }
+          );
 
           sendEvent({ type: "SUCCESS" });
-        }
-        catch (error)
-        {
+        } catch (error) {
           if ((error as Error).message !== "")
             setFailedSubmitMessage((error as Error).message);
 
@@ -93,73 +92,78 @@ export const CreateNoticePage: React.FC = () =>
         }
       })();
     }
-  },
-  [
+  }, [
     formState.context,
     formState.value,
     params.id,
     sendEvent,
-    formNoticesRequester.send
+    formNoticesRequester.send,
   ]);
 
-  const goBack = useCallback(() =>
-  {
+  const goBack = useCallback(() => {
     if (formState.value === "main" || formState.value === "succeeded")
       history.goBack();
     else
-      sendEvent(formState.value === "failed"
-        ? { type: "REVIEW" }
-        : { type: "PREVIOUS" });
+      sendEvent(
+        formState.value === "failed" ? { type: "REVIEW" } : { type: "PREVIOUS" }
+      );
   }, [history, formState.value, sendEvent]);
 
-  const handleFormFinished = useCallback((formName: string, values: Store) =>
-  {
-    switch (formName)
-    {
-      case "main":
-        sendEvent(
-        {
-          type: "NEXT",
-          payload: values as Notice
-        });
+  const handleFormFinished = useCallback(
+    (formName: string, values: Store) => {
+      console.log(values);
+      switch (formName) {
+        case "main":
+          sendEvent({
+            type: "NEXT",
+            payload: values as Notice,
+          });
 
-        break;
+          break;
 
-      case "timetables":
-        sendEvent(
-        {
-          type: "SAVE",
-          payload: values.timetables as Timetable[]
-        });
+        case "timetables":
+          sendEvent({
+            type: "SAVE",
+            payload: values,
+          });
 
-        break;
-    }
-  }, [sendEvent]);
+          break;
+      }
+    },
+    [sendEvent]
+  );
 
-  const forms = useMemo(() => new Map<string, FormView>(
-  [
-    ["main",
-    {
-      title: "Informações básicas",
-      view: (
-        <MainDataForm
-          formController={formController}
-          initialValues={formState.context.data}
-        />
-      )
-    }],
+  const forms = useMemo(
+    () =>
+      new Map<string, FormView>([
+        [
+          "main",
+          {
+            title: "Informações básicas",
+            view: (
+              <MainDataForm
+                formController={formController}
+                initialValues={formState.context.data}
+              />
+            ),
+          },
+        ],
 
-    ["timetables",
-    {
-      title: "Categorias e horários",
-      view: (
-        <TimetablesForm
-          formController={formController}
-          initialValues={formState.context.data?.timetables}
-        />
-      )
-    }]
-  ]), [formController, formState.context]);
+        [
+          "timetables",
+          {
+            title: "Categorias e horários",
+            view: (
+              <TimetablesForm
+                formController={formController}
+                initialValues={formState.context.data?.timetables}
+              />
+            ),
+          },
+        ],
+      ]),
+    [formController, formState.context]
+  );
 
   if (formState.value === "failed")
     return (
@@ -167,14 +171,10 @@ export const CreateNoticePage: React.FC = () =>
         status="error"
         title="Ops! Algo deu errado!"
         subTitle={failedSubmitMessage}
-        extra={
-        [
-          <Button
-            type="primary"
-            onClick={() => goBack()}
-          >
+        extra={[
+          <Button type="primary" onClick={() => goBack()}>
             Voltar
-          </Button>
+          </Button>,
         ]}
       />
     );
@@ -184,27 +184,25 @@ export const CreateNoticePage: React.FC = () =>
       <Result
         status="success"
         title="Edital salvo com sucesso!"
-        extra={
-        [
-          <Button
-            type="primary"
-            onClick={() => goBack()}
-          >
+        extra={[
+          <Button type="primary" onClick={() => goBack()}>
             Continuar
-          </Button>
+          </Button>,
         ]}
       />
     );
 
   return (
     <Structure title={`${params.id == null ? "Cadastrar" : "Alterar"} edital`}>
-      <Form.Provider onFormFinish={(name, { values }) => handleFormFinished(name, values)}>
+      <Form.Provider
+        onFormFinish={(name, { values }) => handleFormFinished(name, values)}
+      >
         <Row justify="center" gutter={[0, 24]}>
           <Col xs={24} xl={21} xxl={18}>
             <Steps type="navigation" current={formState.context.step}>
-              {FormSteps.map((k: string) =>
+              {FormSteps.map((k: string) => (
                 <Steps.Step key={k} title={forms.get(k)!.title} />
-              )}
+              ))}
             </Steps>
           </Col>
 
@@ -229,12 +227,12 @@ export const CreateNoticePage: React.FC = () =>
               >
                 {FormSteps[formState.context.step] === "timetables"
                   ? "Salvar"
-                  : "Próximo"
-                }
+                  : "Próximo"}
               </Button>
             </Row>
           </Col>
         </Row>
       </Form.Provider>
-    </Structure>);
+    </Structure>
+  );
 };
