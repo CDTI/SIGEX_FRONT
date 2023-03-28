@@ -392,7 +392,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                             </LabeledContent>
                           </Col>
 
-                          {props.project.typeProject ===
+                          {/* {props.project.typeProject ===
                             "curricularComponent" && (
                             <Col span={24} style={{ paddingBottom: "0" }}>
                               <LabeledContent label="Disciplinas">
@@ -407,7 +407,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                                 />
                               </LabeledContent>
                             </Col>
-                          )}
+                          )} */}
                         </Row>
                       </Col>
                     </>

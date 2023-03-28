@@ -94,7 +94,7 @@ export interface Project {
   courses: string[];
   dateStart: Date;
   description: string;
-  disciplines: Discipline[];
+  discipline: Discipline;
   firstSemester: Schedule[];
   key?: string;
   maxClasses?: number;
