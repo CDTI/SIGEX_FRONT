@@ -86,6 +86,7 @@ export const MainForm: React.FC<Props> = (props) => {
 
   useEffect(() => {
     (async () => {
+      console.log(user);
       const courses = await selectCoursesRequester.send({
         method: "GET",
         url: getAllCoursesEndpoint(),
@@ -95,6 +96,7 @@ export const MainForm: React.FC<Props> = (props) => {
       const userCourses = courses.filter((course: Course) => {
         return user?.courses.some((c) => course._id === c);
       });
+      console.log(userCourses);
       setUserCourses(userCourses);
 
       let notices =
