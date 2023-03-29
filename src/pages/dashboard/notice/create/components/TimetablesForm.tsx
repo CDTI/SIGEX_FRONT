@@ -31,7 +31,9 @@ const { Option } = Select;
 
 export const TimetablesForm: React.FC<Props> = (props) => {
   const [shouldDisableButton, setShouldDisableButton] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >(undefined);
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const selectCategoriesRequester = useHttpClient();
@@ -60,6 +62,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
   useEffect(() => {
     if (props.initialValues != null)
       props.formController.setFieldsValue({ timetables: props.initialValues });
+    console.log(props.initialValues);
   }, [props.formController, props.initialValues]);
 
   const addDiscipline = useCallback(
@@ -97,14 +100,15 @@ export const TimetablesForm: React.FC<Props> = (props) => {
         console.log(error);
       })
       .finally(() => {
-        setSelectedCategory(categoryId);
+        const category = categories.find((c: Category) => c._id === categoryId);
+        setSelectedCategory(category);
       });
   };
 
-  const getCategoryName = (id: string) => {
-    const categoryName = categories.find((category) => category._id === id);
-    return categoryName?.name;
-  };
+  // const getCategoryName = (id: string) => {
+  //   const categoryName = categories.find((category) => category._id === id);
+  //   return categoryName?.name;
+  // };
 
   const getDisciplineName = useCallback(
     (index: number) => {
@@ -120,7 +124,11 @@ export const TimetablesForm: React.FC<Props> = (props) => {
     <Form name="timetables" layout="vertical" form={props.formController}>
       <Row justify="center">
         <Col span={24}>
-          <Form.Item name="category" label="Categoria">
+          <Form.Item
+            name="category"
+            label="Categoria"
+            rules={[{ required: true, message: "Campo obrigatório" }]}
+          >
             <Select
               options={categories.map((c) => ({
                 key: c._id,
@@ -133,8 +141,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
               style={{ width: "100%" }}
             />
           </Form.Item>
-          {getCategoryName(String(selectedCategory)) ===
-            "Curricular institucional" && (
+          {selectedCategory?.name === "Curricular institucional" && (
             <Form.Item
               name="disciplineSelector"
               label="Disciplina"
@@ -173,8 +180,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
           )}
         </Col>
 
-        {getCategoryName(String(selectedCategory)) ===
-          "Curricular institucional" && (
+        {selectedCategory?.name === "Curricular institucional" && (
           <Col span={24}>
             <Form.List name="timetables">
               {(disciplineFields, { add, remove }) => (

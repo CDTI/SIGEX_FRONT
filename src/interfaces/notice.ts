@@ -26,7 +26,7 @@ export interface Notice {
   name: string;
   number: number;
   reportDeadline: Date;
-  category: string;
+  category: string | Category;
   timetables: Timetable[];
   type: "common" | "specific";
   updatedAt?: Date;
