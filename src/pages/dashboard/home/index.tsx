@@ -22,9 +22,8 @@ export const HomeDashboard: React.FC = () => {
   const [programFilter, setProgramFilter] = useState<string>("");
 
   async function LoadProjectsCount() {
-    const response = await listPrograms();
-    setPrograms(response.programs);
-
+    const programs = await listPrograms();
+    setPrograms(programs);
     const projects = await countProjects(programFilter);
     setProjectsCount(projects);
   }
@@ -52,13 +51,11 @@ export const HomeDashboard: React.FC = () => {
         >
           <Option value={""}>Selecione</Option>
           {programs.map((e) => {
-            if (e._id !== undefined) {
-              return (
-                <Option key={e._id} value={e._id}>
-                  {e.name}
-                </Option>
-              );
-            }
+            return (
+              <Option key={e._id} value={e._id!}>
+                {e.name}
+              </Option>
+            );
           })}
         </Select>
       </div>

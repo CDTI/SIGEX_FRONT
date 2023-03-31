@@ -112,7 +112,7 @@ export const TeacherProjectsPage: React.FC = () => {
       setProjects(data);
       setFilteredProjects(data);
       listPrograms().then((list) => {
-        setPrograms(list.programs);
+        setPrograms(list);
         setLoading(false);
       });
     });

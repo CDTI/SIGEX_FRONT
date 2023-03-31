@@ -22,6 +22,12 @@ export const getUsers = async (): Promise<ResponseUsers> => {
   return response.data;
 };
 
+export const getTeachers = async (): Promise<User[]> => {
+  const response = await httpClient.get("/users/teachers");
+
+  return response.data;
+};
+
 export const getUserCourses = async (id: string): Promise<string[]> => {
   const response = await httpClient.get(`/user/courses/${id}`);
 

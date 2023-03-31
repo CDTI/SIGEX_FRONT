@@ -31,7 +31,7 @@ import {
 import { Program } from "../../../../../../interfaces/program";
 import { Project } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
-import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/programs";
+import { getActiveProgramsEndpoint } from "../../../../../../services/endpoints/programs";
 import {
   getActiveNoticesEndpoint,
   getAllUsersEndpoint,
@@ -46,7 +46,10 @@ import {
 } from "../../../../../../services/discipline_service";
 import { AuthContext } from "../../../../../../context/auth";
 import { DefaultLoading } from "../../../../../../components/defaultLoading";
-import { getUserCourses } from "../../../../../../services/user_service";
+import {
+  getTeachers,
+  getUserCourses,
+} from "../../../../../../services/user_service";
 
 interface Props {
   context: "admin" | "user";
@@ -69,6 +72,7 @@ export const MainForm: React.FC<Props> = (props) => {
 
   const { user } = useContext(AuthContext);
   const [users, setUsers] = useState<User[]>([]);
+  const [teachers, setTeachers] = useState<User[]>([]);
   const [userCourses, setUserCourses] = useState<Course[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -118,7 +122,7 @@ export const MainForm: React.FC<Props> = (props) => {
           ? (JSON.parse(localStorage.getItem(programsKey)!) as Program[])
           : (
               await selectProgramsRequester.send({
-                ...getAllProgramsEndpoint(),
+                ...getActiveProgramsEndpoint(),
                 cancellable: true,
               })
             ).programs;
@@ -137,6 +141,9 @@ export const MainForm: React.FC<Props> = (props) => {
             ).user;
 
       setUsers(users ?? []);
+
+      const teachers = await getTeachers();
+      setTeachers(teachers);
 
       const categories = await getAllCategories();
       setCategories(categories);
@@ -264,12 +271,7 @@ export const MainForm: React.FC<Props> = (props) => {
   return loading ? (
     <DefaultLoading></DefaultLoading>
   ) : (
-    <Form
-      name="main"
-      layout="vertical"
-      form={props.formController}
-      initialValues={{ teachers: [undefined] }}
-    >
+    <Form name="main" layout="vertical" form={props.formController}>
       <Row gutter={[8, 0]}>
         {props.context === "admin" && (
           <Restricted allow="Administrador">
@@ -474,34 +476,6 @@ export const MainForm: React.FC<Props> = (props) => {
 
             <Col span={24}>
               <Form.Item
-                name="totalCHManha"
-                label="Carga horária máxima que o professor pode assumir no periódo da manhã"
-                rules={[{ required: true, message: "Campo obrigatório" }]}
-              >
-                <InputNumber min={1} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                name="totalCHTarde"
-                label="Carga horária máxima que o professor pode assumir no periódo da tarde"
-                rules={[{ required: true, message: "Campo obrigatório" }]}
-              >
-                <InputNumber min={1} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                name="totalCHNoite"
-                label="Carga horária máxima que o professor pode assumir no periódo da noite"
-                rules={[{ required: true, message: "Campo obrigatório" }]}
-              >
-                <InputNumber min={1} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Form.Item
                 name="maxClasses"
                 label="Número máximo de turmas para este projeto"
                 rules={[{ required: true, message: "Campo obrigatório" }]}
@@ -542,6 +516,183 @@ export const MainForm: React.FC<Props> = (props) => {
                 )}
               </Col>
 
+              <Col span={24}>
+                {/* <Form.List name="teachers">
+                  {(teacherFields, { add, remove }) => (
+                    <>
+                      <Row gutter={[8, 0]}>
+                        {teacherFields.map((teacherField, index) => (
+                          <>
+                            <Col span={24}>
+                              <Divider>
+                                <Space>
+                                  <Button
+                                    type="link"
+                                    shape="circle"
+                                    size="small"
+                                    icon={<MinusCircleOutlined />}
+                                    onClick={() => remove(teacherField.name)}
+                                    style={{ verticalAlign: "baseline" }}
+                                  />
+
+                                  <Typography.Title
+                                    level={3}
+                                    style={{
+                                      display: "inline-block",
+                                      marginBottom: "0",
+                                    }}
+                                  >
+                                    {`Professor ${index + 1}`}
+                                  </Typography.Title>
+                                </Space>
+                              </Divider>
+                            </Col>
+
+                            <Col xs={24} xl={8}>
+                              <Form.Item
+                                {...teacherField}
+                                fieldKey={[teacherField.fieldKey, "name"]}
+                                name={[teacherField.name, "name"]}
+                                label="Nome"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Campo Obrigatório",
+                                  },
+                                ]}
+                              >
+                                <Input style={{ width: "100%" }} />
+                              </Form.Item>
+                            </Col>
+
+                            <Col xs={24} xl={8}>
+                              <Form.Item
+                                {...teacherField}
+                                fieldKey={[teacherField.fieldKey, "cpf"]}
+                                name={[teacherField.name, "cpf"]}
+                                label="CPF"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Campo Obrigatório",
+                                  },
+                                ]}
+                              >
+                                <MaskedInput
+                                  mask="111.111.111-11"
+                                  style={{ width: "100%" }}
+                                />
+                              </Form.Item>
+                            </Col>
+
+                            <Col xs={24} xl={8}>
+                              <Form.Item
+                                {...teacherField}
+                                fieldKey={[
+                                  teacherField.fieldKey,
+                                  "registration",
+                                ]}
+                                name={[teacherField.name, "registration"]}
+                                label="Matrícula"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Campo Obrigatório",
+                                  },
+                                ]}
+                              >
+                                <Input style={{ width: "100%" }} />
+                              </Form.Item>
+                            </Col>
+
+                            <Col xs={24} xl={12}>
+                              <Form.Item
+                                {...teacherField}
+                                fieldKey={[teacherField.fieldKey, "email"]}
+                                name={[teacherField.name, "email"]}
+                                label="E-mail"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Campo Obrigatório",
+                                  },
+                                ]}
+                              >
+                                <Input type="email" style={{ width: "100%" }} />
+                              </Form.Item>
+                            </Col>
+
+                            <Col
+                              xs={24}
+                              xl={
+                                currentProjectType === "extraCurricular"
+                                  ? 8
+                                  : 12
+                              }
+                            >
+                              <Form.Item
+                                {...teacherField}
+                                fieldKey={[teacherField.fieldKey, "phone"]}
+                                name={[teacherField.name, "phone"]}
+                                label="Telefone"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Campo Obrigatório",
+                                  },
+                                ]}
+                              >
+                                <MaskedInput
+                                  mask="(11)11111-1111"
+                                  style={{ width: "100%" }}
+                                />
+                              </Form.Item>
+                            </Col>
+                          </>
+                        ))}
+                      </Row>
+
+                      <Row
+                        gutter={[
+                          0,
+                          currentProjectType === "curricularComponent" ? 16 : 0,
+                        ]}
+                      >
+                        <Col span={24}>
+                          <Button block type="dashed" onClick={() => add()}>
+                            <PlusOutlined /> Adicionar professor
+                          </Button>
+                        </Col>
+                      </Row>
+                    </>
+                  )}
+                </Form.List> */}
+                <Form.Item
+                  name="teachers"
+                  label="Professores"
+                  rules={[{ required: true, message: "Campo obrigatório" }]}
+                >
+                  <Select
+                    showSearch
+                    showArrow
+                    placeholder="Selecione o(s) professor(es)"
+                    mode="multiple"
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (String(option?.label) ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={teachers.map((p: User) => ({
+                      key: p._id!,
+                      label: p.name,
+                      value: p._id!,
+                    }))}
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+
               {courseDisciplines.length > 0 && (
                 <Col span={24}>
                   <Form.Item
@@ -563,196 +714,6 @@ export const MainForm: React.FC<Props> = (props) => {
                       em comum!
                     </Typography>
                   )}
-                </Col>
-              )}
-
-              {(selectedCategory.name === "Curricular específica de curso" ||
-                selectedCategory.name === "Extracurricular") && (
-                <Col span={24}>
-                  <Form.List name="teachers">
-                    {(teacherFields, { add, remove }) => (
-                      <>
-                        <Row gutter={[8, 0]}>
-                          {teacherFields.map((teacherField, index) => (
-                            <>
-                              <Col span={24}>
-                                <Divider>
-                                  <Space>
-                                    <Button
-                                      type="link"
-                                      shape="circle"
-                                      size="small"
-                                      icon={<MinusCircleOutlined />}
-                                      onClick={() => remove(teacherField.name)}
-                                      style={{ verticalAlign: "baseline" }}
-                                    />
-
-                                    <Typography.Title
-                                      level={3}
-                                      style={{
-                                        display: "inline-block",
-                                        marginBottom: "0",
-                                      }}
-                                    >
-                                      {`Professor ${index + 1}`}
-                                    </Typography.Title>
-                                  </Space>
-                                </Divider>
-                              </Col>
-
-                              <Col xs={24} xl={8}>
-                                <Form.Item
-                                  {...teacherField}
-                                  fieldKey={[teacherField.fieldKey, "name"]}
-                                  name={[teacherField.name, "name"]}
-                                  label="Nome"
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Campo Obrigatório",
-                                    },
-                                  ]}
-                                >
-                                  <Input style={{ width: "100%" }} />
-                                </Form.Item>
-                              </Col>
-
-                              <Col xs={24} xl={8}>
-                                <Form.Item
-                                  {...teacherField}
-                                  fieldKey={[teacherField.fieldKey, "cpf"]}
-                                  name={[teacherField.name, "cpf"]}
-                                  label="CPF"
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Campo Obrigatório",
-                                    },
-                                  ]}
-                                >
-                                  <MaskedInput
-                                    mask="111.111.111-11"
-                                    style={{ width: "100%" }}
-                                  />
-                                </Form.Item>
-                              </Col>
-
-                              <Col xs={24} xl={8}>
-                                <Form.Item
-                                  {...teacherField}
-                                  fieldKey={[
-                                    teacherField.fieldKey,
-                                    "registration",
-                                  ]}
-                                  name={[teacherField.name, "registration"]}
-                                  label="Matrícula"
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Campo Obrigatório",
-                                    },
-                                  ]}
-                                >
-                                  <Input style={{ width: "100%" }} />
-                                </Form.Item>
-                              </Col>
-
-                              <Col
-                                xs={24}
-                                xl={
-                                  currentProjectType === "extraCurricular"
-                                    ? 8
-                                    : 12
-                                }
-                              >
-                                <Form.Item
-                                  {...teacherField}
-                                  fieldKey={[teacherField.fieldKey, "email"]}
-                                  name={[teacherField.name, "email"]}
-                                  label="E-mail"
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Campo Obrigatório",
-                                    },
-                                  ]}
-                                >
-                                  <Input
-                                    type="email"
-                                    style={{ width: "100%" }}
-                                  />
-                                </Form.Item>
-                              </Col>
-
-                              <Col
-                                xs={24}
-                                xl={
-                                  currentProjectType === "extraCurricular"
-                                    ? 8
-                                    : 12
-                                }
-                              >
-                                <Form.Item
-                                  {...teacherField}
-                                  fieldKey={[teacherField.fieldKey, "phone"]}
-                                  name={[teacherField.name, "phone"]}
-                                  label="Telefone"
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Campo Obrigatório",
-                                    },
-                                  ]}
-                                >
-                                  <MaskedInput
-                                    mask="(11)11111-1111"
-                                    style={{ width: "100%" }}
-                                  />
-                                </Form.Item>
-                              </Col>
-
-                              {currentProjectType === "extraCurricular" && (
-                                <Col xs={24} xl={8}>
-                                  <Form.Item
-                                    {...teacherField}
-                                    fieldKey={[
-                                      teacherField.fieldKey,
-                                      "totalCH",
-                                    ]}
-                                    name={[teacherField.name, "totalCH"]}
-                                    label="Carga horária fora de sala"
-                                    rules={[
-                                      {
-                                        required: true,
-                                        message: "Campo Obrigatório",
-                                      },
-                                    ]}
-                                  >
-                                    <Input style={{ width: "100%" }} />
-                                  </Form.Item>
-                                </Col>
-                              )}
-                            </>
-                          ))}
-                        </Row>
-
-                        <Row
-                          gutter={[
-                            0,
-                            currentProjectType === "curricularComponent"
-                              ? 16
-                              : 0,
-                          ]}
-                        >
-                          <Col span={24}>
-                            <Button block type="dashed" onClick={() => add()}>
-                              <PlusOutlined /> Adicionar professor
-                            </Button>
-                          </Col>
-                        </Row>
-                      </>
-                    )}
-                  </Form.List>
                 </Col>
               )}
             </>
@@ -777,7 +738,7 @@ export const MainForm: React.FC<Props> = (props) => {
               </Form.Item>
             </Col>
             <Col span={24}>
-              <Form.List name="teachers">
+              {/* <Form.List name="teachers">
                 {(teacherFields, { add, remove }) => (
                   <>
                     <Row gutter={[8, 0]}>
@@ -945,7 +906,31 @@ export const MainForm: React.FC<Props> = (props) => {
                     </Row>
                   </>
                 )}
-              </Form.List>
+              </Form.List> */}
+              <Form.Item
+                name="teachers"
+                label="Professores"
+                rules={[{ required: true, message: "Campo obrigatório" }]}
+              >
+                <Select
+                  showSearch
+                  showArrow
+                  placeholder="Selecione o(s) professor(es)"
+                  mode="multiple"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (String(option?.label) ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={teachers.map((p: User) => ({
+                    key: p._id!,
+                    label: p.name,
+                    value: p._id!,
+                  }))}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
             </Col>
           </>
         )}

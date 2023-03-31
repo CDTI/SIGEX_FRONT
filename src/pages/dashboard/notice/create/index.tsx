@@ -15,7 +15,7 @@ import { TimetablesForm } from "./components/TimetablesForm";
 
 import { useHttpClient } from "../../../../hooks/useHttpClient";
 import Structure from "../../../../components/layout/structure";
-import { Notice, Timetable } from "../../../../interfaces/notice";
+import { Notice } from "../../../../interfaces/notice";
 import {
   createNoticeEndpoint,
   updateNoticeEndpoint,
@@ -102,7 +102,8 @@ export const CreateNoticePage: React.FC = () => {
 
   const goBack = useCallback(() => {
     if (formState.value === "main" || formState.value === "succeeded")
-      history.goBack();
+      // history.goBack();
+      history.push("/editais");
     else
       sendEvent(
         formState.value === "failed" ? { type: "REVIEW" } : { type: "PREVIOUS" }
