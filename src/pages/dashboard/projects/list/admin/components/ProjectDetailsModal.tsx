@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import
-{
+import {
   Steps,
   Button,
   Space,
@@ -10,7 +9,7 @@ import
   Timeline,
   Row,
   Col,
-  List
+  List,
 } from "antd";
 
 import { formatDate } from "../../../../../../utils/dateFormatter";
@@ -23,19 +22,17 @@ import { Feedback, Register } from "../../../../../../interfaces/feedback";
 import { Schedule } from "../../../../../../interfaces/notice";
 import { Program } from "../../../../../../interfaces/program";
 import { Notice } from "../../../../../../interfaces/notice";
-import
-{
+import {
   Contact,
-  Discipline,
   Material,
   Project,
   Teacher,
-  Transport
+  Transport,
 } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
+import { Discipline } from "../../../../../../interfaces/discipline";
 
-interface Props
-{
+interface Props {
   isVisible: boolean;
   log?: Feedback;
   project?: Project;
@@ -46,59 +43,46 @@ interface Props
 const { Panel } = Collapse;
 const { Text, Title, Paragraph } = Typography;
 
-const projectStatus =
-{
+const projectStatus = {
   pending: 0,
   reproved: 0,
   notSelected: 1,
   selected: 2,
-  finished: 3
+  finished: 3,
 } as const;
 
-const projectTypes =
-{
+const projectTypes = {
   common: "Comum",
   curricularComponent: "Componente curricular",
-  extraCurricular: "Extra curricular"
+  extraCurricular: "Extra curricular",
 } as const;
 
-function compareRegistersDate(a: Register, b: Register): number
-{
-  return a.date > b.date
-    ? -1 : a.date < b.date
-      ? 1 : 0;
+function compareRegistersDate(a: Register, b: Register): number {
+  return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
 }
 
-function formatCurrency(value: number): string
-{
+function formatCurrency(value: number): string {
   return `R$ ${value.toFixed(2).replace(/\./, ",")}`;
 }
 
-function formatPrice(quantity: number, pricePerUnit: number): string
-{
+function formatPrice(quantity: number, pricePerUnit: number): string {
   const value = formatCurrency(pricePerUnit);
   const total = formatCurrency(quantity * pricePerUnit);
   return `${quantity} x ${value} = ${total}`;
 }
 
-function formatTimelineMessage(type: "system" | "user", date: Date): string
-{
+function formatTimelineMessage(type: "system" | "user", date: Date): string {
   const formattedDate = formatDate(date);
-  const parsedType = type === "system"
-    ? "sistema"
-    : "usuário"
+  const parsedType = type === "system" ? "sistema" : "usuário";
 
   return `${formattedDate} por ${parsedType}`;
 }
 
-export const ProjectDetailsModal: React.FC<Props> = (props) =>
-{
+export const ProjectDetailsModal: React.FC<Props> = (props) => {
   const [totalCost, setTotalCost] = useState("");
 
-  useEffect(() =>
-  {
-    if (props.project != null)
-    {
+  useEffect(() => {
+    if (props.project != null) {
       const materialsTotalValue = props.project.resources.materials
         .map((m: Material) => m.quantity * m.unitaryValue)
         .reduce((previous: number, current: number) => previous + current, 0);
@@ -110,12 +94,11 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
       setTotalCost(formatCurrency(materialsTotalValue + transportTotalValue));
     }
   }, [props.project]);
-
   return (
     <Modal
       centered={true}
       closable={false}
-      footer={(
+      footer={
         <Row justify="space-between">
           <Col>
             <Restricted allow="Administrador">
@@ -153,17 +136,18 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
 
           <Col>
             <Row justify="end">
-              <Button
-                type="primary"
-                onClick={() => props.onClose()}
-              >
+              <Button type="primary" onClick={() => props.onClose()}>
                 Fechar
               </Button>
             </Row>
           </Col>
         </Row>
-      )}
-      title={<Title level={5} ellipsis>{props.project?.name}</Title>}
+      }
+      title={
+        <Title level={5} ellipsis>
+          {props.project?.name}
+        </Title>
+      }
       visible={props.isVisible}
       width="85%"
     >
@@ -172,10 +156,11 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
           <Steps current={projectStatus[props.project?.status ?? "pending"]}>
             <Steps.Step title="Em análise" />
 
-            {props.project != null && props.project.status === "reproved"
-              ? <Steps.Step title="Reprovado" status="error" />
-              : <Steps.Step title="Aprovado" />
-            }
+            {props.project != null && props.project.status === "reproved" ? (
+              <Steps.Step title="Reprovado" status="error" />
+            ) : (
+              <Steps.Step title="Aprovado" />
+            )}
 
             <Steps.Step title="Em andamento" />
             <Steps.Step title="Finalizado" />
@@ -188,7 +173,9 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
               <Row gutter={[0, 8]}>
                 <Col span={24}>
                   <LabeledContent label="Autor">
-                    <Paragraph>{(props.project?.author as User)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.author as User)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
@@ -200,42 +187,58 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
 
                 <Col span={24}>
                   <LabeledContent label="Categoria">
-                    <Paragraph>{(props.project?.category as Category)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.category as Category)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Programa">
-                    <Paragraph>{(props.project?.program as Program)?.name}</Paragraph>
+                    <Paragraph>
+                      {(props.project?.program as Program)?.name}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Tipo">
-                    <Paragraph>{projectTypes[props.project?.typeProject ?? "common"]}</Paragraph>
+                    <Paragraph>
+                      {projectTypes[props.project?.typeProject ?? "common"]}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
-                {props.project != null
-                  && ((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
-                  && (
+                {props.project != null &&
+                  (props.project.notice as Notice).projectExecutionPeriod &&
+                  (props.project.notice as Notice).projectExecutionYear && (
                     <>
                       <Col span={24}>
                         <LabeledContent label="Período de execução do projeto">
-                          <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
+                          <Paragraph>
+                            {
+                              (props.project?.notice as Notice)
+                                ?.projectExecutionPeriod
+                            }
+                          </Paragraph>
                         </LabeledContent>
                       </Col>
                       <Col span={24}>
                         <LabeledContent label="Ano de execução do projeto">
-                          <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
+                          <Paragraph>
+                            {new Date(
+                              (
+                                props.project?.notice as Notice
+                              )?.projectExecutionYear
+                            ).getFullYear()}
+                          </Paragraph>
                         </LabeledContent>
                       </Col>
                     </>
-                  )
-                }
-                {props.project != null
-                  && (props.project.category as Category).name !== "Extensão específica do curso"
-                  && (
+                  )}
+                {props.project != null &&
+                  (props.project.category as Category).name !==
+                    "Extensão específica do curso" && (
                     <>
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>
@@ -259,20 +262,29 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                       </Col>
 
                       <Col span={24}>
-                        {(!props.project.totalCHManha && !props.project.totalCHTarde && !props.project.totalCHNoite)
-                          ? (
-                            <LabeledContent label={`Carga horária disponível`}>
-                              <Paragraph >{props.project.totalCH} horas</Paragraph>
-                            </LabeledContent>
-                          )
-                          : (
-                            <LabeledContent label={`Carga horária disponível(Total: ${props.project.totalCH} horas)`}>
-                              <Paragraph style={{marginBottom: 2, marginTop: 5}}>Manha: {props.project.totalCHManha} horas</Paragraph>
-                              <Paragraph style={{marginBottom: 2}}>Tarde: {props.project.totalCHTarde} horas</Paragraph>
-                              <Paragraph >Noite: {props.project.totalCHNoite} horas</Paragraph>
-                            </LabeledContent>
-                          )
-                        }
+                        {!props.project.totalCHManha &&
+                        !props.project.totalCHTarde &&
+                        !props.project.totalCHNoite ? (
+                          <LabeledContent label={`Carga horária disponível`}>
+                            <Paragraph>{props.project.totalCH} horas</Paragraph>
+                          </LabeledContent>
+                        ) : (
+                          <LabeledContent
+                            label={`Carga horária disponível(Total: ${props.project.totalCH} horas)`}
+                          >
+                            <Paragraph
+                              style={{ marginBottom: 2, marginTop: 5 }}
+                            >
+                              Manha: {props.project.totalCHManha} horas
+                            </Paragraph>
+                            <Paragraph style={{ marginBottom: 2 }}>
+                              Tarde: {props.project.totalCHTarde} horas
+                            </Paragraph>
+                            <Paragraph>
+                              Noite: {props.project.totalCHNoite} horas
+                            </Paragraph>
+                          </LabeledContent>
+                        )}
                       </Col>
 
                       <Col span={24} style={{ paddingBottom: "0" }}>
@@ -281,34 +293,54 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                         </LabeledContent>
                       </Col>
 
-                        {((props.project.notice as Notice).projectExecutionPeriod && (props.project.notice as Notice).projectExecutionYear)
-                          && (
-                            <>
-                              <Col span={24}>
-                                <LabeledContent label="Período de execução do projeto">
-                                  <Paragraph>{(props.project?.notice as Notice)?.projectExecutionPeriod}</Paragraph>
-                                </LabeledContent>
-                              </Col>
-                              <Col span={24}>
-                                <LabeledContent label="Ano de execução do projeto">
-                                  <Paragraph>{new Date((props.project?.notice as Notice)?.projectExecutionYear).getFullYear()}</Paragraph>
-                                </LabeledContent>
-                              </Col>
-                            </>
+                      {(props.project.notice as Notice)
+                        .projectExecutionPeriod &&
+                        (props.project.notice as Notice)
+                          .projectExecutionYear && (
+                          <>
+                            <Col span={24}>
+                              <LabeledContent label="Período de execução do projeto">
+                                <Paragraph>
+                                  {
+                                    (props.project?.notice as Notice)
+                                      ?.projectExecutionPeriod
+                                  }
+                                </Paragraph>
+                              </LabeledContent>
+                            </Col>
+                            <Col span={24}>
+                              <LabeledContent label="Ano de execução do projeto">
+                                <Paragraph>
+                                  {new Date(
+                                    (
+                                      props.project?.notice as Notice
+                                    )?.projectExecutionYear
+                                  ).getFullYear()}
+                                </Paragraph>
+                              </LabeledContent>
+                            </Col>
+                          </>
                         )}
                     </>
-                  )
-                }
+                  )}
 
-                {props.project != null
-                  && (props.project.category as Category).name === "Extensão específica do curso"
-                  && (
+                {props.project != null &&
+                  (props.project.category as Category).name ===
+                    "Extensão específica do curso" && (
                     <>
                       <Col span={24} style={{ paddingBottom: "0" }}>
                         <LabeledContent label="Curso">
                           <Paragraph>
-                            {(props.project.course as Course).name} -
-                            {((props.project.course as Course).campus as Campus).name}
+                            {props.project.course
+                              ? (props.project.course as Course).name
+                              : ""}{" "}
+                            -
+                            {props.project.course
+                              ? (
+                                  (props.project.course as Course)
+                                    .campus as Campus
+                                ).name
+                              : ""}
                           </Paragraph>
                         </LabeledContent>
                       </Col>
@@ -322,25 +354,36 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                                 renderItem={(t: Teacher) => (
                                   <List.Item>
                                     <List.Item.Meta
-                                      description={(
+                                      description={
                                         <Row justify="space-between">
-                                          <LabeledText label="Matrícula" text={t.registration} />
-                                          <LabeledText label="Telefone" text={t.phone} />
-                                          <LabeledText label="E-Mail" text={t.email} />
-                                          {props.project != null
-                                            && props.project.typeProject === "extraCurricular"
-                                            && (
-                                              <LabeledText label="Carga horária" text={t.totalCH!.toString()} />
-                                            )
-                                          }
+                                          <LabeledText
+                                            label="Matrícula"
+                                            text={t.registration}
+                                          />
+                                          <LabeledText
+                                            label="Telefone"
+                                            text={t.phone}
+                                          />
+                                          <LabeledText
+                                            label="E-Mail"
+                                            text={t.email}
+                                          />
+                                          {props.project != null &&
+                                            props.project.typeProject ===
+                                              "extraCurricular" && (
+                                              <LabeledText
+                                                label="Carga horária"
+                                                text={t.totalCH!.toString()}
+                                              />
+                                            )}
                                         </Row>
-                                      )}
-                                      title={(
+                                      }
+                                      title={
                                         <Row justify="space-between">
                                           <Text>{t.name}</Text>
                                           <Text>{t.cpf}</Text>
                                         </Row>
-                                      )}
+                                      }
                                     />
                                   </List.Item>
                                 )}
@@ -349,7 +392,8 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                             </LabeledContent>
                           </Col>
 
-                          {props.project.typeProject === "curricularComponent" && (
+                          {props.project.typeProject ===
+                            "curricularComponent" && (
                             <Col span={24} style={{ paddingBottom: "0" }}>
                               <LabeledContent label="Disciplinas">
                                 <List
@@ -367,8 +411,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                         </Row>
                       </Col>
                     </>
-                  )
-                }
+                  )}
               </Row>
             </Panel>
 
@@ -392,12 +435,12 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                                 renderItem={(c: Contact) => (
                                   <List.Item>
                                     <List.Item.Meta
-                                      description={(
+                                      description={
                                         <LabeledText
                                           label="Telefone"
                                           text={c.phone ?? "Nenhum cadastrado!"}
                                         />
-                                      )}
+                                      }
                                       title={c.name}
                                     />
                                   </List.Item>
@@ -418,19 +461,25 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
               <Row gutter={[0, 8]}>
                 <Col span={24}>
                   <LabeledContent label="Sobre">
-                    <Paragraph>{props.project?.specificCommunity.text}</Paragraph>
+                    <Paragraph>
+                      {props.project?.specificCommunity.text}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Localização">
-                    <Paragraph>{props.project?.specificCommunity.location}</Paragraph>
+                    <Paragraph>
+                      {props.project?.specificCommunity.location}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Pessoas envolvidas">
-                    <Paragraph>{props.project?.specificCommunity.peopleInvolved}</Paragraph>
+                    <Paragraph>
+                      {props.project?.specificCommunity.peopleInvolved}
+                    </Paragraph>
                   </LabeledContent>
                 </Col>
               </Row>
@@ -486,12 +535,14 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                         <List.Item>
                           <List.Item.Meta
                             description={m.description}
-                            title={(
+                            title={
                               <Row justify="space-between">
                                 <Text>{m.item}</Text>
-                                <Text>{formatPrice(m.quantity, m.unitaryValue)}</Text>
+                                <Text>
+                                  {formatPrice(m.quantity, m.unitaryValue)}
+                                </Text>
                               </Row>
-                            )}
+                            }
                           />
                         </List.Item>
                       )}
@@ -508,12 +559,14 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
                         <List.Item>
                           <List.Item.Meta
                             description={t.description}
-                            title={(
+                            title={
                               <Row justify="space-between">
                                 <Text>{t.typeTransport}</Text>
-                                <Text>{formatPrice(t.quantity, t.unitaryValue)}</Text>
+                                <Text>
+                                  {formatPrice(t.quantity, t.unitaryValue)}
+                                </Text>
                               </Row>
-                            )}
+                            }
                           />
                         </List.Item>
                       )}
@@ -537,22 +590,25 @@ export const ProjectDetailsModal: React.FC<Props> = (props) =>
         <Col span={21}>
           <Timeline
             mode="left"
-            style={
-            {
+            style={{
               maxHeight: "160px",
               overflowX: "hidden",
               overflowY: "auto",
-              paddingTop: "8px"
+              paddingTop: "8px",
             }}
           >
             {props.log?.registers
               .sort(compareRegistersDate)
               .map((r: Register) => (
-                <Timeline.Item label={formatTimelineMessage(r.typeFeedback, new Date(r.date))}>
+                <Timeline.Item
+                  label={formatTimelineMessage(
+                    r.typeFeedback,
+                    new Date(r.date)
+                  )}
+                >
                   {r.text}
                 </Timeline.Item>
-              )) ?? []
-            }
+              )) ?? []}
           </Timeline>
         </Col>
       </Row>

@@ -23,7 +23,7 @@
 		"xstate": "^4.23.3"
 	},
 	"scripts": {
-		"start": "react-scripts start",
+		"start": "react-scripts --openssl-legacy-provider start",
 		"dev": "react-scripts start --dev",
 		"build": "react-scripts build",
 		"test": "react-scripts test",
