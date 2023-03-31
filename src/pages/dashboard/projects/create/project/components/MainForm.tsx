@@ -50,6 +50,7 @@ import {
   getTeachers,
   getUserCourses,
 } from "../../../../../../services/user_service";
+import { listActivePrograms } from "../../../../../../services/program_service";
 
 interface Props {
   context: "admin" | "user";
@@ -102,7 +103,6 @@ export const MainForm: React.FC<Props> = (props) => {
       const userCourses = courses.filter((course: Course) => {
         return foundUserCourses.some((c) => course._id === c);
       });
-      console.log(userCourses);
       setUserCourses(userCourses);
 
       let notices =
@@ -117,15 +117,7 @@ export const MainForm: React.FC<Props> = (props) => {
 
       setNotices(notices ?? []);
 
-      const programs =
-        localStorage.getItem(programsKey) != null
-          ? (JSON.parse(localStorage.getItem(programsKey)!) as Program[])
-          : (
-              await selectProgramsRequester.send({
-                ...getActiveProgramsEndpoint(),
-                cancellable: true,
-              })
-            ).programs;
+      const programs = await listActivePrograms();
 
       setPrograms(programs ?? []);
 
