@@ -32,17 +32,17 @@ import { ProjectsFilterContext } from "../../../../../context/projects";
 export const AllProjects: React.FC = () => {
   const {
     projects,
-    filteredProjects,
     setFilteredProjects,
     page,
     setPage,
     limit,
     setLimit,
     totalPages,
-    getPaginatedProjects,
     loading,
+    shouldReload,
+    setShouldReload,
   } = useContext(ProjectsFilterContext);
-  let { query, queryString } = useContext(ProjectsFilterContext);
+  let { queryString } = useContext(ProjectsFilterContext);
   const location = useLocation();
 
   const [projectNameFilter, setProjectNameFilter] = useState<string>();
@@ -52,7 +52,6 @@ export const AllProjects: React.FC = () => {
   const [programFilter, setProgramFilter] = useState<string>();
   const [yearFilter, setYearFilter] = useState<number>();
   const [semesterFilter, setSemesterFilter] = useState<number>();
-  const [shouldReload, setShouldReload] = useState(true);
   const [projectStatus, setProjectStatus] = useState<
     "reproved" | "notSelected" | "selected"
   >();
@@ -77,7 +76,7 @@ export const AllProjects: React.FC = () => {
 
           setFeedbackModalIsVisible(false);
           setProjectModalIsVisible(false);
-          setShouldReload(true);
+          setShouldReload(shouldReload + 1);
 
           notification.success({ message: "Avaliação salva com sucesso!" });
         } catch (error) {
@@ -154,16 +153,6 @@ export const AllProjects: React.FC = () => {
     },
     [project, modalProjectsRequester.send]
   );
-
-  const clearFilters = () => {
-    setAuthorNameFilter(undefined);
-    setCategoryFilter(undefined);
-    setProjectNameFilter(undefined);
-    setNoticeFilter(undefined);
-    setProgramFilter(undefined);
-    setSemesterFilter(undefined);
-    setYearFilter(undefined);
-  };
 
   const columns = useMemo(
     () => [
@@ -243,16 +232,6 @@ export const AllProjects: React.FC = () => {
   //     })();
   //   }
   // }, [shouldReload, tableProjectsRequester.send, page]);
-
-  // useEffect(() => {
-  //     getPaginatedProjects(
-  //       [
-  //         ["page", String(page)],
-  //         ["limit", String(limit)],
-  //       ],
-  //       false
-  //     );
-  // }, []);
 
   useEffect(() => {
     setFilteredProjects(

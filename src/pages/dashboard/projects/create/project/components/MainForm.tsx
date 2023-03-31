@@ -51,6 +51,7 @@ import {
   getUserCourses,
 } from "../../../../../../services/user_service";
 import { listActivePrograms } from "../../../../../../services/program_service";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   context: "admin" | "user";
@@ -179,21 +180,36 @@ export const MainForm: React.FC<Props> = (props) => {
           );
         }
         setCurrentProjectType(props.initialValues.typeProject);
+
         if (props.initialValues.course) {
-          if (typeof props.initialValues.course === "string") {
-            const disciplines = await getDisciplinesByCourses([
-              props.initialValues.course,
-            ]);
-            setCourseDisciplines(disciplines);
+          if (props.context === "user") {
+            if (typeof props.initialValues.course === "string") {
+              const disciplines = await getDisciplinesByCourses([
+                props.initialValues.course,
+              ]);
+              setCourseDisciplines(disciplines);
+            } else {
+              const disciplines = await getDisciplinesByCourses(
+                props.initialValues.course as unknown as Array<string>
+              );
+              setCourseDisciplines(disciplines);
+            }
           } else {
-            const disciplines = await getDisciplinesByCourses(
-              props.initialValues.course as unknown as Array<string>
+            const coursesID = (props.initialValues.course as Course[]).map(
+              (c: Course) => c._id!
             );
+            const disciplines = await getDisciplinesByCourses(coursesID);
             setCourseDisciplines(disciplines);
           }
         }
         props.formController.setFieldsValue({
           ...props.initialValues,
+          course:
+            props.context === "user"
+              ? props.initialValues.course
+              : (props.initialValues.course as Course[]).map(
+                  (c: Course) => c._id!
+                ),
           program: (props.initialValues.program as Program)._id,
           notice: (props.initialValues.notice as Notice)._id,
           author: (props.initialValues.author as User)._id,
@@ -202,6 +218,7 @@ export const MainForm: React.FC<Props> = (props) => {
           firstSemester: [],
           secondSemester: [],
         });
+        console.log(props.initialValues);
       }
       localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));

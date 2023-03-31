@@ -33,6 +33,8 @@ interface IProjectsFilter {
   statusFilter: string;
   setStatusFilter: React.Dispatch<React.SetStateAction<string>>;
   cleanFilters: () => void;
+  shouldReload: number;
+  setShouldReload: React.Dispatch<React.SetStateAction<number>>;
 }
 
 interface IProps {
@@ -67,6 +69,7 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
   const [noticeFilter, setNoticeFilter] = useState<string>("");
   const [programFilter, setProgramFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [shouldReload, setShouldReload] = useState(1);
   let query = {
     page: String(page),
     limit: String(limit),
@@ -128,7 +131,7 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
 
   useEffect(() => {
     getPaginatedProjects(query);
-  }, [page, limit]);
+  }, [page, limit, shouldReload]);
 
   return (
     <ProjectsFilterContext.Provider
@@ -162,6 +165,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
         setAuthorNameFilter,
         setStatusFilter,
         cleanFilters,
+        shouldReload,
+        setShouldReload,
       }}
     >
       {children}

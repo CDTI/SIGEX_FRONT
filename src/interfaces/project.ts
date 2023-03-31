@@ -89,7 +89,7 @@ export interface Project {
   author: string | User;
   category: string | Category;
   createdAt?: Date;
-  course?: Course;
+  course?: Course | Course[];
   dateFinal: Date;
   courses: string[];
   dateStart: Date;

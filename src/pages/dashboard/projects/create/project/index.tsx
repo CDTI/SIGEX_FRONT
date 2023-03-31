@@ -112,8 +112,9 @@ export const CreateProposalPage: React.FC = () => {
       localStorage.removeItem(noticesKey);
       localStorage.removeItem(programsKey);
       localStorage.removeItem(usersKey);
-      if (location.state.context === "admin")
+      if (location.state.context === "admin") {
         localStorage.removeItem(savedStateKey);
+      }
     };
   }, [
     location.state,
