@@ -89,7 +89,7 @@ export interface Project {
   author: string | User;
   category: string | Category;
   createdAt?: Date;
-  course?: Course | Course[];
+  course?: Course[];
   dateFinal: Date;
   courses: string[];
   dateStart: Date;
@@ -108,13 +108,13 @@ export interface Project {
   secondSemester: Schedule[];
   specificCommunity: Community;
   status: ProjectStatus;
-  teachers: Teacher[];
+  teachers: User[];
   totalCH?: number;
   totalCHManha?: number;
   totalCHTarde?: number;
   totalCHNoite?: number;
-  school: string;
-  schoolCourses: string[];
+  // school: string;
+  // schoolCourses: string[];
   typeProject: "common" | "extraCurricular" | "curricularComponent";
   updatedAt?: Date;
 }

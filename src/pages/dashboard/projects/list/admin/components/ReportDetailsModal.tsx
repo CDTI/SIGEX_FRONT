@@ -90,7 +90,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                   style={
                     props.project == null ||
                     (props.project.category as Category).name ===
-                      "Extensão específica do curso"
+                      "Curricular específica de curso"
                       ? { paddingBottom: "0" }
                       : {}
                   }
@@ -170,9 +170,9 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
 
                 {props.project != null &&
                   (props.project.category as Category).name ===
-                    "Extensão específica do curso" && (
+                    "Curricular específica de curso" && (
                     <Col span={24} style={{ paddingBottom: "0" }}>
-                      <LabeledContent label="Curso(s)">
+                      {/* <LabeledContent label="Curso(s)">
                         <Paragraph>
                           {props.project.course
                             ? (props.project.course as Course).name
@@ -185,7 +185,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                               ).name
                             : ""}
                         </Paragraph>
-                      </LabeledContent>
+                      </LabeledContent> */}
                     </Col>
                   )}
               </Row>

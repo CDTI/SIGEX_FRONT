@@ -190,7 +190,12 @@ export const AllProjects: React.FC = () => {
               </Link>
             </Button>
 
-            <Button onClick={() => openDetailsModal("project", record)}>
+            <Button
+              onClick={() => {
+                openDetailsModal("project", record);
+                console.log(record);
+              }}
+            >
               <EyeOutlined /> Proposta
             </Button>
 

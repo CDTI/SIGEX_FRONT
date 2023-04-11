@@ -100,7 +100,6 @@ export const MainForm: React.FC<Props> = (props) => {
       });
       setCourses(courses ?? []);
       const foundUserCourses = await getUserCourses(user?._id!);
-      console.log(foundUserCourses);
       const userCourses = courses.filter((course: Course) => {
         return foundUserCourses.some((c) => course._id === c);
       });
@@ -145,43 +144,37 @@ export const MainForm: React.FC<Props> = (props) => {
       setDisciplines(disciplines);
 
       if (props.initialValues != null) {
-        delete props.initialValues._id;
-        const projectNotice = isNotice(props.initialValues.notice)
-          ? props.initialValues.notice
-          : notices.find(
-              (n: Notice) => n._id === getNoticeId(props.initialValues!.notice)
-            )!;
-
-        if (
-          !notices.some((n: Notice) => n._id === getNoticeId(projectNotice))
-        ) {
-          notices = [...notices, projectNotice as Notice];
-          setNotices(notices);
-        }
+        const projectNotice = props.initialValues.notice as Notice;
         setSelectedNotice(projectNotice);
-
+        delete props.initialValues._id;
         const foundCategory = categories.find(
           (c: Category) => c._id === projectNotice.category
         );
         setSelectedCategory(foundCategory);
 
-        const foundDiscipline = disciplines.find(
-          (d: Discipline) => d._id === projectNotice.discipline
-        );
-        setSelectedDiscipline(foundDiscipline);
+        // if (
+        //   !notices.some((n: Notice) => n._id === getNoticeId(projectNotice))
+        // ) {
+        //   notices = [...notices, projectNotice as Notice];
+        //   setNotices(notices);
+        // }
 
-        if (projectNotice.timables) {
-          setSchedule(
-            projectNotice.timetables.find(
-              (t: Timetable) =>
-                (t.discipline as unknown as Discipline)._id ===
-                projectNotice.discipline
-            )!.schedules
+        if (props.initialValues.discipline) {
+          const foundDiscipline = disciplines.find(
+            (d: Discipline) => d._id === props.initialValues?.discipline._id
           );
+          setSelectedDiscipline(foundDiscipline);
         }
-        setCurrentProjectType(props.initialValues.typeProject);
 
-        if (props.initialValues.course) {
+        if (projectNotice.timetables) {
+          setSchedule(props.initialValues.firstSemester);
+        }
+        // setCurrentProjectType(props.initialValues.typeProject);
+
+        if (
+          props.initialValues.course &&
+          props.initialValues.course.length > 0
+        ) {
           if (props.context === "user") {
             if (typeof props.initialValues.course === "string") {
               const disciplines = await getDisciplinesByCourses([
@@ -204,21 +197,35 @@ export const MainForm: React.FC<Props> = (props) => {
         }
         props.formController.setFieldsValue({
           ...props.initialValues,
+          teachers: props.initialValues.teachers
+            ? props.initialValues.teachers.map(
+                (teacher: User) => teacher._id
+              ) ?? []
+            : [],
           course:
             props.context === "user"
-              ? props.initialValues.course
-              : (props.initialValues.course as Course[]).map(
+              ? props.initialValues.course ?? []
+              : (props.initialValues?.course as Course[]).map(
                   (c: Course) => c._id!
-                ),
-          program: (props.initialValues.program as Program)._id,
-          notice: (props.initialValues.notice as Notice)._id,
-          author: (props.initialValues.author as User)._id,
-          category: (props.initialValues.category as Category)._id,
-          discipline: props.initialValues.discipline,
-          firstSemester: [],
-          secondSemester: [],
+                ) ?? [],
+          program: props.initialValues.program
+            ? (props.initialValues.program as Program)._id
+            : null,
+          notice: props.initialValues.notice
+            ? (props.initialValues.notice as Notice)._id
+            : null,
+          author: props.initialValues.author
+            ? (props.initialValues.author as User)._id
+            : null,
+          category: props.initialValues.category
+            ? (props.initialValues.category as Category)._id
+            : null,
+          discipline: props.initialValues.discipline
+            ? props.initialValues.discipline._id
+            : null,
+          firstSemester: props.initialValues.firstSemester ?? [],
+          secondSemester: props.initialValues.secondSemester ?? [],
         });
-        console.log(props.initialValues);
       }
       localStorage.setItem(coursesKey, JSON.stringify(courses));
       localStorage.setItem(usersKey, JSON.stringify(users));
@@ -436,7 +443,10 @@ export const MainForm: React.FC<Props> = (props) => {
                         key={`${s.location} - ${s.period} - ${s.day}ª feira`}
                         span={24}
                       >
-                        <Checkbox value={scheduleAsValue(s)}>
+                        <Checkbox
+                          value={scheduleAsValue(s)}
+                          defaultChecked={Boolean(props.initialValues)}
+                        >
                           {s.location} - {s.period} - {`${s.day}ª feira`}
                         </Checkbox>
                       </Col>

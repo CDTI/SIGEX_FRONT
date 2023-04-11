@@ -128,7 +128,7 @@ export function useFormStateMachine() {
                     totalCHNoite: payload.totalCHNoite,
                     typeProject: payload.typeProject,
                     courses: payload.courses,
-                    schoolCourses: payload.schoolCourses,
+                    // schoolCourses: payload.schoolCourses,
                   };
                 },
               }),

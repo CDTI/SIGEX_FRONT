@@ -194,6 +194,14 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                 </Col>
 
                 <Col span={24}>
+                  <LabeledContent label="Disciplina">
+                    <Paragraph>
+                      {(props.project?.discipline as Discipline)?.name}
+                    </Paragraph>
+                  </LabeledContent>
+                </Col>
+
+                <Col span={24}>
                   <LabeledContent label="Programa">
                     <Paragraph>
                       {(props.project?.program as Program)?.name}
@@ -237,8 +245,8 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                     </>
                   )}
                 {props.project != null &&
-                  (props.project.category as Category).name !==
-                    "Extensão específica do curso" && (
+                  (props.project.category as Category).name ===
+                    "Curricular institucional" && (
                     <>
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>
@@ -326,24 +334,25 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
 
                 {props.project != null &&
                   (props.project.category as Category).name ===
-                    "Extensão específica do curso" && (
+                    "Curricular específica de curso" && (
                     <>
-                      <Col span={24} style={{ paddingBottom: "0" }}>
-                        <LabeledContent label="Curso">
-                          <Paragraph>
-                            {props.project.course
-                              ? (props.project.course as Course).name
-                              : ""}{" "}
-                            -
-                            {props.project.course
-                              ? (
-                                  (props.project.course as Course)
-                                    .campus as Campus
-                                ).name
-                              : ""}
-                          </Paragraph>
-                        </LabeledContent>
-                      </Col>
+                      {props.project.course ? (
+                        props.project.course.length > 0 ? (
+                          <Col span={24} style={{ paddingBottom: "0" }}>
+                            <LabeledContent label="Cursos">
+                              {props.project.course?.map((course: Course) => (
+                                <Paragraph>
+                                  {course.name} - {course.campus.name}
+                                </Paragraph>
+                              ))}
+                            </LabeledContent>
+                          </Col>
+                        ) : (
+                          <></>
+                        )
+                      ) : (
+                        <></>
+                      )}
 
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>
@@ -351,31 +360,19 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                             <LabeledContent label="Professores">
                               <List
                                 dataSource={props.project.teachers}
-                                renderItem={(t: Teacher) => (
+                                renderItem={(t: User) => (
                                   <List.Item>
                                     <List.Item.Meta
                                       description={
                                         <Row justify="space-between">
                                           <LabeledText
-                                            label="Matrícula"
-                                            text={t.registration}
-                                          />
-                                          <LabeledText
-                                            label="Telefone"
-                                            text={t.phone}
+                                            label="Nome"
+                                            text={t.name}
                                           />
                                           <LabeledText
                                             label="E-Mail"
                                             text={t.email}
                                           />
-                                          {props.project != null &&
-                                            props.project.typeProject ===
-                                              "extraCurricular" && (
-                                              <LabeledText
-                                                label="Carga horária"
-                                                text={t.totalCH!.toString()}
-                                              />
-                                            )}
                                         </Row>
                                       }
                                       title={
