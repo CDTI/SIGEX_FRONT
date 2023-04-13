@@ -144,6 +144,12 @@ export const MainForm: React.FC<Props> = (props) => {
       setDisciplines(disciplines);
 
       if (props.initialValues != null) {
+        const oldProjectsDate = new Date(2023, 4, 13);
+        console.log(oldProjectsDate);
+        if (props.initialValues.createdAt) {
+          const createdDate = new Date(props.initialValues.createdAt);
+          console.log(createdDate > oldProjectsDate);
+        }
         const projectNotice = props.initialValues.notice as Notice;
         setSelectedNotice(projectNotice);
         delete props.initialValues._id;
