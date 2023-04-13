@@ -79,8 +79,7 @@ export const Filters: React.FC<Props> = (props) => {
           cancellable: true,
         }),
       ]);
-
-      setPrograms(data[0].programs ?? []);
+      setPrograms(data[0] ?? []);
       setCategories(data[2] ?? []);
       setNotices(
         data[1]

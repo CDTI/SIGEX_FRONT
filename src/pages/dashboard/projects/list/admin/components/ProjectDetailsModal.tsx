@@ -193,13 +193,15 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   </LabeledContent>
                 </Col>
 
-                <Col span={24}>
-                  <LabeledContent label="Disciplina">
-                    <Paragraph>
-                      {(props.project?.discipline as Discipline)?.name}
-                    </Paragraph>
-                  </LabeledContent>
-                </Col>
+                {props.project?.discipline && (
+                  <Col span={24}>
+                    <LabeledContent label="Disciplina">
+                      <Paragraph>
+                        {(props.project?.discipline as Discipline)?.name}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
 
                 <Col span={24}>
                   <LabeledContent label="Programa">
@@ -388,23 +390,67 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                               />
                             </LabeledContent>
                           </Col>
+                        </Row>
+                      </Col>
+                    </>
+                  )}
 
-                          {/* {props.project.typeProject ===
-                            "curricularComponent" && (
-                            <Col span={24} style={{ paddingBottom: "0" }}>
-                              <LabeledContent label="Disciplinas">
-                                <List
-                                  dataSource={props.project.disciplines}
-                                  renderItem={(d: Discipline) => (
-                                    <List.Item>
-                                      <List.Item.Meta title={d.name} />
-                                    </List.Item>
-                                  )}
-                                  size="small"
-                                />
-                              </LabeledContent>
-                            </Col>
-                          )} */}
+                {props.project != null &&
+                  (props.project.category as Category).name ===
+                    "Extracurricular" && (
+                    <>
+                      {props.project.course ? (
+                        props.project.course.length > 0 ? (
+                          <Col span={24} style={{ paddingBottom: "0" }}>
+                            <LabeledContent label="Cursos">
+                              {props.project.course?.map((course: Course) => (
+                                <Paragraph>
+                                  {course.name} - {course.campus.name}
+                                </Paragraph>
+                              ))}
+                            </LabeledContent>
+                          </Col>
+                        ) : (
+                          <></>
+                        )
+                      ) : (
+                        <></>
+                      )}
+
+                      <Col span={24}>
+                        <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>
+                          <Col span={24}>
+                            <LabeledContent label="Professores">
+                              <List
+                                dataSource={props.project.teachers}
+                                renderItem={(t: User) => (
+                                  <List.Item>
+                                    <List.Item.Meta
+                                      description={
+                                        <Row justify="space-between">
+                                          <LabeledText
+                                            label="Nome"
+                                            text={t.name}
+                                          />
+                                          <LabeledText
+                                            label="E-Mail"
+                                            text={t.email}
+                                          />
+                                        </Row>
+                                      }
+                                      title={
+                                        <Row justify="space-between">
+                                          <Text>{t.name}</Text>
+                                          <Text>{t.cpf}</Text>
+                                        </Row>
+                                      }
+                                    />
+                                  </List.Item>
+                                )}
+                                size="small"
+                              />
+                            </LabeledContent>
+                          </Col>
                         </Row>
                       </Col>
                     </>
