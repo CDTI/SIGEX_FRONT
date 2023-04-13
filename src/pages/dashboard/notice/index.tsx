@@ -39,16 +39,24 @@ export const Notices: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [year, setYear] = useState<number | undefined>(undefined);
+  const [semester, setSemester] = useState<string | undefined>(undefined);
+  const [category, setCategory] = useState<string | undefined>(undefined);
+  const [name, setName] = useState<string | undefined>(undefined);
+  let query = {
+    page: page,
+    limit: limit,
+    name: name,
+    category: category,
+    projectExecutionPeriod: semester,
+    year: year,
+  };
 
   const listNoticesRequester = useHttpClient();
   const switchNoticesRequester = useHttpClient();
 
   const submitSearch = async (data: any) => {
-    if (data.year) {
-      data.year = data.year.year();
-    }
-    data.page = page;
-    data.limit = limit;
+    console.log(data);
     const notices = await getAllNoticesPaginated(data)
       .then((res) => {
         setNotices(res.docs);
@@ -66,6 +74,10 @@ export const Notices: React.FC = () => {
     form.resetFields();
     setPage(1);
     setLimit(10);
+    setCategory(undefined);
+    setName(undefined);
+    setSemester(undefined);
+    setYear(undefined);
     setShouldReloadNotices(shouldReloadNotices + 1);
   };
 
@@ -79,13 +91,7 @@ export const Notices: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const notices = await getAllNoticesPaginated({
-          page: page,
-          limit: limit,
-        });
-        setNotices(notices?.docs);
-        setTotalPages(notices.totalPages);
-
+        submitSearch(query);
         const categories = await getAllCategories();
         setCategories(categories);
       } catch (error) {
@@ -202,7 +208,7 @@ export const Notices: React.FC = () => {
       </Button>
 
       <Form
-        onFinish={(e) => submitSearch(e)}
+        onFinish={(e) => submitSearch(query)}
         form={form}
         style={{
           marginTop: "10px",
@@ -214,6 +220,7 @@ export const Notices: React.FC = () => {
               <Input
                 placeholder="Nome do projeto"
                 style={{ width: "100%" }}
+                onChange={(e) => setName(e.target.value)}
               ></Input>
             </Form.Item>
           </Col>
@@ -222,6 +229,7 @@ export const Notices: React.FC = () => {
               <Select
                 style={{ width: "100%" }}
                 defaultValue=""
+                onChange={(e) => setCategory(e)}
                 options={[
                   { label: "Selecione uma categoria", value: "" },
                 ].concat(
@@ -239,6 +247,7 @@ export const Notices: React.FC = () => {
               <Select
                 style={{ width: "100%" }}
                 defaultValue=""
+                onChange={(e) => setSemester(e)}
                 options={[
                   { label: "Selecione um período", value: "" },
                   { label: "1º Semestre", value: "1° Semestre" },
@@ -253,6 +262,7 @@ export const Notices: React.FC = () => {
                 placeholder="Selecione um ano"
                 picker="year"
                 style={{ width: "100%" }}
+                onChange={(e) => setYear(e?.year())}
               />
             </Form.Item>
           </Col>
