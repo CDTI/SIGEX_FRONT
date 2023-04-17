@@ -104,7 +104,6 @@ export function useFormStateMachine() {
                 data: (ctx, ev) => {
                   const now = new Date();
                   const payload = ev.payload as Project;
-                  console.log(payload);
                   return {
                     ...ctx.data!,
                     author: payload.author,
@@ -114,6 +113,14 @@ export function useFormStateMachine() {
                     dateFinal: now,
                     dateStart: now,
                     description: payload.description,
+                    researchTypeDescription: payload.researchTypeDescription,
+                    studentsLearningDescription:
+                      payload.studentsLearningDescription,
+                    transformingActionsDescription:
+                      payload.transformingActionsDescription,
+                    disciplineLearningObjectivesDescription:
+                      payload.disciplineLearningObjectivesDescription,
+                    ods: payload.ods,
                     firstSemester: payload.firstSemester,
                     maxClasses: payload.maxClasses,
                     name: payload.name,

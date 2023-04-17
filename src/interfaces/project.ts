@@ -94,6 +94,11 @@ export interface Project {
   courses: string[];
   dateStart: Date;
   description: string;
+  researchTypeDescription?: string;
+  studentsLearningDescription?: string;
+  transformingActionsDescription?: string;
+  disciplineLearningObjectivesDescription?: string;
+  ods?: string[];
   discipline: Discipline;
   firstSemester: Schedule[];
   key?: string;

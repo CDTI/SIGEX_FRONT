@@ -193,7 +193,6 @@ export const AllProjects: React.FC = () => {
             <Button
               onClick={() => {
                 openDetailsModal("project", record);
-                console.log(record);
               }}
             >
               <EyeOutlined /> Proposta

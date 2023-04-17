@@ -62,7 +62,6 @@ export const TimetablesForm: React.FC<Props> = (props) => {
   useEffect(() => {
     if (props.initialValues != null)
       props.formController.setFieldsValue({ timetables: props.initialValues });
-    console.log(props.initialValues);
   }, [props.formController, props.initialValues]);
 
   const addDiscipline = useCallback(

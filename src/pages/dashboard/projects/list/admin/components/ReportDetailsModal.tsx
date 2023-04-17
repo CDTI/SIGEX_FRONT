@@ -36,7 +36,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
   return (
     <Modal
       centered={true}
-      closable={false}
+      closable={true}
       footer={
         <Row justify="end">
           <Button type="primary" onClick={() => props.onClose()}>
@@ -50,6 +50,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
         </Title>
       }
       visible={props.isVisible}
+      onCancel={() => props.onClose()}
       width="85%"
     >
       <Row gutter={[0, 24]} justify="center">

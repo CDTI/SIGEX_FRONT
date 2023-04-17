@@ -101,7 +101,6 @@ export const CreateDiscipline: React.FC = () => {
   const changeEdit = (discipline: Discipline) => {
     formModal.setFieldsValue(discipline);
     setState({ visible: true, discipline: discipline });
-    console.log(discipline.category);
   };
 
   const submitEdit = async (item: any) => {

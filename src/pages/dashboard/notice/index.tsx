@@ -56,7 +56,6 @@ export const Notices: React.FC = () => {
   const switchNoticesRequester = useHttpClient();
 
   const submitSearch = async (data: any) => {
-    console.log(data);
     const notices = await getAllNoticesPaginated(data)
       .then((res) => {
         setNotices(res.docs);

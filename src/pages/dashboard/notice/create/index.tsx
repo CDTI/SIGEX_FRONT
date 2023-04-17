@@ -65,7 +65,6 @@ export const CreateNoticePage: React.FC = () => {
   useEffect(() => {
     if (formState.value === "pending") {
       (async () => {
-        console.log(formState.context.data);
         try {
           await formNoticesRequester.send(
             params.id == null
@@ -112,7 +111,6 @@ export const CreateNoticePage: React.FC = () => {
 
   const handleFormFinished = useCallback(
     (formName: string, values: Store) => {
-      console.log(values);
       switch (formName) {
         case "main":
           sendEvent({

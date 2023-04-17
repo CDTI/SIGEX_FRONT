@@ -97,7 +97,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
   return (
     <Modal
       centered={true}
-      closable={false}
+      closable={true}
       footer={
         <Row justify="space-between">
           <Col>
@@ -149,6 +149,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
         </Title>
       }
       visible={props.isVisible}
+      onCancel={props.onClose}
       width="85%"
     >
       <Row gutter={[0, 32]} justify="center">
@@ -180,10 +181,50 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                 </Col>
 
                 <Col span={24}>
-                  <LabeledContent label="Descrição">
+                  <LabeledContent label="Descrição geral do Projeto">
                     <Paragraph>{props.project?.description}</Paragraph>
                   </LabeledContent>
                 </Col>
+
+                {props.project?.researchTypeDescription && (
+                  <Col span={24}>
+                    <LabeledContent label="Tipo de pesquisa será desenvolvida no projeto e como será realizada">
+                      <Paragraph>
+                        {props.project?.researchTypeDescription}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
+                {props.project?.studentsLearningDescription && (
+                  <Col span={24}>
+                    <LabeledContent label="Atores com quem o estudante irá estabelecer relação dialógica e o tipo de aprendizado que pode adquirir com essa relação">
+                      <Paragraph>
+                        {props.project?.studentsLearningDescription}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
+                {props.project?.transformingActionsDescription && (
+                  <Col span={24}>
+                    <LabeledContent label="Ações transformadoras que podem surgir deste projeto">
+                      <Paragraph>
+                        {props.project?.transformingActionsDescription}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
+                {props.project?.disciplineLearningObjectivesDescription && (
+                  <Col span={24}>
+                    <LabeledContent label="Aderência deste projeto com os objetivos de aprendizagem da componente curricular">
+                      <Paragraph>
+                        {props.project?.disciplineLearningObjectivesDescription}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
 
                 <Col span={24}>
                   <LabeledContent label="Categoria">

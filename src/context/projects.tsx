@@ -24,6 +24,8 @@ interface IProjectsFilter {
   setProjectNameFilter: React.Dispatch<React.SetStateAction<string>>;
   categoryFilter: string;
   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
+  disciplineFilter: string;
+  setDisciplineFilter: React.Dispatch<React.SetStateAction<string>>;
   noticeFilter: string;
   setNoticeFilter: React.Dispatch<React.SetStateAction<string>>;
   programFilter: string;
@@ -32,6 +34,8 @@ interface IProjectsFilter {
   setAuthorNameFilter: React.Dispatch<React.SetStateAction<string>>;
   statusFilter: string;
   setStatusFilter: React.Dispatch<React.SetStateAction<string>>;
+  reportFilter: string;
+  setReportFilter: React.Dispatch<React.SetStateAction<string>>;
   cleanFilters: () => void;
   shouldReload: number;
   setShouldReload: React.Dispatch<React.SetStateAction<number>>;
@@ -46,10 +50,12 @@ export interface IQuery {
   author?: string;
   program?: string;
   category?: string;
+  discipline?: string;
   notice?: string;
   page?: string;
   limit?: string;
   status?: string;
+  report?: string;
 }
 
 export const ProjectsFilterContext = createContext<IProjectsFilter>(
@@ -66,9 +72,11 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
   const [projectNameFilter, setProjectNameFilter] = useState<string>("");
   const [authorNameFilter, setAuthorNameFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [disciplineFilter, setDisciplineFilter] = useState<string>("");
   const [noticeFilter, setNoticeFilter] = useState<string>("");
   const [programFilter, setProgramFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [reportFilter, setReportFilter] = useState<string>("");
   const [shouldReload, setShouldReload] = useState(1);
   let query = {
     page: String(page),
@@ -77,8 +85,10 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
     author: authorNameFilter,
     program: programFilter,
     category: categoryFilter,
+    discipline: disciplineFilter,
     notice: noticeFilter,
     status: statusFilter,
+    report: reportFilter,
   };
 
   const [queryString, setQueryString] = useState<string>("?");
@@ -121,11 +131,13 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
 
   const cleanFilters = () => {
     setCategoryFilter("");
+    setDisciplineFilter("");
     setProjectNameFilter("");
     setNoticeFilter("");
     setProgramFilter("");
     setAuthorNameFilter("");
     setStatusFilter("");
+    setReportFilter("");
     setPage(1);
   };
 
@@ -150,20 +162,24 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
         projectNameFilter,
         authorNameFilter,
         categoryFilter,
+        disciplineFilter,
         noticeFilter,
         statusFilter,
+        reportFilter,
         setPage,
         setLimit,
         setTotalPages,
         setLoading,
         setProjects,
         setCategoryFilter,
+        setDisciplineFilter,
         setNoticeFilter,
         setProgramFilter,
         setFilteredProjects,
         setProjectNameFilter,
         setAuthorNameFilter,
         setStatusFilter,
+        setReportFilter,
         cleanFilters,
         shouldReload,
         setShouldReload,
