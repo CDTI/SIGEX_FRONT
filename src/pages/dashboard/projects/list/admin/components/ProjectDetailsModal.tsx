@@ -287,6 +287,27 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                       </Col>
                     </>
                   )}
+
+                {props.project?.ods && props.project.ods.length > 0 && (
+                  <Col span={24}>
+                    <LabeledContent label="ODS Selecionados">
+                      <Paragraph>
+                        {props.project?.ods.map((eachOds, index) => {
+                          const isLastElement =
+                            props.project?.ods?.length === index + 1
+                              ? true
+                              : false;
+                          if (isLastElement) {
+                            return eachOds + ".";
+                          } else {
+                            return eachOds + ", ";
+                          }
+                        })}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
                 {props.project != null &&
                   (props.project.category as Category).name ===
                     "Curricular institucional" && (

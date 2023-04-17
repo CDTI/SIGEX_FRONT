@@ -141,8 +141,11 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                               props.project?.report?.ods.length === index + 1
                                 ? true
                                 : false;
-                            if (isLastElement) return eachOds + ".";
-                            else return eachOds + ", ";
+                            if (isLastElement) {
+                              return eachOds + ".";
+                            } else {
+                              return eachOds + ", ";
+                            }
                           })}
                         </Paragraph>
                       </LabeledContent>
