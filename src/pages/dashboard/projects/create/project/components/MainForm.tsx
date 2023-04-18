@@ -40,7 +40,7 @@ import { AuthContext } from "../../../../../../context/auth";
 import { DefaultLoading } from "../../../../../../components/defaultLoading";
 import {
   getTeachers,
-  getUserCourses,
+  getUserCoursesAndRoles,
 } from "../../../../../../services/user_service";
 import { listActivePrograms } from "../../../../../../services/program_service";
 import { allOds } from "../../report/components/IntroductionForm";
@@ -94,9 +94,9 @@ export const MainForm: React.FC<Props> = (props) => {
         cancellable: true,
       });
       setCourses(courses ?? []);
-      const foundUserCourses = await getUserCourses(user?._id!);
+      const foundUserCourses = await getUserCoursesAndRoles(user?._id!);
       const userCourses = courses.filter((course: Course) => {
-        return foundUserCourses.some((c) => course._id === c);
+        return foundUserCourses.courses.some((c) => course._id === c);
       });
       setUserCourses(userCourses);
 
@@ -291,7 +291,6 @@ export const MainForm: React.FC<Props> = (props) => {
   ) : (
     <Form name="main" layout="vertical" form={props.formController}>
       <Row gutter={[8, 0]}>
-        {console.log(selectedCategory)}
         {props.context === "admin" && (
           <Restricted allow="Administrador">
             <Col span={24}>
@@ -677,7 +676,7 @@ export const MainForm: React.FC<Props> = (props) => {
                 </Form.Item>
                 {userCourses.length === 0 && (
                   <Typography style={{ color: "#ff4d4f" }}>
-                    Nenhum curso para listar. Tente fazer o login novamente ou
+                    Nenhum curso para listar. Tente atualizar a página ou
                     contate um administrador!
                   </Typography>
                 )}

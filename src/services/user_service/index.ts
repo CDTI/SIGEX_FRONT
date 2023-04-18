@@ -16,6 +16,16 @@ interface ResponseUser {
   created: boolean;
 }
 
+interface roles {
+  _id: string;
+  description: string;
+}
+
+interface userCoursesAndRoles {
+  courses: string[];
+  roles: roles[];
+}
+
 export const getUsers = async (): Promise<ResponseUsers> => {
   const response = await httpClient.get("/users");
 
@@ -28,8 +38,10 @@ export const getTeachers = async (): Promise<User[]> => {
   return response.data;
 };
 
-export const getUserCourses = async (id: string): Promise<string[]> => {
-  const response = await httpClient.get(`/user/courses/${id}`);
+export const getUserCoursesAndRoles = async (
+  id: string
+): Promise<userCoursesAndRoles> => {
+  const response = await httpClient.get(`/user/coursesAndRoles/${id}`);
 
   return response.data;
 };

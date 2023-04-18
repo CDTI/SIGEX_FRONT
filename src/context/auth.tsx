@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { User } from "../interfaces/user";
 import { httpClient } from "../services/httpClient";
+import { getUserCoursesAndRoles } from "../services/user_service";
 
 interface AuthContextData {
   isUserLoggedIn: boolean;
@@ -21,11 +22,18 @@ export const AuthProvider: React.FC = (props) => {
 
   const [user, setUser] = useState<User | null>(null);
 
-  const update = useCallback((user: User) => {
+  const update = useCallback(async (user: User) => {
     delete user.password;
-
-    localStorage.setItem("@pp:user", JSON.stringify(user));
-    setUser(user);
+    try {
+      const coursesAndRolesUpdated = await getUserCoursesAndRoles(user._id!);
+      user.roles = coursesAndRolesUpdated.roles;
+      user.courses = coursesAndRolesUpdated.courses;
+      localStorage.setItem("@pp:user", JSON.stringify(user));
+      setUser(user);
+    } catch (error) {
+      console.log(error);
+      logout();
+    }
   }, []);
 
   const authorize = useCallback((token: string, user: User) => {

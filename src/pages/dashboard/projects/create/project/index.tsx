@@ -93,15 +93,16 @@ export const CreateProposalPage: React.FC = () => {
 
       setHasActiveNotices(hasActiveNotices ?? false);
 
-      if (location.state.project != null)
+      if (location.state.project != null) {
         sendEvent({
           type: "RESTORE",
           payload: { step: 0, data: location.state.project },
         });
-      else if (localStorage.getItem(savedStateKey) != null)
+      } else if (localStorage.getItem(savedStateKey) != null) {
         hasActiveNotices
           ? setLoaderModalIsVisible(true)
           : localStorage.removeItem(savedStateKey);
+      }
     })();
 
     return () => {
@@ -346,7 +347,7 @@ export const CreateProposalPage: React.FC = () => {
         status="error"
         icon={<StopOutlined />}
         title="Nenhum edital está ativo no momento!"
-        subTitle="Tente novamente mais tarde, ou contate um administrador ou responsável."
+        subTitle="Tente atualizar a página, ou contate um administrador ou responsável."
         extra={[
           <Button type="primary" onClick={() => goBack()}>
             Continuar

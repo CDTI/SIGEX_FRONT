@@ -142,7 +142,6 @@ export const LoginPage: React.FC = () => {
         .createCipheriv("aes-256-gcm", key, iv)
         .setEncoding("hex");
 
-      console.log(value);
       const token = JSON.stringify({
         id,
         cpf,
