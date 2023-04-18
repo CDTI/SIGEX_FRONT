@@ -75,7 +75,9 @@ export const MainForm: React.FC<Props> = (props) => {
   const [courseDisciplines, setCourseDisciplines] = useState<Discipline[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<Notice>();
-  const [selectedCategory, setSelectedCategory] = useState<Category>();
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >(undefined);
   const [selectedDiscipline, setSelectedDiscipline] = useState<Discipline>();
   const [loading, setLoading] = useState<boolean>(true);
   const oldProjectsDate = new Date(2023, 3, 13);
@@ -289,6 +291,7 @@ export const MainForm: React.FC<Props> = (props) => {
   ) : (
     <Form name="main" layout="vertical" form={props.formController}>
       <Row gutter={[8, 0]}>
+        {console.log(selectedCategory)}
         {props.context === "admin" && (
           <Restricted allow="Administrador">
             <Col span={24}>
@@ -360,113 +363,82 @@ export const MainForm: React.FC<Props> = (props) => {
           </Form.Item>
         </Col>
 
-        <Col span={24}>
-          <Form.Item
-            name="description"
-            label="Descrição geral do projeto (cenário, problemática, desenvolvimentos previstos)"
-            rules={[
-              { required: true, message: "Campo Obrigatório" },
-              {
-                type: "string",
-                max: 1500,
-                message: "O número máximo de caracteres foi extrapolado!",
-              },
-            ]}
-          >
-            <Input.TextArea
-              autoSize={{ minRows: 3, maxRows: 7 }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-          <Form.Item
-            name="researchTypeDescription"
-            label="Que tipo de pesquisa será desenvolvida no projeto e como será realizada?"
-            rules={[
-              {
-                required:
-                  !props.initialValues ||
-                  Boolean(
-                    new Date(props.initialValues.createdAt!) > oldProjectsDate
-                  ),
-                message: "Campo Obrigatório",
-              },
-              {
-                type: "string",
-                max: 1500,
-                message: "O número máximo de caracteres foi extrapolado!",
-              },
-            ]}
-          >
-            <Input.TextArea
-              autoSize={{ minRows: 3, maxRows: 7 }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-          <Form.Item
-            name="studentsLearningDescription"
-            label="Com que atores o estudante irá estabelecer relação dialógica e que tipo de aprendizado pode adquirir com essa relação?"
-            rules={[
-              {
-                required:
-                  !props.initialValues ||
-                  Boolean(
-                    new Date(props.initialValues.createdAt!) > oldProjectsDate
-                  ),
-                message: "Campo Obrigatório",
-              },
-              {
-                type: "string",
-                max: 1500,
-                message: "O número máximo de caracteres foi extrapolado!",
-              },
-            ]}
-          >
-            <Input.TextArea
-              autoSize={{ minRows: 3, maxRows: 7 }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={24}>
-          <Form.Item
-            name="transformingActionsDescription"
-            label="Que tipo de ações transformadoras podem surgir deste projeto?"
-            rules={[
-              {
-                required:
-                  !props.initialValues ||
-                  Boolean(
-                    new Date(props.initialValues.createdAt!) > oldProjectsDate
-                  ),
-                message: "Campo Obrigatório",
-              },
-              {
-                type: "string",
-                max: 1500,
-                message: "O número máximo de caracteres foi extrapolado!",
-              },
-            ]}
-          >
-            <Input.TextArea
-              autoSize={{ minRows: 3, maxRows: 7 }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-
-        {selectedCategory != null &&
-          selectedCategory.name !== "Extracurricular" && (
+        {selectedCategory !== undefined && (
+          <>
             <Col span={24}>
               <Form.Item
-                name="disciplineLearningObjectivesDescription"
-                label="Qual a aderência deste projeto com os objetivos de aprendizagem da componente curricular?"
+                name="category"
+                label="Categoria"
+                rules={[{ required: true }]}
+              >
+                <Select
+                  loading={selectNoticesRequester.inProgress}
+                  style={{ width: "100%" }}
+                  disabled={Boolean(!selectedCategory)}
+                  defaultActiveFirstOption
+                >
+                  <Select.Option value={selectedCategory?._id!}>
+                    {selectedCategory
+                      ? selectedCategory.name
+                      : "Escolha um edital"}
+                  </Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </>
+        )}
+
+        {selectedCategory !== undefined &&
+          selectedCategory.name === "Curricular institucional" && (
+            <>
+              <Form.Item
+                name="discipline"
+                label="Disciplina"
+                style={{ width: "100%" }}
+                rules={[{ required: true, message: "Escolha uma disciplina" }]}
+              >
+                <Select
+                  loading={selectNoticesRequester.inProgress}
+                  style={{ width: "100%" }}
+                  options={selectedNotice!.timetables.map((timetable) => ({
+                    value: timetable.discipline,
+                    key: timetable.discipline,
+                    label: getDisciplineName(timetable.discipline),
+                  }))}
+                  onChange={(itemId) => {
+                    selectDiscipline(String(itemId));
+                  }}
+                />
+              </Form.Item>
+            </>
+          )}
+
+        {selectedCategory !== undefined && (
+          <>
+            <Col span={24}>
+              <Form.Item
+                name="description"
+                label="Descrição geral do projeto (contexto, problemática, objetivo)"
+                rules={[
+                  { required: true, message: "Campo Obrigatório" },
+                  {
+                    type: "string",
+                    max: 1500,
+                    message: "O número máximo de caracteres foi extrapolado!",
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  autoSize={{ minRows: 3, maxRows: 7 }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                name="researchTypeDescription"
+                label="Que tipo de pesquisa será desenvolvida no projeto e como será realizada?"
                 rules={[
                   {
                     required:
@@ -490,30 +462,94 @@ export const MainForm: React.FC<Props> = (props) => {
                 />
               </Form.Item>
             </Col>
-          )}
 
-        {selectedCategory != null && (
-          <>
             <Col span={24}>
               <Form.Item
-                name="category"
-                label="Categoria"
-                rules={[{ required: true }]}
+                name="studentsLearningDescription"
+                label="Com que atores o estudante irá estabelecer relação dialógica e que tipo de aprendizado pode adquirir com essa relação?"
+                rules={[
+                  {
+                    required:
+                      !props.initialValues ||
+                      Boolean(
+                        new Date(props.initialValues.createdAt!) >
+                          oldProjectsDate
+                      ),
+                    message: "Campo Obrigatório",
+                  },
+                  {
+                    type: "string",
+                    max: 1500,
+                    message: "O número máximo de caracteres foi extrapolado!",
+                  },
+                ]}
               >
-                <Select
-                  loading={selectNoticesRequester.inProgress}
+                <Input.TextArea
+                  autoSize={{ minRows: 3, maxRows: 7 }}
                   style={{ width: "100%" }}
-                  disabled={Boolean(!selectedCategory)}
-                  defaultActiveFirstOption
-                >
-                  <Select.Option value={selectedCategory?._id!}>
-                    {selectedCategory
-                      ? selectedCategory.name
-                      : "Escolha um edital"}
-                  </Select.Option>
-                </Select>
+                />
               </Form.Item>
             </Col>
+
+            <Col span={24}>
+              <Form.Item
+                name="transformingActionsDescription"
+                label="Que tipo de ações transformadoras podem surgir deste projeto?"
+                rules={[
+                  {
+                    required:
+                      !props.initialValues ||
+                      Boolean(
+                        new Date(props.initialValues.createdAt!) >
+                          oldProjectsDate
+                      ),
+                    message: "Campo Obrigatório",
+                  },
+                  {
+                    type: "string",
+                    max: 1500,
+                    message: "O número máximo de caracteres foi extrapolado!",
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  autoSize={{ minRows: 3, maxRows: 7 }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+
+            {selectedCategory !== undefined &&
+              selectedCategory.name !== "Extracurricular" && (
+                <Col span={24}>
+                  <Form.Item
+                    name="disciplineLearningObjectivesDescription"
+                    label="Qual a aderência deste projeto com os objetivos de aprendizagem da componente curricular?"
+                    rules={[
+                      {
+                        required:
+                          !props.initialValues ||
+                          Boolean(
+                            new Date(props.initialValues.createdAt!) >
+                              oldProjectsDate
+                          ),
+                        message: "Campo Obrigatório",
+                      },
+                      {
+                        type: "string",
+                        max: 1500,
+                        message:
+                          "O número máximo de caracteres foi extrapolado!",
+                      },
+                    ]}
+                  >
+                    <Input.TextArea
+                      autoSize={{ minRows: 3, maxRows: 7 }}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Col>
+              )}
 
             <Col span={24}>
               <Form.Item
@@ -541,31 +577,6 @@ export const MainForm: React.FC<Props> = (props) => {
             </Col>
           </>
         )}
-
-        {selectedCategory != null &&
-          selectedCategory.name === "Curricular institucional" && (
-            <>
-              <Form.Item
-                name="discipline"
-                label="Disciplina"
-                style={{ width: "100%" }}
-                rules={[{ required: true, message: "Escolha uma disciplina" }]}
-              >
-                <Select
-                  loading={selectNoticesRequester.inProgress}
-                  style={{ width: "100%" }}
-                  options={selectedNotice!.timetables.map((timetable) => ({
-                    value: timetable.discipline,
-                    key: timetable.discipline,
-                    label: getDisciplineName(timetable.discipline),
-                  }))}
-                  onChange={(itemId) => {
-                    selectDiscipline(String(itemId));
-                  }}
-                />
-              </Form.Item>
-            </>
-          )}
 
         {selectedCategory?.name === "Curricular institucional" &&
           schedule.length > 0 && (
@@ -642,7 +653,7 @@ export const MainForm: React.FC<Props> = (props) => {
             </>
           )}
 
-        {selectedCategory != null &&
+        {selectedCategory !== undefined &&
           selectedCategory.name === "Curricular específica de curso" && (
             <>
               <Col span={24}>
@@ -671,6 +682,37 @@ export const MainForm: React.FC<Props> = (props) => {
                   </Typography>
                 )}
               </Col>
+
+              {selectedCategory !== undefined &&
+                selectedCategory.name === "Curricular específica de curso" &&
+                courseDisciplines.length > 0 && (
+                  <Col span={24}>
+                    <Form.Item
+                      name="discipline"
+                      label="Disciplina"
+                      rules={[{ required: true, message: "Campo obrigatório" }]}
+                    >
+                      <Select
+                        options={courseDisciplines.map((d: Discipline) => ({
+                          label: d.name,
+                          value: d._id!,
+                        }))}
+                        style={{ width: "100%" }}
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
+              {courseDisciplines.length === 0 && (
+                <Typography
+                  style={{
+                    color: "#ff4d4f",
+                    margin: "-10px 0 10px 5px",
+                  }}
+                >
+                  Os cursos selecionados não possuem uma ou mais disciplinas em
+                  comum!
+                </Typography>
+              )}
 
               <Col span={24}>
                 {/* <Form.List name="teachers">
@@ -848,30 +890,6 @@ export const MainForm: React.FC<Props> = (props) => {
                   />
                 </Form.Item>
               </Col>
-
-              {courseDisciplines.length > 0 && (
-                <Col span={24}>
-                  <Form.Item
-                    name="discipline"
-                    label="Disciplina"
-                    rules={[{ required: true, message: "Campo obrigatório" }]}
-                  >
-                    <Select
-                      options={courseDisciplines.map((d: Discipline) => ({
-                        label: d.name,
-                        value: d._id!,
-                      }))}
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                  {courseDisciplines.length === 0 && (
-                    <Typography style={{ color: "#ff4d4f" }}>
-                      Os cursos selecionados não possuem uma ou mais disciplinas
-                      em comum!
-                    </Typography>
-                  )}
-                </Col>
-              )}
             </>
           )}
         {selectedCategory?.name === "Extracurricular" && (

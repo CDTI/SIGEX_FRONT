@@ -181,7 +181,33 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                 </Col>
 
                 <Col span={24}>
-                  <LabeledContent label="Descrição geral do Projeto">
+                  <LabeledContent label="Programa">
+                    <Paragraph>
+                      {(props.project?.program as Program)?.name}
+                    </Paragraph>
+                  </LabeledContent>
+                </Col>
+
+                <Col span={24}>
+                  <LabeledContent label="Categoria">
+                    <Paragraph>
+                      {(props.project?.category as Category)?.name}
+                    </Paragraph>
+                  </LabeledContent>
+                </Col>
+
+                {props.project?.discipline && (
+                  <Col span={24}>
+                    <LabeledContent label="Disciplina">
+                      <Paragraph>
+                        {(props.project?.discipline as Discipline)?.name}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
+                <Col span={24}>
+                  <LabeledContent label="Descrição geral do projeto (contexto, problemática, objetivo)">
                     <Paragraph>{props.project?.description}</Paragraph>
                   </LabeledContent>
                 </Col>
@@ -226,31 +252,25 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   </Col>
                 )}
 
-                <Col span={24}>
-                  <LabeledContent label="Categoria">
-                    <Paragraph>
-                      {(props.project?.category as Category)?.name}
-                    </Paragraph>
-                  </LabeledContent>
-                </Col>
-
-                {props.project?.discipline && (
+                {props.project?.ods && props.project.ods.length > 0 && (
                   <Col span={24}>
-                    <LabeledContent label="Disciplina">
+                    <LabeledContent label="ODS Selecionados">
                       <Paragraph>
-                        {(props.project?.discipline as Discipline)?.name}
+                        {props.project?.ods.map((eachOds, index) => {
+                          const isLastElement =
+                            props.project?.ods?.length === index + 1
+                              ? true
+                              : false;
+                          if (isLastElement) {
+                            return eachOds + ".";
+                          } else {
+                            return eachOds + ", ";
+                          }
+                        })}
                       </Paragraph>
                     </LabeledContent>
                   </Col>
                 )}
-
-                <Col span={24}>
-                  <LabeledContent label="Programa">
-                    <Paragraph>
-                      {(props.project?.program as Program)?.name}
-                    </Paragraph>
-                  </LabeledContent>
-                </Col>
 
                 <Col span={24}>
                   <LabeledContent label="Tipo">
@@ -287,26 +307,6 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                       </Col>
                     </>
                   )}
-
-                {props.project?.ods && props.project.ods.length > 0 && (
-                  <Col span={24}>
-                    <LabeledContent label="ODS Selecionados">
-                      <Paragraph>
-                        {props.project?.ods.map((eachOds, index) => {
-                          const isLastElement =
-                            props.project?.ods?.length === index + 1
-                              ? true
-                              : false;
-                          if (isLastElement) {
-                            return eachOds + ".";
-                          } else {
-                            return eachOds + ", ";
-                          }
-                        })}
-                      </Paragraph>
-                    </LabeledContent>
-                  </Col>
-                )}
 
                 {props.project != null &&
                   (props.project.category as Category).name ===
@@ -400,8 +400,8 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   (props.project.category as Category).name ===
                     "Curricular específica de curso" && (
                     <>
-                      {props.project.course ? (
-                        props.project.course.length > 0 ? (
+                      {props.project.course &&
+                        (props.project.course.length > 0 ? (
                           <Col span={24} style={{ paddingBottom: "0" }}>
                             <LabeledContent label="Cursos">
                               {props.project.course?.map((course: Course) => (
@@ -413,10 +413,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                           </Col>
                         ) : (
                           <></>
-                        )
-                      ) : (
-                        <></>
-                      )}
+                        ))}
 
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>
@@ -461,8 +458,8 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   (props.project.category as Category).name ===
                     "Extracurricular" && (
                     <>
-                      {props.project.course ? (
-                        props.project.course.length > 0 ? (
+                      {props.project.course &&
+                        (props.project.course.length > 0 ? (
                           <Col span={24} style={{ paddingBottom: "0" }}>
                             <LabeledContent label="Cursos">
                               {props.project.course?.map((course: Course) => (
@@ -474,10 +471,7 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                           </Col>
                         ) : (
                           <></>
-                        )
-                      ) : (
-                        <></>
-                      )}
+                        ))}
 
                       <Col span={24}>
                         <Row gutter={[0, 32]} style={{ marginBottom: "0" }}>

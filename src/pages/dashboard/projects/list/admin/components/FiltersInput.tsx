@@ -11,8 +11,7 @@ import { getAllNoticesEndpoint } from "../../../../../../services/endpoints/noti
 import { getAllCategoriesEndpoint } from "../../../../../../services/endpoints/categories";
 import { ProjectsFilterContext } from "../../../../../../context/projects";
 import { Discipline } from "../../../../../../interfaces/discipline";
-import { getActiveDisciplinesEndpoint } from "../../../../../../services/endpoints/disciplines";
-import { getActiveDisciplines } from "../../../../../../services/discipline_service";
+import { getAllDisciplines } from "../../../../../../services/discipline_service";
 
 export type Field =
   | "AUTHOR"
@@ -44,7 +43,6 @@ export const Filters: React.FC<Props> = (props) => {
     page,
     limit,
     getPaginatedProjects,
-    setPage,
     cleanFilters,
     setProjectNameFilter,
     setProgramFilter,
@@ -86,7 +84,7 @@ export const Filters: React.FC<Props> = (props) => {
           cancellable: true,
         }),
 
-        getActiveDisciplines(),
+        getAllDisciplines(),
       ]);
       setPrograms(data[0] ?? []);
       setCategories(data[2] ?? []);
@@ -164,6 +162,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(programId: string) => {
                 setProgramFilter(programId);
               }}
@@ -183,6 +188,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(categoryId: string) => {
                 setCategoryFilter(categoryId);
               }}
@@ -204,6 +216,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(disciplineId: string) => {
                 setDisciplineFilter(disciplineId);
               }}
@@ -220,6 +239,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(noticeId: string) => {
                 setNoticeFilter(noticeId);
               }}
