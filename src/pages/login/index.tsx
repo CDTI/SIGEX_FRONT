@@ -56,9 +56,8 @@ export const LoginPage: React.FC = () => {
 
         status = response.status;
         if (response.token !== null && response.status === "success") {
-          notification[status]({ message: response.message });
-
           authContext.login!(response.token, response.user);
+          notification[status]({ message: response.message });
         } else if (response.token === null && response.status === "error") {
           notification[status]({ message: response.message });
         }

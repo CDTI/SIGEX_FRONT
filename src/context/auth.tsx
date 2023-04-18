@@ -36,15 +36,15 @@ export const AuthProvider: React.FC = (props) => {
     }
   }, []);
 
-  const authorize = useCallback((token: string, user: User) => {
+  const authorize = useCallback(async (token: string, user: User) => {
     httpClient.defaults.headers.Authorization = `Bearer ${token}`;
-    update(user);
+    await update(user);
   }, []);
 
-  const login = useCallback((token: string, user: User) => {
+  const login = useCallback(async (token: string, user: User) => {
     localStorage.setItem("@pp:token", token);
 
-    authorize(token, user);
+    await authorize(token, user);
 
     history.replace("/home");
   }, []);
@@ -59,12 +59,14 @@ export const AuthProvider: React.FC = (props) => {
   }, []);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("@pp:user");
-    const savedToken = localStorage.getItem("@pp:token");
-    if (savedToken && savedUser) {
-      authorize(savedToken, JSON.parse(savedUser.toString()));
-      history.replace("/home");
-    }
+    (async () => {
+      const savedUser = localStorage.getItem("@pp:user");
+      const savedToken = localStorage.getItem("@pp:token");
+      if (savedToken && savedUser) {
+        await authorize(savedToken, JSON.parse(savedUser.toString()));
+        history.replace("/home");
+      }
+    })();
   }, []);
 
   return (
