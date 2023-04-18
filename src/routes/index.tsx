@@ -14,7 +14,6 @@ import { HomeDashboard } from "../pages/dashboard/home";
 import { Notices } from "../pages/dashboard/notice";
 import { CreateNoticePage } from "../pages/dashboard/notice/create";
 import { Programs } from "../pages/dashboard/programs";
-import { CreateProgram } from "../pages/dashboard/programs/create";
 import { CreateProposalPage } from "../pages/dashboard/projects/create/project";
 import { CreateReportPage } from "../pages/dashboard/projects/create/report";
 import { AllProjects } from "../pages/dashboard/projects/list/admin";
@@ -23,6 +22,7 @@ import { UsersPage } from "../pages/dashboard/users";
 import { CreateUserPage } from "../pages/dashboard/users/create";
 import { LoginPage } from "../pages/login";
 import { ProjectsFilterProvider } from "../context/projects";
+import { CreateProgram } from "../pages/dashboard/programs/create";
 
 export const Routes: React.FC = () => {
   const authContext = useContext(AuthContext);

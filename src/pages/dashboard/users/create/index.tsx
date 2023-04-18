@@ -107,7 +107,9 @@ export const CreateUserPage: React.FC = () => {
         cancellable: true,
       });
 
-      notification.success({ message: "Senha resetada com sucesso!" });
+      notification.success({
+        message: "O usuário foi marcado para redefinição de senha com sucesso!",
+      });
     } catch (error) {
       if ((error as Error).message !== "")
         notification.error({ message: (error as Error).message });

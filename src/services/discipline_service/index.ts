@@ -37,6 +37,19 @@ export const getDisciplinesByCategory = async (
   return response.data;
 };
 
+export const getDisciplinesByCourses = async (
+  courses: Array<string>
+): Promise<Discipline[]> => {
+  let query = "?courses=";
+  courses.forEach((el) => (query += `${el},`));
+  const response = await httpClient.get(
+    `/disciplines/byCourses/${query.slice(0, -1)}`
+  );
+  // const response = await httpClient.get(`/disciplines`);
+
+  return response.data;
+};
+
 export const getDiscipline = async (id: string): Promise<Discipline> => {
   const response = await httpClient.get(`/discipline/${id}`);
 

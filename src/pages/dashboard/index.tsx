@@ -139,9 +139,11 @@ export const AppLayout: React.FC = (props) => {
               </Menu.Item>
 
               {userRoles.includes("Administrador") && (
-                <Menu.Item key="/programas/criar" icon={<DiffOutlined />}>
-                  <Link to="/programas/criar">Criar Programa</Link>
-                </Menu.Item>
+                <>
+                  <Menu.Item key="/programas/criar" icon={<DiffOutlined />}>
+                    <Link to="/programas/criar">Criar/Editar Programas</Link>
+                  </Menu.Item>
+                </>
               )}
             </SubMenu>
 

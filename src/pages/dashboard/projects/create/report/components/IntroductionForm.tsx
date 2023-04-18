@@ -6,25 +6,22 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Report } from "../../../../../../interfaces/project";
 import Paragraph from "antd/lib/typography/Paragraph";
 
-interface Props
-{
-  formController: FormInstance
+interface Props {
+  formController: FormInstance;
   initialValues?: Report;
 }
 
-export const IntroductionForm: React.FC<Props> = (props) =>
-{
-  const [selectedOds, setSelectedOds] = useState<Array<string>>([])
+export const IntroductionForm: React.FC<Props> = (props) => {
+  const [selectedOds, setSelectedOds] = useState<Array<string>>([]);
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     if (props.initialValues !== undefined)
       props.formController.setFieldsValue(props.initialValues);
   }, [props.initialValues]);
 
   const handleOdsSelection = (values: string[]) => {
     setSelectedOds(values);
-  }
+  };
 
   return (
     <Form
@@ -38,10 +35,13 @@ export const IntroductionForm: React.FC<Props> = (props) =>
           <Form.Item
             name="projectTitle"
             label="Título"
-            rules={
-            [
+            rules={[
               { required: true, message: "Campo obrigatório!" },
-              { type: "string", max: 500, message: "O número máximo de caracteres foi extrapolado!" }
+              {
+                type: "string",
+                max: 500,
+                message: "O número máximo de caracteres foi extrapolado!",
+              },
             ]}
           >
             <Input style={{ width: "100%" }} />
@@ -52,13 +52,19 @@ export const IntroductionForm: React.FC<Props> = (props) =>
           <Form.Item
             name="introduction"
             label="Introdução"
-            rules={
-            [
+            rules={[
               { required: true, message: "Campo obrigatório!" },
-              { type: "string", max: 3000, message: "O número máximo de caracteres foi extrapolado!" }
+              {
+                type: "string",
+                max: 3000,
+                message: "O número máximo de caracteres foi extrapolado!",
+              },
             ]}
           >
-            <Input.TextArea autoSize={{ minRows: 3, maxRows: 5 }} style={{ width: "100%" }} />
+            <Input.TextArea
+              autoSize={{ minRows: 3, maxRows: 5 }}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
         </Col>
 
@@ -71,7 +77,7 @@ export const IntroductionForm: React.FC<Props> = (props) =>
                   <Form.Item
                     required={false}
                     key={field.key}
-                    style={{marginBottom: '6px'}}
+                    style={{ marginBottom: "6px" }}
                   >
                     <Form.Item
                       {...field}
@@ -81,13 +87,13 @@ export const IntroductionForm: React.FC<Props> = (props) =>
                       <Input
                         placeholder="Link para o post"
                         style={{
-                          width: "90%"
+                          width: "90%",
                         }}
                       />
                     </Form.Item>
                     {fields.length > 1 ? (
                       <MinusCircleOutlined
-                        style={{paddingLeft: '12px'}}
+                        style={{ paddingLeft: "12px" }}
                         className="dynamic-delete-button"
                         onClick={() => remove(field.name)}
                       />
@@ -100,7 +106,7 @@ export const IntroductionForm: React.FC<Props> = (props) =>
                     onClick={() => add()}
                     style={{
                       width: "100%",
-                      marginTop: '12px'
+                      marginTop: "12px",
                     }}
                     icon={<PlusOutlined />}
                   >
@@ -132,7 +138,7 @@ export const IntroductionForm: React.FC<Props> = (props) =>
   );
 };
 
-const allOds = [
+export const allOds = [
   "Erradicação da Pobreza",
   "Fome Zero",
   "Saúde e Bem Estar",
@@ -149,5 +155,5 @@ const allOds = [
   "Vida na Água",
   "Vida Terrestre",
   "Paz, Justiça e Instituições Eficazes",
-  "Parcerias e Meios de Implementação"
-  ]
+  "Parcerias e Meios de Implementação",
+];

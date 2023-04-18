@@ -8,75 +8,75 @@ import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import { Role } from "../../../../../interfaces/user";
 import { Notice } from "../../../../../interfaces/notice";
 import { getAllRolesEndpoint } from "../../../../../services/endpoints/roles";
+import { Category } from "../../../../../interfaces/category";
 
-interface Props
-{
+interface Props {
   formController: FormInstance;
   initialValues?: Notice;
 }
 
-function getDisabledDateRange(currentDate: moment.Moment)
-{
-  return currentDate < moment().startOf("day")
-    || currentDate > moment().endOf("day").add(4, "years");
+function getDisabledDateRange(currentDate: moment.Moment) {
+  return (
+    currentDate < moment().startOf("day") ||
+    currentDate > moment().endOf("day").add(4, "years")
+  );
 }
 
-export const MainDataForm: React.FC<Props> = (props) =>
-{
+export const MainDataForm: React.FC<Props> = (props) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const { Option } = Select;
   const selectRolesRequester = useHttpClient();
 
-  useEffect(() =>
-  {
-    (async () =>
-    {
-      const roles = localStorage.getItem(rolesKey) != null
-        ? JSON.parse(localStorage.getItem(rolesKey)!) as Role[]
-        : await selectRolesRequester.send<Role[]>(
-          {
-            method: "GET",
-            url: getAllRolesEndpoint(),
-            cancellable: true
-          });
+  useEffect(() => {
+    (async () => {
+      const roles =
+        localStorage.getItem(rolesKey) != null
+          ? (JSON.parse(localStorage.getItem(rolesKey)!) as Role[])
+          : await selectRolesRequester.send<Role[]>({
+              method: "GET",
+              url: getAllRolesEndpoint(),
+              cancellable: true,
+            });
 
       setRoles(roles ?? []);
 
       localStorage.setItem(rolesKey, JSON.stringify(roles));
     })();
 
-    return () =>
-    {
+    return () => {
       selectRolesRequester.halt();
-    }
+    };
   }, [selectRolesRequester.halt, selectRolesRequester.send]);
 
-  useEffect(() =>
-  {
-
+  useEffect(() => {
     if (props.initialValues != null) {
-      const noticeSemester = new Date(props.initialValues?.effectiveDate).getMonth() + 1 > 6 ? "2 semestre" : "1 semestre";
-      props.formController.setFieldsValue(
-      {
+      const noticeSemester =
+        new Date(props.initialValues?.effectiveDate).getMonth() + 1 > 6
+          ? "2 semestre"
+          : "1 semestre";
+      props.formController.setFieldsValue({
         ...props.initialValues,
+        category: null,
         effectiveDate: moment(props.initialValues.effectiveDate),
         expirationDate: moment(props.initialValues.expirationDate),
         reportDeadline: moment(props.initialValues.reportDeadline),
-        projectExecutionPeriod: props.initialValues.projectExecutionPeriod ? props.initialValues.projectExecutionPeriod : noticeSemester,
-        projectExecutionYear: props.initialValues.projectExecutionYear ? moment(props.initialValues.projectExecutionYear) : moment(props.initialValues.effectiveDate),
+        projectExecutionPeriod: props.initialValues.projectExecutionPeriod
+          ? props.initialValues.projectExecutionPeriod
+          : noticeSemester,
+        projectExecutionYear: props.initialValues.projectExecutionYear
+          ? moment(props.initialValues.projectExecutionYear)
+          : moment(props.initialValues.effectiveDate),
       });
     }
   }, [props.formController, props.initialValues]);
 
   function disabledDate(current: moment.Moment) {
-    return current && !current.isBetween(moment().year(2020), moment().year(2050));
+    return (
+      current && !current.isBetween(moment().year(2020), moment().year(2050))
+    );
   }
   return (
-    <Form
-      name="main"
-      layout="vertical"
-      form={props.formController}
-    >
+    <Form name="main" layout="vertical" form={props.formController}>
       <Row>
         <Form.Item name="_id">
           <Input type="hidden" />
@@ -101,7 +101,10 @@ export const MainDataForm: React.FC<Props> = (props) =>
             rules={[{ required: true, message: "Campo obrigatório" }]}
           >
             <Select
-              options={roles.map((r: Role) => ({ label: r.description, value: r._id! }))}
+              options={roles.map((r: Role) => ({
+                label: r.description,
+                value: r._id!,
+              }))}
               placeholder="Selecione funções de usuário"
               mode="multiple"
               allowClear
@@ -165,8 +168,8 @@ export const MainDataForm: React.FC<Props> = (props) =>
               <Option value="2° Semestre">2° Semestre</Option>
             </Select>
           </Form.Item>
-          </Col>
-          <Col span={24}>
+        </Col>
+        <Col span={24}>
           <Form.Item
             name="projectExecutionYear"
             label="Ano de execução do projeto"
@@ -178,7 +181,7 @@ export const MainDataForm: React.FC<Props> = (props) =>
               style={{ width: "100%" }}
             />
           </Form.Item>
-          </Col>
+        </Col>
       </Row>
     </Form>
   );

@@ -138,18 +138,20 @@ export const CreateDiscipline: React.FC = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="courses" label="Cursos">
-            <Select
-              mode="multiple"
-              allowClear
-              placeholder="Selecione os cursos"
-              options={courses.map((course: Course) => ({
-                key: course._id!,
-                value: course._id!,
-                label: `${course.name} - ${course.campus.name}`,
-              }))}
-            ></Select>
-          </Form.Item>
+          {selectedCategory?.name === "Curricular específica de curso" && (
+            <Form.Item name="courses" label="Cursos">
+              <Select
+                mode="multiple"
+                allowClear
+                placeholder="Selecione os cursos"
+                options={courses.map((course: Course) => ({
+                  key: course._id!,
+                  value: course._id!,
+                  label: `${course.name} - ${course.campus.name}`,
+                }))}
+              ></Select>
+            </Form.Item>
+          )}
 
           <Form.Item>
             <Space>
@@ -199,9 +201,17 @@ export const CreateDiscipline: React.FC = () => {
             {selectedCategory.name === "Curricular específica de curso" && (
               <Form.Item name="courses" label="Cursos">
                 <Select
+                  showSearch
+                  showArrow
                   mode="multiple"
                   allowClear
                   placeholder="Selecione os cursos"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (String(option?.label) ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
                   style={{ width: "100%" }}
                   options={courses.map((course: Course) => ({
                     key: course._id!,

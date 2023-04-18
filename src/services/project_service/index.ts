@@ -107,7 +107,6 @@ export const downloadCSV = async (programId: string): Promise<any> => {
     const response = await httpClient.get("/downloadCsv/".concat(programId), {
       responseType: "blob",
     });
-    console.log(response.headers);
     window.open(response.data);
     return response.data;
   } else {

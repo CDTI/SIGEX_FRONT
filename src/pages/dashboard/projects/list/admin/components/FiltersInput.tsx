@@ -10,6 +10,8 @@ import { getAllProgramsEndpoint } from "../../../../../../services/endpoints/pro
 import { getAllNoticesEndpoint } from "../../../../../../services/endpoints/notices";
 import { getAllCategoriesEndpoint } from "../../../../../../services/endpoints/categories";
 import { ProjectsFilterContext } from "../../../../../../context/projects";
+import { Discipline } from "../../../../../../interfaces/discipline";
+import { getAllDisciplines } from "../../../../../../services/discipline_service";
 
 export type Field =
   | "AUTHOR"
@@ -41,14 +43,15 @@ export const Filters: React.FC<Props> = (props) => {
     page,
     limit,
     getPaginatedProjects,
-    setPage,
     cleanFilters,
     setProjectNameFilter,
     setProgramFilter,
     setCategoryFilter,
+    setDisciplineFilter,
     setNoticeFilter,
     setAuthorNameFilter,
     setStatusFilter,
+    setReportFilter,
   } = useContext(ProjectsFilterContext);
   let { query } = useContext(ProjectsFilterContext);
   const [form] = Form.useForm();
@@ -57,6 +60,8 @@ export const Filters: React.FC<Props> = (props) => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const selectCategoriesRequester = useHttpClient();
+
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
 
   const [notices, setNotices] = useState<Notice[]>([]);
   const selectNoticesRequester = useHttpClient();
@@ -78,10 +83,12 @@ export const Filters: React.FC<Props> = (props) => {
           ...getAllCategoriesEndpoint(),
           cancellable: true,
         }),
-      ]);
 
-      setPrograms(data[0].programs ?? []);
+        getAllDisciplines(),
+      ]);
+      setPrograms(data[0] ?? []);
       setCategories(data[2] ?? []);
+      setDisciplines(data[3] ?? []);
       setNotices(
         data[1]
           ?.sort((a: Notice, b: Notice) =>
@@ -114,15 +121,8 @@ export const Filters: React.FC<Props> = (props) => {
       category: "",
       notice: "",
       status: "",
+      report: "",
     });
-  };
-
-  const getFilteredProjects = () => {
-    if (page !== 1) {
-      setPage(1);
-    } else {
-      getPaginatedProjects(query);
-    }
   };
 
   return (
@@ -162,6 +162,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(programId: string) => {
                 setProgramFilter(programId);
               }}
@@ -181,8 +188,43 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(categoryId: string) => {
                 setCategoryFilter(categoryId);
+              }}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} xl={12}>
+          <Form.Item name="discipline" style={{ margin: "0px" }}>
+            <Select
+              loading={selectCategoriesRequester.inProgress}
+              options={[
+                { label: "Selecione uma disciplina", value: "" },
+              ].concat(
+                disciplines.map((d: Discipline) => ({
+                  label: d.name,
+                  value: d._id!,
+                }))
+              )}
+              defaultValue=""
+              style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              onChange={(disciplineId: string) => {
+                setDisciplineFilter(disciplineId);
               }}
             />
           </Form.Item>
@@ -197,6 +239,13 @@ export const Filters: React.FC<Props> = (props) => {
               )}
               defaultValue=""
               style={{ width: "100%" }}
+              showSearch
+              showArrow
+              filterOption={(input, option) =>
+                (String(option?.label) ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               onChange={(noticeId: string) => {
                 setNoticeFilter(noticeId);
               }}
@@ -219,6 +268,21 @@ export const Filters: React.FC<Props> = (props) => {
                 Aprovado e não selecionado
               </Select.Option>
               <Select.Option value="reproved">Não aprovado</Select.Option>
+            </Select>
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <Form.Item name="report" style={{ margin: "0px" }}>
+            <Select
+              defaultValue=""
+              id="report"
+              style={{ width: "100%" }}
+              onChange={(report: string) => setReportFilter(report)}
+            >
+              <Select.Option value="">Projeto possui relatório?</Select.Option>
+              <Select.Option value="yes">Sim</Select.Option>
+              <Select.Option value="no">Não</Select.Option>
             </Select>
           </Form.Item>
         </Col>

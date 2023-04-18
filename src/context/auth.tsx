@@ -2,53 +2,60 @@ import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { User } from "../interfaces/user";
 import { httpClient } from "../services/httpClient";
+import { getUserCoursesAndRoles } from "../services/user_service";
 
-interface AuthContextData
-{
+interface AuthContextData {
   isUserLoggedIn: boolean;
   user: User | null;
   login?(token: string, user: User): void;
   logout?(): void;
   update?(user: User): void;
+  loading: boolean;
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AuthContext = createContext<AuthContextData>(
-{
+export const AuthContext = createContext<AuthContextData>({
   isUserLoggedIn: false,
-  user: null
+  user: null,
+  loading: false,
 });
 
-export const AuthProvider: React.FC = (props) =>
-{
+export const AuthProvider: React.FC = (props) => {
   const history = useHistory();
 
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const update = useCallback((user: User) =>
-  {
+  const update = useCallback(async (user: User) => {
     delete user.password;
-
-    localStorage.setItem("@pp:user", JSON.stringify(user));
-    setUser(user);
+    try {
+      const coursesAndRolesUpdated = await getUserCoursesAndRoles(user._id!);
+      user.roles = coursesAndRolesUpdated.roles;
+      user.courses = coursesAndRolesUpdated.courses;
+      localStorage.setItem("@pp:user", JSON.stringify(user));
+      setUser(user);
+    } catch (error) {
+      console.log(error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const authorize = useCallback((token: string, user: User) =>
-  {
-    httpClient.defaults.headers.Authorization = `Bearer ${token}`
-    update(user);
+  const authorize = useCallback(async (token: string, user: User) => {
+    httpClient.defaults.headers.Authorization = `Bearer ${token}`;
+    await update(user);
   }, []);
 
-  const login = useCallback((token: string, user: User) =>
-  {
+  const login = useCallback(async (token: string, user: User) => {
     localStorage.setItem("@pp:token", token);
 
-    authorize(token, user);
+    await authorize(token, user);
 
     history.replace("/home");
   }, []);
 
-  const logout = useCallback(() =>
-  {
+  const logout = useCallback(() => {
     setUser(null);
 
     localStorage.removeItem("@pp:user");
@@ -57,26 +64,28 @@ export const AuthProvider: React.FC = (props) =>
     history.replace("/login");
   }, []);
 
-  useEffect(() =>
-  {
-    const savedUser = localStorage.getItem("@pp:user");
-    const savedToken = localStorage.getItem("@pp:token");
-    if (savedToken && savedUser)
-    {
-      authorize(savedToken, JSON.parse(savedUser.toString()));
-      history.replace("/home");
-    }
+  useEffect(() => {
+    (async () => {
+      const savedUser = localStorage.getItem("@pp:user");
+      const savedToken = localStorage.getItem("@pp:token");
+      if (savedToken && savedUser) {
+        setLoading(true);
+        await authorize(savedToken, JSON.parse(savedUser.toString()));
+        history.replace("/home");
+      }
+    })();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={
-      {
+      value={{
         isUserLoggedIn: user != null,
         user,
         login,
         logout,
-        update
+        update,
+        loading,
+        setLoading,
       }}
     >
       {props.children}

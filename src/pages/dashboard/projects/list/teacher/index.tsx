@@ -1,7 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
-import { Tag, Space, Button, notification, Select, Col, Row, Modal, Table } from "antd";
+import {
+  Tag,
+  Space,
+  Button,
+  notification,
+  Select,
+  Col,
+  Row,
+  Modal,
+  Table,
+} from "antd";
 
 import { Register } from "../../../../../interfaces/feedback";
 import { Notice } from "../../../../../interfaces/notice";
@@ -9,7 +25,10 @@ import { Program } from "../../../../../interfaces/program";
 import { Project } from "../../../../../interfaces/project";
 import { listFeedbackProject } from "../../../../../services/feedback_service";
 import { listPrograms } from "../../../../../services/program_service";
-import { deleteProject, listAllTeacherProjects } from "../../../../../services/project_service";
+import {
+  deleteProject,
+  listAllTeacherProjects,
+} from "../../../../../services/project_service";
 import Structure from "../../../../../components/layout/structure";
 import { formatDate } from "../../../../../utils/dateFormatter";
 import { StatusTag } from "../../../../../components/StatusTag";
@@ -18,15 +37,12 @@ import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks
 import { ProjectDetailsModal } from "../admin/components/ProjectDetailsModal";
 import { EyeOutlined } from "@ant-design/icons";
 
-
-interface IAction
-{
+interface IAction {
   type: string;
-  data?: any
+  data?: any;
 }
 
-interface DialogState
-{
+interface DialogState {
   isVisible: boolean;
   title: string;
   content: string;
@@ -34,10 +50,8 @@ interface DialogState
   targetId?: string;
 }
 
-const dialogReducer = (state: DialogState, action: IAction): DialogState =>
-{
-  switch (action.type)
-  {
+const dialogReducer = (state: DialogState, action: IAction): DialogState => {
+  switch (action.type) {
     case "SHOW_DIALOG":
       return { ...state, isVisible: true };
 
@@ -51,21 +65,19 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState =>
       return { ...state, isWorking: false };
 
     case "SET_CONTENT":
-      return (
-      {
+      return {
         ...state,
         title: action.data.title,
         content: action.data.content,
-        targetId: action.data.targetId
-      });
+        targetId: action.data.targetId,
+      };
 
     default:
       throw new Error();
   }
-}
+};
 
-export const TeacherProjectsPage: React.FC = () =>
-{
+export const TeacherProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -75,14 +87,11 @@ export const TeacherProjectsPage: React.FC = () =>
   const modalProjectsRequester = useHttpClient();
   const [projectModalIsVisible, setProjectModalIsVisible] = useState(false);
 
-
-  const [infoDialogState, dispatchInfoDialogState] = useReducer(
-    dialogReducer,
-    {
-      isVisible: false,
-      title: "",
-      content: ""
-    });
+  const [infoDialogState, dispatchInfoDialogState] = useReducer(dialogReducer, {
+    isVisible: false,
+    title: "",
+    content: "",
+  });
 
   const [actionDialogState, dispatchActionDialogState] = useReducer(
     dialogReducer,
@@ -91,29 +100,25 @@ export const TeacherProjectsPage: React.FC = () =>
       title: "",
       content: "",
       isWorking: false,
-      targetId: ""
-    });
+      targetId: "",
+    }
+  );
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     setLoading(true);
-    if (shouldReload)
-      setShouldReload(false);
+    if (shouldReload) setShouldReload(false);
 
-    listAllTeacherProjects({ withPopulatedRefs: true }).then((data) =>
-    {
+    listAllTeacherProjects({ withPopulatedRefs: true }).then((data) => {
       setProjects(data);
       setFilteredProjects(data);
-      listPrograms().then((list) =>
-      {
-        setPrograms(list.programs);
+      listPrograms().then((list) => {
+        setPrograms(list);
         setLoading(false);
       });
     });
   }, [shouldReload]);
 
-  const infoDialog = useMemo(() =>
-  {
+  const infoDialog = useMemo(() => {
     const dialogVisibilityHandler = () =>
       dispatchInfoDialogState({ type: "HIDE_DIALOG" });
 
@@ -121,7 +126,11 @@ export const TeacherProjectsPage: React.FC = () =>
       <Modal
         visible={infoDialogState.isVisible}
         title={infoDialogState.title}
-        footer={<Button type="primary" onClick={dialogVisibilityHandler}>OK</Button>}
+        footer={
+          <Button type="primary" onClick={dialogVisibilityHandler}>
+            OK
+          </Button>
+        }
         onOk={dialogVisibilityHandler}
       >
         <p>{infoDialogState.content}</p>
@@ -129,35 +138,32 @@ export const TeacherProjectsPage: React.FC = () =>
     );
   }, [infoDialogState]);
 
-  const openDetailsModal = useCallback(async (type: "project" | "report", project: Project) =>
-  {
-    setProject(project);
-    if (type === "project")
-    {
-      try
-      {
-        const log = await modalProjectsRequester.send(
-        {
-          ...getFeedbackEndpoint(project._id!),
-          queryParams: new Map([["withPopulatedRefs", "true"]]),
-          cancellable: true,
-        });
-        setProjectModalIsVisible(true);
+  const openDetailsModal = useCallback(
+    async (type: "project" | "report", project: Project) => {
+      setProject(project);
+      if (type === "project") {
+        try {
+          const log = await modalProjectsRequester.send({
+            ...getFeedbackEndpoint(project._id!),
+            queryParams: new Map([["withPopulatedRefs", "true"]]),
+            cancellable: true,
+          });
+          setProjectModalIsVisible(true);
+        } catch (error) {
+          notification.error({
+            message: "Não foi possível carregar o projeto para visualização!",
+          });
+        }
       }
-      catch (error)
-      {
-        notification.error({ message: "Não foi possível carregar o projeto para visualização!" });
-      }
-    }
-  }, [project, modalProjectsRequester.send]);
+    },
+    [project, modalProjectsRequester.send]
+  );
 
-  const actionDialog = useMemo(() =>
-  {
+  const actionDialog = useMemo(() => {
     const cancelationHandler = () =>
       dispatchActionDialogState({ type: "HIDE_DIALOG" });
 
-    const confirmationHandler = async (id: string) =>
-    {
+    const confirmationHandler = async (id: string) => {
       dispatchActionDialogState({ type: "WORKING" });
 
       const response = await deleteProject(id);
@@ -167,7 +173,7 @@ export const TeacherProjectsPage: React.FC = () =>
       dispatchActionDialogState({ type: "HIDE_DIALOG" });
 
       setShouldReload(true);
-    }
+    };
 
     return (
       <Modal
@@ -175,159 +181,181 @@ export const TeacherProjectsPage: React.FC = () =>
         title={actionDialogState.title}
         confirmLoading={actionDialogState.isWorking}
         onCancel={cancelationHandler}
-        onOk={async () => await confirmationHandler(actionDialogState.targetId!)}
+        onOk={async () =>
+          await confirmationHandler(actionDialogState.targetId!)
+        }
       >
         <p>{actionDialogState.content}</p>
       </Modal>
     );
   }, [actionDialogState]);
 
-  const handleChange = (event: string) =>
-  {
-    setFilteredProjects(event !== ""
-      ? projects.filter((p: Project) => p.program === event)
-      : projects);
+  const handleChange = (event: string) => {
+    setFilteredProjects(
+      event !== ""
+        ? projects.filter((p: Project) => p.program === event)
+        : projects
+    );
   };
 
-  const columns =
-  [{
-    key: "name",
-    title: "Nome",
-    dataIndex: "name"
-  },
-  {
-    key: "dateStart",
-    title: "Data de início",
-    dataIndex: "dateStart",
-    render: (dateStart: string) =>
-      formatDate(new Date(dateStart))
-  },
-  {
-    key: "status",
-    title: "Avaliação",
-    dataIndex: "status",
-    render: (text: string, record: Project) => (
-      <StatusTag status={record.status} />
-    )
-  },
-  {
-    key: "action",
-    title: "Ação",
-    render: (text: string, record: Project) => (
-      <Space size="middle">
-        {record.status !== "pending" && record.status !== "finished" && (
-          <Button
-          onClick={async () =>
-            {
-              let data;
-              const justification = await listFeedbackProject(record._id!).then((response => {
-                const hasUserJustification = response.feedback.registers.filter((r: Register) => r.typeFeedback === "user").length > 0
-                if(hasUserJustification) {
-                  return response.feedback.registers
-                    .filter((r: Register) => r.typeFeedback === "user")
-                    .slice(-1)[0].text
-                }
-              }));
-              switch (record.status)
-              {
-                case "reproved":
-                  data = { title: "Não aprovado", content: justification};
-                  break;
-                case "notSelected":
-                  data = { title: "Não selecionado", content: justification !== ''
-                    ? justification
-                    : "Professor, seu projeto atende os requisitos da extensão, " +"entretanto não foi possível alocá-lo nas turmas disponíveis."
-                  };
-                  break;
-                case "selected":
-                  data = { title: "Selecionado", content: justification  !== ''
-                    ? justification
-                    : "Parabéns, seu projeto foi selecionado. " +
-                     "Por favor, confira as turmas para as quais " +
-                     "foi alocado no edital de resultados."
-                  };
-                  break;
-              }
-
-              dispatchInfoDialogState({ type: "SET_CONTENT", data });
-              dispatchInfoDialogState({ type: "SHOW_DIALOG" });
-            }}
-          >
-            Informações
-          </Button>
-        )}
-
-        {record.status === "selected" &&
-        <>
-         <Button>
-            {record.report == null
-              ? <Link to={`/propostas/relatorio/criar?project=${record._id}`}>Relatório</Link>
-              : (<Link
-                  to={
-                  {
-                    pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
-                    state: record.report
-                  }}
-                >
-                  Relatório
-                </Link>)}
-          </Button>
-          <Button onClick={() => openDetailsModal("project", record)}>
-            <EyeOutlined /> Proposta
-          </Button>
-        </>
-        }
-
-        {record.status === "notSelected" &&
-          <>
-            <Button onClick={() => openDetailsModal("project", record)}>
-              <EyeOutlined /> Proposta
-            </Button>
-          </>
-        }
-
-        {(record.notice as Notice).isActive && (record.status === "pending" || record.status === "reproved") && (
-          <>
-            <Button>
-              <Link
-                to={
-                {
-                  pathname: `/propostas/editar/${record._id}`,
-                  state: { project: record, context: "user" }
-                }}
-              >
-                Editar
-              </Link>
-            </Button>
-
+  const columns = [
+    {
+      key: "name",
+      title: "Nome",
+      dataIndex: "name",
+    },
+    {
+      key: "dateStart",
+      title: "Data de início",
+      dataIndex: "dateStart",
+      render: (dateStart: string) => formatDate(new Date(dateStart)),
+    },
+    {
+      key: "status",
+      title: "Avaliação",
+      dataIndex: "status",
+      render: (text: string, record: Project) => (
+        <StatusTag status={record.status} />
+      ),
+    },
+    {
+      key: "action",
+      title: "Ação",
+      render: (text: string, record: Project) => (
+        <Space size="middle">
+          {record.status !== "pending" && record.status !== "finished" && (
             <Button
-              onClick={() =>
-              {
-                dispatchActionDialogState(
-                {
-                  type: "SET_CONTENT",
-                  data:
-                  {
-                    title: "Remover projeto",
-                    content: `Tem certeza que deseja remover o projeto ${record.name}?`,
-                    targetId: record._id
+              onClick={async () => {
+                let data;
+                const justification = await listFeedbackProject(
+                  record._id!
+                ).then((response) => {
+                  const hasUserJustification =
+                    response.feedback.registers.filter(
+                      (r: Register) => r.typeFeedback === "user"
+                    ).length > 0;
+                  if (hasUserJustification) {
+                    return response.feedback.registers
+                      .filter((r: Register) => r.typeFeedback === "user")
+                      .slice(-1)[0].text;
                   }
-                })
-                dispatchActionDialogState({ type: "SHOW_DIALOG" });
+                });
+                switch (record.status) {
+                  case "reproved":
+                    data = { title: "Não aprovado", content: justification };
+                    break;
+                  case "notSelected":
+                    data = {
+                      title: "Não selecionado",
+                      content:
+                        justification !== ""
+                          ? justification
+                          : "Professor, seu projeto atende os requisitos da extensão, " +
+                            "entretanto não foi possível alocá-lo nas turmas disponíveis.",
+                    };
+                    break;
+                  case "selected":
+                    data = {
+                      title: "Selecionado",
+                      content:
+                        justification !== ""
+                          ? justification
+                          : "Parabéns, seu projeto foi selecionado. " +
+                            "Por favor, confira as turmas para as quais " +
+                            "foi alocado no edital de resultados.",
+                    };
+                    break;
+                }
+
+                dispatchInfoDialogState({ type: "SET_CONTENT", data });
+                dispatchInfoDialogState({ type: "SHOW_DIALOG" });
               }}
             >
-              Deletar
+              Informações
             </Button>
-          </>
-        )}
-      </Space>
-    )
-  }];
+          )}
+
+          {record.status === "selected" && (
+            <>
+              <Button>
+                {record.report == null ? (
+                  <Link to={`/propostas/relatorio/criar?project=${record._id}`}>
+                    Relatório
+                  </Link>
+                ) : (
+                  <Link
+                    to={{
+                      pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
+                      state: record.report,
+                    }}
+                  >
+                    Relatório
+                  </Link>
+                )}
+              </Button>
+              <Button onClick={() => openDetailsModal("project", record)}>
+                <EyeOutlined /> Proposta
+              </Button>
+            </>
+          )}
+
+          {record.status === "notSelected" && (
+            <>
+              <Button onClick={() => openDetailsModal("project", record)}>
+                <EyeOutlined /> Proposta
+              </Button>
+            </>
+          )}
+
+          {(record.notice as Notice).isActive &&
+            record.status === "pending" && (
+              <>
+                <Button>
+                  <Link
+                    to={{
+                      pathname: `/propostas/editar/${record._id}`,
+                      state: {
+                        project: record,
+                        context: "user",
+                      },
+                    }}
+                  >
+                    Editar
+                  </Link>
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    dispatchActionDialogState({
+                      type: "SET_CONTENT",
+                      data: {
+                        title: "Remover projeto",
+                        content: `Tem certeza que deseja remover o projeto ${record.name}?`,
+                        targetId: record._id,
+                      },
+                    });
+                    dispatchActionDialogState({ type: "SHOW_DIALOG" });
+                  }}
+                >
+                  Deletar
+                </Button>
+              </>
+            )}
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <>
-      {ReactDOM.createPortal(infoDialog, document.getElementById("dialog-overlay")!)}
-      {ReactDOM.createPortal(actionDialog, document.getElementById("dialog-overlay")!)}
+      {ReactDOM.createPortal(
+        infoDialog,
+        document.getElementById("dialog-overlay")!
+      )}
+      {ReactDOM.createPortal(
+        actionDialog,
+        document.getElementById("dialog-overlay")!
+      )}
       <ProjectDetailsModal
         project={project}
         isVisible={projectModalIsVisible}
@@ -338,10 +366,11 @@ export const TeacherProjectsPage: React.FC = () =>
         <Row gutter={[8, 8]}>
           <Col xs={24}>
             <Select
-              options={
-                [{ label: "Sem filtro", value: "" }].concat(programs
+              options={[{ label: "Sem filtro", value: "" }].concat(
+                programs
                   .filter((p: Program) => p._id !== undefined)
-                  .map((p: Program) => ({ label: p.name, value: p._id! })))}
+                  .map((p: Program) => ({ label: p.name, value: p._id! }))
+              )}
               defaultValue=""
               onChange={handleChange}
               style={{ width: "100%" }}
@@ -349,7 +378,11 @@ export const TeacherProjectsPage: React.FC = () =>
           </Col>
 
           <Col span={24}>
-            <Table loading={loading} dataSource={filteredProjects} columns={columns} />
+            <Table
+              loading={loading}
+              dataSource={filteredProjects}
+              columns={columns}
+            />
           </Col>
         </Row>
       </Structure>

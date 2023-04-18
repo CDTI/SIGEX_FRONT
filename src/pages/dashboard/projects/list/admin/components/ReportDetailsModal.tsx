@@ -36,7 +36,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
   return (
     <Modal
       centered={true}
-      closable={false}
+      closable={true}
       footer={
         <Row justify="end">
           <Button type="primary" onClick={() => props.onClose()}>
@@ -50,6 +50,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
         </Title>
       }
       visible={props.isVisible}
+      onCancel={() => props.onClose()}
       width="85%"
     >
       <Row gutter={[0, 24]} justify="center">
@@ -90,7 +91,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                   style={
                     props.project == null ||
                     (props.project.category as Category).name ===
-                      "Extensão específica do curso"
+                      "Curricular específica de curso"
                       ? { paddingBottom: "0" }
                       : {}
                   }
@@ -140,8 +141,11 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                               props.project?.report?.ods.length === index + 1
                                 ? true
                                 : false;
-                            if (isLastElement) return eachOds + ".";
-                            else return eachOds + ", ";
+                            if (isLastElement) {
+                              return eachOds + ".";
+                            } else {
+                              return eachOds + ", ";
+                            }
                           })}
                         </Paragraph>
                       </LabeledContent>
@@ -170,9 +174,9 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
 
                 {props.project != null &&
                   (props.project.category as Category).name ===
-                    "Extensão específica do curso" && (
+                    "Curricular específica de curso" && (
                     <Col span={24} style={{ paddingBottom: "0" }}>
-                      <LabeledContent label="Curso(s)">
+                      {/* <LabeledContent label="Curso(s)">
                         <Paragraph>
                           {props.project.course
                             ? (props.project.course as Course).name
@@ -185,7 +189,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                               ).name
                             : ""}
                         </Paragraph>
-                      </LabeledContent>
+                      </LabeledContent> */}
                     </Col>
                   )}
               </Row>
