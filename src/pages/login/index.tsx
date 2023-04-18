@@ -65,8 +65,8 @@ export const LoginPage: React.FC = () => {
         if ((error as Error).message !== "")
           notification.error({ message: (error as Error).message });
       }
-
-      setLoading(false);
+      authContext.setLoading!(false);
+      // setLoading(false);
     },
     [formUsersRequester.send, authContext]
   );
@@ -164,7 +164,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <Container>
-      {!loading && (
+      {!authContext.loading && (
         <FormDiv>
           <ContainerImage>
             <ImageLogo src={logo} />
@@ -362,7 +362,7 @@ export const LoginPage: React.FC = () => {
         </FormDiv>
       )}
 
-      {loading && <Spin size="large" />}
+      {authContext.loading && <Spin size="large" />}
     </Container>
   );
 };

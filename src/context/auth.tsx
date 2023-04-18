@@ -10,17 +10,21 @@ interface AuthContextData {
   login?(token: string, user: User): void;
   logout?(): void;
   update?(user: User): void;
+  loading: boolean;
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AuthContext = createContext<AuthContextData>({
   isUserLoggedIn: false,
   user: null,
+  loading: false,
 });
 
 export const AuthProvider: React.FC = (props) => {
   const history = useHistory();
 
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const update = useCallback(async (user: User) => {
     delete user.password;
@@ -33,6 +37,8 @@ export const AuthProvider: React.FC = (props) => {
     } catch (error) {
       console.log(error);
       logout();
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -63,6 +69,7 @@ export const AuthProvider: React.FC = (props) => {
       const savedUser = localStorage.getItem("@pp:user");
       const savedToken = localStorage.getItem("@pp:token");
       if (savedToken && savedUser) {
+        setLoading(true);
         await authorize(savedToken, JSON.parse(savedUser.toString()));
         history.replace("/home");
       }
@@ -77,6 +84,8 @@ export const AuthProvider: React.FC = (props) => {
         login,
         logout,
         update,
+        loading,
+        setLoading,
       }}
     >
       {props.children}
