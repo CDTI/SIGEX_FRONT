@@ -1,7 +1,15 @@
 import crypto from "crypto";
 import React, { useCallback, useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Form, Button, Input, Spin, notification } from "antd";
+import {
+  Form,
+  Button,
+  Input,
+  Spin,
+  notification,
+  Typography,
+  Space,
+} from "antd";
 import InputMask from "antd-mask-input";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import "dotenv/config";
@@ -33,7 +41,6 @@ interface Credentials {
 export const LoginPage: React.FC = () => {
   const history = useHistory();
   const authContext = useContext(AuthContext);
-  const [loading, setLoading] = useState(false);
   const [cpf, setCpf] = useState("");
   const [newUser, setNewUser] = useState(false);
   const [loginUser, setLoginUser] = useState(false);
@@ -362,7 +369,30 @@ export const LoginPage: React.FC = () => {
         </FormDiv>
       )}
 
-      {authContext.loading && <Spin size="large" />}
+      {authContext.loading && (
+        <>
+          <Space
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            <Spin size="large" />
+            <Typography style={{ fontSize: "24px", color: "white" }}>
+              Por favor, aguarde...
+            </Typography>
+
+            <Typography style={{ color: "white", marginTop: "20px" }}>
+              Caso demore mais de 1 minuto, clique no botão abaixo para relogar:
+            </Typography>
+            <Button
+              type="primary"
+              onClick={() => {
+                authContext.logout!();
+              }}
+            >
+              Logout
+            </Button>
+          </Space>
+        </>
+      )}
     </Container>
   );
 };
