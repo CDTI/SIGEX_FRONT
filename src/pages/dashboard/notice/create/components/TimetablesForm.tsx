@@ -167,11 +167,15 @@ export const TimetablesForm: React.FC<Props> = (props) => {
               ]}
             >
               <Select
-                options={disciplines.map((d) => ({
-                  key: d._id,
-                  label: d.name,
-                  value: d._id!,
-                }))}
+                options={[
+                  { label: "Selecione uma disciplina", value: "" },
+                ].concat(
+                  disciplines.map((d) => ({
+                    key: d._id,
+                    label: d.name,
+                    value: d._id!,
+                  }))
+                )}
                 onChange={() => setShouldDisableButton(false)}
                 style={{ width: "100%" }}
               />
