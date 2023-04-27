@@ -95,10 +95,13 @@ export const MainForm: React.FC<Props> = (props) => {
       });
       setCourses(courses ?? []);
       const foundUserCourses = await getUserCoursesAndRoles(user?._id!);
-      const userCourses = courses.filter((course: Course) => {
-        return foundUserCourses.courses.some((c) => course._id === c);
-      });
-      setUserCourses(userCourses);
+
+      if (foundUserCourses.courses) {
+        const userCourses = courses.filter((course: Course) => {
+          return foundUserCourses.courses.some((c) => course._id === c);
+        });
+        setUserCourses(userCourses);
+      }
 
       let notices =
         localStorage.getItem(noticesKey) != null
