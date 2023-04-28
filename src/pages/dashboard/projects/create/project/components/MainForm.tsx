@@ -158,10 +158,17 @@ export const MainForm: React.FC<Props> = (props) => {
         // }
 
         if (props.initialValues.discipline) {
-          const foundDiscipline = disciplines.find(
-            (d: Discipline) => d._id === props.initialValues?.discipline._id
-          );
-          setSelectedDiscipline(foundDiscipline);
+          if (props.context === "admin") {
+            const foundDiscipline = disciplines.find(
+              (d: Discipline) => d._id === props.initialValues?.discipline._id
+            );
+            setSelectedDiscipline(foundDiscipline);
+          } else {
+            const foundDiscipline = disciplines.find(
+              (d: Discipline) => d._id === props.initialValues?.discipline
+            );
+            setSelectedDiscipline(foundDiscipline);
+          }
         }
 
         if (projectNotice.timetables) {
@@ -225,9 +232,14 @@ export const MainForm: React.FC<Props> = (props) => {
           category: props.initialValues.category
             ? (props.initialValues.category as Category)._id
             : null,
-          discipline: props.initialValues.discipline
-            ? props.initialValues.discipline._id
-            : null,
+          discipline:
+            props.context === "user"
+              ? props.initialValues.discipline
+                ? props.initialValues.discipline
+                : null
+              : props.initialValues.discipline
+              ? props.initialValues.discipline._id
+              : null,
           firstSemester: [],
           secondSemester: [],
         });
