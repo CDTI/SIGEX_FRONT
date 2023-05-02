@@ -44,6 +44,7 @@ import {
 } from "../../../../../../services/user_service";
 import { listActivePrograms } from "../../../../../../services/program_service";
 import { allOds } from "../../report/components/IntroductionForm";
+import { getAllNotices } from "../../../../../../services/notice_service";
 
 interface Props {
   context: "admin" | "user";
@@ -103,17 +104,23 @@ export const MainForm: React.FC<Props> = (props) => {
         setUserCourses(userCourses);
       }
 
-      let notices =
-        localStorage.getItem(noticesKey) != null
-          ? (JSON.parse(localStorage.getItem(noticesKey)!) as Notice[])
-          : await selectNoticesRequester.send({
-              method: "GET",
-              url: getActiveNoticesEndpoint(),
-              queryParams: new Map([["withPopulatedRefs", "true"]]),
-              cancellable: true,
-            });
+      if (props.context === "user") {
+        let notices =
+          localStorage.getItem(noticesKey) != null
+            ? (JSON.parse(localStorage.getItem(noticesKey)!) as Notice[])
+            : await selectNoticesRequester.send({
+                method: "GET",
+                url: getActiveNoticesEndpoint(),
+                queryParams: new Map([["withPopulatedRefs", "true"]]),
+                cancellable: true,
+              });
 
-      setNotices(notices ?? []);
+        setNotices(notices ?? []);
+      } else {
+        const notices = await getAllNotices();
+
+        setNotices(notices ?? []);
+      }
 
       const programs = await listActivePrograms();
 
@@ -163,17 +170,32 @@ export const MainForm: React.FC<Props> = (props) => {
               (d: Discipline) => d._id === props.initialValues?.discipline._id
             );
             setSelectedDiscipline(foundDiscipline);
+            if (projectNotice.timetables) {
+              const foundTimetable = projectNotice?.timetables.find(
+                (timetable: Timetable) =>
+                  timetable.discipline === foundDiscipline?._id
+              );
+              setSchedule(
+                foundTimetable?.schedules ?? props.initialValues.secondSemester
+              );
+            }
           } else {
             const foundDiscipline = disciplines.find(
               (d: Discipline) => d._id === props.initialValues?.discipline
             );
             setSelectedDiscipline(foundDiscipline);
+            if (projectNotice.timetables) {
+              const foundTimetable = projectNotice?.timetables.find(
+                (timetable: Timetable) =>
+                  timetable.discipline === foundDiscipline?._id
+              );
+              setSchedule(
+                foundTimetable?.schedules ?? props.initialValues.secondSemester
+              );
+            }
           }
         }
 
-        if (projectNotice.timetables) {
-          setSchedule(props.initialValues.firstSemester);
-        }
         // setCurrentProjectType(props.initialValues.typeProject);
 
         if (
@@ -240,8 +262,14 @@ export const MainForm: React.FC<Props> = (props) => {
               : props.initialValues.discipline
               ? props.initialValues.discipline._id
               : null,
-          firstSemester: [],
-          secondSemester: [],
+          firstSemester:
+            props.initialValues.firstSemester.map((s: Schedule) =>
+              scheduleAsValue(s)
+            ) ?? [],
+          secondSemester:
+            props.initialValues.firstSemester.map((s: Schedule) =>
+              scheduleAsValue(s)
+            ) ?? [],
         });
       }
       localStorage.setItem(coursesKey, JSON.stringify(courses));
@@ -600,6 +628,13 @@ export const MainForm: React.FC<Props> = (props) => {
                   name="secondSemester"
                   label="Horários disponíveis"
                   rules={[{ required: true }]}
+                  initialValue={
+                    props.initialValues
+                      ? props.initialValues.secondSemester.map((s: Schedule) =>
+                          scheduleAsValue(s)
+                        )
+                      : []
+                  }
                 >
                   <Checkbox.Group style={{ width: "100%" }}>
                     <Row>
