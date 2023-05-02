@@ -121,7 +121,7 @@ export function useFormStateMachine() {
                     disciplineLearningObjectivesDescription:
                       payload.disciplineLearningObjectivesDescription,
                     ods: payload.ods,
-                    firstSemester: payload.firstSemester,
+                    firstSemester: payload.secondSemester,
                     maxClasses: payload.maxClasses,
                     name: payload.name,
                     notice: payload.notice,

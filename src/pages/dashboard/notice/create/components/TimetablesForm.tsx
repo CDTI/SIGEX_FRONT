@@ -93,7 +93,8 @@ export const TimetablesForm: React.FC<Props> = (props) => {
   const getDisciplines = async (categoryId: string) => {
     const disciplines = await getDisciplinesByCategory(categoryId)
       .then((res) => {
-        setDisciplines(res);
+        const activeDisciplines = res.filter((d: Discipline) => d.isActive);
+        setDisciplines(activeDisciplines);
       })
       .catch((error) => {
         console.log(error);

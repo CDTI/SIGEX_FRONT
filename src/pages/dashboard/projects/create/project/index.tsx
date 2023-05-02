@@ -85,13 +85,17 @@ export const CreateProposalPage: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const hasActiveNotices = await validationNoticesRequester.send<boolean>({
-        method: "GET",
-        url: hasActiveNoticesEndpoint(),
-        cancellable: true,
-      });
+      if (location.state.context === "user") {
+        const hasActiveNotices = await validationNoticesRequester.send<boolean>(
+          {
+            method: "GET",
+            url: hasActiveNoticesEndpoint(),
+            cancellable: true,
+          }
+        );
 
-      setHasActiveNotices(hasActiveNotices ?? false);
+        setHasActiveNotices(hasActiveNotices ?? false);
+      }
 
       if (location.state.project != null) {
         sendEvent({
