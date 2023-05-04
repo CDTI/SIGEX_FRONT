@@ -8,7 +8,7 @@ import { NotFound } from "../pages/404";
 import { ChangePasswordPage } from "../pages/change-password";
 import { AppLayout } from "../pages/dashboard";
 import { CreateCategory } from "../pages/dashboard/category";
-import { CreateDiscipline } from "../pages/dashboard/discipline";
+import { CreateDiscipline } from "../pages/dashboard/disciplines";
 import { CoursesPage } from "../pages/dashboard/courses";
 import { HomeDashboard } from "../pages/dashboard/home";
 import { Notices } from "../pages/dashboard/notice";
@@ -23,6 +23,7 @@ import { CreateUserPage } from "../pages/dashboard/users/create";
 import { LoginPage } from "../pages/login";
 import { ProjectsFilterProvider } from "../context/projects";
 import { CreateProgram } from "../pages/dashboard/programs/create";
+import { YearReportPage } from "../pages/dashboard/yearReport";
 
 export const Routes: React.FC = () => {
   const authContext = useContext(AuthContext);
@@ -77,6 +78,10 @@ export const Routes: React.FC = () => {
 
         <ProtectedRoute allow="Administrador" path="/disciplines">
           <CreateDiscipline />
+        </ProtectedRoute>
+
+        <ProtectedRoute allow="Administrador" path="/relatorio-anual">
+          <YearReportPage />
         </ProtectedRoute>
 
         <ProtectedRoute allow="Administrador" path="/editais" exact>
