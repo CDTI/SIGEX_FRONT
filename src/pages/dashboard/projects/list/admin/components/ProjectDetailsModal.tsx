@@ -272,14 +272,6 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   </Col>
                 )}
 
-                <Col span={24}>
-                  <LabeledContent label="Tipo">
-                    <Paragraph>
-                      {projectTypes[props.project?.typeProject ?? "common"]}
-                    </Paragraph>
-                  </LabeledContent>
-                </Col>
-
                 {props.project != null &&
                   (props.project.notice as Notice).projectExecutionPeriod &&
                   (props.project.notice as Notice).projectExecutionYear && (

@@ -131,7 +131,7 @@ export const Filters: React.FC<Props> = (props) => {
         <Col xs={24} md={12}>
           <Form.Item name="projectName" style={{ margin: "0px" }}>
             <Input
-              placeholder="Nome do projeto"
+              placeholder="Nome do projeto ou palavras-chave. Exemplo: Educação"
               style={{ width: "100%" }}
               onChange={(ev) => {
                 setProjectNameFilter(ev.target.value);
