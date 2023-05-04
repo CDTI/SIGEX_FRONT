@@ -168,6 +168,10 @@ export const AppLayout: React.FC = (props) => {
                 <Menu.Item key="/propostas" icon={<TeamOutlined />}>
                   <Link to="/propostas">Projetos</Link>
                 </Menu.Item>
+
+                <Menu.Item key="/relatorio-anual" icon={<FileTextOutlined />}>
+                  <Link to="/relatorio-anual">Relatório Anual</Link>
+                </Menu.Item>
               </>
             )}
 
