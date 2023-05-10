@@ -17,14 +17,17 @@ import { categoriesKey } from "..";
 
 import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import { Category } from "../../../../../interfaces/category";
-import { Timetable } from "../../../../../interfaces/notice";
+import { Notice, Timetable } from "../../../../../interfaces/notice";
 import { getActiveCategoriesEndpoint } from "../../../../../services/endpoints/categories";
 import { Discipline } from "../../../../../interfaces/discipline";
-import { getDisciplinesByCategory } from "../../../../../services/discipline_service";
+import {
+  getActiveDisciplines,
+  getDisciplinesByCategory,
+} from "../../../../../services/discipline_service";
 
 interface Props {
   formController: FormInstance;
-  initialValues?: Timetable[];
+  initialValues?: Notice;
 }
 
 const { Option } = Select;
@@ -40,16 +43,14 @@ export const TimetablesForm: React.FC<Props> = (props) => {
 
   useEffect(() => {
     (async () => {
-      const categories =
-        localStorage.getItem(categoriesKey) != null
-          ? (JSON.parse(localStorage.getItem(categoriesKey)!) as Category[])
-          : await selectCategoriesRequester.send<Category[]>({
-              method: "GET",
-              url: getActiveCategoriesEndpoint(),
-              cancellable: true,
-            });
+      const categories = await selectCategoriesRequester.send<Category[]>({
+        method: "GET",
+        url: getActiveCategoriesEndpoint(),
+        cancellable: true,
+      });
 
-      setCategories(categories?.slice(-3) ?? []);
+      setCategories(categories ?? []);
+      const disciplines = await getActiveDisciplines();
 
       localStorage.setItem(categoriesKey, JSON.stringify(categories));
     })();
@@ -60,8 +61,23 @@ export const TimetablesForm: React.FC<Props> = (props) => {
   }, [selectCategoriesRequester.halt, selectCategoriesRequester.send]);
 
   useEffect(() => {
-    if (props.initialValues != null)
-      props.formController.setFieldsValue({ timetables: props.initialValues });
+    (async () => {
+      if (props.initialValues != null)
+        props.formController.setFieldsValue({
+          timetables: props.initialValues.timetables,
+          category: (props.initialValues.category as Category)._id,
+        });
+      const disciplines = await getDisciplinesByCategory(
+        (props.initialValues?.category as Category)._id!
+      )
+        .then((res) => {
+          setDisciplines(res ?? []);
+        })
+        .catch((err) => console.log(err))
+        .finally(() => {
+          setSelectedCategory(props.initialValues?.category as Category);
+        });
+    })();
   }, [props.formController, props.initialValues]);
 
   const addDiscipline = useCallback(

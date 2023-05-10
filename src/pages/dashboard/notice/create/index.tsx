@@ -155,7 +155,7 @@ export const CreateNoticePage: React.FC = () => {
             view: (
               <TimetablesForm
                 formController={formController}
-                initialValues={formState.context.data?.timetables}
+                initialValues={formState.context.data}
               />
             ),
           },
