@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Structure from "../../../components/layout/structure";
 import { Button, Form, Input, Select, notification } from "antd";
 import { generateReport } from "../../../services/yearReport_service";
 import { baseUrl, httpClient } from "../../../services/httpClient";
 import { DownloadOutlined, FileWordOutlined } from "@ant-design/icons";
+import { getAllCampiEndpoint } from "../../../services/endpoints/courses";
+import { Campus } from "../../../interfaces/course";
+
+type NotificationType = "success" | "info" | "warning" | "error";
 
 export const YearReportPage: React.FC = () => {
   const years: number[] = [];
@@ -12,32 +16,49 @@ export const YearReportPage: React.FC = () => {
     years.push(i);
   }
 
+  const [form] = Form.useForm();
   const [btnLoading, setBtnLoading] = useState(false);
   const [downloadBtnDisabled, setDownloadBtnDisabled] = useState(true);
+  const [campus, setCampus] = useState<Campus[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(
+    undefined
+  );
+
+  const [api, contextHolder] = notification.useNotification();
+
+  const openNotification = (
+    type: NotificationType,
+    message: string,
+    description: string,
+    duration?: number
+  ) => {
+    api[type]({
+      message: message,
+      description: description,
+      duration: duration,
+    });
+  };
 
   const submitGenerateReport = async (city: string, year: number) => {
     setBtnLoading(true);
-    notification.info({
-      message: "Gerando relatório",
-      duration: 15,
-      description:
-        "O relatório pode demorar até 10 minutos para ficar pronto. Por favor aguarde...",
-      placement: "topRight",
-    });
+    setDownloadBtnDisabled(true);
+
     const response = await generateReport(city, year)
       .then((res) => {
         setBtnLoading(false);
         setDownloadBtnDisabled(false);
-        notification.success({
-          message: res,
-          description: "Você já pode fazer o download do relatório.",
-        });
+        openNotification(
+          "success",
+          "Relatório gerado",
+          "Você já pode fazer o download do relatório."
+        );
       })
       .catch((err) => {
-        notification.error({
-          message: "Erro!",
-          description: "Por favor, tente novamente mais tarde.",
-        });
+        openNotification(
+          "success",
+          "Erro!",
+          "Algo deu errado. Tente novamente mais tarde."
+        );
         console.log(err);
         setBtnLoading(false);
       });
@@ -47,65 +68,114 @@ export const YearReportPage: React.FC = () => {
     const report = await httpClient.get("/project/downloadYearReport");
   };
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const request = await httpClient.get(getAllCampiEndpoint());
+        setCampus(request.data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  });
+
   return (
-    <Structure title="Relatório Anual">
-      <Form
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: "20px",
-          width: "100%",
-        }}
-        onFinish={(e) => submitGenerateReport(e.city, e.year)}
-      >
-        <Form.Item
-          name="city"
-          label="Cidade"
-          rules={[{ required: true, message: "Campo obrigatório" }]}
-          style={{ width: "60%" }}
+    <>
+      {contextHolder}
+      <Structure title="Relatório Anual">
+        <Form
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            paddingTop: "20px",
+            width: "100%",
+          }}
+          onFinish={(e) => {
+            submitGenerateReport(e.city, e.year);
+          }}
+          form={form}
         >
-          <Input style={{ width: "100%" }} />
-        </Form.Item>
-        <Form.Item
-          name="year"
-          label="Ano"
-          rules={[{ required: true, message: "Selecione um ano" }]}
-          style={{ width: "60%" }}
-        >
-          <Select
-            style={{ width: "100%" }}
-            options={years.map((year: number) => ({
-              label: year,
-              key: year,
-              value: year,
-            }))}
-          />
-        </Form.Item>
-        <Form.Item style={{ marginBottom: "10px" }}>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={btnLoading}
-            icon={<FileWordOutlined />}
+          <Form.Item
+            name="year"
+            label="Ano"
+            rules={[{ required: true, message: "Selecione um ano" }]}
+            style={{ width: "60%" }}
           >
-            Gerar relatório
-          </Button>
-        </Form.Item>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="button"
-            disabled={downloadBtnDisabled}
-            shape="round"
-            icon={<DownloadOutlined />}
-            href={`${baseUrl}/project/downloadYearReport/`}
-            target="blank"
-          >
-            Baixar Relatório
-          </Button>
-        </Form.Item>
-      </Form>
-    </Structure>
+            <Select
+              style={{ width: "100%" }}
+              options={years.map((year: number) => ({
+                label: year,
+                key: year,
+                value: year,
+              }))}
+              onChange={(e) => {
+                setSelectedYear(Number(e));
+                form.resetFields(["city"]);
+              }}
+            />
+          </Form.Item>
+          {selectedYear !== undefined && selectedYear < 2023 && (
+            <Form.Item
+              name="city"
+              label="Cidade"
+              rules={[{ required: true, message: "Campo obrigatório" }]}
+              style={{ width: "60%" }}
+            >
+              <Input style={{ width: "100%" }} />
+            </Form.Item>
+          )}
+
+          {selectedYear !== undefined && selectedYear >= 2023 && (
+            <Form.Item
+              name="city"
+              label="Cidade"
+              rules={[{ required: true, message: "Campo obrigatório" }]}
+              style={{ width: "60%" }}
+            >
+              <Select
+                options={campus.map((c: Campus) => ({
+                  label: c.name,
+                  key: c._id,
+                  value: c._id!,
+                }))}
+              />
+            </Form.Item>
+          )}
+
+          <Form.Item style={{ marginBottom: "10px" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={btnLoading}
+              icon={<FileWordOutlined />}
+              onClick={() => {
+                openNotification(
+                  "info",
+                  "Gerando relatório",
+                  "O relatório pode levar alguns minutos para ficar pronto. Por favor, aguarde...",
+                  15
+                );
+              }}
+            >
+              Gerar relatório
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="button"
+              disabled={downloadBtnDisabled}
+              shape="round"
+              icon={<DownloadOutlined />}
+              href={`${baseUrl}/project/downloadYearReport/`}
+              target="blank"
+            >
+              Baixar Relatório
+            </Button>
+          </Form.Item>
+        </Form>
+      </Structure>
+    </>
   );
 };

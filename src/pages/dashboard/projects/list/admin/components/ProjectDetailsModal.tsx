@@ -196,6 +196,16 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                   </LabeledContent>
                 </Col>
 
+                {props.project?.campus && (
+                  <Col span={24}>
+                    <LabeledContent label="Cidade de execução do projeto">
+                      <Paragraph>
+                        {(props.project?.campus as Campus)?.name}
+                      </Paragraph>
+                    </LabeledContent>
+                  </Col>
+                )}
+
                 {props.project?.discipline && (
                   <Col span={24}>
                     <LabeledContent label="Disciplina">

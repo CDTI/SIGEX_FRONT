@@ -134,7 +134,7 @@ export function useFormStateMachine() {
                     totalCHTarde: payload.totalCHTarde,
                     totalCHNoite: payload.totalCHNoite,
                     courses: payload.courses,
-                    // schoolCourses: payload.schoolCourses,
+                    campus: payload.campus,
                   };
                 },
               }),

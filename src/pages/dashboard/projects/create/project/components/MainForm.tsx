@@ -29,7 +29,10 @@ import {
   getAllUsersEndpoint,
 } from "../../../../../../services/endpoints/users";
 import { Restricted } from "../../../../../../components/Restricted";
-import { getAllCoursesEndpoint } from "../../../../../../services/endpoints/courses";
+import {
+  getAllCampiEndpoint,
+  getAllCoursesEndpoint,
+} from "../../../../../../services/endpoints/courses";
 import { getAllCategories } from "../../../../../../services/category_service";
 import { Discipline } from "../../../../../../interfaces/discipline";
 import {
@@ -45,6 +48,7 @@ import {
 import { listActivePrograms } from "../../../../../../services/program_service";
 import { allOds } from "../../report/components/IntroductionForm";
 import { getAllNotices } from "../../../../../../services/notice_service";
+import { httpClient } from "../../../../../../services/httpClient";
 
 interface Props {
   context: "admin" | "user";
@@ -73,6 +77,7 @@ export const MainForm: React.FC<Props> = (props) => {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [campus, setCampus] = useState<Campus[]>([]);
   const [courseDisciplines, setCourseDisciplines] = useState<Discipline[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<Notice>();
@@ -82,6 +87,7 @@ export const MainForm: React.FC<Props> = (props) => {
   const [selectedDiscipline, setSelectedDiscipline] = useState<Discipline>();
   const [loading, setLoading] = useState<boolean>(true);
   const oldProjectsDate = new Date(2023, 3, 13);
+  const projectsWithoutCampusDate = new Date(2023, 4, 5);
 
   const [currentProjectType, setCurrentProjectType] = useState<
     "extraCurricular" | "curricularComponent" | "common"
@@ -105,15 +111,12 @@ export const MainForm: React.FC<Props> = (props) => {
       }
 
       if (props.context === "user") {
-        let notices =
-          localStorage.getItem(noticesKey) != null
-            ? (JSON.parse(localStorage.getItem(noticesKey)!) as Notice[])
-            : await selectNoticesRequester.send({
-                method: "GET",
-                url: getActiveNoticesEndpoint(),
-                queryParams: new Map([["withPopulatedRefs", "true"]]),
-                cancellable: true,
-              });
+        let notices = await selectNoticesRequester.send({
+          method: "GET",
+          url: getActiveNoticesEndpoint(),
+          queryParams: new Map([["withPopulatedRefs", "true"]]),
+          cancellable: true,
+        });
 
         setNotices(notices ?? []);
       } else {
@@ -125,6 +128,10 @@ export const MainForm: React.FC<Props> = (props) => {
       const programs = await listActivePrograms();
 
       setPrograms(programs ?? []);
+
+      const campus = await httpClient.get(getAllCampiEndpoint());
+
+      setCampus(campus.data);
 
       const users =
         localStorage.getItem(usersKey) != null
@@ -188,7 +195,8 @@ export const MainForm: React.FC<Props> = (props) => {
             }
           }
         }
-
+        console.log(props.context);
+        console.log(props.initialValues);
         if (
           props.initialValues.course &&
           props.initialValues.course.length > 0
@@ -200,9 +208,10 @@ export const MainForm: React.FC<Props> = (props) => {
               ]);
               setCourseDisciplines(disciplines);
             } else {
-              const disciplines = await getDisciplinesByCourses(
-                props.initialValues.course as unknown as Array<string>
+              const coursesID = (props.initialValues.course as Course[]).map(
+                (c: Course) => c._id!
               );
+              const disciplines = await getDisciplinesByCourses(coursesID);
               setCourseDisciplines(disciplines);
             }
           } else {
@@ -228,16 +237,17 @@ export const MainForm: React.FC<Props> = (props) => {
               ) ?? []
             : [],
           course:
-            props.context === "user"
-              ? props.initialValues.course ?? []
-              : (props.initialValues?.course as Course[]).map(
-                  (c: Course) => c._id!
-                ) ?? [],
+            (props.initialValues?.course as Course[]).map(
+              (c: Course) => c._id!
+            ) ?? [],
           program: props.initialValues.program
             ? (props.initialValues.program as Program)._id
             : null,
           notice: props.initialValues.notice
             ? (props.initialValues.notice as Notice)._id
+            : null,
+          campus: props.initialValues.campus
+            ? (props.initialValues.campus as Campus)._id
             : null,
           author: props.initialValues.author
             ? (props.initialValues.author as User)._id
@@ -248,7 +258,7 @@ export const MainForm: React.FC<Props> = (props) => {
           discipline:
             props.context === "user"
               ? props.initialValues.discipline
-                ? props.initialValues.discipline
+                ? props.initialValues.discipline._id
                 : null
               : props.initialValues.discipline
               ? props.initialValues.discipline._id
@@ -288,6 +298,7 @@ export const MainForm: React.FC<Props> = (props) => {
       "teachers",
       "category",
     ]);
+    props.formController.setFieldsValue({ category: foundCategory?._id });
   };
 
   const getDisciplineName = (id: string) => {
@@ -304,6 +315,7 @@ export const MainForm: React.FC<Props> = (props) => {
     );
     setSelectedDiscipline(foundDiscipline);
     setSchedule(foundTimetable?.schedules!);
+    props.formController.resetFields(["secondSemester"]);
   };
 
   const populateDisciplineByCourses = async (courses: Array<string>) => {
@@ -416,6 +428,35 @@ export const MainForm: React.FC<Props> = (props) => {
                       : "Escolha um edital"}
                   </Select.Option>
                 </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              {console.log(
+                new Date(selectedNotice?.projectExecutionYear!).getFullYear() >=
+                  2023
+              )}
+              <Form.Item
+                name="campus"
+                label="Cidade de execução do projeto"
+                rules={[
+                  {
+                    required: Boolean(
+                      new Date(
+                        selectedNotice?.projectExecutionYear!
+                      ).getFullYear()! >= 2023
+                    ),
+                    message: "Campo Obrigatório",
+                  },
+                ]}
+              >
+                <Select
+                  style={{ width: "100%" }}
+                  options={campus.map((c: Campus) => ({
+                    label: c.name,
+                    value: c._id!,
+                  }))}
+                ></Select>
               </Form.Item>
             </Col>
           </>
