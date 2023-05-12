@@ -43,3 +43,9 @@ export const changeCampusStatus = async (
 
   return response.data as ReturnRequest;
 };
+
+export const deleteCampus = async (id: string): Promise<ReturnRequest> => {
+  const response = await httpClient.delete(`/campus/${id}`);
+
+  return response.data as ReturnRequest;
+};

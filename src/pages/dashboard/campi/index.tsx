@@ -11,13 +11,14 @@ import {
   Space,
   Switch,
 } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Campus } from "../../../interfaces/course";
 import {
   createCampus,
   changeCampusStatus,
   updateCampus,
   getAllCampi,
+  deleteCampus,
 } from "../../../services/campi_service";
 import Structure from "../../../components/layout/structure";
 
@@ -35,6 +36,10 @@ export const CreateCampi: React.FC = () => {
     visible: false,
     campus: undefined,
   });
+  const [campusToDelete, setCampusToDelete] = useState<Campus | undefined>(
+    undefined
+  );
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -81,6 +86,31 @@ export const CreateCampi: React.FC = () => {
     setState({ visible: false, campus: undefined });
   };
 
+  const submitDelete = async (campus: Campus) => {
+    const response = await deleteCampus(campus._id!)
+      .then((res) => {
+        setDeleteModalVisible(false);
+        notification.success({ message: "Campus deletado com sucesso" });
+        setInitialState(initialState + 1);
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.response.status === 403) {
+          notification.error({
+            message: err.response.data.message,
+            duration: 15,
+          });
+        } else {
+          notification.error({
+            message:
+              "Ocorreu um erro ao tentar deletar o campus. Por favor tente mais tarde",
+            duration: 15,
+          });
+        }
+        setDeleteModalVisible(false);
+      });
+  };
+
   const modal = useMemo(
     () => (
       <Modal
@@ -121,6 +151,22 @@ export const CreateCampi: React.FC = () => {
     <Structure title="Campus">
       {ReactDOM.createPortal(modal, document.getElementById("dialog-overlay")!)}
 
+      <Modal
+        title="Deletar Campus?"
+        visible={deleteModalVisible}
+        centered
+        onOk={() => {
+          submitDelete(campusToDelete!);
+        }}
+        okButtonProps={{ style: { backgroundColor: "#ff4d4f" } }}
+        okText={"Deletar"}
+        onCancel={() => {
+          setDeleteModalVisible(false);
+        }}
+      >
+        <Typography>Deseja deletar o campus {campusToDelete?.name}?</Typography>
+      </Modal>
+
       <Form
         form={form}
         layout="vertical"
@@ -159,6 +205,15 @@ export const CreateCampi: React.FC = () => {
                 style={{ color: "#333" }}
               >
                 Editar <EditOutlined />
+              </Button>,
+              <Button
+                onClick={() => {
+                  setCampusToDelete(item);
+                  setDeleteModalVisible(true);
+                }}
+                style={{ color: "#333" }}
+              >
+                Excluir <DeleteOutlined />
               </Button>,
             ]}
           >
