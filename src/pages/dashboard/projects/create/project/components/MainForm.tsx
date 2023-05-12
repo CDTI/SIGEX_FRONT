@@ -29,10 +29,7 @@ import {
   getAllUsersEndpoint,
 } from "../../../../../../services/endpoints/users";
 import { Restricted } from "../../../../../../components/Restricted";
-import {
-  getAllCampiEndpoint,
-  getAllCoursesEndpoint,
-} from "../../../../../../services/endpoints/courses";
+import { getAllCoursesEndpoint } from "../../../../../../services/endpoints/courses";
 import { getAllCategories } from "../../../../../../services/category_service";
 import { Discipline } from "../../../../../../interfaces/discipline";
 import {
@@ -49,6 +46,7 @@ import { listActivePrograms } from "../../../../../../services/program_service";
 import { allOds } from "../../report/components/IntroductionForm";
 import { getAllNotices } from "../../../../../../services/notice_service";
 import { httpClient } from "../../../../../../services/httpClient";
+import { getActiveCampi } from "../../../../../../services/campi_service";
 
 interface Props {
   context: "admin" | "user";
@@ -129,9 +127,9 @@ export const MainForm: React.FC<Props> = (props) => {
 
       setPrograms(programs ?? []);
 
-      const campus = await httpClient.get(getAllCampiEndpoint());
+      const campus = await getActiveCampi();
 
-      setCampus(campus.data);
+      setCampus(campus ?? []);
 
       const users =
         localStorage.getItem(usersKey) != null

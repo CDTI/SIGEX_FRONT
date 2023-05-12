@@ -24,6 +24,7 @@ import { LoginPage } from "../pages/login";
 import { ProjectsFilterProvider } from "../context/projects";
 import { CreateProgram } from "../pages/dashboard/programs/create";
 import { YearReportPage } from "../pages/dashboard/yearReport";
+import { CreateCampi } from "../pages/dashboard/campi";
 
 export const Routes: React.FC = () => {
   const authContext = useContext(AuthContext);
@@ -70,6 +71,10 @@ export const Routes: React.FC = () => {
 
         <ProtectedRoute allow="Administrador" path="/cursos">
           <CoursesPage />
+        </ProtectedRoute>
+
+        <ProtectedRoute allow="Administrador" path="/campus">
+          <CreateCampi />
         </ProtectedRoute>
 
         <ProtectedRoute allow="Administrador" path="/categorias">

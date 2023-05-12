@@ -53,7 +53,7 @@ export const CreateDiscipline: React.FC = () => {
   useEffect(() => {
     (async () => {
       const foundCategories = await getAllCategories();
-      setCategories(foundCategories.slice(-3));
+      setCategories(foundCategories);
       const courses = await getCoursesRequester.send({
         method: "GET",
         url: getAllCoursesEndpoint(),

@@ -4,8 +4,8 @@ import { Button, Form, Input, Select, notification } from "antd";
 import { generateReport } from "../../../services/yearReport_service";
 import { baseUrl, httpClient } from "../../../services/httpClient";
 import { DownloadOutlined, FileWordOutlined } from "@ant-design/icons";
-import { getAllCampiEndpoint } from "../../../services/endpoints/courses";
 import { Campus } from "../../../interfaces/course";
+import { getAllCampi } from "../../../services/campi_service";
 
 type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -39,9 +39,13 @@ export const YearReportPage: React.FC = () => {
     });
   };
 
-  const submitGenerateReport = async (city: string, year: number) => {
+  const submitGenerateReport = async (city: Array<string>, year: number) => {
     setBtnLoading(true);
     setDownloadBtnDisabled(true);
+
+    if (typeof city === "string") {
+      city = [city];
+    }
 
     const response = await generateReport(city, year)
       .then((res) => {
@@ -55,7 +59,7 @@ export const YearReportPage: React.FC = () => {
       })
       .catch((err) => {
         openNotification(
-          "success",
+          "error",
           "Erro!",
           "Algo deu errado. Tente novamente mais tarde."
         );
@@ -71,8 +75,8 @@ export const YearReportPage: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const request = await httpClient.get(getAllCampiEndpoint());
-        setCampus(request.data);
+        const campi = await getAllCampi();
+        setCampus(campi ?? []);
       } catch (error) {
         console.log(error);
       }
@@ -139,6 +143,7 @@ export const YearReportPage: React.FC = () => {
                   key: c._id,
                   value: c._id!,
                 }))}
+                mode="multiple"
               />
             </Form.Item>
           )}
