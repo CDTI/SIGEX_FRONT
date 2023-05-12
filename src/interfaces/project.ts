@@ -1,5 +1,5 @@
 import { Category } from "./category";
-import { Course } from "./course";
+import { Campus, Course } from "./course";
 import { Discipline } from "./discipline";
 import { Notice, Schedule } from "./notice";
 import { Program } from "./program";
@@ -100,6 +100,7 @@ export interface Project {
   disciplineLearningObjectivesDescription?: string;
   ods?: string[];
   discipline: Discipline;
+  campus?: Campus;
   firstSemester: Schedule[];
   key?: string;
   maxClasses?: number;
@@ -118,9 +119,6 @@ export interface Project {
   totalCHManha?: number;
   totalCHTarde?: number;
   totalCHNoite?: number;
-  // school: string;
-  // schoolCourses: string[];
-  typeProject: "common" | "extraCurricular" | "curricularComponent";
   updatedAt?: Date;
 }
 
@@ -147,8 +145,7 @@ export function isProject(p: any): p is Project {
     "ods" in p &&
     "midiaLinks" in p &&
     "status" in p &&
-    "teachers " in p &&
-    "typeProject" in p
+    "teachers " in p
   );
 }
 

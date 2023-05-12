@@ -1,7 +1,3 @@
-export function getAllCampiEndpoint(): string {
-  return "/campi";
-}
-
 export function getAllCoursesEndpoint(): string {
   return "/courses";
 }

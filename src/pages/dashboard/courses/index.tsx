@@ -24,13 +24,12 @@ import { Campus, Course } from "../../../interfaces/course";
 import {
   createCourseEndpoint,
   deleteCourseEndpoint,
-  getAllCampiEndpoint,
-  getAllCoursesEndpoint,
   getAllCoursesPaginatedEndpoint,
   toggleCourseEndpoint,
   updateCourseEndpoint,
 } from "../../../services/endpoints/courses";
 import { useForm } from "antd/lib/form/Form";
+import { getActiveCampi } from "../../../services/campi_service";
 
 export const CoursesPage: React.FC = () => {
   const [campi, setCampi] = useState<Campus[]>([]);
@@ -91,11 +90,7 @@ export const CoursesPage: React.FC = () => {
   };
   useEffect(() => {
     (async () => {
-      const campi = await dropDownListCampiRequester.send<Campus[]>({
-        method: "GET",
-        url: getAllCampiEndpoint(),
-        cancellable: true,
-      });
+      const campi = await getActiveCampi();
 
       setCampi(campi ?? []);
     })();

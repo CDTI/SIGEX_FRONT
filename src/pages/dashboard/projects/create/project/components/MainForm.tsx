@@ -45,6 +45,8 @@ import {
 import { listActivePrograms } from "../../../../../../services/program_service";
 import { allOds } from "../../report/components/IntroductionForm";
 import { getAllNotices } from "../../../../../../services/notice_service";
+import { httpClient } from "../../../../../../services/httpClient";
+import { getActiveCampi } from "../../../../../../services/campi_service";
 
 interface Props {
   context: "admin" | "user";
@@ -73,6 +75,7 @@ export const MainForm: React.FC<Props> = (props) => {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [campus, setCampus] = useState<Campus[]>([]);
   const [courseDisciplines, setCourseDisciplines] = useState<Discipline[]>([]);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<Notice>();
@@ -82,6 +85,7 @@ export const MainForm: React.FC<Props> = (props) => {
   const [selectedDiscipline, setSelectedDiscipline] = useState<Discipline>();
   const [loading, setLoading] = useState<boolean>(true);
   const oldProjectsDate = new Date(2023, 3, 13);
+  const projectsWithoutCampusDate = new Date(2023, 4, 5);
 
   const [currentProjectType, setCurrentProjectType] = useState<
     "extraCurricular" | "curricularComponent" | "common"
@@ -105,15 +109,12 @@ export const MainForm: React.FC<Props> = (props) => {
       }
 
       if (props.context === "user") {
-        let notices =
-          localStorage.getItem(noticesKey) != null
-            ? (JSON.parse(localStorage.getItem(noticesKey)!) as Notice[])
-            : await selectNoticesRequester.send({
-                method: "GET",
-                url: getActiveNoticesEndpoint(),
-                queryParams: new Map([["withPopulatedRefs", "true"]]),
-                cancellable: true,
-              });
+        let notices = await selectNoticesRequester.send({
+          method: "GET",
+          url: getActiveNoticesEndpoint(),
+          queryParams: new Map([["withPopulatedRefs", "true"]]),
+          cancellable: true,
+        });
 
         setNotices(notices ?? []);
       } else {
@@ -125,6 +126,10 @@ export const MainForm: React.FC<Props> = (props) => {
       const programs = await listActivePrograms();
 
       setPrograms(programs ?? []);
+
+      const campus = await getActiveCampi();
+
+      setCampus(campus ?? []);
 
       const users =
         localStorage.getItem(usersKey) != null
@@ -157,13 +162,6 @@ export const MainForm: React.FC<Props> = (props) => {
         );
         setSelectedCategory(foundCategory);
 
-        // if (
-        //   !notices.some((n: Notice) => n._id === getNoticeId(projectNotice))
-        // ) {
-        //   notices = [...notices, projectNotice as Notice];
-        //   setNotices(notices);
-        // }
-
         if (props.initialValues.discipline) {
           if (props.context === "admin") {
             const foundDiscipline = disciplines.find(
@@ -195,9 +193,8 @@ export const MainForm: React.FC<Props> = (props) => {
             }
           }
         }
-
-        // setCurrentProjectType(props.initialValues.typeProject);
-
+        console.log(props.context);
+        console.log(props.initialValues);
         if (
           props.initialValues.course &&
           props.initialValues.course.length > 0
@@ -209,9 +206,10 @@ export const MainForm: React.FC<Props> = (props) => {
               ]);
               setCourseDisciplines(disciplines);
             } else {
-              const disciplines = await getDisciplinesByCourses(
-                props.initialValues.course as unknown as Array<string>
+              const coursesID = (props.initialValues.course as Course[]).map(
+                (c: Course) => c._id!
               );
+              const disciplines = await getDisciplinesByCourses(coursesID);
               setCourseDisciplines(disciplines);
             }
           } else {
@@ -237,16 +235,17 @@ export const MainForm: React.FC<Props> = (props) => {
               ) ?? []
             : [],
           course:
-            props.context === "user"
-              ? props.initialValues.course ?? []
-              : (props.initialValues?.course as Course[]).map(
-                  (c: Course) => c._id!
-                ) ?? [],
+            (props.initialValues?.course as Course[]).map(
+              (c: Course) => c._id!
+            ) ?? [],
           program: props.initialValues.program
             ? (props.initialValues.program as Program)._id
             : null,
           notice: props.initialValues.notice
             ? (props.initialValues.notice as Notice)._id
+            : null,
+          campus: props.initialValues.campus
+            ? (props.initialValues.campus as Campus)._id
             : null,
           author: props.initialValues.author
             ? (props.initialValues.author as User)._id
@@ -257,7 +256,7 @@ export const MainForm: React.FC<Props> = (props) => {
           discipline:
             props.context === "user"
               ? props.initialValues.discipline
-                ? props.initialValues.discipline
+                ? props.initialValues.discipline._id
                 : null
               : props.initialValues.discipline
               ? props.initialValues.discipline._id
@@ -267,7 +266,7 @@ export const MainForm: React.FC<Props> = (props) => {
               scheduleAsValue(s)
             ) ?? [],
           secondSemester:
-            props.initialValues.firstSemester.map((s: Schedule) =>
+            props.initialValues.secondSemester.map((s: Schedule) =>
               scheduleAsValue(s)
             ) ?? [],
         });
@@ -297,6 +296,7 @@ export const MainForm: React.FC<Props> = (props) => {
       "teachers",
       "category",
     ]);
+    props.formController.setFieldsValue({ category: foundCategory?._id });
   };
 
   const getDisciplineName = (id: string) => {
@@ -313,6 +313,7 @@ export const MainForm: React.FC<Props> = (props) => {
     );
     setSelectedDiscipline(foundDiscipline);
     setSchedule(foundTimetable?.schedules!);
+    props.formController.resetFields(["secondSemester"]);
   };
 
   const populateDisciplineByCourses = async (courses: Array<string>) => {
@@ -425,6 +426,35 @@ export const MainForm: React.FC<Props> = (props) => {
                       : "Escolha um edital"}
                   </Select.Option>
                 </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              {console.log(
+                new Date(selectedNotice?.projectExecutionYear!).getFullYear() >=
+                  2023
+              )}
+              <Form.Item
+                name="campus"
+                label="Cidade de execução do projeto"
+                rules={[
+                  {
+                    required: Boolean(
+                      new Date(
+                        selectedNotice?.projectExecutionYear!
+                      ).getFullYear()! >= 2023
+                    ),
+                    message: "Campo Obrigatório",
+                  },
+                ]}
+              >
+                <Select
+                  style={{ width: "100%" }}
+                  options={campus.map((c: Campus) => ({
+                    label: c.name,
+                    value: c._id!,
+                  }))}
+                ></Select>
               </Form.Item>
             </Col>
           </>
@@ -764,156 +794,6 @@ export const MainForm: React.FC<Props> = (props) => {
               )}
 
               <Col span={24}>
-                {/* <Form.List name="teachers">
-                  {(teacherFields, { add, remove }) => (
-                    <>
-                      <Row gutter={[8, 0]}>
-                        {teacherFields.map((teacherField, index) => (
-                          <>
-                            <Col span={24}>
-                              <Divider>
-                                <Space>
-                                  <Button
-                                    type="link"
-                                    shape="circle"
-                                    size="small"
-                                    icon={<MinusCircleOutlined />}
-                                    onClick={() => remove(teacherField.name)}
-                                    style={{ verticalAlign: "baseline" }}
-                                  />
-
-                                  <Typography.Title
-                                    level={3}
-                                    style={{
-                                      display: "inline-block",
-                                      marginBottom: "0",
-                                    }}
-                                  >
-                                    {`Professor ${index + 1}`}
-                                  </Typography.Title>
-                                </Space>
-                              </Divider>
-                            </Col>
-
-                            <Col xs={24} xl={8}>
-                              <Form.Item
-                                {...teacherField}
-                                fieldKey={[teacherField.fieldKey, "name"]}
-                                name={[teacherField.name, "name"]}
-                                label="Nome"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Campo Obrigatório",
-                                  },
-                                ]}
-                              >
-                                <Input style={{ width: "100%" }} />
-                              </Form.Item>
-                            </Col>
-
-                            <Col xs={24} xl={8}>
-                              <Form.Item
-                                {...teacherField}
-                                fieldKey={[teacherField.fieldKey, "cpf"]}
-                                name={[teacherField.name, "cpf"]}
-                                label="CPF"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Campo Obrigatório",
-                                  },
-                                ]}
-                              >
-                                <MaskedInput
-                                  mask="111.111.111-11"
-                                  style={{ width: "100%" }}
-                                />
-                              </Form.Item>
-                            </Col>
-
-                            <Col xs={24} xl={8}>
-                              <Form.Item
-                                {...teacherField}
-                                fieldKey={[
-                                  teacherField.fieldKey,
-                                  "registration",
-                                ]}
-                                name={[teacherField.name, "registration"]}
-                                label="Matrícula"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Campo Obrigatório",
-                                  },
-                                ]}
-                              >
-                                <Input style={{ width: "100%" }} />
-                              </Form.Item>
-                            </Col>
-
-                            <Col xs={24} xl={12}>
-                              <Form.Item
-                                {...teacherField}
-                                fieldKey={[teacherField.fieldKey, "email"]}
-                                name={[teacherField.name, "email"]}
-                                label="E-mail"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Campo Obrigatório",
-                                  },
-                                ]}
-                              >
-                                <Input type="email" style={{ width: "100%" }} />
-                              </Form.Item>
-                            </Col>
-
-                            <Col
-                              xs={24}
-                              xl={
-                                currentProjectType === "extraCurricular"
-                                  ? 8
-                                  : 12
-                              }
-                            >
-                              <Form.Item
-                                {...teacherField}
-                                fieldKey={[teacherField.fieldKey, "phone"]}
-                                name={[teacherField.name, "phone"]}
-                                label="Telefone"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Campo Obrigatório",
-                                  },
-                                ]}
-                              >
-                                <MaskedInput
-                                  mask="(11)11111-1111"
-                                  style={{ width: "100%" }}
-                                />
-                              </Form.Item>
-                            </Col>
-                          </>
-                        ))}
-                      </Row>
-
-                      <Row
-                        gutter={[
-                          0,
-                          currentProjectType === "curricularComponent" ? 16 : 0,
-                        ]}
-                      >
-                        <Col span={24}>
-                          <Button block type="dashed" onClick={() => add()}>
-                            <PlusOutlined /> Adicionar professor
-                          </Button>
-                        </Col>
-                      </Row>
-                    </>
-                  )}
-                </Form.List> */}
                 <Form.Item
                   name="teachers"
                   label="Professores"

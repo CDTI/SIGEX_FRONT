@@ -124,9 +124,15 @@ export const AppLayout: React.FC = (props) => {
             </Menu.Item>
 
             {userRoles.includes("Administrador") && (
-              <Menu.Item key="/cursos" icon={<BankOutlined />}>
-                <Link to="/cursos">Cursos</Link>
-              </Menu.Item>
+              <>
+                <Menu.Item key="/cursos" icon={<BankOutlined />}>
+                  <Link to="/cursos">Cursos</Link>
+                </Menu.Item>
+
+                <Menu.Item key="/campus" icon={<BankOutlined />}>
+                  <Link to="/campus">Campus</Link>
+                </Menu.Item>
+              </>
             )}
 
             <SubMenu
@@ -167,6 +173,10 @@ export const AppLayout: React.FC = (props) => {
 
                 <Menu.Item key="/propostas" icon={<TeamOutlined />}>
                   <Link to="/propostas">Projetos</Link>
+                </Menu.Item>
+
+                <Menu.Item key="/relatorio-anual" icon={<FileTextOutlined />}>
+                  <Link to="/relatorio-anual">Relatório Anual</Link>
                 </Menu.Item>
               </>
             )}
