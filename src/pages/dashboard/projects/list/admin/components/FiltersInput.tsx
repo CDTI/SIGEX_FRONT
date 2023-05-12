@@ -89,17 +89,7 @@ export const Filters: React.FC<Props> = (props) => {
       setPrograms(data[0] ?? []);
       setCategories(data[2] ?? []);
       setDisciplines(data[3] ?? []);
-      setNotices(
-        data[1]
-          ?.sort((a: Notice, b: Notice) =>
-            a.createdAt! < b.createdAt!
-              ? -1
-              : a.createdAt! > b.createdAt!
-              ? 1
-              : 0
-          )
-          .reverse() ?? []
-      );
+      setNotices(data[1] ?? []);
     })();
 
     return () => {
