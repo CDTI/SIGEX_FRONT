@@ -44,19 +44,10 @@ export async function countProjects(programId: string) {
   }
 }
 
-export async function listAllTeacherProjects(
-  options?: RequestOptions
-): Promise<Project[]> {
-  const config: AxiosRequestConfig = {};
-  if (options != null) {
-    if (options.withPopulatedRefs != null && options.withPopulatedRefs)
-      config.params = { ...config.params, withPopulatedRefs: true };
-
-    if (options.cancellationToken != null)
-      config.cancelToken = options.cancellationToken;
-  }
-
-  const response = await httpClient.get("/projects/forTeacher", config);
+export async function listAllTeacherProjects(params: any) {
+  const response = await httpClient.get("/projects/forTeacher", {
+    params: params,
+  });
 
   return response.data;
 }
