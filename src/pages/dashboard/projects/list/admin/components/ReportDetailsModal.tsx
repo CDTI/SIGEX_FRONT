@@ -10,6 +10,8 @@ import {
   Typography,
 } from "antd";
 
+import { DownloadOutlined } from "@ant-design/icons";
+
 import { LabeledContent } from "../../../../../../components/LabeledContent";
 import { formatDate } from "../../../../../../utils/dateFormatter";
 import { Category } from "../../../../../../interfaces/category";
@@ -18,6 +20,7 @@ import { Program } from "../../../../../../interfaces/program";
 import { Notice } from "../../../../../../interfaces/notice";
 import { Contact, Project } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
+import { baseUrl } from "../../../../../../services/httpClient";
 
 interface Props {
   isVisible: boolean;
@@ -299,6 +302,19 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
               />
             </Col>
           )}
+
+        {props.project?.report !== null && (
+          <Col span={21}>
+            <Button
+              type="default"
+              shape="round"
+              target="blank"
+              href={`${baseUrl}/project/generateAndDownloadProjectReport/${props.project?._id}`}
+            >
+              <DownloadOutlined /> Exportar relatório
+            </Button>
+          </Col>
+        )}
       </Row>
     </Modal>
   );
