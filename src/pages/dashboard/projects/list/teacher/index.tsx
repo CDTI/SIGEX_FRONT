@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useReducer,
@@ -8,7 +9,6 @@ import React, {
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import {
-  Tag,
   Space,
   Button,
   notification,
@@ -17,6 +17,7 @@ import {
   Row,
   Modal,
   Table,
+  Form,
 } from "antd";
 
 import { Register } from "../../../../../interfaces/feedback";
@@ -36,6 +37,12 @@ import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks";
 import { ProjectDetailsModal } from "../admin/components/ProjectDetailsModal";
 import { EyeOutlined } from "@ant-design/icons";
+import { Category } from "../../../../../interfaces/category";
+import { getAllCategories } from "../../../../../services/category_service";
+import { ClearOutlined, SearchOutlined } from "@ant-design/icons";
+import { useForm } from "antd/lib/form/Form";
+import { AuthContext } from "../../../../../context/auth";
+import { User } from "../../../../../interfaces/user";
 
 interface IAction {
   type: string;
@@ -78,14 +85,27 @@ const dialogReducer = (state: DialogState, action: IAction): DialogState => {
 };
 
 export const TeacherProjectsPage: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const [form] = useForm();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filterProgram, setFilterProgram] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string>("");
   const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [shouldReload, setShouldReload] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [shouldReload, setShouldReload] = useState(0);
   const [project, setProject] = useState<Project>();
   const modalProjectsRequester = useHttpClient();
   const [projectModalIsVisible, setProjectModalIsVisible] = useState(false);
+  let query = {
+    page: page,
+    limit: limit,
+    program: filterProgram,
+    category: filterCategory,
+  };
 
   const [infoDialogState, dispatchInfoDialogState] = useReducer(dialogReducer, {
     isVisible: false,
@@ -105,18 +125,43 @@ export const TeacherProjectsPage: React.FC = () => {
   );
 
   useEffect(() => {
-    setLoading(true);
-    if (shouldReload) setShouldReload(false);
-
-    listAllTeacherProjects({ withPopulatedRefs: true }).then((data) => {
-      setProjects(data);
-      setFilteredProjects(data);
+    (async () => {
+      getPaginatedTeacherProjects(query);
       listPrograms().then((list) => {
         setPrograms(list);
+      });
+      getAllCategories().then((res) => {
+        setCategories(res);
+      });
+    })();
+  }, [page, limit, shouldReload]);
+
+  const getPaginatedTeacherProjects = async (data: any) => {
+    setLoading(true);
+    listAllTeacherProjects(data)
+      .then((res) => {
+        setProjects(res.docs);
+        setTotalPages(res.totalPages);
+      })
+      .catch((err) => {
+        console.log(err);
+        notification.error({
+          message: "Ocorreu um erro durante a busca dos projetos",
+        });
+      })
+      .finally(() => {
         setLoading(false);
       });
-    });
-  }, [shouldReload]);
+  };
+
+  const clearFilters = () => {
+    setPage(1);
+    setLimit(10);
+    setFilterCategory("");
+    setFilterProgram("");
+    setShouldReload(shouldReload + 1);
+    form.resetFields();
+  };
 
   const infoDialog = useMemo(() => {
     const dialogVisibilityHandler = () =>
@@ -172,7 +217,7 @@ export const TeacherProjectsPage: React.FC = () => {
       dispatchActionDialogState({ type: "NOT_WORKING" });
       dispatchActionDialogState({ type: "HIDE_DIALOG" });
 
-      setShouldReload(true);
+      setShouldReload(shouldReload + 1);
     };
 
     return (
@@ -189,14 +234,6 @@ export const TeacherProjectsPage: React.FC = () => {
       </Modal>
     );
   }, [actionDialogState]);
-
-  const handleChange = (event: string) => {
-    setFilteredProjects(
-      event !== ""
-        ? projects.filter((p: Project) => p.program === event)
-        : projects
-    );
-  };
 
   const columns = [
     {
@@ -275,72 +312,83 @@ export const TeacherProjectsPage: React.FC = () => {
             </Button>
           )}
 
+          <Button onClick={() => openDetailsModal("project", record)}>
+            <EyeOutlined /> Proposta
+          </Button>
+
           {record.status === "selected" && (
             <>
-              <Button>
-                {record.report == null ? (
-                  <Link to={`/propostas/relatorio/criar?project=${record._id}`}>
-                    Relatório
-                  </Link>
-                ) : (
-                  <Link
-                    to={{
-                      pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
-                      state: record.report,
-                    }}
-                  >
-                    Relatório
-                  </Link>
-                )}
-              </Button>
-              <Button onClick={() => openDetailsModal("project", record)}>
-                <EyeOutlined /> Proposta
-              </Button>
-            </>
-          )}
-
-          {record.status === "notSelected" && (
-            <>
-              <Button onClick={() => openDetailsModal("project", record)}>
-                <EyeOutlined /> Proposta
-              </Button>
-            </>
-          )}
-
-          {(record.notice as Notice).isActive &&
-            record.status === "pending" && (
-              <>
+              {((record.author as User)._id === user?._id ||
+                record.teachers.length === 1) && (
                 <Button>
-                  <Link
-                    to={{
-                      pathname: `/propostas/editar/${record._id}`,
-                      state: {
-                        project: record,
-                        context: "user",
-                      },
-                    }}
-                  >
-                    Editar
-                  </Link>
+                  {record.report == null ? (
+                    <Link
+                      to={`/propostas/relatorio/criar?project=${record._id}`}
+                    >
+                      Relatório
+                    </Link>
+                  ) : (
+                    <Link
+                      to={{
+                        pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
+                        state: record.report,
+                      }}
+                    >
+                      Relatório
+                    </Link>
+                  )}
                 </Button>
+              )}
+            </>
+          )}
 
-                <Button
-                  onClick={() => {
-                    dispatchActionDialogState({
-                      type: "SET_CONTENT",
-                      data: {
-                        title: "Remover projeto",
-                        content: `Tem certeza que deseja remover o projeto ${record.name}?`,
-                        targetId: record._id,
-                      },
-                    });
-                    dispatchActionDialogState({ type: "SHOW_DIALOG" });
-                  }}
-                >
-                  Deletar
-                </Button>
-              </>
-            )}
+          {record.status === "pending" && (
+            <>
+              {(record.notice as Notice).isActive &&
+                (record.author as User)._id === user?._id && (
+                  <>
+                    <Button>
+                      <Link
+                        to={{
+                          pathname: `/propostas/editar/${record._id}`,
+                          state: {
+                            project: record,
+                            context: "user",
+                          },
+                        }}
+                      >
+                        Editar
+                      </Link>
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        dispatchActionDialogState({
+                          type: "SET_CONTENT",
+                          data: {
+                            title: "Remover projeto",
+                            content: `Tem certeza que deseja remover o projeto ${record.name}?`,
+                            targetId: record._id,
+                          },
+                        });
+                        dispatchActionDialogState({ type: "SHOW_DIALOG" });
+                      }}
+                    >
+                      Deletar
+                    </Button>
+                  </>
+                )}
+              {/* {((!(record.notice as Notice).isActive &&
+                (record.author as User)._id === user?._id) ||
+                (record.author as User)._id !== user?._id) && (
+                <>
+                  <Button onClick={() => openDetailsModal("project", record)}>
+                    <EyeOutlined /> Proposta
+                  </Button>
+                </>
+              )} */}
+            </>
+          )}
         </Space>
       ),
     },
@@ -363,25 +411,83 @@ export const TeacherProjectsPage: React.FC = () => {
         onClose={() => setProjectModalIsVisible(false)}
       />
       <Structure title="Meus Projetos">
-        <Row gutter={[8, 8]}>
-          <Col xs={24}>
-            <Select
-              options={[{ label: "Sem filtro", value: "" }].concat(
-                programs
-                  .filter((p: Program) => p._id !== undefined)
-                  .map((p: Program) => ({ label: p.name, value: p._id! }))
-              )}
-              defaultValue=""
-              onChange={handleChange}
-              style={{ width: "100%" }}
-            />
-          </Col>
+        <Form form={form} onFinish={() => getPaginatedTeacherProjects(query)}>
+          <Row justify="center" gutter={[8, 8]}>
+            <Col span={12}>
+              <Form.Item name="Program" style={{ margin: 0 }}>
+                <Select
+                  options={[
+                    { label: "Selecione um programa", value: "" },
+                  ].concat(
+                    programs
+                      .filter((p: Program) => p._id !== undefined)
+                      .map((p: Program) => ({ label: p.name, value: p._id! }))
+                  )}
+                  defaultValue=""
+                  onChange={(e) => {
+                    setFilterProgram(e);
+                  }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="Category" style={{ margin: 0 }}>
+                <Select
+                  options={[
+                    { label: "Selecione uma categoria", value: "" },
+                  ].concat(
+                    categories
+                      .filter((c: Category) => c._id !== undefined)
+                      .map((c: Category) => ({ label: c.name, value: c._id! }))
+                  )}
+                  defaultValue=""
+                  onChange={(e) => {
+                    setFilterCategory(e);
+                  }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24}>
+              <Button block type="primary" htmlType="submit">
+                <SearchOutlined />
+                Pesquisar
+              </Button>
+            </Col>
+            <Col xs={24}>
+              <Button
+                block
+                type="primary"
+                htmlType="button"
+                onClick={clearFilters}
+              >
+                <ClearOutlined />
+                Limpar Filtros
+              </Button>
+            </Col>
+          </Row>
+        </Form>
 
+        <Row gutter={[8, 8]}>
           <Col span={24}>
             <Table
               loading={loading}
-              dataSource={filteredProjects}
+              dataSource={projects}
               columns={columns}
+              pagination={{
+                current: page,
+                defaultPageSize: 10,
+                defaultCurrent: 1,
+                pageSize: limit,
+                showSizeChanger: true,
+                pageSizeOptions: ["10", "20", "30"],
+                total: totalPages * limit,
+                onChange: (actualPage, actualLimit) => {
+                  setPage(actualPage);
+                  setLimit(actualLimit!);
+                },
+              }}
             />
           </Col>
         </Row>
