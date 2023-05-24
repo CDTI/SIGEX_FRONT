@@ -130,7 +130,7 @@ export const AppLayout: React.FC = (props) => {
                 </Menu.Item>
 
                 <Menu.Item key="/campus" icon={<BankOutlined />}>
-                  <Link to="/campus">Campus</Link>
+                  <Link to="/campus">Campus/Unidades</Link>
                 </Menu.Item>
               </>
             )}

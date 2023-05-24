@@ -4,6 +4,13 @@ export interface Campus {
   isActive: boolean;
 }
 
+export interface Unit {
+  _id?: string;
+  name: string;
+  isActive: boolean;
+  campus: Campus;
+}
+
 export interface Course {
   _id?: string;
   key?: string;

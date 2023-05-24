@@ -24,6 +24,8 @@ import {
   getActiveDisciplines,
   getDisciplinesByCategory,
 } from "../../../../../services/discipline_service";
+import { Unit } from "../../../../../interfaces/course";
+import { getActiveUnits } from "../../../../../services/campi_service";
 
 interface Props {
   formController: FormInstance;
@@ -39,6 +41,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
   >(undefined);
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const selectCategoriesRequester = useHttpClient();
 
   useEffect(() => {
@@ -51,6 +54,8 @@ export const TimetablesForm: React.FC<Props> = (props) => {
 
       setCategories(categories ?? []);
       const disciplines = await getActiveDisciplines();
+      const units = await getActiveUnits();
+      setUnits(units);
 
       localStorage.setItem(categoriesKey, JSON.stringify(categories));
     })();
@@ -280,7 +285,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
                                       <Col xs={24} md={7}>
                                         <Form.Item
                                           {...scheduleField}
-                                          label="Campus"
+                                          label="Unidade"
                                           name={[
                                             scheduleField.name,
                                             "location",
@@ -296,8 +301,14 @@ export const TimetablesForm: React.FC<Props> = (props) => {
                                             },
                                           ]}
                                         >
-                                          <Select>
-                                            <Option value="Campus Ecoville">
+                                          <Select
+                                            options={units.map((u: Unit) => ({
+                                              label: u.name,
+                                              value: u.name,
+                                              key: u._id,
+                                            }))}
+                                          >
+                                            {/* <Option value="Campus Ecoville">
                                               Campus Ecoville
                                             </Option>
                                             <Option value="Unidade Santos Andrade">
@@ -311,7 +322,7 @@ export const TimetablesForm: React.FC<Props> = (props) => {
                                             </Option>
                                             <Option value="Ponta Grossa">
                                               Ponta Grossa
-                                            </Option>
+                                            </Option> */}
                                           </Select>
                                         </Form.Item>
                                       </Col>
