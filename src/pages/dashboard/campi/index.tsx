@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
 import {
@@ -10,6 +11,7 @@ import {
   Modal,
   Space,
   Switch,
+  Divider,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Campus } from "../../../interfaces/course";
@@ -21,6 +23,7 @@ import {
   deleteCampus,
 } from "../../../services/campi_service";
 import Structure from "../../../components/layout/structure";
+import { UnitPage } from "./unit";
 
 interface State {
   visible: boolean;
@@ -87,6 +90,7 @@ export const CreateCampi: React.FC = () => {
   };
 
   const submitDelete = async (campus: Campus) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await deleteCampus(campus._id!)
       .then((res) => {
         setDeleteModalVisible(false);
@@ -170,13 +174,17 @@ export const CreateCampi: React.FC = () => {
       <Form
         form={form}
         layout="vertical"
-        style={{ maxWidth: "500px", width: "100%" }}
+        style={{
+          maxWidth: "500px",
+          width: "100%",
+        }}
         onFinish={submitCampus}
       >
         <Form.Item
           name="name"
           label="Nome do campus"
           rules={[{ required: true, message: "Campo Obrigatório" }]}
+          style={{ marginBottom: 10 }}
         >
           <Input placeholder="Insira o nome do campus" />
         </Form.Item>
@@ -187,6 +195,8 @@ export const CreateCampi: React.FC = () => {
           </Button>
         </Form.Item>
       </Form>
+
+      <Divider style={{ margin: 0 }}></Divider>
 
       <List
         className="demo-loadmore-list"
@@ -221,6 +231,11 @@ export const CreateCampi: React.FC = () => {
           </List.Item>
         )}
       />
+      <UnitPage
+        initialState={initialState}
+        setInitialState={setInitialState}
+        campi={campi}
+      ></UnitPage>
     </Structure>
   );
 };

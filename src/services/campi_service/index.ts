@@ -1,6 +1,6 @@
 import { httpClient } from "../httpClient";
 
-import { Campus } from "../../interfaces/course";
+import { Campus, Unit } from "../../interfaces/course";
 
 interface ReturnRequest {
   message: string;
@@ -46,6 +46,38 @@ export const changeCampusStatus = async (
 
 export const deleteCampus = async (id: string): Promise<ReturnRequest> => {
   const response = await httpClient.delete(`/campus/${id}`);
+
+  return response.data as ReturnRequest;
+};
+
+export const getAllUnits = async (): Promise<Unit[]> => {
+  const response = await httpClient.get("/unit");
+  return response.data;
+};
+
+export const getActiveUnits = async (): Promise<Unit[]> => {
+  const response = await httpClient.get("/unit/is-active");
+  return response.data;
+};
+
+export const createUnit = async (unit: Unit): Promise<ReturnRequest> => {
+  const response = await httpClient.post("/unit", unit);
+
+  console.log(response.data);
+  return response.data;
+};
+
+export const updateUnit = async (
+  id: string,
+  unit: any
+): Promise<ReturnRequest> => {
+  const response = await httpClient.put(`/unit/${id}`, unit);
+
+  return response.data as ReturnRequest;
+};
+
+export const changeUnitStatus = async (id: string): Promise<ReturnRequest> => {
+  const response = await httpClient.put(`/unit/changeStatus/${id}`);
 
   return response.data as ReturnRequest;
 };
