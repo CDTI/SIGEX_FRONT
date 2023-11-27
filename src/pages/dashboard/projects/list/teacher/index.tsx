@@ -312,35 +312,45 @@ export const TeacherProjectsPage: React.FC = () => {
             </Button>
           )}
 
-          <Button onClick={() => openDetailsModal("project", record)}>
+          <Button
+            onClick={() => {
+              openDetailsModal("project", record);
+              const todayDate = new Date();
+              const initialReportDate = new Date(
+                (record.notice as Notice).reportDeadline
+              );
+              console.log(todayDate > initialReportDate);
+            }}
+          >
             <EyeOutlined /> Proposta
           </Button>
 
-          {record.status === "selected" && (
-            <>
-              {((record.author as User)._id === user?._id ||
-                record.teachers.length === 1) && (
-                <Button>
-                  {record.report == null ? (
-                    <Link
-                      to={`/propostas/relatorio/criar?project=${record._id}`}
-                    >
-                      Relatório
-                    </Link>
-                  ) : (
-                    <Link
-                      to={{
-                        pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
-                        state: record.report,
-                      }}
-                    >
-                      Relatório
-                    </Link>
-                  )}
-                </Button>
-              )}
-            </>
-          )}
+          {record.status === "selected" &&
+            new Date() > new Date((record.notice as Notice).reportDeadline) && (
+              <>
+                {((record.author as User)._id === user?._id ||
+                  record.teachers.length === 1) && (
+                  <Button>
+                    {record.report == null ? (
+                      <Link
+                        to={`/propostas/relatorio/criar?project=${record._id}`}
+                      >
+                        Relatório
+                      </Link>
+                    ) : (
+                      <Link
+                        to={{
+                          pathname: `/propostas/relatorio/editar/${record.report._id}?project=${record._id}`,
+                          state: record.report,
+                        }}
+                      >
+                        Relatório
+                      </Link>
+                    )}
+                  </Button>
+                )}
+              </>
+            )}
 
           {record.status === "pending" && (
             <>
@@ -378,15 +388,6 @@ export const TeacherProjectsPage: React.FC = () => {
                     </Button>
                   </>
                 )}
-              {/* {((!(record.notice as Notice).isActive &&
-                (record.author as User)._id === user?._id) ||
-                (record.author as User)._id !== user?._id) && (
-                <>
-                  <Button onClick={() => openDetailsModal("project", record)}>
-                    <EyeOutlined /> Proposta
-                  </Button>
-                </>
-              )} */}
             </>
           )}
         </Space>
