@@ -18,7 +18,11 @@ import {
   Modal,
   Table,
   Form,
+  Typography,
+  Tag,
 } from "antd";
+import { AlignType } from "rc-table/lib/interface";
+import { DownloadOutlined } from "@ant-design/icons";
 
 import { Register } from "../../../../../interfaces/feedback";
 import { Notice } from "../../../../../interfaces/notice";
@@ -43,6 +47,7 @@ import { ClearOutlined, SearchOutlined } from "@ant-design/icons";
 import { useForm } from "antd/lib/form/Form";
 import { AuthContext } from "../../../../../context/auth";
 import { User } from "../../../../../interfaces/user";
+import { baseUrl } from "../../../../../services/httpClient";
 
 interface IAction {
   type: string;
@@ -100,6 +105,9 @@ export const TeacherProjectsPage: React.FC = () => {
   const [project, setProject] = useState<Project>();
   const modalProjectsRequester = useHttpClient();
   const [projectModalIsVisible, setProjectModalIsVisible] = useState(false);
+  const [isOpenReportInformationModal, setIsOpenReportInformationModal] =
+    useState(false);
+  const [currentProject, setCurrentProject] = useState<Project | undefined>();
   let query = {
     page: page,
     limit: limit,
@@ -177,6 +185,7 @@ export const TeacherProjectsPage: React.FC = () => {
           </Button>
         }
         onOk={dialogVisibilityHandler}
+        onCancel={dialogVisibilityHandler}
       >
         <p>{infoDialogState.content}</p>
       </Modal>
@@ -243,25 +252,42 @@ export const TeacherProjectsPage: React.FC = () => {
     },
     {
       key: "dateStart",
-      title: "Data de início",
+      title: "Data de cadastro do projeto",
       dataIndex: "dateStart",
       render: (dateStart: string) => formatDate(new Date(dateStart)),
     },
     {
-      key: "status",
-      title: "Avaliação",
-      dataIndex: "status",
-      render: (text: string, record: Project) => (
-        <StatusTag status={record.status} />
+      key: "yearAndSemester",
+      title: "Ano - Semestre do Edital",
+      render: (_: string, record: Project) => (
+        <Typography>
+          {}
+          {new Date(
+            (record.notice as Notice).projectExecutionYear
+          ).getFullYear()}{" "}
+          - {(record.notice as Notice).projectExecutionPeriod}
+        </Typography>
       ),
     },
     {
-      key: "action",
-      title: "Ação",
+      key: "status",
+      title: "Status do projeto",
+      align: "center" as AlignType,
+      dataIndex: "status",
       render: (text: string, record: Project) => (
-        <Space size="middle">
-          {record.status !== "pending" && record.status !== "finished" && (
+        <Space
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "5px",
+            margin: 0,
+          }}
+        >
+          <StatusTag status={record.status} style={{ marginLeft: "16px" }} />
+          {record.status !== "pending" && (
             <Button
+              size="small"
               onClick={async () => {
                 let data;
                 const justification = await listFeedbackProject(
@@ -302,6 +328,14 @@ export const TeacherProjectsPage: React.FC = () => {
                             "foi alocado no edital de resultados.",
                     };
                     break;
+                  case "finished":
+                    data = {
+                      title: "Finalizado",
+                      content:
+                        "Parabéns, seu projeto foi finalizado." +
+                        " Você pode agora realizar o download do seu certificado.",
+                    };
+                    break;
                 }
 
                 dispatchInfoDialogState({ type: "SET_CONTENT", data });
@@ -311,22 +345,121 @@ export const TeacherProjectsPage: React.FC = () => {
               Informações
             </Button>
           )}
-
+        </Space>
+      ),
+    },
+    {
+      key: "statusReport",
+      title: "Status do relatório",
+      align: "center" as AlignType,
+      render: (text: string, record: Project) => (
+        <Space
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "5px",
+            margin: 0,
+          }}
+        >
+          {(!(
+            new Date() > new Date((record.notice as Notice).reportDeadline)
+          ) &&
+            record.status === "selected") ||
+            (record.status !== "selected" && record.status !== "finished" && (
+              <Tag
+                color="#b3afc8"
+                style={{ color: "#000", marginLeft: "16px" }}
+              >
+                Não liberado
+              </Tag>
+            ))}
+          {new Date() > new Date((record.notice as Notice).reportDeadline) &&
+            record.status === "selected" &&
+            !record.report && (
+              <Tag
+                color="#f9a03f"
+                style={{ color: "#000", marginLeft: "16px" }}
+              >
+                Pendente
+              </Tag>
+            )}
+          {record.report &&
+            (record.report.status === "coordinatorAnalysis" ||
+              record.report.status === "supervisorAnalysis" ||
+              (record.status === "selected" &&
+                record.report &&
+                !record.report.status)) && (
+              <Tag
+                color="#1890ff"
+                style={{ color: "#fff", marginLeft: "16px" }}
+              >
+                Em análise
+              </Tag>
+            )}
+          {record.report && record.report.status === "waitingCorrections" && (
+            <Tag color="#fe4c47" style={{ color: "#fff", marginLeft: "16px" }}>
+              Aguardando correções
+            </Tag>
+          )}
+          {record.report && record.report.status === "approved" && (
+            <Tag color="#8dc898" style={{ color: "#000", marginLeft: "16px" }}>
+              Aprovado
+            </Tag>
+          )}
+          {record.report &&
+            record.report.status &&
+            record.report.status !== "coordinatorAnalysis" &&
+            record.report.coordinatorFeedback && (
+              <>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setCurrentProject(record);
+                    setIsOpenReportInformationModal(true);
+                  }}
+                >
+                  Informações
+                </Button>
+                <Modal
+                  visible={isOpenReportInformationModal}
+                  title="Informações do relatório"
+                  cancelButtonProps={{ hidden: true }}
+                  onCancel={() => {
+                    setIsOpenReportInformationModal(false);
+                  }}
+                  onOk={() => {
+                    setIsOpenReportInformationModal(false);
+                  }}
+                >
+                  <Typography>
+                    {currentProject?.report?.supervisorFeedback
+                      ? currentProject?.report.supervisorFeedback
+                      : currentProject?.report?.coordinatorFeedback}
+                  </Typography>
+                </Modal>
+              </>
+            )}
+        </Space>
+      ),
+    },
+    {
+      key: "action",
+      title: "Ação",
+      render: (text: string, record: Project) => (
+        <Space size="small">
           <Button
             onClick={() => {
               openDetailsModal("project", record);
-              const todayDate = new Date();
-              const initialReportDate = new Date(
-                (record.notice as Notice).reportDeadline
-              );
-              console.log(todayDate > initialReportDate);
             }}
           >
             <EyeOutlined /> Proposta
           </Button>
 
           {record.status === "selected" &&
-            new Date() > new Date((record.notice as Notice).reportDeadline) && (
+            new Date() > new Date((record.notice as Notice).reportDeadline) &&
+            (!record.report ||
+              record.report.status === "waitingCorrections") && (
               <>
                 {((record.author as User)._id === user?._id ||
                   record.teachers.length === 1) && (
@@ -390,6 +523,17 @@ export const TeacherProjectsPage: React.FC = () => {
                 )}
             </>
           )}
+
+          {record.status === "finished" &&
+            record.report?.status === "approved" && (
+              <Button
+                type="default"
+                target="blank"
+                href={`${baseUrl}/project/generateAndDownloadProjectCertificate/${record._id}/${user?._id}`}
+              >
+                <DownloadOutlined /> Certificado
+              </Button>
+            )}
         </Space>
       ),
     },
@@ -476,6 +620,7 @@ export const TeacherProjectsPage: React.FC = () => {
               loading={loading}
               dataSource={projects}
               columns={columns}
+              rowKey={"id"}
               pagination={{
                 current: page,
                 defaultPageSize: 10,

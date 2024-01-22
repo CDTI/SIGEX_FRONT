@@ -9,44 +9,38 @@ type FormStep =
   | "completed";
 
 type Action =
-  | { type: "RESTORE",  payload: { step: FormStep, data: any }  }
-  | { type: "SET_DATA", payload: Report                         }
-  | { type: "PREVIOUS"                                          }
-  | { type: "NEXT",     payload: any                            };
+  | { type: "RESTORE"; payload: { step: FormStep; data: any } }
+  | { type: "SET_DATA"; payload: Report }
+  | { type: "PREVIOUS" }
+  | { type: "NEXT"; payload: any };
 
-interface FormStepDefinition
-{
-  [key: string]:
-  {
-    order: number,
-    previous?: FormStep,
-    next?: FormStep
-  }
+interface FormStepDefinition {
+  [key: string]: {
+    order: number;
+    previous?: FormStep;
+    next?: FormStep;
+  };
 }
 
-interface ReportFormState
-{
+interface ReportFormState {
   data?: Report;
   step: FormStep;
 }
 
-export const FormSteps: FormStepDefinition =
-{
-  introduction: { order: 0, next: "methodology"                           },
-  methodology:  { order: 1, previous: "introduction", next: "results"     },
-  results:      { order: 2, previous: "methodology",  next: "discussion"  },
-  discussion:   { order: 3, previous: "results",      next: "community"   },
-  community:    { order: 4, previous: "discussion",   next: "completed"   },
-  completed:    { order: 5, previous: "community"                         }
+export const FormSteps: FormStepDefinition = {
+  introduction: { order: 0, next: "methodology" },
+  methodology: { order: 1, previous: "introduction", next: "results" },
+  results: { order: 2, previous: "methodology", next: "discussion" },
+  discussion: { order: 3, previous: "results", next: "community" },
+  community: { order: 4, previous: "discussion", next: "completed" },
+  completed: { order: 5, previous: "community" },
 } as const;
 
 export function reportFormStateReducer(
   state: ReportFormState,
-  action: Action)
-  : ReportFormState
-{
-  switch (action.type)
-  {
+  action: Action
+): ReportFormState {
+  switch (action.type) {
     case "SET_DATA":
       return { ...state, data: action.payload };
 
@@ -59,76 +53,69 @@ export function reportFormStateReducer(
         : { ...state, step: FormSteps[state.step].previous! };
 
     case "NEXT":
-      if (FormSteps[state.step].next === undefined)
-        return { ...state };
+      if (FormSteps[state.step].next === undefined) return { ...state };
 
-      switch (state.step)
-      {
+      switch (state.step) {
         case "introduction":
-          return (
-          {
+          return {
             step: FormSteps[state.step].next!,
-            data:
-            {
+            data: {
               ...state.data!,
               projectTitle: action.payload.projectTitle,
               introduction: action.payload.introduction,
               ods: action.payload.ods,
-              midiaLinks: action.payload.midiaLinks
-            }
-          });
+              midiaLinks: action.payload.midiaLinks,
+              status: "coordinatorAnalysis",
+              coordinatorFeedback: "",
+              supervisorFeedback: "",
+            },
+          };
 
         case "methodology":
-          return (
-          {
+          return {
             step: FormSteps[state.step].next!,
-            data:
-            {
+            data: {
               ...state.data!,
-              methodology: action.payload.methodology
-            }
-          });
+              methodology: action.payload.methodology,
+            },
+          };
 
         case "results":
-          return (
-          {
+          return {
             step: FormSteps[state.step].next!,
-            data:
-            {
+            data: {
               ...state.data!,
               results: action.payload.results,
               students: action.payload.students,
               teams: action.payload.teams,
               communityPeople: action.payload.communityPeople,
-              affectedPeople: action.payload.affectedPeople
-            }
-          });
+              affectedPeople: action.payload.affectedPeople,
+            },
+          };
 
         case "discussion":
-          return (
-          {
+          return {
             step: FormSteps[state.step].next!,
-            data:
-            {
+            data: {
               ...state.data!,
-              discussion: action.payload.discussion
-            }
-          });
+              discussion: action.payload.discussion,
+            },
+          };
 
         case "community":
-          return (
-          {
+          return {
             step: FormSteps[state.step].next!,
-            data:
-            {
+            data: {
               ...state.data!,
               communityContacts: action.payload.communityContacts,
-              communityName: action.payload.communityName
-            }
-          });
+              communityName: action.payload.communityName,
+            },
+          };
 
         default:
-          throw new Error("You shoudn't be here, fella! Go back before anyone get hurts!");
+          throw new Error(
+            "You shoudn't be here, fella! Go back before anyone get hurts!"
+          );
       }
   }
 }

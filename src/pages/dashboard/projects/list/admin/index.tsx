@@ -6,7 +6,16 @@ import React, {
   useState,
 } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button, Row, Col, Space, Table, Collapse, notification } from "antd";
+import {
+  Button,
+  Row,
+  Col,
+  Space,
+  Table,
+  Collapse,
+  notification,
+  Tag,
+} from "antd";
 import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
 
 import { Field, Filters } from "./components/FiltersInput";
@@ -169,16 +178,62 @@ export const AllProjects: React.FC = () => {
       },
       {
         key: "status",
-        title: "Avaliação",
+        title: "Status do projeto",
         render: (text: string, record: Project) => (
           <StatusTag status={record.status} />
+        ),
+      },
+      {
+        key: "statusReport",
+        title: "Status do relatório",
+        render: (text: string, record: Project) => (
+          <>
+            {(!(
+              new Date() > new Date((record.notice as Notice).reportDeadline)
+            ) &&
+              record.status === "selected") ||
+              (record.status !== "selected" && record.status !== "finished" && (
+                <Tag color="#b3afc8" style={{ color: "#000" }}>
+                  Não liberado
+                </Tag>
+              ))}
+            {new Date() > new Date((record.notice as Notice).reportDeadline) &&
+              record.status === "selected" &&
+              !record.report && (
+                <Tag color="#f9a03f" style={{ color: "#000" }}>
+                  Pendente
+                </Tag>
+              )}
+            {record.report &&
+              (record.report.status === "coordinatorAnalysis" ||
+                !record.report.status) && (
+                <Tag color="#1890ff" style={{ color: "#fff" }}>
+                  Em análise coordenador
+                </Tag>
+              )}
+            {record.report && record.report.status === "supervisorAnalysis" && (
+              <Tag color="#1890ff" style={{ color: "#fff" }}>
+                Em análise supervisor
+              </Tag>
+            )}
+            {record.report && record.report.status === "waitingCorrections" && (
+              <Tag color="#fe4c47" style={{ color: "#fff" }}>
+                Aguardando correções
+              </Tag>
+            )}
+            {record.report && record.report.status === "approved" && (
+              <Tag color="#8dc898" style={{ color: "#000" }}>
+                Aprovado
+              </Tag>
+            )}
+          </>
         ),
       },
       {
         key: "action",
         title: "Ação",
         render: (text: string, record: Project) => (
-          <Space size="middle">
+          <Space size="small">
             <Button>
               <Link
                 to={{

@@ -2,18 +2,15 @@ import { Tag } from "antd";
 import React from "react";
 import { ProjectStatus } from "../interfaces/project";
 
-interface Props
-{
+interface Props {
   color?: string;
   style?: React.CSSProperties;
   status?: ProjectStatus;
 }
 
-export const StatusTag: React.FC<Props> = (props) =>
-{
+export const StatusTag: React.FC<Props> = (props) => {
   if (props.status != null)
-    switch (props.status)
-    {
+    switch (props.status) {
       case "pending":
         return (
           <Tag color="#f9a03f" style={{ color: "#000", ...props.style }}>
@@ -44,7 +41,7 @@ export const StatusTag: React.FC<Props> = (props) =>
 
       case "finished":
         return (
-          <Tag color="#fff" style={{ color: "#000", ...props.style }}>
+          <Tag color="teal" style={{ color: "#fff", ...props.style }}>
             Finalizado
           </Tag>
         );

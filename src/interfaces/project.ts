@@ -73,6 +73,13 @@ export interface Report {
   createdAt?: Date;
   discussion: string;
   introduction: string;
+  status:
+    | "coordinatorAnalysis"
+    | "supervisorAnalysis"
+    | "waitingCorrections"
+    | "approved";
+  coordinatorFeedback?: string;
+  supervisorFeedback?: string;
   isLate: boolean;
   methodology: string;
   projectTitle: string;
