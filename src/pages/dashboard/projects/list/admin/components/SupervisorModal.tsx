@@ -35,8 +35,8 @@ export const SupervisorModal: React.FC<Props> = ({
       }),
       httpClient.put(`/project/report/${project?.report?._id}`, {
         ...project?.report,
-        ...data,
-        // coordinatorFeedback: project?.report?.coordinatorFeedback,
+        status: data.status,
+        supervisorFeedback: data.supervisorFeedback,
       }),
     ])
       .then((res) => {

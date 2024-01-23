@@ -105,38 +105,6 @@ export const AllProjects: React.FC = () => {
     [changeProjectStatus]
   );
 
-  const setFilter = useCallback((field: Field, value: string) => {
-    switch (field) {
-      case "AUTHOR":
-        setAuthorNameFilter(value !== "" ? value : undefined);
-        break;
-
-      case "CATEGORY":
-        setCategoryFilter(value !== "" ? value : undefined);
-        break;
-
-      case "NAME":
-        setProjectNameFilter(value !== "" ? value : undefined);
-        break;
-
-      case "NOTICE":
-        setNoticeFilter(value !== "" ? value : undefined);
-        break;
-
-      case "PROGRAM":
-        setProgramFilter(value !== "" ? value : undefined);
-        break;
-
-      case "SEMESTER":
-        setSemesterFilter(value !== "" ? Number(value) : undefined);
-        break;
-
-      case "YEAR":
-        setYearFilter(value !== "" ? Number(value) : undefined);
-        break;
-    }
-  }, []);
-
   const openDetailsModal = useCallback(
     async (type: "project" | "report", project: Project) => {
       setProject(project);
@@ -271,8 +239,6 @@ export const AllProjects: React.FC = () => {
       tableProjectsRequester.halt();
     };
   }, []);
-
-  // useEffect(() => {
   //   if (shouldReload) {
   //     (async () => {
   //       const projects = await tableProjectsRequester.send({
@@ -386,7 +352,7 @@ export const AllProjects: React.FC = () => {
                 header="Filtros"
                 style={{ borderBottom: "0" }}
               >
-                <Filters onFilterBy={setFilter} />
+                <Filters />
               </Collapse.Panel>
             </Collapse>
           </Col>

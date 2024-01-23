@@ -12,6 +12,7 @@ import { getAllCategoriesEndpoint } from "../../../../../../services/endpoints/c
 import { ProjectsFilterContext } from "../../../../../../context/projects";
 import { Discipline } from "../../../../../../interfaces/discipline";
 import { getAllDisciplines } from "../../../../../../services/discipline_service";
+import { allOds } from "../../../create/report/components/IntroductionForm";
 
 export type Field =
   | "AUTHOR"
@@ -22,23 +23,17 @@ export type Field =
   | "YEAR"
   | "SEMESTER";
 
-interface Props {
-  minYear?: number;
-  maxYear?: number;
-  onFilterBy(field: Field, value: string): void;
-}
+// function enumerateYears(from?: number, to?: number): number[] {
+//   const first = from ?? 1970;
+//   let last = to ?? new Date().getFullYear();
+//   if (last < first) last = first;
 
-function enumerateYears(from?: number, to?: number): number[] {
-  const first = from ?? 1970;
-  let last = to ?? new Date().getFullYear();
-  if (last < first) last = first;
+//   return Array(last - first + 1)
+//     .fill(first)
+//     .map((elem: number, index: number) => elem + index);
+// }
 
-  return Array(last - first + 1)
-    .fill(first)
-    .map((elem: number, index: number) => elem + index);
-}
-
-export const Filters: React.FC<Props> = (props) => {
+export const Filters: React.FC = () => {
   const {
     page,
     limit,
@@ -52,6 +47,8 @@ export const Filters: React.FC<Props> = (props) => {
     setAuthorNameFilter,
     setStatusFilter,
     setReportFilter,
+    setReportOdsFilter,
+    setReportStatusFilter,
   } = useContext(ProjectsFilterContext);
   let { query } = useContext(ProjectsFilterContext);
   const [form] = Form.useForm();
@@ -249,7 +246,7 @@ export const Filters: React.FC<Props> = (props) => {
               defaultValue=""
               id="status"
               style={{ width: "100%" }}
-              onChange={(semester: string) => setStatusFilter(semester)}
+              onChange={(status: string) => setStatusFilter(status)}
             >
               <Select.Option value="">Selecione um status</Select.Option>
               <Select.Option value="pending">Pendente</Select.Option>
@@ -273,6 +270,47 @@ export const Filters: React.FC<Props> = (props) => {
               <Select.Option value="">Projeto possui relatório?</Select.Option>
               <Select.Option value="yes">Sim</Select.Option>
               <Select.Option value="no">Não</Select.Option>
+            </Select>
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <Form.Item name="reportOds" style={{ margin: "0px" }}>
+            <Select
+              placeholder={"Filtrar por ODS do relatório"}
+              options={allOds.map((c: string) => ({ value: c }))}
+              mode="multiple"
+              style={{ width: "100%" }}
+              onChange={(reportOds: string[]) => {
+                setReportOdsFilter(reportOds);
+              }}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <Form.Item name="reportStatus" style={{ margin: "0px" }}>
+            <Select
+              defaultValue=""
+              id="reportStatus"
+              style={{ width: "100%" }}
+              onChange={(status: string) => setReportStatusFilter(status)}
+            >
+              <Select.Option value="">
+                Selecione um status de relatório
+              </Select.Option>
+              <Select.Option value="notApproved">Não liberado</Select.Option>
+              <Select.Option value="pending">Pendente</Select.Option>
+              <Select.Option value="coordinatorAnalysis">
+                Em análise Coordenador
+              </Select.Option>
+              <Select.Option value="supervisorAnalysis">
+                Em análise Supervisor
+              </Select.Option>
+              <Select.Option value="waitingCorrections">
+                Aguardando correções
+              </Select.Option>
+              <Select.Option value="approved">Aprovado</Select.Option>
             </Select>
           </Form.Item>
         </Col>

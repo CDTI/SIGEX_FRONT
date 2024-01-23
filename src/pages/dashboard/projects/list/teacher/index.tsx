@@ -410,6 +410,7 @@ export const TeacherProjectsPage: React.FC = () => {
           {record.report &&
             record.report.status &&
             record.report.status !== "coordinatorAnalysis" &&
+            record.report.status !== "supervisorAnalysis" &&
             record.report.coordinatorFeedback && (
               <>
                 <Button

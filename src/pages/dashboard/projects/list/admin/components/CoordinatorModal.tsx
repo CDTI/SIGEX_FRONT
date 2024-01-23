@@ -28,11 +28,18 @@ export const CoordinatorModal: React.FC<Props> = ({
   const { setShouldReload, shouldReload } = useContext(ProjectsFilterContext);
 
   const submit = (data: CoordinatorFormData) => {
-    httpClient
-      .put(`/project/report/${project?.report?._id}`, {
+    Promise.all([
+      httpClient.put(`/project/${project?._id}`, {
+        ...project,
+        status: "selected",
+      }),
+      httpClient.put(`/project/report/${project?.report?._id}`, {
         ...project?.report,
-        ...data,
-      })
+        status: data.status,
+        coordinatorFeedback: data.coordinatorFeedback,
+        supervisorFeedback: null,
+      }),
+    ])
       .then((res) => {
         form.resetFields();
         setIsCoordinatorModalOpen(false);
@@ -78,17 +85,7 @@ export const CoordinatorModal: React.FC<Props> = ({
           label={"Status"}
           rules={[{ required: true }]}
         >
-          <Radio.Group
-            // options={[
-            //   { label: "Aprovado", value: "supervisorAnalysis" },
-            //   {
-            //     label: "Enviar para correção",
-            //     value: "waitingCorrections",
-            //   },
-            // ]}
-            optionType="button"
-            buttonStyle="solid"
-          >
+          <Radio.Group optionType="button" buttonStyle="solid">
             <Radio.Button
               value={"supervisorAnalysis"}
               style={{ backgroundColor: "#61ca6f" }}

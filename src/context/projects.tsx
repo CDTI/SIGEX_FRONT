@@ -36,6 +36,10 @@ interface IProjectsFilter {
   setStatusFilter: React.Dispatch<React.SetStateAction<string>>;
   reportFilter: string;
   setReportFilter: React.Dispatch<React.SetStateAction<string>>;
+  reportOdsFilter: string[];
+  setReportOdsFilter: React.Dispatch<React.SetStateAction<string[]>>;
+  reportStatusFilter: string;
+  setReportStatusFilter: React.Dispatch<React.SetStateAction<string>>;
   cleanFilters: () => void;
   shouldReload: number;
   setShouldReload: React.Dispatch<React.SetStateAction<number>>;
@@ -56,6 +60,8 @@ export interface IQuery {
   limit?: string;
   status?: string;
   report?: string;
+  reportOds?: string[];
+  reportStatus: string;
 }
 
 export const ProjectsFilterContext = createContext<IProjectsFilter>(
@@ -77,6 +83,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
   const [programFilter, setProgramFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [reportFilter, setReportFilter] = useState<string>("");
+  const [reportOdsFilter, setReportOdsFilter] = useState<string[]>([]);
+  const [reportStatusFilter, setReportStatusFilter] = useState<string>("");
   const [shouldReload, setShouldReload] = useState(1);
   let query = {
     page: String(page),
@@ -89,6 +97,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
     notice: noticeFilter,
     status: statusFilter,
     report: reportFilter,
+    reportOds: reportOdsFilter,
+    reportStatus: reportStatusFilter,
   };
 
   const [queryString, setQueryString] = useState<string>("?");
@@ -138,6 +148,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
     setAuthorNameFilter("");
     setStatusFilter("");
     setReportFilter("");
+    setReportOdsFilter([]);
+    setReportStatusFilter("");
     setPage(1);
   };
 
@@ -166,6 +178,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
         noticeFilter,
         statusFilter,
         reportFilter,
+        reportOdsFilter,
+        reportStatusFilter,
         setPage,
         setLimit,
         setTotalPages,
@@ -180,6 +194,8 @@ export const ProjectsFilterProvider = ({ children }: IProps) => {
         setAuthorNameFilter,
         setStatusFilter,
         setReportFilter,
+        setReportOdsFilter,
+        setReportStatusFilter,
         cleanFilters,
         shouldReload,
         setShouldReload,
