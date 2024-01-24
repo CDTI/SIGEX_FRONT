@@ -188,6 +188,21 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                     </Col>
                   )}
 
+                {props.project?.report &&
+                  props.project?.report.sharepointLink && (
+                    <Col span={24}>
+                      <LabeledContent label="Link das imagens no sharepoint">
+                        <Button
+                          type="link"
+                          href={props.project.report.sharepointLink}
+                          target="blank"
+                        >
+                          Ir para pasta de imagens
+                        </Button>
+                      </LabeledContent>
+                    </Col>
+                  )}
+
                 {props.project != null &&
                   (props.project.category as Category).name ===
                     "Curricular específica de curso" && (

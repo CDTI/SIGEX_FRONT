@@ -28,17 +28,21 @@ export const SupervisorModal: React.FC<Props> = ({
   const { setShouldReload, shouldReload } = useContext(ProjectsFilterContext);
 
   const submit = (data: SupervisorFormData) => {
-    Promise.all([
-      httpClient.put(`/project/${project?._id}`, {
+    httpClient
+      .put(`/project/${project?._id}`, {
         ...project,
         status: data.status === "approved" ? "finished" : "selected",
-      }),
-      httpClient.put(`/project/report/${project?.report?._id}`, {
-        ...project?.report,
-        status: data.status,
-        supervisorFeedback: data.supervisorFeedback,
-      }),
-    ])
+        report: {
+          ...project?.report,
+          status: data.status,
+          supervisorFeedback: data.supervisorFeedback,
+        },
+      })
+      // httpClient.put(`/project/report/${project?.report?._id}`, {
+      //   ...project?.report,
+      //   status: data.status,
+      //   supervisorFeedback: data.supervisorFeedback,
+      // }),
       .then((res) => {
         form.resetFields();
         setIsSupervisorModalOpen(false);

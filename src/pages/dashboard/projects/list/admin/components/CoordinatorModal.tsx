@@ -28,18 +28,23 @@ export const CoordinatorModal: React.FC<Props> = ({
   const { setShouldReload, shouldReload } = useContext(ProjectsFilterContext);
 
   const submit = (data: CoordinatorFormData) => {
-    Promise.all([
-      httpClient.put(`/project/${project?._id}`, {
+    httpClient
+      .put(`/project/${project?._id}`, {
         ...project,
         status: "selected",
-      }),
-      httpClient.put(`/project/report/${project?.report?._id}`, {
-        ...project?.report,
-        status: data.status,
-        coordinatorFeedback: data.coordinatorFeedback,
-        supervisorFeedback: null,
-      }),
-    ])
+        report: {
+          ...project?.report,
+          status: data.status,
+          coordinatorFeedback: data.coordinatorFeedback,
+          supervisorFeedback: null,
+        },
+      })
+      // httpClient.put(`/project/report/${project?.report?._id}`, {
+      //   ...project?.report,
+      //   status: data.status,
+      //   coordinatorFeedback: data.coordinatorFeedback,
+      //   supervisorFeedback: null,
+      // }),
       .then((res) => {
         form.resetFields();
         setIsCoordinatorModalOpen(false);

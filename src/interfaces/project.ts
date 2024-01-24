@@ -80,6 +80,7 @@ export interface Report {
     | "approved";
   coordinatorFeedback?: string;
   supervisorFeedback?: string;
+  sharepointLink: string;
   isLate: boolean;
   methodology: string;
   projectTitle: string;

@@ -68,6 +68,7 @@ export function reportFormStateReducer(
               status: "coordinatorAnalysis",
               coordinatorFeedback: "",
               supervisorFeedback: "",
+              sharepointLink: action.payload.sharepointLink,
             },
           };
 
