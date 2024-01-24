@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   Alert,
   Button,
   Col,
   Collapse,
+  Form,
+  Input,
   List,
   Modal,
+  Radio,
   Row,
+  Select,
+  Space,
   Typography,
 } from "antd";
 
@@ -19,8 +24,13 @@ import { Campus, Course } from "../../../../../../interfaces/course";
 import { Program } from "../../../../../../interfaces/program";
 import { Notice } from "../../../../../../interfaces/notice";
 import { Contact, Project } from "../../../../../../interfaces/project";
-import { User } from "../../../../../../interfaces/user";
+import { Role, User } from "../../../../../../interfaces/user";
 import { baseUrl } from "../../../../../../services/httpClient";
+import { AuthContext } from "../../../../../../context/auth";
+import { Restricted } from "../../../../../../components/Restricted";
+import { useForm } from "antd/lib/form/Form";
+import { CoordinatorModal } from "./CoordinatorModal";
+import { SupervisorModal } from "./SupervisorModal";
 
 interface Props {
   isVisible: boolean;
@@ -36,6 +46,9 @@ function formatLateSubmitMessage(date: Date): string {
 }
 
 export const ReportDetailsModal: React.FC<Props> = (props) => {
+  const [isCoordinatorModalOpen, setIsCoordinatorModalOpen] = useState(false);
+  const [isSupervisorModalOpen, setIsSupervisorModalOpen] = useState(false);
+
   return (
     <Modal
       centered={true}
@@ -171,6 +184,21 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                             </a>
                           </Paragraph>
                         ))}
+                      </LabeledContent>
+                    </Col>
+                  )}
+
+                {props.project?.report &&
+                  props.project?.report.sharepointLink && (
+                    <Col span={24}>
+                      <LabeledContent label="Link das imagens no sharepoint">
+                        <Button
+                          type="link"
+                          href={props.project.report.sharepointLink}
+                          target="blank"
+                        >
+                          Ir para pasta de imagens
+                        </Button>
                       </LabeledContent>
                     </Col>
                   )}
@@ -314,6 +342,68 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
               <DownloadOutlined /> Exportar relatório
             </Button>
           </Col>
+        )}
+        <Restricted allow={["Comitê de extensão", "Administrador"]}>
+          <CoordinatorModal
+            isCoordinatorModalOpen={isCoordinatorModalOpen}
+            project={props.project}
+            setIsCoordinatorModalOpen={setIsCoordinatorModalOpen}
+            onCloseReportModal={props.onClose}
+          />
+          <Col span={21}>
+            <Space size={"large"} style={{ marginTop: "10px" }}>
+              <Button
+                style={{ color: "black", backgroundColor: "#4add65" }}
+                onClick={() => {
+                  setIsCoordinatorModalOpen(true);
+                }}
+              >
+                Avaliação de relatório do coordenador
+              </Button>
+            </Space>
+            {props.project?.report?.coordinatorFeedback && (
+              <Collapse accordion>
+                <Panel
+                  header="Avaliação do coordenador"
+                  key={"coordinatorFeedback"}
+                >
+                  <Text>{props.project.report.coordinatorFeedback}</Text>
+                </Panel>
+              </Collapse>
+            )}
+          </Col>
+        </Restricted>
+        {props.project?.report?.coordinatorFeedback && (
+          <Restricted allow={"Administrador"}>
+            <SupervisorModal
+              isSupervisorModalOpen={isSupervisorModalOpen}
+              project={props.project}
+              setIsSupervisorModalOpen={setIsSupervisorModalOpen}
+              onCloseReportModal={props.onClose}
+            />
+            <Col span={21}>
+              <Space size={"large"} style={{ marginTop: "10px" }}>
+                <Button
+                  style={{ color: "black", backgroundColor: "#4add65" }}
+                  onClick={() => {
+                    setIsSupervisorModalOpen(true);
+                  }}
+                >
+                  Avaliação de relatório do supervisor
+                </Button>
+              </Space>
+              {props.project?.report?.supervisorFeedback && (
+                <Collapse accordion>
+                  <Panel
+                    header="Avaliação do supervisor"
+                    key={"supervisorFeedback"}
+                  >
+                    <Text>{props.project.report.supervisorFeedback}</Text>
+                  </Panel>
+                </Collapse>
+              )}
+            </Col>
+          </Restricted>
         )}
       </Row>
     </Modal>

@@ -1,7 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Form, Input, Row, Select } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
 import { FormInstance } from "antd/lib/form";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  QuestionCircleTwoTone,
+} from "@ant-design/icons";
 
 import { Report } from "../../../../../../interfaces/project";
 import Paragraph from "antd/lib/typography/Paragraph";
@@ -58,6 +72,34 @@ export const IntroductionForm: React.FC<Props> = (props) => {
                 type: "string",
                 max: 3000,
                 message: "O número máximo de caracteres foi extrapolado!",
+              },
+            ]}
+          >
+            <Input.TextArea
+              autoSize={{ minRows: 3, maxRows: 5 }}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item
+            name="sharepointLink"
+            label={
+              <Tooltip
+                title="O link deve ser para uma pasta do sharepoint contendo as imagens do relatório do projeto."
+                color="blue"
+              >
+                <Space>
+                  <Typography>Link para pasta sharepoint</Typography>
+                  <QuestionCircleTwoTone />
+                </Space>
+              </Tooltip>
+            }
+            rules={[
+              { required: true, message: "Campo obrigatório!" },
+              {
+                type: "string",
               },
             ]}
           >

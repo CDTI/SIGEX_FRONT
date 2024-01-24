@@ -8,7 +8,6 @@ import { useHttpClient } from "../../../../../hooks/useHttpClient";
 import { Role } from "../../../../../interfaces/user";
 import { Notice } from "../../../../../interfaces/notice";
 import { getAllRolesEndpoint } from "../../../../../services/endpoints/roles";
-import { Category } from "../../../../../interfaces/category";
 
 interface Props {
   formController: FormInstance;
@@ -144,7 +143,7 @@ export const MainDataForm: React.FC<Props> = (props) => {
         <Col span={24}>
           <Form.Item
             name="reportDeadline"
-            label="Data limite para envio do relatório"
+            label="Data inicial para envio do relatório"
             rules={[{ required: true, message: "Campo obrigatório" }]}
           >
             <DatePicker
