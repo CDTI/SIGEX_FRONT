@@ -6,11 +6,16 @@ import {
   Input,
   Row,
   Select,
+  Space,
   Tooltip,
   Typography,
 } from "antd";
 import { FormInstance } from "antd/lib/form";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  QuestionCircleTwoTone,
+} from "@ant-design/icons";
 
 import { Report } from "../../../../../../interfaces/project";
 import Paragraph from "antd/lib/typography/Paragraph";
@@ -85,7 +90,10 @@ export const IntroductionForm: React.FC<Props> = (props) => {
                 title="O link deve ser para uma pasta do sharepoint contendo as imagens do relatório do projeto."
                 color="blue"
               >
-                <Typography>Link para pasta sharepoint</Typography>
+                <Space>
+                  <Typography>Link para pasta sharepoint</Typography>
+                  <QuestionCircleTwoTone />
+                </Space>
               </Tooltip>
             }
             rules={[
