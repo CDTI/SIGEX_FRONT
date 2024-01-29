@@ -16,7 +16,7 @@ interface Props {
 
 function getDisabledDateRange(currentDate: moment.Moment) {
   return (
-    currentDate < moment().startOf("day") ||
+    currentDate < moment().startOf("day").subtract(7, "days") ||
     currentDate > moment().endOf("day").add(4, "years")
   );
 }
