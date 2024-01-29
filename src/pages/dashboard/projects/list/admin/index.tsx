@@ -18,7 +18,7 @@ import {
 } from "antd";
 import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
 
-import { Field, Filters } from "./components/FiltersInput";
+import { Filters } from "./components/FiltersInput";
 import { ProjectDetailsModal } from "./components/ProjectDetailsModal";
 import { ReportDetailsModal } from "./components/ReportDetailsModal";
 import { ProjectFeedbackModal } from "./components/ProjectFeedbackModal";
@@ -156,16 +156,27 @@ export const AllProjects: React.FC = () => {
         title: "Status do relatório",
         render: (text: string, record: Project) => (
           <>
-            {(!(
-              new Date() > new Date((record.notice as Notice).reportDeadline)
-            ) &&
-              record.status === "selected") ||
-              (record.status !== "selected" && record.status !== "finished" && (
-                <Tag color="#b3afc8" style={{ color: "#000" }}>
-                  Não liberado
-                </Tag>
-              ))}
-            {new Date() > new Date((record.notice as Notice).reportDeadline) &&
+            {((record.status !== "selected" && record.status !== "finished") ||
+              (record.status === "selected" &&
+                new Date(
+                  new Date((record.notice as Notice).reportDeadline).setDate(
+                    new Date(
+                      (record.notice as Notice).reportDeadline
+                    ).getDate() - 1
+                  )
+                ) > new Date() &&
+                !record.report)) && (
+              <Tag color="#b3afc8" style={{ color: "#000" }}>
+                Não liberado
+              </Tag>
+            )}
+            {new Date() >=
+              new Date(
+                new Date((record.notice as Notice).reportDeadline).setDate(
+                  new Date((record.notice as Notice).reportDeadline).getDate() -
+                    1
+                )
+              ) &&
               record.status === "selected" &&
               !record.report && (
                 <Tag color="#f9a03f" style={{ color: "#000" }}>
