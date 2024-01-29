@@ -362,18 +362,13 @@ export const TeacherProjectsPage: React.FC = () => {
             margin: 0,
           }}
         >
-          {(!(
-            new Date() > new Date((record.notice as Notice).reportDeadline)
-          ) &&
+          {((new Date((record.notice as Notice).reportDeadline) >= new Date() &&
             record.status === "selected") ||
-            (record.status !== "selected" && record.status !== "finished" && (
-              <Tag
-                color="#b3afc8"
-                style={{ color: "#000", marginLeft: "16px" }}
-              >
-                Não liberado
-              </Tag>
-            ))}
+            (record.status !== "selected" && record.status !== "finished")) && (
+            <Tag color="#b3afc8" style={{ color: "#000", marginLeft: "16px" }}>
+              Não liberado
+            </Tag>
+          )}
           {new Date() > new Date((record.notice as Notice).reportDeadline) &&
             record.status === "selected" &&
             !record.report && (
@@ -458,7 +453,7 @@ export const TeacherProjectsPage: React.FC = () => {
           </Button>
 
           {record.status === "selected" &&
-            new Date() > new Date((record.notice as Notice).reportDeadline) &&
+            new Date() >= new Date((record.notice as Notice).reportDeadline) &&
             (!record.report ||
               record.report.status === "waitingCorrections") && (
               <>
