@@ -61,7 +61,7 @@ export interface IQuery {
   status?: string;
   report?: string;
   reportOds?: string[];
-  reportStatus: string;
+  reportStatus?: string;
 }
 
 export const ProjectsFilterContext = createContext<IProjectsFilter>(
