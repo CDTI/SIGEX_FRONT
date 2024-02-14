@@ -109,6 +109,8 @@ export const Filters: React.FC = () => {
       notice: "",
       status: "",
       report: "",
+      reportOds: [],
+      reportStatus: "",
     });
   };
 
