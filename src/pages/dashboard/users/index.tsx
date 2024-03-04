@@ -7,6 +7,7 @@ import {
   Input,
   notification,
   Row,
+  Select,
   Space,
   Switch,
   Table,
@@ -15,7 +16,7 @@ import { SearchOutlined, ClearOutlined } from "@ant-design/icons";
 
 import Structure from "../../../components/layout/structure";
 
-import { User } from "../../../interfaces/user";
+import { Role, User } from "../../../interfaces/user";
 import { useHttpClient } from "../../../hooks/useHttpClient";
 import {
   getAllUsersEndpoint,
@@ -23,12 +24,20 @@ import {
   toggleUserEndpoint,
 } from "../../../services/endpoints/users";
 import { useForm } from "antd/lib/form/Form";
+import { getAllRolesEndpoint } from "../../../services/endpoints/roles";
+
+interface IUserQueryOptions {
+  name?: string;
+  roles?: string[];
+}
 
 export const UsersPage: React.FC = () => {
   const location = useLocation();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [userFilter, setUserFilter] = useState<string>("");
+  const [rolesFilter, setRolesFilter] = useState<string[]>([]);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -37,14 +46,15 @@ export const UsersPage: React.FC = () => {
   const tableUsersRequester = useHttpClient();
   const switchUsersRequester = useHttpClient();
 
-  const getPaginatedUsers = async (query: string) => {
+  const getPaginatedUsers = async (data: IUserQueryOptions) => {
     setLoading(true);
     try {
       const users = await tableUsersRequester.send({
         method: "GET",
         url: getAllUsersPaginatedEndpoint(),
         queryParams: new Map([
-          ["name", query],
+          ["name", data.name ?? ""],
+          ["roles", data.roles?.join(",") ?? ""],
           ["page", String(page)],
           ["limit", String(limit)],
         ]),
@@ -61,22 +71,30 @@ export const UsersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    getPaginatedUsers(userFilter);
+    (async () => {
+      tableUsersRequester
+        .send<Role[]>({
+          method: "GET",
+          url: getAllRolesEndpoint(),
+          cancellable: true,
+        })
+        .then((res) => {
+          setRoles(res ?? []);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })();
+    getPaginatedUsers({ name: userFilter, roles: rolesFilter });
   }, [page, limit]);
-
-  const filterUsers = (ev: any) => {
-    setUserFilter(ev.target.value);
-    if (page !== 1) {
-      setPage(1);
-    }
-  };
 
   const cleanFilter = () => {
     form.resetFields();
+    setUserFilter("");
     if (page !== 1) {
       setPage(1);
     }
-    getPaginatedUsers("");
+    getPaginatedUsers({ name: "", roles: [] });
   };
 
   const toggleUserStatus = useCallback(
@@ -181,7 +199,9 @@ export const UsersPage: React.FC = () => {
         <Col span={24}>
           <Form
             form={form}
-            onFinish={() => getPaginatedUsers(userFilter)}
+            onFinish={(data) => {
+              getPaginatedUsers(data);
+            }}
             style={{ display: "flex", marginTop: "5px" }}
           >
             <Button>
@@ -194,14 +214,42 @@ export const UsersPage: React.FC = () => {
                 Adicionar
               </Link>
             </Button>
-            <Form.Item name={"name"} style={{ margin: "0px", width: "100%" }}>
+            <Form.Item
+              name={"name"}
+              style={{ marginLeft: "20px", width: "100%" }}
+            >
               <Input
-                style={{ width: "100%", marginLeft: "20px" }}
+                style={{ width: "100%" }}
                 placeholder={"Digite o nome do usuário para filtrar"}
-                onChange={filterUsers}
+                onChange={(e) => {
+                  setUserFilter(e.target.value);
+                }}
               />
             </Form.Item>
-            <Button icon={<SearchOutlined />} type="primary" htmlType="submit">
+            <Form.Item
+              name="roles"
+              style={{ marginLeft: "5px", width: "100%" }}
+            >
+              <Select
+                style={{ width: "100%" }}
+                placeholder={"Filtrar por cargos"}
+                options={roles.map((r: Role) => ({
+                  label: r.description,
+                  value: r._id!,
+                }))}
+                mode="multiple"
+                allowClear
+                onChange={(e) => {
+                  setRolesFilter(e as string[]);
+                }}
+              />
+            </Form.Item>
+            <Button
+              icon={<SearchOutlined />}
+              type="primary"
+              htmlType="submit"
+              style={{ marginLeft: "5px" }}
+            >
               Pesquisar
             </Button>
             <Button
@@ -221,6 +269,7 @@ export const UsersPage: React.FC = () => {
         loading={loading}
         columns={tableColumns}
         dataSource={users}
+        rowKey={"id"}
         pagination={{
           current: page,
           defaultPageSize: 10,
