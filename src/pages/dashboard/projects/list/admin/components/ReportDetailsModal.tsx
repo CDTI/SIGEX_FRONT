@@ -106,7 +106,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                   span={24}
                   style={
                     props.project == null ||
-                    (props.project.category as Category).name ===
+                    (props.project.category as Category)?.name ===
                       "Curricular específica de curso"
                       ? { paddingBottom: "0" }
                       : {}
@@ -179,6 +179,7 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                               style={{ paddingLeft: "8px" }}
                               href={link}
                               target="_blank"
+                              rel="noopener noreferrer"
                             >
                               {link}
                             </a>
@@ -206,22 +207,22 @@ export const ReportDetailsModal: React.FC<Props> = (props) => {
                 {props.project != null &&
                   (props.project.category as Category).name ===
                     "Curricular específica de curso" && (
-                    <Col span={24} style={{ paddingBottom: "0" }}>
-                      {/* <LabeledContent label="Curso(s)">
-                        <Paragraph>
-                          {props.project.course
-                            ? (props.project.course as Course).name
-                            : ""}{" "}
-                          -
-                          {props.project.course
-                            ? (
-                                (props.project.course as Course)
-                                  .campus as Campus
-                              ).name
-                            : ""}
-                        </Paragraph>
-                      </LabeledContent> */}
-                    </Col>
+                    <>
+                      {props.project.course &&
+                        (props.project.course.length > 0 ? (
+                          <Col span={24} style={{ paddingBottom: "0" }}>
+                            <LabeledContent label="Cursos">
+                              {props.project.course?.map((course: Course) => (
+                                <Paragraph>
+                                  {course.name} - {course.campus.name}
+                                </Paragraph>
+                              ))}
+                            </LabeledContent>
+                          </Col>
+                        ) : (
+                          <></>
+                        ))}
+                    </>
                   )}
               </Row>
             </Panel>
