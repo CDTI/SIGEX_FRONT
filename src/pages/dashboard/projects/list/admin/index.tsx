@@ -191,7 +191,7 @@ export const AllProjects: React.FC = () => {
                 </Tag>
               )}
             {record.report && record.report.status === "supervisorAnalysis" && (
-              <Tag color="#1890ff" style={{ color: "#fff" }}>
+              <Tag color="#2709ad" style={{ color: "#fff" }}>
                 Em análise supervisor
               </Tag>
             )}
