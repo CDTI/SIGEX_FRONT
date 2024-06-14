@@ -191,19 +191,20 @@ export const AppLayout: React.FC = (props) => {
                   </Menu.Item>
                 </>
               )}
-            {userRoles.includes("Comitê de extensão") ||
-              (userRoles.includes("Administrador") && (
-                <>
-                  <Menu.Item
-                    key="/relatorio-de-parceiros"
-                    icon={<FileExcelOutlined />}
-                  >
-                    <Link to="/relatorio-de-parceiros">
-                      Relatório de parceiros
-                    </Link>
-                  </Menu.Item>
-                </>
-              ))}
+
+            {(userRoles.includes("Comitê de extensão") ||
+              userRoles.includes("Administrador")) && (
+              <>
+                <Menu.Item
+                  key="/relatorio-de-parceiros"
+                  icon={<FileExcelOutlined />}
+                >
+                  <Link to="/relatorio-de-parceiros">
+                    Relatório de parceiros
+                  </Link>
+                </Menu.Item>
+              </>
+            )}
 
             {(userRoles.includes("Professor") ||
               userRoles.includes("Presidente do NDE") ||
