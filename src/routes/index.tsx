@@ -23,8 +23,9 @@ import { CreateUserPage } from "../pages/dashboard/users/create";
 import { LoginPage } from "../pages/login";
 import { ProjectsFilterProvider } from "../context/projects";
 import { CreateProgram } from "../pages/dashboard/programs/create";
-import { YearReportPage } from "../pages/dashboard/yearReport";
+import { YearReportPage } from "../pages/dashboard/year-report";
 import { CreateCampi } from "../pages/dashboard/campi";
+import { PartnersReportPage } from "../pages/dashboard/partners-report";
 
 export const Routes: React.FC = () => {
   const authContext = useContext(AuthContext);
@@ -87,6 +88,13 @@ export const Routes: React.FC = () => {
 
         <ProtectedRoute allow="Administrador" path="/relatorio-anual">
           <YearReportPage />
+        </ProtectedRoute>
+
+        <ProtectedRoute
+          allow={["Administrador", "Comitê de extensão"]}
+          path="/relatorio-de-parceiros"
+        >
+          <PartnersReportPage />
         </ProtectedRoute>
 
         <ProtectedRoute allow="Administrador" path="/editais" exact>
