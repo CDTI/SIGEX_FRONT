@@ -17,6 +17,8 @@ import {
   FieldTimeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  FileExcelOutlined,
+  FileWordOutlined,
 } from "@ant-design/icons";
 
 import { Role } from "../../interfaces/user";
@@ -175,8 +177,31 @@ export const AppLayout: React.FC = (props) => {
                   <Link to="/propostas">Projetos</Link>
                 </Menu.Item>
 
-                <Menu.Item key="/relatorio-anual" icon={<FileTextOutlined />}>
+                <Menu.Item key="/relatorio-anual" icon={<FileWordOutlined />}>
                   <Link to="/relatorio-anual">Relatório Anual</Link>
+                </Menu.Item>
+              </>
+            )}
+
+            {userRoles.includes("Comitê de extensão") &&
+              !userRoles.includes("Administrador") && (
+                <>
+                  <Menu.Item key="/propostas" icon={<TeamOutlined />}>
+                    <Link to="/propostas">Projetos</Link>
+                  </Menu.Item>
+                </>
+              )}
+
+            {(userRoles.includes("Comitê de extensão") ||
+              userRoles.includes("Administrador")) && (
+              <>
+                <Menu.Item
+                  key="/relatorio-de-parceiros"
+                  icon={<FileExcelOutlined />}
+                >
+                  <Link to="/relatorio-de-parceiros">
+                    Relatório de parceiros
+                  </Link>
                 </Menu.Item>
               </>
             )}
@@ -207,15 +232,6 @@ export const AppLayout: React.FC = (props) => {
                 </SubMenu>
               </>
             )}
-
-            {userRoles.includes("Comitê de extensão") &&
-              !userRoles.includes("Administrador") && (
-                <>
-                  <Menu.Item key="/propostas" icon={<TeamOutlined />}>
-                    <Link to="/propostas">Projetos</Link>
-                  </Menu.Item>
-                </>
-              )}
           </Menu>
         </Sider>
 
