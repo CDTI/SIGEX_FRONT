@@ -31,6 +31,8 @@ import {
 } from "../../../../../../interfaces/project";
 import { User } from "../../../../../../interfaces/user";
 import { Discipline } from "../../../../../../interfaces/discipline";
+import { DownloadOutlined } from "@ant-design/icons";
+import { baseUrl } from "../../../../../../services/httpClient";
 
 interface Props {
   isVisible: boolean;
@@ -711,6 +713,16 @@ export const ProjectDetailsModal: React.FC<Props> = (props) => {
                 </Timeline.Item>
               )) ?? []}
           </Timeline>
+        </Col>
+        <Col span={21}>
+          <Button
+            type="default"
+            shape="round"
+            target="blank"
+            href={`${baseUrl}/project/generateAndDownloadProject/${props.project?._id}`}
+          >
+            <DownloadOutlined /> Exportar projeto
+          </Button>
         </Col>
       </Row>
     </Modal>
