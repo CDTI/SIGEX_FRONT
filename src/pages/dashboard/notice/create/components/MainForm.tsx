@@ -48,6 +48,7 @@ export const MainDataForm: React.FC<Props> = (props) => {
   }, [selectRolesRequester.halt, selectRolesRequester.send]);
 
   useEffect(() => {
+    console.log(props.initialValues);
     if (props.initialValues != null) {
       const noticeSemester =
         new Date(props.initialValues?.effectiveDate).getMonth() + 1 > 6
