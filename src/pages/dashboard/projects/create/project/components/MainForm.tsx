@@ -193,8 +193,6 @@ export const MainForm: React.FC<Props> = (props) => {
             }
           }
         }
-        console.log(props.context);
-        console.log(props.initialValues);
         if (
           props.initialValues.course &&
           props.initialValues.course.length > 0
@@ -430,10 +428,6 @@ export const MainForm: React.FC<Props> = (props) => {
             </Col>
 
             <Col span={24}>
-              {console.log(
-                new Date(selectedNotice?.projectExecutionYear!).getFullYear() >=
-                  2023
-              )}
               <Form.Item
                 name="campus"
                 label="Cidade de execução do projeto"
@@ -744,17 +738,24 @@ export const MainForm: React.FC<Props> = (props) => {
                   <Select
                     mode="multiple"
                     loading={selectCoursesRequester.inProgress}
-                    options={userCourses.map((c: Course) => ({
-                      label: `${c.name} - ${(c.campus as Campus).name}`,
-                      value: c._id!,
-                    }))}
+                    options={
+                      props.context == "admin"
+                        ? courses.map((c: Course) => ({
+                            label: `${c.name} - ${(c.campus as Campus).name}`,
+                            value: c._id!,
+                          }))
+                        : userCourses.map((c: Course) => ({
+                            label: `${c.name} - ${(c.campus as Campus).name}`,
+                            value: c._id!,
+                          }))
+                    }
                     style={{ width: "100%" }}
                     onChange={(e) => {
                       populateDisciplineByCourses(e as Array<string>);
                     }}
                   />
                 </Form.Item>
-                {userCourses.length === 0 && (
+                {props.context == "user" && userCourses.length === 0 && (
                   <Typography style={{ color: "#ff4d4f" }}>
                     Nenhum curso para listar. Tente atualizar a página ou
                     contate um administrador!

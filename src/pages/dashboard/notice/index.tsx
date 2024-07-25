@@ -227,17 +227,13 @@ export const Notices: React.FC = () => {
             <Form.Item name="category" style={{ margin: "0" }}>
               <Select
                 style={{ width: "100%" }}
-                defaultValue=""
-                onChange={(e) => setCategory(e)}
-                options={[
-                  { label: "Selecione uma categoria", value: "" },
-                ].concat(
-                  categories.map((c: Category) => ({
-                    key: c._id!,
-                    value: c._id!,
-                    label: c.name,
-                  }))
-                )}
+                placeholder="Selecione uma categoria"
+                onChange={(e) => setCategory(e.toString())}
+                options={categories.map((c: Category) => ({
+                  key: c._id!,
+                  value: c._id!,
+                  label: c.name,
+                }))}
               ></Select>
             </Form.Item>
           </Col>
@@ -245,12 +241,19 @@ export const Notices: React.FC = () => {
             <Form.Item name="projectExecutionPeriod" style={{ margin: "0" }}>
               <Select
                 style={{ width: "100%" }}
-                defaultValue=""
-                onChange={(e) => setSemester(e)}
+                placeholder="Selecione um período"
+                onChange={(e) => setSemester(e.toString())}
                 options={[
-                  { label: "Selecione um período", value: "" },
-                  { label: "1º Semestre", value: "1° Semestre" },
-                  { label: "2º Semestre", value: "2° Semestre" },
+                  {
+                    label: "1º Semestre",
+                    value: "1° Semestre",
+                    key: "1° Semestre",
+                  },
+                  {
+                    label: "2º Semestre",
+                    value: "2° Semestre",
+                    key: "2° Semestre",
+                  },
                 ]}
               ></Select>
             </Form.Item>
