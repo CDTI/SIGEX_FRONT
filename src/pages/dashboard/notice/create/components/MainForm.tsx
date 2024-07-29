@@ -149,7 +149,9 @@ export const MainDataForm: React.FC<Props> = (props) => {
           >
             <DatePicker
               format="DD/MM/YYYY"
-              disabledDate={getDisabledDateRange}
+              disabledDate={(current) => {
+                return current && current < moment("2021-01-01");
+              }}
               style={{ width: "100%" }}
             />
           </Form.Item>
