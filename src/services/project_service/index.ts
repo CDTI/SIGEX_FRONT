@@ -3,6 +3,7 @@ import { AxiosRequestConfig } from "axios";
 import { httpClient, RequestOptions } from "../httpClient";
 
 import { Project, Report } from "../../interfaces/project";
+import { ISearchDashboardProjects } from "../../pages/dashboard/home";
 
 export interface ReturnResponse {
   message: string;
@@ -32,16 +33,15 @@ export async function listAllProjects(
   return response.data;
 }
 
-export async function countProjects(programId: string) {
-  if (programId) {
-    const response = await httpClient.get("/projects/count", {
-      params: { program: programId },
-    });
-    return response.data;
-  } else {
-    const response = await httpClient.get("/projects/count", {});
-    return response.data;
-  }
+export async function countProjects(search: ISearchDashboardProjects) {
+  const response = await httpClient.get("/projects/count", {
+    params: {
+      program: search.program ? search.program : null,
+      discipline: search.discipline ? search.discipline : null,
+      semester: search.semester ? search.semester : null,
+    },
+  });
+  return response.data;
 }
 
 export async function listAllTeacherProjects(params: any) {
