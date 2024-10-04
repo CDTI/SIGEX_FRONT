@@ -56,7 +56,7 @@ export const HomeDashboard: React.FC = () => {
     setPrograms(programs);
     setDisciplines(disciplines);
     const projects: IProjectsCount = await countProjects(data);
-    const projectsWithReports = projects.total.filter(
+    const projectsWithReports = projects.selecionados.filter(
       (project: Project) => !!project.report
     );
     const results = {
