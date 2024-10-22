@@ -33,7 +33,7 @@ import { Program } from "../../../../../interfaces/program";
 import { Project } from "../../../../../interfaces/project";
 import { User } from "../../../../../interfaces/user";
 import { Feedback } from "../../../../../interfaces/feedback";
-import { baseUrl } from "../../../../../services/httpClient";
+import { baseUrl, httpClient } from "../../../../../services/httpClient";
 import { getFeedbackEndpoint } from "../../../../../services/endpoints/feedbacks";
 import { updateProjectEndpoint } from "../../../../../services/endpoints/projects";
 import { ProjectsFilterContext } from "../../../../../context/projects";
@@ -65,6 +65,12 @@ export const AllProjects: React.FC = () => {
     "reproved" | "notSelected" | "selected"
   >();
   const tableProjectsRequester = useHttpClient();
+
+  const [loadingProjectsBtn, setLoadingProjectsBtn] = useState(false);
+  const [loadingHoursBtn, setLoadingHoursBtn] = useState(false);
+  const [loadingReportsBtn, setLoadingReportsBtn] = useState(false);
+  const [loadingReportsFinishedBtn, setLoadingReportsFinishedBtn] =
+    useState(false);
 
   const [feedbackModalIsVisible, setFeedbackModalIsVisible] = useState(false);
   const [projectModalIsVisible, setProjectModalIsVisible] = useState(false);
@@ -244,6 +250,114 @@ export const AllProjects: React.FC = () => {
     [location.pathname, openDetailsModal]
   );
 
+  const generateProjectsTable = () => {
+    setLoadingProjectsBtn(true);
+    httpClient
+      .request({
+        url: `/project/downloadProjects/?${queryString}`,
+        method: "get",
+        responseType: "blob",
+      })
+      .then((res) => {
+        const href = URL.createObjectURL(res.data);
+        const link = document.createElement("a");
+        link.href = href;
+        link.setAttribute("download", "Projetos.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      })
+      .catch((err) => {
+        console.log(err);
+        notification.error({ message: "Ocorreu um erro ao gerar a tabela." });
+      })
+      .finally(() => {
+        setLoadingProjectsBtn(false);
+      });
+  };
+
+  const generateHoursTable = () => {
+    setLoadingHoursBtn(true);
+    httpClient
+      .request({
+        url: `/project/downloadHours/?${queryString}`,
+        method: "get",
+        responseType: "blob",
+      })
+      .then((res) => {
+        const href = URL.createObjectURL(res.data);
+        const link = document.createElement("a");
+        link.href = href;
+        link.setAttribute("download", "Horários.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      })
+      .catch((err) => {
+        console.log(err);
+        notification.error({ message: "Ocorreu um erro ao gerar a tabela." });
+      })
+      .finally(() => {
+        setLoadingHoursBtn(false);
+      });
+  };
+
+  const generateReportsTable = () => {
+    setLoadingReportsBtn(true);
+    httpClient
+      .request({
+        url: `/project/report/download/?${queryString}`,
+        method: "get",
+        responseType: "blob",
+      })
+      .then((res) => {
+        const href = URL.createObjectURL(res.data);
+        const link = document.createElement("a");
+        link.href = href;
+        link.setAttribute("download", "Relatórios.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      })
+      .catch((err) => {
+        console.log(err);
+        notification.error({ message: "Ocorreu um erro ao gerar a tabela." });
+      })
+      .finally(() => {
+        setLoadingReportsBtn(false);
+      });
+  };
+
+  const generateReportsFinishedTable = () => {
+    setLoadingReportsFinishedBtn(true);
+    httpClient
+      .request({
+        url: `/project/report/downloadFinished/?${queryString}`,
+        method: "get",
+        responseType: "blob",
+      })
+      .then((res) => {
+        const href = URL.createObjectURL(res.data);
+        const link = document.createElement("a");
+        link.href = href;
+        link.setAttribute("download", "Relatórios de finalizados.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      })
+      .catch((err) => {
+        console.log(err);
+        notification.error({ message: "Ocorreu um erro ao gerar a tabela." });
+      })
+      .finally(() => {
+        setLoadingReportsFinishedBtn(false);
+      });
+  };
+
   useEffect(() => {
     return () => {
       modalProjectsRequester.halt();
@@ -370,36 +484,51 @@ export const AllProjects: React.FC = () => {
         </Row>
 
         <Row gutter={[8, 24]}>
-          <Col xs={24} lg={8}>
+          <Col xs={24} lg={6}>
             <Button
               block
               shape="round"
-              href={`${baseUrl}/downloadCsv/?${queryString}`}
               target="blank"
+              onClick={generateProjectsTable}
+              loading={loadingProjectsBtn}
             >
               <DownloadOutlined /> Projetos
             </Button>
           </Col>
 
-          <Col xs={24} lg={8}>
+          <Col xs={24} lg={6}>
             <Button
               block
               shape="round"
-              href={`${baseUrl}/downloadCsvHours/?${queryString}`}
+              onClick={generateHoursTable}
+              loading={loadingHoursBtn}
               target="blank"
             >
               <DownloadOutlined /> Horários
             </Button>
           </Col>
 
-          <Col xs={24} lg={8}>
+          <Col xs={24} lg={6}>
             <Button
               block
               shape="round"
-              href={`${baseUrl}/project/report/download/?${queryString}`}
               target="blank"
+              onClick={generateReportsTable}
+              loading={loadingReportsBtn}
             >
               <DownloadOutlined /> Relatórios
+            </Button>
+          </Col>
+
+          <Col xs={24} lg={6}>
+            <Button
+              block
+              shape="round"
+              target="blank"
+              onClick={generateReportsFinishedTable}
+              loading={loadingReportsFinishedBtn}
+            >
+              <DownloadOutlined /> Relatórios finalizados
             </Button>
           </Col>
         </Row>
